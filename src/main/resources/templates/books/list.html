@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Browse the full book catalog of FPT University Library System."/>
+    <title>Book Catalog — FPT University Library</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        /* ─── Design Tokens ─────────────────────────────────────────────────── */
+        :root {
+            --bg-base:       #080d17;
+            --bg-surface:    #0e1625;
+            --bg-card:       #131c2e;
+            --bg-card-hover: #1a2540;
+            --border:        rgba(99, 149, 255, 0.12);
+            --border-hover:  rgba(99, 149, 255, 0.35);
+
+            --accent:        #4f8cff;
+            --accent-glow:   rgba(79, 140, 255, 0.18);
+            --gold:          #f5a623;
+            --gold-soft:     rgba(245, 166, 35, 0.15);
+            --emerald:       #34d399;
+            --emerald-soft:  rgba(52, 211, 153, 0.15);
+            --rose:          #fb7185;
+            --rose-soft:     rgba(251, 113, 133, 0.15);
+            --violet:        #a78bfa;
+            --teal:          #2dd4bf;
+
+            --text-primary:   #e8f0ff;
+            --text-secondary: #7a8fb5;
+            --text-muted:     #4a5a7a;
+
+            --radius-card:  16px;
+            --radius-tag:   6px;
+            --shadow-card:  0 4px 24px rgba(0,0,0,0.4);
+            --shadow-hover: 0 8px 40px rgba(79, 140, 255, 0.2);
+
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ─── Reset & Base ───────────────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* ─── Navigation ─────────────────────────────────────────────────────── */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            height: 64px;
+            background: rgba(8, 13, 23, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent), var(--violet));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .brand-text {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .brand-sub {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            display: block;
+            line-height: 1;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.4rem 0.9rem;
+            border-radius: 8px;
+            transition: color var(--transition), background var(--transition);
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text-primary);
+            background: var(--accent-glow);
+        }
+
+        .nav-links a.active {
+            color: var(--accent);
+        }
+
+        /* ─── Hero / Page Header ─────────────────────────────────────────────── */
+        .page-hero {
+            padding: 3rem 2rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--text-primary) 40%, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            margin-top: 0.4rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* ─── Toolbar ────────────────────────────────────────────────────────── */
+        .toolbar {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .book-count {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .book-count strong {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .search-wrap {
+            position: relative;
+        }
+
+        .search-wrap svg {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        #search-input {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.55rem 1rem 0.55rem 2.6rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.875rem;
+            width: 280px;
+            transition: border-color var(--transition), box-shadow var(--transition);
+            outline: none;
+        }
+
+        #search-input::placeholder { color: var(--text-muted); }
+
+        #search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        /* ─── Books Grid ─────────────────────────────────────────────────────── */
+        .books-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* ─── Book Card ──────────────────────────────────────────────────────── */
+        .book-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-card);
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            transition: transform var(--transition),
+                        border-color var(--transition),
+                        box-shadow var(--transition),
+                        background var(--transition);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .book-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-hover);
+            background: var(--bg-card-hover);
+        }
+
+        /* ── Cover ── */
+        .book-cover {
+            position: relative;
+            aspect-ratio: 3 / 4;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a2540, #0e1625);
+        }
+
+        .book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .book-card:hover .book-cover img {
+            transform: scale(1.05);
+        }
+
+        /* placeholder cover when no image */
+        .cover-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: linear-gradient(145deg,
+                hsl(220, 40%, 14%) 0%,
+                hsl(240, 35%, 18%) 50%,
+                hsl(260, 30%, 14%) 100%);
+        }
+
+        .cover-initial {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, var(--accent), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .cover-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        /* availability badge */
+        .copy-badge {
+            position: absolute;
+            top: 0.6rem;
+            right: 0.6rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            backdrop-filter: blur(8px);
+            letter-spacing: 0.3px;
+        }
+
+        .copy-badge.available {
+            background: var(--emerald-soft);
+            color: var(--emerald);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .copy-badge.unavailable {
+            background: var(--rose-soft);
+            color: var(--rose);
+            border: 1px solid rgba(251, 113, 133, 0.3);
+        }
+
+        /* language badge */
+        .lang-badge {
+            position: absolute;
+            bottom: 0.6rem;
+            left: 0.6rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            font-size: 0.65rem;
+            font-weight: 500;
+            background: rgba(8,13,23,0.75);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(6px);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Card Body ── */
+        .book-info {
+            padding: 1rem 1rem 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .book-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .book-authors {
+            font-size: 0.78rem;
+            color: var(--accent);
+            font-weight: 500;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .book-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-publisher {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .meta-dot {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .meta-year {
+            font-size: 0.72rem;
+            color: var(--gold);
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        /* tag row */
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.2rem;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: var(--radius-tag);
+            font-size: 0.67rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .tag-category {
+            background: var(--gold-soft);
+            color: var(--gold);
+            border: 1px solid rgba(245, 166, 35, 0.25);
+        }
+
+        .tag-subject {
+            background: rgba(167, 139, 250, 0.12);
+            color: var(--violet);
+            border: 1px solid rgba(167, 139, 250, 0.25);
+        }
+
+        /* divider line */
+        .card-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0 -1rem;
+        }
+
+        /* isbn row */
+        .isbn-row {
+            font-size: 0.67rem;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+        }
+
+        /* ─── Empty State ────────────────────────────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 6rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p { font-size: 0.9rem; }
+
+        /* ─── Glow Orbs (background decoration) ─────────────────────────────── */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.35;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(79,140,255,0.4), transparent 70%);
+            top: -150px;
+            left: -150px;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(167,139,250,0.3), transparent 70%);
+            bottom: 100px;
+            right: -100px;
+        }
+
+        /* ─── Responsive ─────────────────────────────────────────────────────── */
+        @media (max-width: 640px) {
+            .hero-title   { font-size: 1.6rem; }
+            .books-grid   { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
+            #search-input { width: 200px; }
+            .nav-links    { display: none; }
+        }
+
+        /* ─── Scroll-in animation ────────────────────────────────────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .book-card {
+            animation: fadeUp 0.4s ease both;
+        }
+
+        /* stagger via nth-child (up to 20 cards) */
+        .book-card:nth-child(1)  { animation-delay: 0.05s; }
+        .book-card:nth-child(2)  { animation-delay: 0.08s; }
+        .book-card:nth-child(3)  { animation-delay: 0.11s; }
+        .book-card:nth-child(4)  { animation-delay: 0.14s; }
+        .book-card:nth-child(5)  { animation-delay: 0.17s; }
+        .book-card:nth-child(6)  { animation-delay: 0.20s; }
+        .book-card:nth-child(7)  { animation-delay: 0.23s; }
+        .book-card:nth-child(8)  { animation-delay: 0.26s; }
+        .book-card:nth-child(9)  { animation-delay: 0.29s; }
+        .book-card:nth-child(10) { animation-delay: 0.32s; }
+        .book-card:nth-child(11) { animation-delay: 0.35s; }
+        .book-card:nth-child(12) { animation-delay: 0.38s; }
+    </style>
+</head>
+<body>
+
+<!-- background decoration -->
+<div class="orb orb-1" aria-hidden="true"></div>
+<div class="orb orb-2" aria-hidden="true"></div>
+
+<!-- ═══ NAVIGATION ══════════════════════════════════════════════════════════ -->
+<nav class="navbar">
+    <a href="/" class="navbar-brand">
+        <div class="brand-icon">📚</div>
+        <div>
+            <span class="brand-text">FPT Library</span>
+            <span class="brand-sub">University Library Management</span>
+        </div>
+    </a>
+    <ul class="nav-links">
+        <li><a href="/" id="nav-home">Home</a></li>
+        <li><a href="/books" id="nav-books" class="active">Books</a></li>
+        <li><a href="#" id="nav-reservations">Reservations</a></li>
+        <li><a href="#" id="nav-rooms">Study Rooms</a></li>
+        <li><a href="#" id="nav-account">My Account</a></li>
+    </ul>
+</nav>
+
+<!-- ═══ PAGE HERO ══════════════════════════════════════════════════════════ -->
+<div class="page-hero">
+    <h1 class="hero-title">Book Catalog</h1>
+    <p class="hero-subtitle">Explore books across all FPT University campuses</p>
+</div>
+
+<!-- ═══ TOOLBAR ════════════════════════════════════════════════════════════ -->
+<div class="toolbar">
+    <div class="toolbar-left">
+        <p class="book-count">
+            Showing <strong th:text="${#lists.size(books)}">0</strong> books
+        </p>
+    </div>
+    <div class="search-wrap">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input id="search-input" type="search" placeholder="Search title, author…" autocomplete="off"/>
+    </div>
+</div>
+
+<!-- ═══ BOOK GRID ═══════════════════════════════════════════════════════════ -->
+<div class="books-container">
+
+    <!-- ── Grid ── -->
+    <div class="books-grid" id="books-grid" th:if="${not #lists.isEmpty(books)}">
+        <div class="book-card"
+             th:each="book : ${books}"
+             th:attr="data-title=${book.title}, data-authors=${book.authorNames}">
+
+            <!-- Cover -->
+            <div class="book-cover">
+                <img th:if="${book.coverImageUrl != null and not #strings.isEmpty(book.coverImageUrl)}"
+                     th:src="${book.coverImageUrl}"
+                     th:alt="${book.title}"
+                     loading="lazy"/>
+
+                <div class="cover-placeholder"
+                     th:if="${book.coverImageUrl == null or #strings.isEmpty(book.coverImageUrl)}">
+                    <span class="cover-initial"
+                          th:text="${#strings.substring(book.title, 0, 1).toUpperCase()}">B</span>
+                    <span class="cover-label">No Cover</span>
+                </div>
+
+                <!-- Available copies badge -->
+                <span class="copy-badge available"
+                      th:if="${book.availableCount > 0}"
+                      th:text="${book.availableCount} + ' available'">3 available</span>
+                <span class="copy-badge unavailable"
+                      th:if="${book.availableCount == 0}">Unavailable</span>
+
+                <!-- Language -->
+                <span class="lang-badge"
+                      th:text="${book.language}">Vietnamese</span>
+            </div>
+
+            <!-- Info -->
+            <div class="book-info">
+                <h3 class="book-title" th:text="${book.title}">Book Title</h3>
+
+                <p class="book-authors" th:text="${book.authorNames}">Author Name</p>
+
+                <!-- Publisher · Year -->
+                <div class="book-meta">
+                    <span class="meta-publisher"
+                          th:if="${book.publisher != null}"
+                          th:text="${book.publisher.publisherName}">Publisher</span>
+
+                    <span class="meta-dot"
+                          th:if="${book.publisher != null and book.publishYear != null}"></span>
+
+                    <span class="meta-year"
+                          th:if="${book.publishYear != null}"
+                          th:text="${book.publishYear}">2024</span>
+                </div>
+
+                <!-- Category tags -->
+                <div class="tag-row" th:if="${not #sets.isEmpty(book.categories)}">
+                    <span class="tag tag-category"
+                          th:each="cat : ${book.categories}"
+                          th:text="${cat.categoryName}">Category</span>
+                </div>
+
+                <!-- Subject tag -->
+                <div class="tag-row" th:if="${book.subject != null}">
+                    <span class="tag tag-subject"
+                          th:text="${book.subject.subjectCode + ' — ' + book.subject.subjectName}">SUB101</span>
+                </div>
+
+                <!-- Divider + ISBN -->
+                <div th:if="${book.isbn != null and not #strings.isEmpty(book.isbn)}">
+                    <div class="card-divider"></div>
+                    <p class="isbn-row" th:text="'ISBN: ' + ${book.isbn}">ISBN: 978-xxx</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Empty state ── -->
+    <div class="empty-state" th:if="${#lists.isEmpty(books)}">
+        <div class="empty-icon">📭</div>
+        <h2>No books in the catalog yet</h2>
+        <p>Add books via the Librarian dashboard or import them from the acquisition module.</p>
+    </div>
+</div>
+
+<!-- ═══ CLIENT-SIDE SEARCH (no page reload) ════════════════════════════════ -->
+<script>
+    const searchInput = document.getElementById('search-input');
+    const grid        = document.getElementById('books-grid');
+
+    if (searchInput && grid) {
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.trim().toLowerCase();
+            grid.querySelectorAll('.book-card').forEach(card => {
+                const title   = (card.dataset.title   || '').toLowerCase();
+                const authors = (card.dataset.authors || '').toLowerCase();
+                card.style.display = (!q || title.includes(q) || authors.includes(q))
+                    ? ''
+                    : 'none';
+            });
+        });
+    }
+</script>
+</body>
+</html>
