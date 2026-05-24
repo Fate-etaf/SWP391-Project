@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống Thư viện Đại học FPT - FLMS</title>
-    <!-- Tailwind CSS để dựng UI nhanh và chuyên nghiệp -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -22,25 +21,20 @@
             }
         }
     </script>
-    <!-- Import Font Google Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
 
-    <!-- NAV BAR (Thanh điều hướng đỉnh cao) -->
+    <!-- NAV BAR -->
     <header class="bg-fpt-dark text-white sticky top-0 z-50 shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <!-- Logo & Brand -->
                 <div class="flex items-center space-x-3">
-                    <div class="bg-fpt-orange text-white p-2.5 rounded-lg font-extrabold text-xl tracking-wider shadow-lg">
-                        FPT
-                    </div>
+                    <div class="bg-fpt-orange text-white p-2.5 rounded-lg font-extrabold text-xl tracking-wider shadow-lg">FPT</div>
                     <div>
                         <h1 class="text-lg font-bold tracking-tight leading-none text-orange-400">FLMS</h1>
                         <p class="text-xs text-slate-400 font-medium">Library Management System</p>
@@ -49,24 +43,18 @@
 
                 <!-- Menu Navigation -->
                 <nav class="hidden md:flex space-x-8 font-medium text-sm">
-                    <a href="/home" class="text-fpt-orange hover:text-orange-400 transition-colors py-2 border-b-2 border-fpt-orange">Trang chủ</a>
-                    <a href="/books" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Tra cứu sách</a>
-                    <a href="#" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Yêu cầu mượn</a>
-                    <a href="#" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Đặt phòng học nhóm</a>
-                    <a href="#" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Tin tức & Sự kiện</a>
+                    <a href="/home"   class="text-fpt-orange hover:text-orange-400 transition-colors py-2 border-b-2 border-fpt-orange">Trang chủ</a>
+                    <a href="/books"  class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Tra cứu sách</a>
+                    <a href="#"       class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Yêu cầu mượn</a>
+                    <a href="#"       class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Đặt phòng học nhóm</a>
+                    <a href="#"       class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Tin tức &amp; Sự kiện</a>
                 </nav>
 
-                <!-- User Corner / Login -->
+                <!-- User Corner -->
                 <div class="flex items-center space-x-4">
                     <div class="hidden lg:block text-right">
-                        <p class="text-xs text-slate-400">Xin chào,</p>
-                        <p class="text-sm font-semibold text-slate-100">Vũ Minh Đức</p>
+                        <p class="text-xs text-slate-400">Chỗ này làm LOGIN</p>
                     </div>
-                    <button class="bg-fpt-orange hover:bg-fpt-orangeHover text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-md flex items-center space-x-2">
-                        <!-- Login/Logout Icon -->
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                        <span>Đăng xuất</span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -74,16 +62,19 @@
 
     <!-- MAIN BODY -->
     <main class="flex-grow">
-        
-        <!-- HERO SECTION: Tìm kiếm trung tâm -->
+
+        <!-- HERO SECTION -->
         <section class="bg-gradient-to-r from-fpt-navy to-slate-900 text-white py-16 md:py-24 relative overflow-hidden">
-            <!-- Decorative Background Shape -->
             <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-1/4 translate-y-1/4">
-                <svg class="w-96 h-96" fill="currentColor" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40"></circle></svg>
+                <svg class="w-96 h-96" fill="currentColor" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="40"></circle>
+                </svg>
             </div>
-            
+
             <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
-                <span class="bg-fpt-orange/20 text-orange-400 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase">Cổng thông tin Thư viện liên cơ sở</span>
+                <span class="bg-fpt-orange/20 text-orange-400 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase">
+                    Cổng thông tin Thư viện liên cơ sở
+                </span>
                 <h2 class="text-3xl md:text-5xl font-extrabold mt-4 mb-6 leading-tight tracking-tight">
                     Tìm kiếm tài nguyên học thuật của bạn
                 </h2>
@@ -91,21 +82,35 @@
                     Truy cập kho sách giáo trình phong phú, tài liệu nghiên cứu chuyên ngành và đặt chỗ nhanh chóng tại tất cả các cơ sở của Đại học FPT.
                 </p>
 
-                <!-- COMPREHENSIVE SEARCH BOX (Thanh tìm kiếm xịn sò) -->
+                <!-- SEARCH BOX -->
                 <form action="/books" method="get" class="bg-white p-3 rounded-2xl shadow-2xl flex flex-col md:flex-row gap-3 items-center">
-                    <!-- Dropdown Cơ sở -->
+                    <!-- Dropdown Cơ sở: dữ liệu từ campusRepository.findAll() qua Service -->
                     <div class="w-full md:w-1/4 flex items-center px-3 border-b md:border-b-0 md:border-r border-slate-200 pb-3 md:pb-0">
-                        <svg class="w-5 h-5 text-fpt-orange shrink-0 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <svg class="w-5 h-5 text-fpt-orange shrink-0 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
                         <select name="campus" class="w-full bg-transparent text-slate-700 text-sm font-semibold focus:outline-none cursor-pointer">
                             <option value="">Tất cả cơ sở</option>
-                            <option th:each="cam : ${campuses}" th:value="${cam}" th:text="${cam}"></option>
+                            <!--
+                                "campuses" là List<String> từ HomeService.getCampusNames()
+                                → Thymeleaf lặp qua từng tên cơ sở lấy từ bảng Campuses trong DB.
+                            -->
+                            <option th:each="campus : ${campuses}"
+                                    th:value="${campus}"
+                                    th:text="${campus}">
+                            </option>
                         </select>
                     </div>
 
-                    <!-- Input từ khóa tìm kiếm -->
+                    <!-- Input từ khoá -->
                     <div class="w-full md:w-2/4 flex items-center px-3 py-1">
-                        <svg class="w-5 h-5 text-slate-400 shrink-0 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        <input type="text" name="keyword" placeholder="Nhập tên sách, tác giả, mã môn học, ISBN..." class="w-full bg-transparent text-slate-800 text-sm focus:outline-none placeholder-slate-400">
+                        <svg class="w-5 h-5 text-slate-400 shrink-0 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input type="text" name="keyword"
+                               placeholder="Nhập tên sách, tác giả, mã môn học, ISBN..."
+                               class="w-full bg-transparent text-slate-800 text-sm focus:outline-none placeholder-slate-400">
                     </div>
 
                     <!-- Button Tìm kiếm -->
@@ -116,29 +121,44 @@
             </div>
         </section>
 
-        <!-- STATISTICS: Số liệu ấn tượng -->
+        <!-- STATISTICS -->
+        <!--
+            "stats" là HomeStatsDTO từ HomeService.getHomeStats()
+            Các trường: stats.totalBooks, stats.availableCopies, stats.activeReaders, stats.totalCampuses
+            đều là giá trị long tính từ DB thật — không còn hardcode.
+        -->
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-6 rounded-2xl shadow-xl border border-slate-100">
-                <div class="text-center p-3 border-r border-slate-100 last:border-0">
-                    <p class="text-2xl md:text-3xl font-extrabold text-slate-900" th:text="${#numbers.formatInteger(stats.totalBooks, 0, 'COMMA')}">12,000</p>
+                <div class="text-center p-3 border-r border-slate-100">
+                    <p class="text-2xl md:text-3xl font-extrabold text-slate-900"
+                       th:text="${#numbers.formatInteger(stats.totalBooks, 0, 'COMMA')}">0</p>
                     <p class="text-xs md:text-sm text-slate-500 mt-1 font-medium">Tổng đầu sách giấy</p>
                 </div>
-                <div class="text-center p-3 border-r border-slate-100 last:border-0">
-                    <p class="text-2xl md:text-3xl font-extrabold text-slate-900" th:text="${#numbers.formatInteger(stats.availableCopies, 0, 'COMMA')}">8,000</p>
+                <div class="text-center p-3 border-r border-slate-100">
+                    <p class="text-2xl md:text-3xl font-extrabold text-slate-900"
+                       th:text="${#numbers.formatInteger(stats.availableCopies, 0, 'COMMA')}">0</p>
                     <p class="text-xs md:text-sm text-slate-500 mt-1 font-medium">Bản sao sẵn sàng</p>
                 </div>
-                <div class="text-center p-3 border-r border-slate-100 last:border-0">
-                    <p class="text-2xl md:text-3xl font-extrabold text-slate-900" th:text="${#numbers.formatInteger(stats.activeReaders, 0, 'COMMA')}">3,000</p>
+                <div class="text-center p-3 border-r border-slate-100">
+                    <p class="text-2xl md:text-3xl font-extrabold text-slate-900"
+                       th:text="${#numbers.formatInteger(stats.activeReaders, 0, 'COMMA')}">0</p>
                     <p class="text-xs md:text-sm text-slate-500 mt-1 font-medium">Bạn đọc tích cực</p>
                 </div>
-                <div class="text-center p-3 last:border-0">
-                    <p class="text-2xl md:text-3xl font-extrabold text-fpt-orange" th:text="${stats.totalCampuses}">5</p>
+                <div class="text-center p-3">
+                    <p class="text-2xl md:text-3xl font-extrabold text-fpt-orange"
+                       th:text="${stats.totalCampuses}">0</p>
                     <p class="text-xs md:text-sm text-slate-500 mt-1 font-medium">Cơ sở kết nối</p>
                 </div>
             </div>
         </section>
 
-        <!-- CATEGORIES: Danh mục thể loại -->
+        <!-- CATEGORIES -->
+        <!--
+            "categories" là List<CategoryCardDTO> từ HomeService.getFeaturedCategories(5)
+            Mỗi DTO có: cat.name, cat.bookCount, cat.bgClass, cat.colorKey
+            → KHÔNG còn chuỗi if-else lồng nhau kiểm tra cat.color như phiên bản cũ.
+              Thay vào đó, cat.bgClass đã là chuỗi CSS đầy đủ, dùng trực tiếp.
+        -->
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div class="flex items-center justify-between mb-8">
                 <div>
@@ -147,54 +167,72 @@
                 </div>
                 <a href="#" class="text-sm font-semibold text-fpt-orange hover:text-fpt-orangeHover transition-colors flex items-center space-x-1">
                     <span>Xem tất cả</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+                    </svg>
                 </a>
             </div>
 
-            <!-- Grid Thể loại -->
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                <div th:each="cat : ${categories}" class="bg-white p-6 rounded-2xl border border-slate-100 hover:border-orange-200 hover:shadow-lg transition-all duration-300 group cursor-pointer">
-                    <!-- Icon Mockups based on colors -->
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-115"
-                         th:classappend="${cat.color == 'blue' ? 'bg-blue-50 text-blue-600' : 
-                                           (cat.color == 'green' ? 'bg-emerald-50 text-emerald-600' : 
-                                           (cat.color == 'amber' ? 'bg-amber-50 text-amber-600' : 
-                                           (cat.color == 'indigo' ? 'bg-indigo-50 text-indigo-600' : 'bg-rose-50 text-rose-600')))}">
-                        <!-- Dynamic icons as inline SVG or fallback simple shape -->
+                <div th:each="cat : ${categories}"
+                     class="bg-white p-6 rounded-2xl border border-slate-100 hover:border-orange-200 hover:shadow-lg transition-all duration-300 group cursor-pointer">
+
+                    <!--
+                        THAY ĐỔI QUAN TRỌNG: Trước đây dùng th:classappend với chuỗi
+                        if-else dài kiểm tra cat.color == 'blue' rồi ghép CSS class.
+                        Bây giờ cat.bgClass đã là chuỗi class hoàn chỉnh (VD: "bg-blue-50 text-blue-600")
+                        → chỉ cần th:classappend="${cat.bgClass}" là xong, gọn và dễ mở rộng.
+                    -->
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
+                         th:classappend="${cat.bgClass}">
                         <span class="font-bold text-lg" th:text="${#strings.substring(cat.name, 0, 1)}">C</span>
                     </div>
-                    <h4 class="font-bold text-slate-900 text-sm group-hover:text-fpt-orange transition-colors" th:text="${cat.name}">Category Name</h4>
-                    <p class="text-xs text-slate-400 mt-1.5" th:text="${cat.count}">120 đầu sách</p>
+
+                    <h4 class="font-bold text-slate-900 text-sm group-hover:text-fpt-orange transition-colors"
+                        th:text="${cat.name}">Category Name</h4>
+
+                    <!-- cat.bookCount đã được định dạng sẵn trong Service, VD: "1,240 đầu sách" -->
+                    <p class="text-xs text-slate-400 mt-1.5"
+                       th:text="${cat.bookCount}">0 đầu sách</p>
                 </div>
             </div>
         </section>
 
-        <!-- FEATURED BOOKS: Sách mới nhất -->
+        <!-- FEATURED BOOKS -->
+        <!--
+            "featuredBooks" là List<FeaturedBookDTO> từ HomeService.getFeaturedBooks()
+            Các trường thay đổi so với phiên bản cũ:
+              book.author      → book.authorNames   (tên field trong DTO mới)
+              book.category    → book.categoryName  (tên field trong DTO mới)
+              book.isAvailable → book.available     (tên field trong DTO mới — xem lý do trong FeaturedBookDTO.java)
+        -->
         <section class="bg-slate-100/60 py-16 border-y border-slate-200/50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between mb-8">
                     <div>
                         <h3 class="text-xl md:text-2xl font-extrabold text-slate-900">Sách mới nhập kho nổi bật</h3>
-                        <p class="text-sm text-slate-500 mt-1">Giáo trình mới được cập nhật từ hệ thống FAP & FLMS</p>
+                        <p class="text-sm text-slate-500 mt-1">Giáo trình mới được cập nhật từ hệ thống FAP &amp; FLMS</p>
                     </div>
                 </div>
 
-                <!-- Book Cards Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div th:each="book : ${featuredBooks}" class="bg-white rounded-2xl overflow-hidden border border-slate-150 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
-                        
-                        <!-- Book Header / Cover Placeholder -->
+                    <div th:each="book : ${featuredBooks}"
+                         class="bg-white rounded-2xl overflow-hidden border border-slate-150 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+
+                        <!-- Book Cover Mockup -->
                         <div class="p-6 pb-0">
-                            <!-- Canvas/Mockup Cover Sách -->
                             <div class="h-44 w-full rounded-xl bg-gradient-to-br shadow-inner flex flex-col justify-between p-4 text-white select-none"
                                  th:classappend="${book.coverColor}">
                                 <div class="flex justify-between items-start">
-                                    <span class="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase backdrop-blur-sm" th:text="${book.subjectCode}">PRJ301</span>
+                                    <span class="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase backdrop-blur-sm"
+                                          th:text="${book.subjectCode}">CODE</span>
                                     <span class="text-xs font-semibold text-orange-300">FPTU</span>
                                 </div>
-                                <h5 class="font-extrabold text-xs tracking-tight line-clamp-3 mb-2" th:text="${book.title}">Book Title</h5>
+                                <h5 class="font-extrabold text-xs tracking-tight line-clamp-3 mb-2"
+                                    th:text="${book.title}">Book Title</h5>
                                 <div class="flex justify-between items-center text-[10px] text-slate-300">
-                                    <span th:text="${book.author}">Author</span>
+                                    <!-- book.authorNames thay cho book.author cũ -->
+                                    <span th:text="${book.authorNames}">Author</span>
                                     <span>LMS</span>
                                 </div>
                             </div>
@@ -202,31 +240,38 @@
 
                         <!-- Book Details -->
                         <div class="p-6">
-                            <span class="text-[10px] text-fpt-orange font-bold uppercase tracking-wider block mb-1" th:text="${book.category}">Technology</span>
-                            <h4 class="font-bold text-slate-900 text-sm line-clamp-1 group-hover:text-fpt-orange transition-colors" th:text="${book.title}">Title of Book</h4>
-                            <p class="text-xs text-slate-500 mt-1" th:text="${'Tác giả: ' + book.author}">Author Name</p>
-                            <p class="text-[11px] text-slate-400 mt-2 font-mono" th:text="${'ISBN: ' + book.isbn}">ISBN: xxxxxxx</p>
+                            <!-- book.categoryName thay cho book.category cũ -->
+                            <span class="text-[10px] text-fpt-orange font-bold uppercase tracking-wider block mb-1"
+                                  th:text="${book.categoryName}">Category</span>
 
-                            <!-- Divider -->
+                            <h4 class="font-bold text-slate-900 text-sm line-clamp-1 group-hover:text-fpt-orange transition-colors"
+                                th:text="${book.title}">Title of Book</h4>
+
+                            <p class="text-xs text-slate-500 mt-1"
+                               th:text="${'Tác giả: ' + book.authorNames}">Tác giả: ...</p>
+
+                            <p class="text-[11px] text-slate-400 mt-2 font-mono"
+                               th:text="${'ISBN: ' + book.isbn}">ISBN: xxxxxxx</p>
+
                             <div class="my-4 border-t border-slate-100"></div>
 
-                            <!-- Footer Card: Trạng thái & Action Button -->
+                            <!-- Status & Action -->
                             <div class="flex items-center justify-between mt-4">
-                                <!-- Status Badge -->
+                                <!-- book.available thay cho book.isAvailable cũ -->
                                 <div class="flex items-center space-x-1.5">
-                                    <span class="w-2.5 h-2.5 rounded-full" 
-                                          th:classappend="${book.isAvailable ? 'bg-emerald-500' : 'bg-red-500'}"></span>
-                                    <span class="text-xs font-semibold text-slate-600" 
-                                          th:text="${book.isAvailable ? 'Còn sách' : 'Hết sách'}">Còn sách</span>
+                                    <span class="w-2.5 h-2.5 rounded-full"
+                                          th:classappend="${book.available ? 'bg-emerald-500' : 'bg-red-500'}"></span>
+                                    <span class="text-xs font-semibold text-slate-600"
+                                          th:text="${book.available ? 'Còn sách' : 'Hết sách'}">Còn sách</span>
                                 </div>
 
-                                <!-- Action Buttons (Gắn trực tiếp với luồng của Đức) -->
-                                <button th:if="${book.isAvailable}" class="bg-fpt-navy hover:bg-slate-700 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center space-x-1">
-                                    <span>Mượn ngay</span>
+                                <button th:if="${book.available}"
+                                        class="bg-fpt-navy hover:bg-slate-700 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all">
+                                    Mượn ngay
                                 </button>
-                                <!-- Nếu hết sách thì cho Đăng ký giữ chỗ (Waitlist) -->
-                                <button th:unless="${book.isAvailable}" class="bg-orange-500 hover:bg-orange-600 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center space-x-1 shadow-md shadow-orange-500/20">
-                                    <span>Đặt hàng đợi</span>
+                                <button th:unless="${book.available}"
+                                        class="bg-orange-500 hover:bg-orange-600 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all shadow-md shadow-orange-500/20">
+                                    Đặt hàng đợi
                                 </button>
                             </div>
                         </div>
@@ -235,7 +280,7 @@
             </div>
         </section>
 
-        <!-- SERVICES & QUICK LINKS: Các Use Case chính của dự án -->
+        <!-- SERVICES & QUICK LINKS -->
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div class="text-center max-w-2xl mx-auto mb-12">
                 <h3 class="text-2xl font-extrabold text-slate-900">Các dịch vụ Thư viện nổi bật</h3>
@@ -243,10 +288,12 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Service 1: Đặt mượn sách -->
+                <!-- Service 1 -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-150 hover:shadow-lg transition-all flex space-x-4">
                     <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center shrink-0 text-fpt-orange">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
                     </div>
                     <div>
                         <h4 class="font-bold text-slate-900 text-sm">Đăng ký mượn sách online</h4>
@@ -255,22 +302,26 @@
                     </div>
                 </div>
 
-                <!-- Service 2: Check Vi phạm / Nộp phạt (Vinh) -->
+                <!-- Service 2 -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-150 hover:shadow-lg transition-all flex space-x-4">
                     <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center shrink-0 text-red-500">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
                     </div>
                     <div>
-                        <h4 class="font-bold text-slate-900 text-sm">Tra cứu phí & Vi phạm quá hạn</h4>
+                        <h4 class="font-bold text-slate-900 text-sm">Tra cứu phí &amp; Vi phạm quá hạn</h4>
                         <p class="text-xs text-slate-500 mt-1 leading-relaxed">Theo dõi chi tiết số ngày mượn quá hạn, phiếu phạt vi phạm và thực hiện nghĩa vụ hoàn trả.</p>
                         <a href="#" class="text-xs font-semibold text-red-500 hover:text-red-600 mt-3 inline-block transition-all">Xem chi tiết &rarr;</a>
                     </div>
                 </div>
 
-                <!-- Service 3: Quản lý vận chuyển (Huy) -->
+                <!-- Service 3 -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-150 hover:shadow-lg transition-all flex space-x-4">
                     <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center shrink-0 text-blue-500">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm12 0a2 2 0 11-4 0 2 2 0 014 0zm0-7v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-4l2-2h14z"></path></svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm12 0a2 2 0 11-4 0 2 2 0 014 0zm0-7v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-4l2-2h14z"></path>
+                        </svg>
                     </div>
                     <div>
                         <h4 class="font-bold text-slate-900 text-sm">Theo dõi Vận chuyển Liên cơ sở</h4>
@@ -282,18 +333,16 @@
         </section>
     </main>
 
-    <!-- FOOTER (Đậm chất FPTU) -->
+    <!-- FOOTER -->
     <footer class="bg-fpt-dark text-white border-t-4 border-fpt-orange pt-12 pb-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                <!-- Cột 1: Giới thiệu -->
                 <div>
                     <span class="bg-fpt-orange text-white px-3 py-1 text-sm font-extrabold rounded-md inline-block mb-4 shadow">FPT Thư viện</span>
                     <p class="text-xs text-slate-400 leading-relaxed">
-                        Hệ thống FLMS là nền tảng quản lý thư viện hiện đại kết nối 5 cơ sở đào tạo của Đại học FPT trên toàn quốc. Đảm bảo trải nghiệm tri thức không giới hạn.
+                        Hệ thống FLMS là nền tảng quản lý thư viện hiện đại kết nối 5 cơ sở đào tạo của Đại học FPT trên toàn quốc.
                     </p>
                 </div>
-                <!-- Cột 2: Đường dẫn nhanh -->
                 <div>
                     <h5 class="font-bold text-sm text-slate-200 uppercase tracking-wider mb-4">Danh mục</h5>
                     <ul class="text-xs text-slate-400 space-y-2.5">
@@ -303,7 +352,6 @@
                         <li><a href="#" class="hover:text-fpt-orange transition-colors">Tài nguyên số E-book</a></li>
                     </ul>
                 </div>
-                <!-- Cột 3: Trợ giúp -->
                 <div>
                     <h5 class="font-bold text-sm text-slate-200 uppercase tracking-wider mb-4">Liên kết FPT</h5>
                     <ul class="text-xs text-slate-400 space-y-2.5">
@@ -312,7 +360,6 @@
                         <li><a href="#" class="hover:text-fpt-orange transition-colors">Cổng hỗ trợ sinh viên</a></li>
                     </ul>
                 </div>
-                <!-- Cột 4: Liên hệ -->
                 <div>
                     <h5 class="font-bold text-sm text-slate-200 uppercase tracking-wider mb-4">Cơ sở Hà Nội (Hòa Lạc)</h5>
                     <p class="text-xs text-slate-400 leading-relaxed mb-2">
@@ -323,7 +370,6 @@
                 </div>
             </div>
 
-            <!-- Bản quyền -->
             <div class="border-t border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500">
                 <p>&copy; 2026 FPT University Library. Developed by Team SWP391 Group 5.</p>
                 <div class="flex space-x-4 mt-3 sm:mt-0">
