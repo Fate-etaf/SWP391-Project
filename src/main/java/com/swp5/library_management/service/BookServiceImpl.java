@@ -21,4 +21,13 @@ public class BookServiceImpl implements BookService {
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
     }
+
+    @Override
+    @Transactional
+    public Book saveBook(Book book) {
+        if (book.getCreatedAt() == null) {
+            book.setCreatedAt(java.time.LocalDateTime.now());
+        }
+        return bookRepository.save(book);
+    }
 }

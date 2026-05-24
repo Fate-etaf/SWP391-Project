@@ -24,4 +24,16 @@ public class BookController {
         model.addAttribute("books", bookService.getAllBooks());
         return "books/list";
     }
+
+    @GetMapping("/add")
+    public String showAddBookForm(Model model) {
+        model.addAttribute("book", new com.swp5.library_management.Entity.Book());
+        return "books/add";
+    }
+
+    @org.springframework.web.bind.annotation.PostMapping("/add")
+    public String saveBook(@org.springframework.web.bind.annotation.ModelAttribute("book") com.swp5.library_management.Entity.Book book) {
+        bookService.saveBook(book);
+        return "redirect:/books";
+    }
 }

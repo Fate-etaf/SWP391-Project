@@ -567,6 +567,22 @@
         <p class="book-count">
             Showing <strong th:text="${#lists.size(books)}">0</strong> books
         </p>
+        <a href="/books/add" style="
+            text-decoration: none;
+            background: var(--accent);
+            color: #fff;
+            padding: 0.4rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s ease;
+        ">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            Add Book
+        </a>
     </div>
     <div class="search-wrap">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"

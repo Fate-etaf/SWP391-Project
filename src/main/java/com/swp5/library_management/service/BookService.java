@@ -10,4 +10,9 @@ public interface BookService {
      * Returns all books in the catalog.
      */
     List<Book> getAllBooks();
+
+    /**
+     * Saves a new or existing book.
+     */
+    Book saveBook(Book book);
 }
