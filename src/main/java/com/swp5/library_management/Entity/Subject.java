@@ -13,11 +13,7 @@ import lombok.*;
 public class Subject {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "SubjectID")
-    private Integer subjectId;
-
-    @Column(name = "SubjectCode", nullable = false, unique = true, length = 20)
+    @Column(name = "SubjectCode", length = 20)
     private String subjectCode;
 
     @Column(name = "SubjectName", nullable = false, length = 200)

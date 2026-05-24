@@ -1,9 +1,12 @@
 package com.swp5.library_management.Entity;
 
-import java.util.List;
-
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "Books", schema = "dbo")
@@ -19,19 +22,17 @@ public class Book {
     @Column(name = "BookID")
     private Integer bookId;
 
-    // FK -> Subjects
-    @ManyToOne
-    @JoinColumn(name = "SubjectCode")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SubjectCode", referencedColumnName = "SubjectCode")
     private Subject subject;
 
-    @Column(name = "ISBN", length = 20, unique = true)
+    @Column(name = "ISBN", unique = true, length = 20)
     private String isbn;
 
     @Column(name = "Title", nullable = false, length = 300)
     private String title;
 
-    // FK -> Publishers
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PublisherID")
     private Publisher publisher;
 
@@ -41,7 +42,7 @@ public class Book {
     @Column(name = "Edition", length = 50)
     private String edition;
 
-    @Column(name = "Language")
+    @Column(name = "Language", nullable = false, length = 50)
     private String language;
 
     @Column(name = "Description", columnDefinition = "NVARCHAR(MAX)")
@@ -53,21 +54,50 @@ public class Book {
     @Column(name = "DefaultShelfCode", length = 50)
     private String defaultShelfCode;
 
-    @Column(name = "CreatedAt")
-    private java.time.LocalDateTime createdAt;
+    @Column(name = "CreatedAt", nullable = false)
+    private LocalDateTime createdAt;
 
-    @ManyToMany
+    // ── Many-to-Many: Authors ────────────────────────────────────────────────
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "BookAuthors",
-        joinColumns = @JoinColumn(name = "BookID"),
-        inverseJoinColumns = @JoinColumn(name = "AuthorID")
+            name = "BookAuthors",
+            schema = "dbo",
+            joinColumns = @JoinColumn(name = "BookID"),
+            inverseJoinColumns = @JoinColumn(name = "AuthorID")
     )
-    private List<Author> authors;
+    @Builder.Default
+    private Set<Author> authors = new HashSet<>();
 
-    @PrePersist
-    public void prePersist() {
-        if (createdAt == null) {
-            createdAt = java.time.LocalDateTime.now();
-        }
+    // ── Many-to-Many: Categories ─────────────────────────────────────────────
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "BookCategories",
+            schema = "dbo",
+            joinColumns = @JoinColumn(name = "BookID"),
+            inverseJoinColumns = @JoinColumn(name = "CategoryID")
+    )
+    @Builder.Default
+    private Set<Category> categories = new HashSet<>();
+
+    // ── One-to-Many: Copies ──────────────────────────────────────────────────
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<BookCopy> copies = new HashSet<>();
+
+    // ── Computed helper ──────────────────────────────────────────────────────
+    /** Returns the number of copies whose status is 'Available'. */
+    public long getAvailableCount() {
+        if (copies == null || copies.isEmpty()) return 0;
+        return copies.stream()
+                .filter(c -> "Available".equals(c.getCopyStatus()))
+                .count();
+    }
+
+    /** Returns comma-separated author names for display. */
+    public String getAuthorNames() {
+        if (authors == null || authors.isEmpty()) return "Unknown Author";
+        return authors.stream()
+                .map(Author::getAuthorName)
+                .collect(Collectors.joining(", "));
     }
 }
