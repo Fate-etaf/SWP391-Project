@@ -680,21 +680,25 @@
 
 <!-- ═══ CLIENT-SIDE SEARCH (no page reload) ════════════════════════════════ -->
 <script>
-    const searchInput = document.getElementById('search-input');
-    const grid        = document.getElementById('books-grid');
+    (function() {
+        const searchInput = document.getElementById('search-input');
+        const grid        = document.getElementById('books-grid');
 
-    if (searchInput && grid) {
-        searchInput.addEventListener('input', () => {
-            const q = searchInput.value.trim().toLowerCase();
-            grid.querySelectorAll('.book-card').forEach(card => {
-                const title   = (card.dataset.title   || '').toLowerCase();
-                const authors = (card.dataset.authors || '').toLowerCase();
-                card.style.display = (!q || title.includes(q) || authors.includes(q))
-                    ? ''
-                    : 'none';
+        if (searchInput && grid) {
+            searchInput.addEventListener('input', () => {
+                const q = searchInput.value.trim().toLowerCase();
+                grid.querySelectorAll('.book-card').forEach(card => {
+                    const title   = (card.dataset.title   || '').toLowerCase();
+                    const authors = (card.dataset.authors || '').toLowerCase();
+                    card.style.display = (!q || title.includes(q) || authors.includes(q))
+                        ? ''
+                        : 'none';
+                });
             });
-        });
-    }
+        }
+    })();
 </script>
 </body>
 </html>
+
+

@@ -1,0 +1,52 @@
+package com.swp5.library_management.service;
+
+import com.swp5.library_management.dto.CategoryCardDTO;
+import com.swp5.library_management.dto.FeaturedBookDTO;
+import com.swp5.library_management.dto.HomeStatsDTO;
+
+import java.util.List;
+
+/**
+ * Interface định nghĩa "hợp đồng" (contract) cho tầng Service của trang chủ.
+ *
+ * <p>Lý do dùng Interface thay vì class trực tiếp:
+ * <ul>
+ *   <li>Controller chỉ phụ thuộc vào abstraction (interface) này, không phụ
+ *       thuộc vào implementation cụ thể. Đây là nguyên tắc Dependency Inversion
+ *       trong SOLID.</li>
+ *   <li>Dễ thay thế implementation sau này (VD: thêm cache, đổi nguồn dữ liệu)
+ *       mà không cần sửa Controller.</li>
+ *   <li>Dễ mock trong unit test.</li>
+ * </ul>
+ */
+public interface HomeService {
+
+    /**
+     * Lấy dữ liệu thống kê tổng quan (số sách, bản sao, bạn đọc, cơ sở).
+     *
+     * @return {@link HomeStatsDTO} chứa các con số đã tính từ DB.
+     */
+    HomeStatsDTO getHomeStats();
+
+    /**
+     * Lấy danh sách tên các cơ sở để populate dropdown tìm kiếm.
+     *
+     * @return Danh sách tên cơ sở (List<String>), trực tiếp dùng được trong Thymeleaf.
+     */
+    List<String> getCampusNames();
+
+    /**
+     * Lấy danh sách thể loại nổi bật để hiển thị phần Categories.
+     *
+     * @param limit Số lượng thể loại muốn hiển thị (thường là 5).
+     * @return Danh sách {@link CategoryCardDTO} đã gắn sẵn CSS class và số sách.
+     */
+    List<CategoryCardDTO> getFeaturedCategories(int limit);
+
+    /**
+     * Lấy danh sách sách mới nhập kho để hiển thị phần Featured Books.
+     *
+     * @return Danh sách {@link FeaturedBookDTO} từ 4 cuốn sách mới nhất trong DB.
+     */
+    List<FeaturedBookDTO> getFeaturedBooks();
+}

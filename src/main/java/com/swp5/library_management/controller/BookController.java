@@ -1,5 +1,5 @@
 package com.swp5.library_management.controller;
-
+import com.swp5.library_management.entity.Book;
 import com.swp5.library_management.service.BookService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,12 +27,12 @@ public class BookController {
 
     @GetMapping("/add")
     public String showAddBookForm(Model model) {
-        model.addAttribute("book", new com.swp5.library_management.Entity.Book());
+        model.addAttribute("book", new Book());
         return "books/add";
     }
 
     @org.springframework.web.bind.annotation.PostMapping("/add")
-    public String saveBook(@org.springframework.web.bind.annotation.ModelAttribute("book") com.swp5.library_management.Entity.Book book) {
+    public String saveBook(@org.springframework.web.bind.annotation.ModelAttribute("book") Book book) {
         bookService.saveBook(book);
         return "redirect:/books";
     }
