@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "Shelves",
+@Table(name = "Shelves", schema = "dbo",
         uniqueConstraints = @UniqueConstraint(columnNames = {"CampusID", "ShelfCode"}))
 @Getter
 @Setter
