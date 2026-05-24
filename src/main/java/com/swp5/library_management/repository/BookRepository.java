@@ -11,6 +11,10 @@ import java.util.List;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Integer> {
 
+    List<Book> findByTitleContainingIgnoreCaseOrAuthorNamesContainingIgnoreCase(
+            String title,
+            String author
+    );
     /**
      * Lấy 4 sách mới nhập kho nhất, sắp xếp theo {@code createdAt} giảm dần.
      *

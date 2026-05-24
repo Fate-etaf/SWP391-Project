@@ -15,4 +15,6 @@ public interface BookService {
      * Saves a new or existing book.
      */
     Book saveBook(Book book);
+
+    List<Book> searchBooks(String keyword);
 }

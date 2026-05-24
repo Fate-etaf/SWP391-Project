@@ -32,4 +32,17 @@ public class BookServiceImpl implements BookService {
         }
         return bookRepository.save(book);
     }
+    @Override
+    public List<Book> searchBooks(String keyword) {
+
+        if (keyword == null || keyword.isBlank()) {
+            return bookRepository.findAll();
+        }
+
+        return bookRepository
+                .findByTitleContainingIgnoreCaseOrAuthorNamesContainingIgnoreCase(
+                        keyword,
+                        keyword
+                );
+    }
 }
