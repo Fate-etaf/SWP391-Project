@@ -139,7 +139,7 @@
         <p>Enter the details of the book below to add it to the catalog.</p>
     </div>
 
-    <form th:action="@{/books/add}" th:object="${book}" method="post">
+    <form th:action="@{/books/add}" th:object="${bookForm}" method="post">
         
         <div class="form-group">
             <label for="title">Title <span style="color: #fb7185">*</span></label>
@@ -147,8 +147,8 @@
         </div>
 
         <div class="form-group">
-            <label for="author">Author <span style="color: #fb7185">*</span></label>
-            <input type="text" id="author" th:field="*{author}" class="form-control" required placeholder="E.g., Robert C.Martin"/>
+            <label for="authorName">Author <span style="color: #fb7185">*</span></label>
+            <input type="text" id="authorName" th:field="*{authorName}" class="form-control" required placeholder="E.g., Robert C. Martin (comma-separate multiple)"/>
         </div>
 
         <div class="form-row">
@@ -159,7 +159,7 @@
             
             <div class="form-group">
                 <label for="language">Language <span style="color: #fb7185">*</span></label>
-                <input type="text" id="language" th:field="*{language}" class="form-control" required value="Vietnamese" placeholder="E.g., English"/>
+                <input type="text" id="language" th:field="*{language}" class="form-control" required placeholder="E.g., English"/>
             </div>
         </div>
 

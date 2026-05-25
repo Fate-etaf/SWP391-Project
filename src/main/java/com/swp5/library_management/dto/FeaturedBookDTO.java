@@ -47,4 +47,5 @@ public class FeaturedBookDTO {
      * Giá trị này được gán xoay vòng trong Service, không phải logic nghiệp vụ.
      */
     private String coverColor;
+    
 }
