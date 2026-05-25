@@ -1,5 +1,4 @@
 package com.swp5.library_management.entity;
-package com.swp5.library_management.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,13 +25,4 @@ public class Campus {
 
     @Column(name = "Phone", length = 20)
     private String phone;
-
-    // Explicit getters (safe if Lombok isn't available at compile time)
-    public Integer getCampusId() {
-        return campusId;
-    }
-
-    public String getCampusName() {
-        return campusName;
-    }
 }

@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Integer> {
@@ -22,5 +21,4 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
      * {@code categoryRepository.findAllByOrderByCategoryIdAsc(PageRequest.of(0, 5))}
      */
     List<Category> findAllByOrderByCategoryIdAsc(Pageable pageable);
-    Optional<Category> findByCategoryName(String categoryName);
 }

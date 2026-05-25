@@ -15,5 +15,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CampusRepository extends JpaRepository<Campus, Integer> {
     // Không cần khai báo thêm query — findAll() và count() từ JpaRepository là đủ.
-    Campus findByCampusName(String campusName);
 }
