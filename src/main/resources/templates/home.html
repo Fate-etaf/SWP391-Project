@@ -58,16 +58,30 @@
 
                 <!-- User Corner / Login -->
                 <div class="flex items-center space-x-4">
-                    <div class="hidden lg:block text-right">
-                        <p class="text-xs text-slate-400">Xin chào,</p>
-                        <p class="text-sm font-semibold text-slate-100">Vũ Minh Đức</p>
-                    </div>
-                    <button class="bg-fpt-orange hover:bg-fpt-orangeHover text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-md flex items-center space-x-2">
-                        <!-- Login/Logout Icon -->
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                        <span>Đăng xuất</span>
-                    </button>
-                </div>
+    
+    <div th:if="${registeredName != null}" class="flex items-center space-x-4">
+        <div class="hidden lg:block text-right">
+            <p class="text-xs text-slate-400">Xin chào,</p>
+            <p class="text-sm font-semibold text-slate-100" th:text="${registeredName}">Tên Sinh Viên</p>
+        </div>
+        <button onclick="window.location.href='/home'" class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-all border border-slate-700 flex items-center space-x-2">
+            <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+            <span>Đăng xuất</span>
+        </button>
+    </div>
+
+    <div th:if="${registeredName == null}">
+        <button onclick="window.location.href='/login'" class="bg-fpt-orange hover:bg-fpt-orangeHover text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg shadow-fpt-orange/20 flex items-center space-x-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+            <span>Đăng nhập hệ thống</span>
+        </button>
+    </div>
+
+</div>
             </div>
         </div>
     </header>
