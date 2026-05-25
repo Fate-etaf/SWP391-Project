@@ -17,15 +17,6 @@ public class BookController {
         this.bookService = bookService;
     }
 
-    /**
-     * GET /books  →  displays the book catalog page.
-     */
-    @GetMapping
-    public String listBooks(Model model) {
-        model.addAttribute("books", bookService.getAllBooks());
-        return "books/list";
-    }
-
     @GetMapping("/add")
     public String showAddBookForm(Model model) {
         model.addAttribute("book", new Book());

@@ -679,14 +679,25 @@
 </div>
 
 <!-- ═══ CLIENT-SIDE SEARCH (no page reload) ════════════════════════════════ -->
-<form method="get" action="/books">
-    <input type="text"
-           name="keyword"
-           th:value="${keyword}"
-           placeholder="Search...">
+<script>
+    (function() {
+        const searchInput = document.getElementById('search-input');
+        const grid        = document.getElementById('books-grid');
 
-    <button type="submit">Search</button>
-</form>
+        if (searchInput && grid) {
+            searchInput.addEventListener('input', () => {
+                const q = searchInput.value.trim().toLowerCase();
+                grid.querySelectorAll('.book-card').forEach(card => {
+                    const title   = (card.dataset.title   || '').toLowerCase();
+                    const authors = (card.dataset.authors || '').toLowerCase();
+                    card.style.display = (!q || title.includes(q) || authors.includes(q))
+                        ? ''
+                        : 'none';
+                });
+            });
+        }
+    })();
+</script>
 </body>
 </html>
 
