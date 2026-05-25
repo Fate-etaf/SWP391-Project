@@ -38,4 +38,13 @@ public class BookCopy {
 
     @Column(name = "AcquiredAt")
     private LocalDateTime acquiredAt;
+
+    // Explicit getter for copyStatus (in case Lombok isn't processed)
+    public String getCopyStatus() {
+        return copyStatus;
+    }
+
+    public LocalDateTime getAcquiredAt() {
+        return acquiredAt;
+    }
 }
