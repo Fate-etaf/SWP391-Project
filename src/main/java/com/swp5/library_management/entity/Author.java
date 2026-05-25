@@ -1,7 +1,16 @@
 package com.swp5.library_management.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "Authors", schema = "dbo")
@@ -19,4 +28,9 @@ public class Author {
 
     @Column(name = "AuthorName", nullable = false, length = 150)
     private String authorName;
+
+    // Explicit getter to avoid Lombok/annotation-processing issues in IDE/build
+    public String getAuthorName() {
+        return this.authorName;
+    }
 }
