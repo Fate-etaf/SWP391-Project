@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import com.swp5.library_management.entity.Book;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Integer> {

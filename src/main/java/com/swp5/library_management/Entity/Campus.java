@@ -1,5 +1,4 @@
 package com.swp5.library_management.entity;
-package com.swp5.library_management.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

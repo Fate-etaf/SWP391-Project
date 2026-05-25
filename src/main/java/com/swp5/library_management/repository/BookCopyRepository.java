@@ -3,6 +3,10 @@ package com.swp5.library_management.repository;
 import com.swp5.library_management.entity.BookCopy;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import java.time.LocalDateTime;
+import java.util.List;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 @Repository
 public interface BookCopyRepository extends JpaRepository<BookCopy, String> {
@@ -17,25 +21,8 @@ public interface BookCopyRepository extends JpaRepository<BookCopy, String> {
      * Sau này có thể mở rộng để đếm "Borrowed", "Damaged", v.v.
      */
     long countByCopyStatus(String copyStatus);
-}
-package com.swp5.library_management.repository;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
-import com.swp5.library_management.entity.BookCopy;
-
-@Repository
-public interface BookCopyRepository extends JpaRepository<BookCopy, String> {
 
     long countByCampusCampusIdAndCopyStatus(Integer campusId, String copyStatus);
-
-    long countByCopyStatus(String copyStatus);
 
     List<BookCopy> findByCampusCampusId(Integer campusId);
 
