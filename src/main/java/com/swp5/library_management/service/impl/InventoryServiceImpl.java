@@ -1,4 +1,4 @@
-package com.swp5.library_management.service;
+package com.swp5.library_management.service.impl;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.swp5.library_management.entity.Campus;
 import com.swp5.library_management.repository.BookCopyRepository;
 import com.swp5.library_management.repository.CampusRepository;
+import com.swp5.library_management.service.InventoryService;
 import com.swp5.library_management.service.dto.CampusInventoryDTO;
 import com.swp5.library_management.service.dto.InventoryOverviewDTO;
 
