@@ -1,6 +1,6 @@
 package com.swp5.library_management.service;
 
-import com.swp5.library_management.Entity.Book;
+import com.swp5.library_management.entity.Book;
 import com.swp5.library_management.repository.BookRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

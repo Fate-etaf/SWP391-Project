@@ -1,9 +1,19 @@
-package com.swp5.library_management.Entity;
-
-import jakarta.persistence.*;
-import lombok.*;
+package com.swp5.library_management.entity;
 
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "BookCopies", schema = "dbo")
@@ -38,4 +48,13 @@ public class BookCopy {
 
     @Column(name = "AcquiredAt")
     private LocalDateTime acquiredAt;
+
+    // Explicit getter for copyStatus (in case Lombok isn't processed)
+    public String getCopyStatus() {
+        return copyStatus;
+    }
+
+    public LocalDateTime getAcquiredAt() {
+        return acquiredAt;
+    }
 }
