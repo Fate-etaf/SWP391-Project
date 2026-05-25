@@ -23,6 +23,7 @@ public class User {
     private String email;
 
     @Column(name = "PasswordHash", nullable = false, length = 255)
+    @Builder.Default
     private String passwordHash = "123";
 
     @Column(name = "Phone", length = 20)
@@ -32,8 +33,10 @@ public class User {
     private Integer campusId;
 
     @Column(name = "Status", nullable = false, length = 20)
+    @Builder.Default
     private String status = "Active";
 
     @Column(name = "BorrowingLocked", nullable = false)
+    @Builder.Default
     private Boolean borrowingLocked = false;
 }
