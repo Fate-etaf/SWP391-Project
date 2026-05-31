@@ -136,7 +136,7 @@
 <div class="form-container">
     <div class="form-header">
         <h1>Add New Book</h1>
-        <p>Enter the details of the book below to add it to the catalog.</p>
+        <p>Fill in the details below to register a new book in the library catalog.</p>
     </div>
 
     <form th:action="@{/books/add}" th:object="${bookForm}" method="post">
@@ -160,6 +160,28 @@
             <div class="form-group">
                 <label for="language">Language <span style="color: #fb7185">*</span></label>
                 <input type="text" id="language" th:field="*{language}" class="form-control" required placeholder="E.g., English"/>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="publisherName">Publisher</label>
+                <input type="text" id="publisherName" th:field="*{publisherName}" class="form-control" placeholder="E.g., O'Reilly Media"/>
+            </div>
+            <div class="form-group">
+                <label for="edition">Edition</label>
+                <input type="text" id="edition" th:field="*{edition}" class="form-control" placeholder="E.g., 3rd Edition"/>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="defaultShelfCode">Default Shelf Code</label>
+                <input type="text" id="defaultShelfCode" th:field="*{defaultShelfCode}" class="form-control" placeholder="E.g., IT-A3"/>
+            </div>
+            <div class="form-group">
+                <label for="subjectCode">Subject Code</label>
+                <input type="text" id="subjectCode" th:field="*{subjectCode}" class="form-control" placeholder="E.g., PRF192"/>
             </div>
         </div>
 

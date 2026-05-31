@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface SubjectRepository extends JpaRepository<Subject, String> {
+    // PK is SubjectCode (String) — findById(subjectCode) is available from JpaRepository
 }
