@@ -23,9 +23,13 @@ import com.swp5.library_management.entity.Author;
 import com.swp5.library_management.entity.Book;
 import com.swp5.library_management.entity.BookCopy;
 import com.swp5.library_management.entity.Category;
+import com.swp5.library_management.entity.Publisher;
+import com.swp5.library_management.entity.Subject;
 import com.swp5.library_management.repository.AuthorRepository;
 import com.swp5.library_management.repository.BookCopyRepository;
 import com.swp5.library_management.repository.BookRepository;
+import com.swp5.library_management.repository.PublisherRepository;
+import com.swp5.library_management.repository.SubjectRepository;
 import com.swp5.library_management.service.BookService;
 
 @Service
@@ -44,16 +48,22 @@ public class BookServiceImpl implements BookService {
         "from-fuchsia-700 to-pink-900"
     };
 
-    private final BookRepository     bookRepository;
-    private final BookCopyRepository bookCopyRepository;
-    private final AuthorRepository   authorRepository;
+    private final BookRepository      bookRepository;
+    private final BookCopyRepository  bookCopyRepository;
+    private final AuthorRepository    authorRepository;
+    private final PublisherRepository publisherRepository;
+    private final SubjectRepository   subjectRepository;
 
     public BookServiceImpl(BookRepository bookRepository,
                            BookCopyRepository bookCopyRepository,
-                           AuthorRepository authorRepository) {
-        this.bookRepository     = bookRepository;
-        this.bookCopyRepository = bookCopyRepository;
-        this.authorRepository   = authorRepository;
+                           AuthorRepository authorRepository,
+                           PublisherRepository publisherRepository,
+                           SubjectRepository subjectRepository) {
+        this.bookRepository      = bookRepository;
+        this.bookCopyRepository  = bookCopyRepository;
+        this.authorRepository    = authorRepository;
+        this.publisherRepository = publisherRepository;
+        this.subjectRepository   = subjectRepository;
     }
 
     // ── Librarian: getAllBooks ─────────────────────────────────────────────────
@@ -63,11 +73,13 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findAll();
     }
 
-    // ── Librarian: saveBook ───────────────────────────────────────────────────
+    // ── Librarian: saveBook (Merged from origin/main) ─────────────────────────
 
     @Override
     @Transactional
     public Book saveBook(AddBookForm form) {
+
+        // ── 1. Resolve Author(s) — find or create ──────────────────────────────
         Set<Author> authors = new HashSet<>();
         if (StringUtils.hasText(form.getAuthorName())) {
             for (String name : form.getAuthorName().split(",")) {
@@ -82,15 +94,39 @@ public class BookServiceImpl implements BookService {
             }
         }
 
+        // ── 2. Resolve Publisher — find or create ──────────────────────────────
+        Publisher publisher = null;
+        if (StringUtils.hasText(form.getPublisherName())) {
+            publisher = publisherRepository
+                    .findByPublisherNameIgnoreCase(form.getPublisherName().trim())
+                    .orElseGet(() -> publisherRepository.save(
+                            Publisher.builder()
+                                    .publisherName(form.getPublisherName().trim())
+                                    .build()));
+        }
+
+        // ── 3. Resolve Subject — lookup only (must exist in DB) ───────────────
+        Subject subject = null;
+        if (StringUtils.hasText(form.getSubjectCode())) {
+            subject = subjectRepository
+                    .findById(form.getSubjectCode().trim())
+                    .orElse(null);   // silently ignore unknown codes
+        }
+
+        // ── 4. Build and save the Book ─────────────────────────────────────────
         Book book = new Book();
         book.setTitle(form.getTitle());
         book.setIsbn(form.getIsbn());
-        book.setLanguage(form.getLanguage() != null ? form.getLanguage() : "Vietnamese");
+        book.setLanguage(StringUtils.hasText(form.getLanguage()) ? form.getLanguage() : "Vietnamese");
         book.setPublishYear(form.getPublishYear());
         book.setCoverImageUrl(form.getCoverImageUrl());
         book.setDescription(form.getDescription());
+        book.setEdition(form.getEdition());
+        book.setDefaultShelfCode(form.getDefaultShelfCode());
         book.setCreatedAt(LocalDateTime.now());
         book.setAuthors(authors);
+        book.setPublisher(publisher);
+        book.setSubject(subject);
 
         return bookRepository.save(book);
     }

@@ -1,6 +1,5 @@
 package com.swp5.library_management.service.impl;
 
-import com.swp5.library_management.service.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,7 +7,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import jakarta.mail.MessagingException;
+import com.swp5.library_management.service.EmailService;
+
 import jakarta.mail.internet.MimeMessage;
 
 /**

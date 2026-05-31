@@ -2,18 +2,25 @@ package com.swp5.library_management.dto;
 
 /**
  * Form-backing DTO used by the Add Book page.
- * Uses simple String fields instead of JPA entity references
- * so Thymeleaf can bind them directly from the HTML form.
+ * Uses simple String/primitive fields so Thymeleaf can bind them directly
+ * from HTML inputs — no JPA entity references needed in the form layer.
  */
 public class AddBookForm {
 
+    // ── Core fields ────────────────────────────────────────────────────────────
     private String title;
-    private String authorName;   // plain text – resolved to Author entity in service
+    private String authorName;      // comma-separated; resolved to Author entity(ies)
     private String isbn;
     private String language = "Vietnamese";
     private Integer publishYear;
     private String coverImageUrl;
     private String description;
+
+    // ── New librarian fields ───────────────────────────────────────────────────
+    private String publisherName;   // resolved to Publisher entity (find or create)
+    private String edition;         // e.g. "3rd Edition"
+    private String defaultShelfCode; // raw shelf code string stored on the book
+    private String subjectCode;     // must match an existing Subject.subjectCode
 
     // ── Getters & Setters ──────────────────────────────────────────────────────
 
@@ -37,4 +44,17 @@ public class AddBookForm {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public String getPublisherName() { return publisherName; }
+    public void setPublisherName(String publisherName) { this.publisherName = publisherName; }
+
+    public String getEdition() { return edition; }
+    public void setEdition(String edition) { this.edition = edition; }
+
+    public String getDefaultShelfCode() { return defaultShelfCode; }
+    public void setDefaultShelfCode(String defaultShelfCode) { this.defaultShelfCode = defaultShelfCode; }
+
+    public String getSubjectCode() { return subjectCode; }
+    public void setSubjectCode(String subjectCode) { this.subjectCode = subjectCode; }
 }
+
