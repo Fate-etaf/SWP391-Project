@@ -1,18 +1,30 @@
 package com.swp5.library_management.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.swp5.library_management.dto.AddBookForm;
+import com.swp5.library_management.dto.BookDetailDTO;
+import com.swp5.library_management.dto.BookSearchResultDTO;
+import com.swp5.library_management.dto.CopyRowDTO;
 import com.swp5.library_management.entity.Author;
 import com.swp5.library_management.entity.Book;
+import com.swp5.library_management.entity.BookCopy;
+import com.swp5.library_management.entity.Category;
 import com.swp5.library_management.repository.AuthorRepository;
+import com.swp5.library_management.repository.BookCopyRepository;
 import com.swp5.library_management.repository.BookRepository;
 import com.swp5.library_management.service.BookService;
 
@@ -20,26 +32,44 @@ import com.swp5.library_management.service.BookService;
 @Transactional(readOnly = true)
 public class BookServiceImpl implements BookService {
 
-    private final BookRepository bookRepository;
-    private final AuthorRepository authorRepository;
+    // ── Bảng màu xoay vòng cho bìa sách mockup ────────────────────────────────
+    private static final String[] COVER_COLORS = {
+        "from-slate-700 to-slate-900",
+        "from-blue-700 to-indigo-900",
+        "from-emerald-700 to-teal-900",
+        "from-red-700 to-rose-900",
+        "from-violet-700 to-purple-900",
+        "from-amber-600 to-orange-900",
+        "from-cyan-700 to-blue-900",
+        "from-fuchsia-700 to-pink-900"
+    };
 
-    public BookServiceImpl(BookRepository bookRepository, AuthorRepository authorRepository) {
-        this.bookRepository = bookRepository;
-        this.authorRepository = authorRepository;
+    private final BookRepository     bookRepository;
+    private final BookCopyRepository bookCopyRepository;
+    private final AuthorRepository   authorRepository;
+
+    public BookServiceImpl(BookRepository bookRepository,
+                           BookCopyRepository bookCopyRepository,
+                           AuthorRepository authorRepository) {
+        this.bookRepository     = bookRepository;
+        this.bookCopyRepository = bookCopyRepository;
+        this.authorRepository   = authorRepository;
     }
+
+    // ── Librarian: getAllBooks ─────────────────────────────────────────────────
 
     @Override
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
     }
 
+    // ── Librarian: saveBook ───────────────────────────────────────────────────
+
     @Override
     @Transactional
     public Book saveBook(AddBookForm form) {
-        // ── Resolve author(s) ──────────────────────────────────────────────────
         Set<Author> authors = new HashSet<>();
         if (StringUtils.hasText(form.getAuthorName())) {
-            // Support comma-separated names, e.g. "Alice, Bob"
             for (String name : form.getAuthorName().split(",")) {
                 String trimmed = name.trim();
                 if (!trimmed.isEmpty()) {
@@ -52,7 +82,6 @@ public class BookServiceImpl implements BookService {
             }
         }
 
-        // ── Build Book entity ──────────────────────────────────────────────────
         Book book = new Book();
         book.setTitle(form.getTitle());
         book.setIsbn(form.getIsbn());
@@ -64,5 +93,156 @@ public class BookServiceImpl implements BookService {
         book.setAuthors(authors);
 
         return bookRepository.save(book);
+    }
+
+    // ── UCG01 – searchBooks ───────────────────────────────────────────────────
+
+    /**
+     * Tìm kiếm sách.
+     *
+     * Chiến lược hiệu năng:
+     *   1. Query tìm kiếm trả về List<Book> (lazy copies — tránh CartesianProduct với EntityGraph).
+     *   2. Lấy tất cả bookId từ kết quả.
+     *   3. Một query batch duy nhất đếm Available copies theo (bookId, campusId).
+     *   4. Map kết quả sang DTO mà không cần truy cập lazy collection.
+     */
+    @Override
+    public List<BookSearchResultDTO> searchBooks(String keyword, String subjectCode, Integer campusId) {
+        // Sanitize: blank string → null để WHERE clause bỏ qua bộ lọc
+        String kw = StringUtils.hasText(keyword)     ? keyword.trim()     : null;
+        String sc = StringUtils.hasText(subjectCode) ? subjectCode.trim() : null;
+
+        List<Book> books = bookRepository.searchBooks(kw, sc, campusId);
+        return mapBooksToSearchResults(books, campusId);
+    }
+
+    // ── UCG01 – E1 Fallback: getRecentBooks ───────────────────────────────────
+
+    @Override
+    public List<BookSearchResultDTO> getRecentBooks(Integer campusId) {
+        List<Book> recent = bookRepository.findTop8ByOrderByCreatedAtDesc();
+        return mapBooksToSearchResults(recent, campusId);
+    }
+
+    // ── UCG02 – getBookDetail ─────────────────────────────────────────────────
+
+    /**
+     * Load chi tiết sách. BookRepository.findById đã được override với @EntityGraph
+     * nên tất cả quan hệ (authors, categories, copies, campus, shelf, subject, publisher)
+     * được load trong 1 câu SQL, không có N+1.
+     *
+     * @throws NoSuchElementException nếu bookId không tồn tại (UCG02 – E1).
+     */
+    @Override
+    public BookDetailDTO getBookDetail(Integer bookId, Integer campusId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Book not found with id: " + bookId));
+
+        // ── Lọc và sắp xếp bản sao theo campus ──────────────────────────────
+        List<BookCopy> copies;
+        if (campusId != null) {
+            copies = book.getCopies().stream()
+                    .filter(c -> c.getCampus().getCampusId().equals(campusId))
+                    .collect(Collectors.toList());
+        } else {
+            copies = new ArrayList<>(book.getCopies());
+        }
+
+        // Sắp xếp: Available lên đầu, sau đó theo copyId
+        copies.sort(Comparator
+                .<BookCopy, Integer>comparing(c -> "Available".equals(c.getCopyStatus()) ? 0 : 1)
+                .thenComparing(BookCopy::getCopyId));
+
+        // ── Map sang CopyRowDTO ───────────────────────────────────────────────
+        List<CopyRowDTO> copyRows = copies.stream().map(c -> CopyRowDTO.builder()
+                .copyId(c.getCopyId())
+                .campusName(c.getCampus() != null ? c.getCampus().getCampusName() : "—")
+                .conditionStatus(c.getConditionStatus())
+                .copyStatus(c.getCopyStatus())
+                .shelfCode(c.getShelf()  != null ? c.getShelf().getShelfCode() : "—")
+                .shelfName(c.getShelf()  != null ? c.getShelf().getShelfName() : "—")
+                .build()
+        ).collect(Collectors.toList());
+
+        boolean hasAvailableCopy = copies.stream()
+                .anyMatch(c -> "Available".equals(c.getCopyStatus()));
+
+        String categoryNames = book.getCategories().stream()
+                .map(Category::getCategoryName)
+                .collect(Collectors.joining(", "));
+
+        // Chọn màu bìa giả ngẫu nhiên theo bookId (ổn định, không random mỗi lần)
+        String coverColor = COVER_COLORS[book.getBookId() % COVER_COLORS.length];
+
+        return BookDetailDTO.builder()
+                .bookId(book.getBookId())
+                .title(book.getTitle())
+                .isbn(book.getIsbn())
+                .publishYear(book.getPublishYear())
+                .edition(book.getEdition())
+                .language(book.getLanguage())
+                .description(book.getDescription())
+                .coverImageUrl(book.getCoverImageUrl())
+                .coverColor(coverColor)
+                .authorNames(book.getAuthorNames())
+                .publisherName(book.getPublisher() != null
+                        ? book.getPublisher().getPublisherName() : "Chưa có thông tin")
+                .subjectCode(book.getSubject()  != null ? book.getSubject().getSubjectCode() : null)
+                .subjectName(book.getSubject()  != null ? book.getSubject().getSubjectName() : null)
+                .categoryNames(categoryNames.isEmpty() ? "Chưa phân loại" : categoryNames)
+                .copies(copyRows)
+                .hasAvailableCopy(hasAvailableCopy)
+                .build();
+    }
+
+    // ── Private helpers ───────────────────────────────────────────────────────
+
+    /**
+     * Chuyển đổi List<Book> sang List<BookSearchResultDTO>.
+     *
+     * Dùng batch query để tính availableCount thay vì lazy load copies từng cuốn (tránh N+1).
+     */
+    private List<BookSearchResultDTO> mapBooksToSearchResults(List<Book> books, Integer campusId) {
+        if (books.isEmpty()) return List.of();
+
+        List<Integer> bookIds = books.stream()
+                .map(Book::getBookId)
+                .collect(Collectors.toList());
+
+        // Batch count: 1 query duy nhất cho tất cả sách
+        List<Object[]> countRows = (campusId != null)
+                ? bookCopyRepository.countAvailableByBookIdsAndCampus(bookIds, campusId)
+                : bookCopyRepository.countAvailableByBookIds(bookIds);
+
+        Map<Integer, Long> availableMap = new HashMap<>();
+        for (Object[] row : countRows) {
+            availableMap.put((Integer) row[0], (Long) row[1]);
+        }
+
+        List<BookSearchResultDTO> result = new ArrayList<>();
+        for (int i = 0; i < books.size(); i++) {
+            Book book = books.get(i);
+
+            String subjectCode = (book.getSubject() != null)
+                    ? book.getSubject().getSubjectCode() : null;
+
+            String categoryNames = book.getCategories().stream()
+                    .map(Category::getCategoryName)
+                    .collect(Collectors.joining(", "));
+
+            result.add(BookSearchResultDTO.builder()
+                    .bookId(book.getBookId())
+                    .title(book.getTitle())
+                    .isbn(book.getIsbn() != null ? book.getIsbn() : "N/A")
+                    .authorNames(book.getAuthorNames())
+                    .subjectCode(subjectCode)
+                    .categoryNames(categoryNames.isEmpty() ? "Chưa phân loại" : categoryNames)
+                    .availableCount(availableMap.getOrDefault(book.getBookId(), 0L))
+                    .coverImageUrl(book.getCoverImageUrl())
+                    .coverColor(COVER_COLORS[i % COVER_COLORS.length])
+                    .build());
+        }
+        return result;
     }
 }

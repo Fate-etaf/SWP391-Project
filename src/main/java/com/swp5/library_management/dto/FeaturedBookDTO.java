@@ -21,6 +21,8 @@ import lombok.*;
 @Builder
 public class FeaturedBookDTO {
 
+    private Integer bookId;
+
     private String title;
 
     /** Chuỗi tên tác giả, ghép bởi dấu phẩy. VD: "Robert C. Martin" */

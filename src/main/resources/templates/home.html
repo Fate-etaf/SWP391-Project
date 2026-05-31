@@ -52,8 +52,9 @@
 
                 <!-- User Corner -->
                 <div class="flex items-center space-x-4">
-                    <div class="hidden lg:block text-right">
-                        <p class="text-xs text-slate-400">Chỗ này làm LOGIN</p>
+                    <div class="hidden lg:flex flex-col text-right">
+                        <a href="/reservations" class="text-sm font-semibold text-fpt-orange hover:text-orange-400 transition-colors">Đơn đặt chỗ của tôi</a>
+                        <p class="text-[10px] text-slate-400 mt-0.5">Chỗ này làm LOGIN</p>
                     </div>
                 </div>
             </div>
@@ -265,14 +266,16 @@
                                           th:text="${book.available ? 'Còn sách' : 'Hết sách'}">Còn sách</span>
                                 </div>
 
-                                <button th:if="${book.available}"
-                                        class="bg-fpt-navy hover:bg-slate-700 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all">
+                                <a th:if="${book.available}"
+                                   th:href="@{/reservations/reserve(bookId=${book.bookId})}"
+                                   class="bg-fpt-navy hover:bg-slate-700 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all text-center inline-block">
                                     Mượn ngay
-                                </button>
-                                <button th:unless="${book.available}"
-                                        class="bg-orange-500 hover:bg-orange-600 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all shadow-md shadow-orange-500/20">
+                                </a>
+                                <a th:unless="${book.available}"
+                                   th:href="@{/reservations/reserve(bookId=${book.bookId})}"
+                                   class="bg-orange-500 hover:bg-orange-600 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all shadow-md shadow-orange-500/20 text-center inline-block">
                                     Đặt hàng đợi
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -298,7 +301,7 @@
                     <div>
                         <h4 class="font-bold text-slate-900 text-sm">Đăng ký mượn sách online</h4>
                         <p class="text-xs text-slate-500 mt-1 leading-relaxed">Đăng ký giữ sách trực tuyến trong vòng 24h trước khi đến quầy Thủ thư để nhận sách vật lý.</p>
-                        <a href="#" class="text-xs font-semibold text-fpt-orange hover:text-fpt-orangeHover mt-3 inline-block transition-all">Đăng ký ngay &rarr;</a>
+                        <a href="/books" class="text-xs font-semibold text-fpt-orange hover:text-fpt-orangeHover mt-3 inline-block transition-all">Đăng ký ngay &rarr;</a>
                     </div>
                 </div>
 

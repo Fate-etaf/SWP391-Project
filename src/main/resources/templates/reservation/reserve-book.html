@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Đặt giữ chỗ sách – Thư viện FPT</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        /* ── Header ───────────────────────────────────────── */
+        .header {
+            background: linear-gradient(135deg, #003580, #0057b8);
+            color: #fff;
+            padding: 18px 32px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.25);
+        }
+        .header h1 { font-size: 1.3rem; font-weight: 700; }
+        .header a { color: rgba(255,255,255,.75); text-decoration: none; font-size: .9rem; }
+        .header a:hover { color: #fff; }
+
+        /* ── Container ────────────────────────────────────── */
+        .container { max-width: 800px; margin: 36px auto; padding: 0 16px; }
+
+        /* ── Card ─────────────────────────────────────────── */
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,.08);
+            overflow: hidden;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #003580, #0057b8);
+            color: #fff;
+            padding: 20px 28px;
+        }
+        .card-header h2 { font-size: 1.1rem; }
+        .card-header p  { font-size: .85rem; opacity: .8; margin-top: 4px; }
+        .card-body { padding: 28px; }
+
+        /* ── Book info ────────────────────────────────────── */
+        .book-info {
+            display: flex;
+            gap: 18px;
+            align-items: flex-start;
+            background: #f8faff;
+            border: 1px solid #dce8ff;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 24px;
+        }
+        .book-cover {
+            width: 80px;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.15);
+            flex-shrink: 0;
+        }
+        .book-cover-placeholder {
+            width: 80px;
+            height: 110px;
+            background: #dce8ff;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+        .book-details h3 { font-size: 1.05rem; color: #003580; margin-bottom: 6px; }
+        .book-details p  { font-size: .85rem; color: #555; margin-top: 3px; }
+
+        /* ── Form ─────────────────────────────────────────── */
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: .9rem;
+        }
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: .95rem;
+            color: #333;
+            background: #fff;
+            cursor: pointer;
+            transition: border-color .2s;
+        }
+        .form-group select:focus {
+            outline: none;
+            border-color: #0057b8;
+            box-shadow: 0 0 0 3px rgba(0,87,184,.12);
+        }
+
+        /* ── Buttons ──────────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: .95rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all .2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #003580, #0057b8);
+            color: #fff;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,53,128,.3); }
+        .btn-secondary {
+            background: #f0f4f8;
+            color: #555;
+            border: 1px solid #ccc;
+        }
+        .btn-secondary:hover { background: #e4eaf2; }
+        .btn-group { display: flex; gap: 12px; margin-top: 8px; }
+
+        /* ── Alerts ───────────────────────────────────────── */
+        .alert {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: .9rem;
+        }
+        .alert-error { background: #ffeaea; border: 1px solid #f5c6c6; color: #c62828; }
+        .alert-warning {
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            color: #6d4c00;
+        }
+        .alert-icon { font-size: 1.2rem; flex-shrink: 0; }
+
+        /* ── Waitlist section ─────────────────────────────── */
+        .waitlist-box {
+            background: #f3f0ff;
+            border: 1px solid #d1c4e9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 8px;
+        }
+        .waitlist-box h3 { color: #4527a0; margin-bottom: 10px; font-size: 1rem; }
+        .waitlist-box p  { font-size: .88rem; color: #555; margin-bottom: 14px; }
+
+        /* ── Info note ────────────────────────────────────── */
+        .info-note {
+            background: #e3f2fd;
+            border-left: 4px solid #1565c0;
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-size: .85rem;
+            color: #0d47a1;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <span style="font-size:1.6rem;">📚</span>
+    <div>
+        <h1>Thư viện FPT University</h1>
+        <a th:href="@{/reservations}">← Quay lại đặt chỗ của tôi</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h2>🔖 Đặt giữ chỗ sách trực tuyến</h2>
+            <p>Chọn cơ sở thư viện bạn muốn đến nhận sách và xác nhận đặt chỗ.</p>
+        </div>
+        <div class="card-body">
+
+            <!-- Thông báo lỗi (Exc 1, 2) -->
+            <div class="alert alert-error" th:if="${errorMsg}">
+                <span class="alert-icon">❌</span>
+                <span th:text="${errorMsg}"></span>
+            </div>
+
+            <!-- Thông báo hết sách (Exc 3/4) -->
+            <div class="alert alert-warning" th:if="${noCopyMsg}">
+                <span class="alert-icon">⚠️</span>
+                <span th:text="${noCopyMsg}"></span>
+            </div>
+
+            <!-- Thông tin sách -->
+            <div class="book-info">
+                <img class="book-cover"
+                     th:if="${!#strings.isEmpty(book.coverImageUrl)}"
+                     th:src="${book.coverImageUrl}"
+                     th:alt="${book.title}" />
+                <div class="book-cover-placeholder" th:unless="${!#strings.isEmpty(book.coverImageUrl)}">
+                    📖
+                </div>
+                <div class="book-details">
+                    <h3 th:text="${book.title}">Tên sách</h3>
+                    <p>✍️ <span th:text="${book.getAuthorNames()}">Tác giả</span></p>
+                    <p th:if="${book.isbn}">ISBN: <span th:text="${book.isbn}"></span></p>
+                    <p th:if="${book.publishYear}">Năm xuất bản: <span th:text="${book.publishYear}"></span></p>
+                    <p>🌐 Ngôn ngữ: <span th:text="${book.language}">Tiếng Việt</span></p>
+                </div>
+            </div>
+
+            <!-- Ghi chú 24h -->
+            <div class="info-note">
+                ⏰ <strong>Lưu ý:</strong> Sau khi đặt giữ chỗ thành công, bạn có <strong>24 giờ</strong>
+                để đến thư viện nhận sách. Quá thời hạn, đơn sẽ tự động hủy.
+            </div>
+
+            <!-- Form đặt giữ chỗ CHÍNH (khi chưa hiển thị waitlist) -->
+            <div th:unless="${param.showWaitlist}">
+                <form id="reserve-form" th:action="@{/reservations/reserve}" method="post">
+                    <input type="hidden" name="bookId" th:value="${book.bookId}" />
+
+                    <div class="form-group">
+                        <label for="campusSelect">🏫 Chọn cơ sở thư viện muốn đến nhận sách</label>
+                        <select id="campusSelect" name="campusId" required>
+                            <option value="" disabled selected>-- Chọn cơ sở --</option>
+                            <option th:each="campus : ${campuses}"
+                                    th:value="${campus.campusId}"
+                                    th:text="${campus.campusName}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="btn-group">
+                        <button id="btn-reserve" type="submit" class="btn btn-primary">
+                            🔖 Đặt giữ chỗ ngay
+                        </button>
+                        <a th:href="@{/reservations}" class="btn btn-secondary">Hủy bỏ</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Waitlist box (Exc 3 / Exc 4) -->
+            <div class="waitlist-box" th:if="${param.showWaitlist}">
+                <h3>📋 Đăng ký xếp hàng chờ sách</h3>
+                <p>
+                    Sách hiện đã hết bản sẵn sàng tại cơ sở bạn chọn.
+                    Bạn có muốn đăng ký vào danh sách chờ để nhận thông báo ngay khi có sách không?
+                </p>
+                <form id="waitlist-form" th:action="@{/reservations/waitlist}" method="post">
+                    <input type="hidden" name="bookId"   th:value="${book.bookId}" />
+                    <input type="hidden" name="campusId" th:value="${param.campusId}" />
+                    <div class="btn-group">
+                        <button id="btn-waitlist" type="submit" class="btn btn-primary">
+                            ✋ Đăng ký xếp hàng chờ
+                        </button>
+                        <a th:href="@{/reservations/reserve(bookId=${book.bookId})}"
+                           class="btn btn-secondary">Chọn cơ sở khác</a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

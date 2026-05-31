@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tra cứu sách – FLMS | Thư viện Đại học FPT</title>
+    <meta name="description" content="Tra cứu sách, giáo trình, tài liệu học thuật tại thư viện Đại học FPT theo tiêu đề, tác giả, ISBN hoặc mã môn học.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B',
+                            dark: '#0F172A',
+                            orangeHover: '#D95F18'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .copy-badge-available { background-color: #d1fae5; color: #065f46; }
+        .copy-badge-none      { background-color: #fee2e2; color: #991b1b; }
+        .card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
+        .search-input:focus { box-shadow: 0 0 0 3px rgba(242,113,37,0.25); }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col">
+
+<!-- ═══════════════════════════════════════════════════════ NAV BAR ══ -->
+<header class="bg-fpt-dark text-white sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+            <div class="flex items-center space-x-3">
+                <div class="bg-fpt-orange text-white p-2.5 rounded-lg font-extrabold text-xl tracking-wider shadow-lg">FPT</div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight leading-none text-orange-400">FLMS</h1>
+                    <p class="text-xs text-slate-400 font-medium">Library Management System</p>
+                </div>
+            </div>
+
+            <nav class="hidden md:flex space-x-8 font-medium text-sm">
+                <a href="/home"  class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Trang chủ</a>
+                <a href="/books" class="text-fpt-orange py-2 border-b-2 border-fpt-orange">Tra cứu sách</a>
+                <a href="#"      class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Yêu cầu mượn</a>
+                <a href="#"      class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Đặt phòng học nhóm</a>
+            </nav>
+
+            <div class="hidden lg:flex flex-col text-right">
+                <a href="/reservations" class="text-sm font-semibold text-fpt-orange hover:text-orange-400 transition-colors">Đơn đặt chỗ của tôi</a>
+                <p class="text-[10px] text-slate-400 mt-0.5">Chỗ này làm LOGIN</p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════ SEARCH HERO ══ -->
+<section class="bg-gradient-to-br from-fpt-navy via-slate-800 to-slate-900 text-white pt-12 pb-16">
+    <div class="max-w-5xl mx-auto px-4">
+        <div class="text-center mb-8">
+            <span class="bg-fpt-orange/20 text-orange-300 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase">
+                UCG01 – Tìm kiếm tài liệu
+            </span>
+            <h2 class="text-3xl md:text-4xl font-extrabold mt-4 mb-3 tracking-tight">
+                Tra cứu sách & tài liệu thư viện
+            </h2>
+            <p class="text-slate-400 text-sm md:text-base max-w-xl mx-auto">
+                Tìm kiếm theo tiêu đề, tác giả, ISBN hoặc lọc nhanh theo mã môn học và cơ sở.
+            </p>
+        </div>
+
+        <!-- Search Form -->
+        <form action="/books" method="get" id="search-form"
+              class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 shadow-2xl">
+
+            <!-- Keyword row -->
+            <div class="flex items-center bg-white rounded-xl px-4 py-3 mb-3 shadow-inner">
+                <svg class="w-5 h-5 text-slate-400 shrink-0 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input id="keyword" name="keyword" type="text"
+                       th:value="${keyword}"
+                       placeholder="Nhập tiêu đề, tên tác giả hoặc ISBN..."
+                       class="search-input w-full bg-transparent text-slate-800 font-medium focus:outline-none placeholder-slate-400 text-sm">
+                <button type="button" onclick="document.getElementById('keyword').value=''"
+                        class="text-slate-400 hover:text-slate-600 ml-2 text-lg leading-none">&times;</button>
+            </div>
+
+            <!-- Filter row -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <!-- Campus dropdown -->
+                <div class="flex items-center bg-white/90 text-slate-700 rounded-xl px-4 py-2.5">
+                    <svg class="w-4 h-4 text-fpt-orange shrink-0 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <select id="campusId" name="campusId" class="w-full bg-transparent text-sm font-medium focus:outline-none cursor-pointer">
+                        <option value="">Tất cả cơ sở</option>
+                        <option th:each="campus : ${campuses}"
+                                th:value="${campus.campusId}"
+                                th:text="${campus.campusName}"
+                                th:selected="${campus.campusId == selectedCampusId}">Campus</option>
+                    </select>
+                </div>
+
+                <!-- Subject dropdown (A1: Advanced search) -->
+                <div class="flex items-center bg-white/90 text-slate-700 rounded-xl px-4 py-2.5">
+                    <svg class="w-4 h-4 text-fpt-orange shrink-0 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                    <select id="subjectCode" name="subjectCode" class="w-full bg-transparent text-sm font-medium focus:outline-none cursor-pointer">
+                        <option value="">Tất cả môn học</option>
+                        <option th:each="subject : ${subjects}"
+                                th:value="${subject.subjectCode}"
+                                th:text="${subject.subjectCode + ' – ' + subject.subjectName}"
+                                th:selected="${subject.subjectCode == selectedSubjectCode}">Subject</option>
+                    </select>
+                </div>
+
+                <!-- Search button -->
+                <button type="submit" id="search-btn"
+                        class="bg-fpt-orange hover:bg-fpt-orangeHover text-white py-2.5 px-6 rounded-xl font-bold transition-all text-sm shadow-lg shadow-orange-500/30 flex items-center justify-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <span>Tìm kiếm</span>
+                </button>
+            </div>
+
+            <!-- Active filter chips -->
+            <div th:if="${hasSearch}" class="flex flex-wrap gap-2 mt-3">
+                <span th:if="${#strings.length(keyword ?: '') > 0}"
+                      class="inline-flex items-center bg-orange-500/20 text-orange-200 text-xs font-medium px-3 py-1 rounded-full">
+                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 3a1 1 0 012 0v5.5a.5.5 0 001 0V4a1 1 0 112 0v4.5a.5.5 0 001 0V6a1 1 0 112 0v5a7 7 0 11-14 0V9a1 1 0 012 0v2.5a.5.5 0 001 0V4a1 1 0 012 0v4.5a.5.5 0 001 0V3z" clip-rule="evenodd"/></svg>
+                    Từ khoá: <span th:text="' ' + ${keyword}" class="ml-1 font-semibold"></span>
+                </span>
+                <span th:if="${selectedSubjectCode != null and !#strings.isEmpty(selectedSubjectCode)}"
+                      class="inline-flex items-center bg-blue-500/20 text-blue-200 text-xs font-medium px-3 py-1 rounded-full">
+                    Môn học: <span th:text="' ' + ${selectedSubjectCode}" class="ml-1 font-semibold"></span>
+                </span>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ RESULTS SECTION ══ -->
+<main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
+
+    <!-- ── UCG01 Normal Flow: Kết quả tìm kiếm ─────────────────────── -->
+    <div th:if="${hasSearch and !noResults}">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-xl font-extrabold text-slate-900">Kết quả tìm kiếm</h3>
+                <p class="text-sm text-slate-500 mt-0.5">
+                    Tìm thấy <span class="font-bold text-fpt-orange" th:text="${#lists.size(results)}">0</span> tài liệu phù hợp
+                </p>
+            </div>
+            <a href="/books" class="text-sm text-slate-500 hover:text-fpt-orange transition-colors flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Xoá tìm kiếm
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div th:each="book : ${results}" class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm card-hover flex flex-col">
+                <!-- Cover mockup -->
+                <div class="h-40 w-full bg-gradient-to-br flex flex-col justify-between p-4 text-white relative select-none"
+                     th:classappend="${book.coverColor}">
+                    <div class="flex justify-between items-start">
+                        <span th:if="${book.subjectCode != null}"
+                              class="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase backdrop-blur-sm"
+                              th:text="${book.subjectCode}">CODE</span>
+                        <span class="text-[10px] font-bold text-orange-300 ml-auto">FPTU</span>
+                    </div>
+                    <h4 class="font-extrabold text-xs tracking-tight line-clamp-3 mb-1"
+                        th:text="${book.title}">Book Title</h4>
+                    <span class="text-[10px] text-slate-300 truncate" th:text="${book.authorNames}">Author</span>
+                </div>
+
+                <!-- Info -->
+                <div class="p-4 flex flex-col flex-grow">
+                    <span class="text-[10px] text-fpt-orange font-bold uppercase tracking-wider block mb-1 truncate"
+                          th:text="${book.categoryNames}">Category</span>
+                    <h5 class="font-bold text-slate-900 text-sm line-clamp-2 mb-1 group-hover:text-fpt-orange"
+                        th:text="${book.title}">Title</h5>
+                    <p class="text-xs text-slate-500 mb-2 truncate" th:text="${'Tác giả: ' + book.authorNames}">Author</p>
+                    <p class="text-[11px] text-slate-400 font-mono mb-3" th:text="${'ISBN: ' + book.isbn}">ISBN</p>
+
+                    <div class="mt-auto flex items-center justify-between pt-3 border-t border-slate-100">
+                        <!-- Available count badge -->
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2 h-2 rounded-full"
+                                  th:classappend="${book.availableCount > 0 ? 'bg-emerald-500' : 'bg-red-400'}"></span>
+                            <span class="text-xs font-semibold"
+                                  th:classappend="${book.availableCount > 0 ? 'text-emerald-700' : 'text-red-600'}"
+                                  th:text="${book.availableCount > 0 ? book.availableCount + ' bản còn' : 'Hết sách'}">
+                                Còn sách
+                            </span>
+                        </div>
+                        <!-- Detail link -->
+                        <a th:href="@{/books/{id}(id=${book.bookId}, campusId=${selectedCampusId})}"
+                           class="bg-fpt-navy hover:bg-slate-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-all">
+                            Xem chi tiết
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── UCG01 E1: Không tìm thấy kết quả ────────────────────────── -->
+    <div th:if="${hasSearch and noResults}" class="mb-12">
+        <div class="bg-white border border-orange-100 rounded-2xl p-8 text-center mb-10 shadow-sm">
+            <div class="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-fpt-orange" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Không tìm thấy tài liệu phù hợp</h3>
+            <p class="text-sm text-slate-500 max-w-md mx-auto">
+                Không có tài liệu nào khớp với từ khoá bạn nhập. Hãy thử lại với từ khoá khác hoặc tìm theo mã môn học.
+            </p>
+            <a href="/books" class="mt-4 inline-block text-sm font-semibold text-fpt-orange hover:text-fpt-orangeHover transition-colors">
+                ← Xoá bộ lọc và xem tất cả
+            </a>
+        </div>
+        <!-- Recent books fallback -->
+        <h3 class="text-lg font-bold text-slate-800 mb-4">Sách mới nhập kho gần đây</h3>
+        <div th:replace="~{books/search :: book-grid(${recentBooks}, ${selectedCampusId})}"></div>
+    </div>
+
+    <!-- ── Trang chủ (chưa search): gợi ý sách mới nhất ───────────── -->
+    <div th:if="${!hasSearch}">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-xl font-extrabold text-slate-900">Sách mới nhập kho</h3>
+                <p class="text-sm text-slate-500 mt-0.5">Tài liệu được bổ sung gần đây vào thư viện FLMS</p>
+            </div>
+        </div>
+        <div th:replace="~{books/search :: book-grid(${recentBooks}, ${selectedCampusId})}"></div>
+    </div>
+
+</main>
+
+<!-- ═════════════════════════════════════ THYMELEAF FRAGMENT: BOOK GRID ══ -->
+<!-- Fragment tái sử dụng để render grid sách (dùng cho cả E1 fallback và trang chủ search) -->
+<th:block th:fragment="book-grid(books, campusId)">
+    <div th:if="${books != null and !#lists.isEmpty(books)}"
+         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div th:each="book : ${books}" class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm card-hover flex flex-col">
+            <div class="h-40 w-full bg-gradient-to-br flex flex-col justify-between p-4 text-white select-none"
+                 th:classappend="${book.coverColor}">
+                <div class="flex justify-between items-start">
+                    <span th:if="${book.subjectCode != null}"
+                          class="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase backdrop-blur-sm"
+                          th:text="${book.subjectCode}">CODE</span>
+                    <span class="text-[10px] font-bold text-orange-300 ml-auto">FPTU</span>
+                </div>
+                <h4 class="font-extrabold text-xs tracking-tight line-clamp-3 mb-1" th:text="${book.title}">Title</h4>
+                <span class="text-[10px] text-slate-300 truncate" th:text="${book.authorNames}">Author</span>
+            </div>
+            <div class="p-4 flex flex-col flex-grow">
+                <span class="text-[10px] text-fpt-orange font-bold uppercase tracking-wider block mb-1 truncate"
+                      th:text="${book.categoryNames}">Category</span>
+                <h5 class="font-bold text-slate-900 text-sm line-clamp-2 mb-1" th:text="${book.title}">Title</h5>
+                <p class="text-xs text-slate-500 mb-2 truncate" th:text="${'Tác giả: ' + book.authorNames}">Author</p>
+                <p class="text-[11px] text-slate-400 font-mono mb-3" th:text="${'ISBN: ' + book.isbn}">ISBN</p>
+                <div class="mt-auto flex items-center justify-between pt-3 border-t border-slate-100">
+                    <div class="flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full"
+                              th:classappend="${book.availableCount > 0 ? 'bg-emerald-500' : 'bg-red-400'}"></span>
+                        <span class="text-xs font-semibold"
+                              th:classappend="${book.availableCount > 0 ? 'text-emerald-700' : 'text-red-600'}"
+                              th:text="${book.availableCount > 0 ? book.availableCount + ' bản còn' : 'Hết sách'}">Còn sách</span>
+                    </div>
+                    <a th:href="@{/books/{id}(id=${book.bookId}, campusId=${campusId})}"
+                       class="bg-fpt-navy hover:bg-slate-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-all">
+                        Xem chi tiết
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:if="${books == null or #lists.isEmpty(books)}"
+         class="text-center py-12 text-slate-400">
+        <p class="text-sm">Chưa có sách nào trong hệ thống.</p>
+    </div>
+</th:block>
+
+<!-- ═══════════════════════════════════════════════════════ FOOTER ══ -->
+<footer class="bg-fpt-dark text-white border-t-4 border-fpt-orange pt-12 pb-6 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div>
+                <span class="bg-fpt-orange text-white px-3 py-1 text-sm font-extrabold rounded-md inline-block mb-4 shadow">FPT Thư viện</span>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Hệ thống FLMS kết nối 5 cơ sở đào tạo của Đại học FPT trên toàn quốc.
+                </p>
+            </div>
+            <div>
+                <h5 class="font-bold text-sm text-slate-200 uppercase tracking-wider mb-4">Tra cứu nhanh</h5>
+                <ul class="text-xs text-slate-400 space-y-2.5">
+                    <li><a href="/books" class="hover:text-fpt-orange transition-colors">Tìm kiếm sách</a></li>
+                    <li><a href="/reservations" class="hover:text-fpt-orange transition-colors">Đơn đặt giữ chỗ</a></li>
+                    <li><a href="#" class="hover:text-fpt-orange transition-colors">Hướng dẫn mượn trả</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="font-bold text-sm text-slate-200 uppercase tracking-wider mb-4">Liên kết FPT</h5>
+                <ul class="text-xs text-slate-400 space-y-2.5">
+                    <li><a href="https://fap.fpt.edu.vn" target="_blank" class="hover:text-fpt-orange transition-colors">Trang học vụ FAP</a></li>
+                    <li><a href="#" class="hover:text-fpt-orange transition-colors">Cổng hỗ trợ sinh viên</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="font-bold text-sm text-slate-200 uppercase tracking-wider mb-4">Liên hệ</h5>
+                <p class="text-xs text-slate-400 leading-relaxed mb-2">Khu Công nghệ cao Hòa Lạc, Km 29 Đại lộ Thăng Long, Hà Nội</p>
+                <p class="text-xs text-slate-400">library@fpt.edu.vn</p>
+            </div>
+        </div>
+        <div class="border-t border-slate-800 pt-6 text-center text-xs text-slate-500">
+            &copy; 2026 FPT University Library. Developed by Team SWP391 Group 5.
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

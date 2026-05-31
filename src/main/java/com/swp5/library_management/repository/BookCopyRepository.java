@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -42,4 +43,46 @@ public interface BookCopyRepository extends JpaRepository<BookCopy, String> {
                                              @Param("categoryId") Integer categoryId,
                                              @Param("fromDate") LocalDateTime fromDate,
                                              @Param("toDate") LocalDateTime toDate);
+
+    /**
+     * UCR06 Bước 4: Tìm một bản sách vật lý sẵn sàng (Available) của đầu sách
+     * tại cơ sở campus chỉ định. Trả về Optional để handle trường hợp hết sách.
+     */
+    Optional<BookCopy> findFirstByBookBookIdAndCampusCampusIdAndCopyStatus(
+            Integer bookId, Integer campusId, String copyStatus);
+
+    /**
+     * UCG02: Lấy tất cả bản sao của một đầu sách không phân biệt campus.
+     * Dùng khi người dùng chưa chọn campus filter.
+     */
+    List<BookCopy> findByBookBookId(Integer bookId);
+
+    /**
+     * UCG02: Đếm số bản sao Available theo từng bookId trong một batch.
+     * Hiệu quả hơn N+1 khi tính availableCount cho trang tìm kiếm.
+     * Trả về Object[]: [bookId (Integer), count (Long)]
+     */
+    @Query("""
+        SELECT bc.book.bookId, COUNT(bc)
+        FROM BookCopy bc
+        WHERE bc.copyStatus = 'Available'
+          AND bc.book.bookId IN :bookIds
+        GROUP BY bc.book.bookId
+    """)
+    List<Object[]> countAvailableByBookIds(@Param("bookIds") List<Integer> bookIds);
+
+    /**
+     * UCG02: Đếm số bản sao Available theo từng bookId tại một campus cụ thể.
+     * Trả về Object[]: [bookId (Integer), count (Long)]
+     */
+    @Query("""
+        SELECT bc.book.bookId, COUNT(bc)
+        FROM BookCopy bc
+        WHERE bc.copyStatus = 'Available'
+          AND bc.campus.campusId = :campusId
+          AND bc.book.bookId IN :bookIds
+        GROUP BY bc.book.bookId
+    """)
+    List<Object[]> countAvailableByBookIdsAndCampus(@Param("bookIds") List<Integer> bookIds,
+                                                     @Param("campusId") Integer campusId);
 }

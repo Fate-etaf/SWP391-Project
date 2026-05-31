@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Không tìm thấy tài liệu – FLMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B',
+                            dark: '#0F172A',
+                            orangeHover: '#D95F18'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
+
+<!-- NAV BAR -->
+<header class="bg-fpt-dark text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+            <div class="flex items-center space-x-3">
+                <div class="bg-fpt-orange text-white p-2.5 rounded-lg font-extrabold text-xl tracking-wider shadow-lg">FPT</div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight leading-none text-orange-400">FLMS</h1>
+                </div>
+            </div>
+            <nav class="hidden md:flex space-x-8 font-medium text-sm">
+                <a href="/home" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent">Trang chủ</a>
+                <a href="/books" class="text-fpt-orange py-2 border-b-2 border-transparent">Tra cứu sách</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main class="flex-grow flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-xl p-10 text-center border border-slate-100">
+        <div class="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+        </div>
+        <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Lỗi 404</h2>
+        <p class="text-lg font-bold text-slate-700 mb-3">Không tìm thấy tài liệu</p>
+        <p class="text-sm text-slate-500 mb-8 leading-relaxed">
+            Tài liệu bạn đang tìm kiếm không tồn tại, đã bị gỡ bỏ, hoặc URL không chính xác. Hãy kiểm tra lại hoặc tìm kiếm một tựa sách khác.
+        </p>
+        <a href="/books" class="block w-full bg-fpt-orange hover:bg-fpt-orangeHover text-white py-3.5 px-6 rounded-xl font-bold transition-all text-sm shadow-lg shadow-orange-500/30">
+            Quay lại Tra cứu sách
+        </a>
+    </div>
+</main>
+
+<footer class="bg-fpt-dark text-white border-t-4 border-fpt-orange pt-8 pb-6 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+        &copy; 2026 FPT University Library.
+    </div>
+</footer>
+
+</body>
+</html>
