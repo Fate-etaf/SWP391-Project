@@ -41,3 +41,4 @@ public class User {
     @Builder.Default
     private Boolean borrowingLocked = false;
 }
+
