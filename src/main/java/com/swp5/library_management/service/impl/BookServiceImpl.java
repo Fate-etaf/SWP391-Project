@@ -22,12 +22,14 @@ import com.swp5.library_management.dto.CopyRowDTO;
 import com.swp5.library_management.entity.Author;
 import com.swp5.library_management.entity.Book;
 import com.swp5.library_management.entity.BookCopy;
+import com.swp5.library_management.entity.Campus;
 import com.swp5.library_management.entity.Category;
 import com.swp5.library_management.entity.Publisher;
 import com.swp5.library_management.entity.Subject;
 import com.swp5.library_management.repository.AuthorRepository;
 import com.swp5.library_management.repository.BookCopyRepository;
 import com.swp5.library_management.repository.BookRepository;
+import com.swp5.library_management.repository.CampusRepository;
 import com.swp5.library_management.repository.PublisherRepository;
 import com.swp5.library_management.repository.SubjectRepository;
 import com.swp5.library_management.service.BookService;
@@ -53,17 +55,20 @@ public class BookServiceImpl implements BookService {
     private final AuthorRepository    authorRepository;
     private final PublisherRepository publisherRepository;
     private final SubjectRepository   subjectRepository;
+    private final CampusRepository    campusRepository;
 
     public BookServiceImpl(BookRepository bookRepository,
                            BookCopyRepository bookCopyRepository,
                            AuthorRepository authorRepository,
                            PublisherRepository publisherRepository,
-                           SubjectRepository subjectRepository) {
+                           SubjectRepository subjectRepository,
+                           CampusRepository campusRepository) {
         this.bookRepository      = bookRepository;
         this.bookCopyRepository  = bookCopyRepository;
         this.authorRepository    = authorRepository;
         this.publisherRepository = publisherRepository;
         this.subjectRepository   = subjectRepository;
+        this.campusRepository    = campusRepository;
     }
 
     // ── Librarian: getAllBooks ─────────────────────────────────────────────────
@@ -128,7 +133,31 @@ public class BookServiceImpl implements BookService {
         book.setPublisher(publisher);
         book.setSubject(subject);
 
-        return bookRepository.save(book);
+        Book saved = bookRepository.save(book);
+
+        // ── 5. Create BookCopy records if copies count provided ────────────────
+        if (form.getCopies() != null && form.getCopies() > 0) {
+            // Use the first campus in the DB as the default assignment campus
+            Campus defaultCampus = campusRepository.findAll()
+                    .stream().findFirst().orElse(null);
+
+            if (defaultCampus != null) {
+                for (int i = 1; i <= form.getCopies(); i++) {
+                    String copyId = "BOOK-" + saved.getBookId() + "-" + i;
+                    BookCopy copy = BookCopy.builder()
+                            .copyId(copyId)
+                            .book(saved)
+                            .campus(defaultCampus)
+                            .copyStatus("Available")
+                            .conditionStatus("Good")
+                            .acquiredAt(LocalDateTime.now())
+                            .build();
+                    bookCopyRepository.save(copy);
+                }
+            }
+        }
+
+        return saved;
     }
 
     // ── UCG01 – searchBooks ───────────────────────────────────────────────────
