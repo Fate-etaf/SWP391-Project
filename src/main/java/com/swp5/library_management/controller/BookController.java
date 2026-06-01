@@ -1,6 +1,5 @@
 package com.swp5.library_management.controller;
 
-import com.swp5.library_management.dto.AddBookForm;
 import com.swp5.library_management.dto.BookDetailDTO;
 import com.swp5.library_management.dto.BookSearchResultDTO;
 import com.swp5.library_management.repository.CampusRepository;
@@ -105,27 +104,5 @@ public class BookController {
             // UCG02 – E1: Sách không tồn tại hoặc đã bị xóa
             return "error/404";
         }
-    }
-
-    // library managment interface for librarian
-    @GetMapping("/list")
-    public String listBooks(Model model) {
-        model.addAttribute("books", bookService.getAllBooks());
-        return "books/list";
-    }
-    // ── Librarian: Add Book ───────────────────────────────────────────────────
-
-    /** Show the Add Book form (dành cho Librarian). */
-    @GetMapping("/add")
-    public String showAddBookForm(Model model) {
-        model.addAttribute("bookForm", new AddBookForm());
-        return "books/add";
-    }
-
-    /** Handle Add Book form submission (dành cho Librarian). */
-    @PostMapping("/add")
-    public String saveBook(@ModelAttribute("bookForm") AddBookForm form) {
-        bookService.saveBook(form);
-        return "redirect:/books";
     }
 }
