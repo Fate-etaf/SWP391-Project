@@ -51,6 +51,9 @@ public class UserController {
         }
 
         model.addAttribute("loginError", "Mã số, Email hoặc Cơ sở học tập không trùng khớp với dữ liệu hệ thống!");
+        model.addAttribute("userId", userId);
+        model.addAttribute("email", email);
+        model.addAttribute("campusId", campusId);
         return "login";
     }
 
