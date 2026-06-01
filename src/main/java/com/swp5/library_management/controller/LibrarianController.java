@@ -30,31 +30,31 @@ public class LibrarianController {
     // ── Book List (Librarian view) ─────────────────────────────────────────────
 
     /**
-     * GET /librarian/books → Hiển thị danh sách toàn bộ sách cho Librarian quản lý.
+     * GET /librarian/inventory → Hiển thị danh sách toàn bộ sách cho Librarian quản lý.
      */
-    @GetMapping("/books")
+    @GetMapping("/inventory")
     public String listBooks(Model model) {
         model.addAttribute("books", bookService.getAllBooks());
-        return "books/list";
+        return "inventory/list";
     }
 
     // ── Add Book ──────────────────────────────────────────────────────────────
 
     /**
-     * GET /librarian/books/add → Hiển thị form thêm sách mới.
+     * GET /librarian/inventory/add → Hiển thị form thêm sách mới.
      */
-    @GetMapping("/books/add")
+    @GetMapping("/inventory/add")
     public String showAddBookForm(Model model) {
         model.addAttribute("bookForm", new AddBookForm());
-        return "books/add";
+        return "inventory/add";
     }
 
     /**
-     * POST /librarian/books/add → Lưu sách mới và redirect về danh sách.
+     * POST /librarian/inventory/add → Lưu sách mới và redirect về danh sách.
      */
-    @PostMapping("/books/add")
+    @PostMapping("/inventory/add")
     public String saveBook(@ModelAttribute("bookForm") AddBookForm form) {
         bookService.saveBook(form);
-        return "redirect:/librarian/books";
+        return "redirect:/librarian/inventory";
     }
 }
