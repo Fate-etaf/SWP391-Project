@@ -2,6 +2,7 @@ package com.swp5.library_management.controller;
 
 import com.swp5.library_management.entity.User;
 import com.swp5.library_management.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,6 +34,7 @@ public class UserController {
             @RequestParam("userId") String userId,
             @RequestParam("email") String email,
             @RequestParam("campusId") Integer campusId,
+            HttpSession session,
             RedirectAttributes redirectAttributes,
             Model model) {
 
@@ -40,12 +42,23 @@ public class UserController {
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+            // Lưu thông tin người dùng vào Session để các trang khác dùng được
+            session.setAttribute("loggedInUser", user);
+            session.setAttribute("loggedInUserId", user.getUserId());
+            session.setAttribute("loggedInCampusId", user.getCampusId());
             redirectAttributes.addFlashAttribute("registeredName", user.getFullName());
             return "redirect:/home";
         }
 
         model.addAttribute("loginError", "Mã số, Email hoặc Cơ sở học tập không trùng khớp với dữ liệu hệ thống!");
         return "login";
+    }
+
+    // === ĐĂNG XUẤT ===
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate(); // Xóa toàn bộ session
+        return "redirect:/login";
     }
 
     // === 2. GIAO DIỆN IMPORT EXCEL ===
