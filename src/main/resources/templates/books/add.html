@@ -139,7 +139,7 @@
         <p>Fill in the details below to register a new book in the library catalog.</p>
     </div>
 
-    <form th:action="@{/books/add}" th:object="${bookForm}" method="post">
+    <form th:action="@{/librarian/books/add}" th:object="${bookForm}" method="post">
         
         <div class="form-group">
             <label for="title">Title <span style="color: #fb7185">*</span></label>
@@ -206,7 +206,7 @@
         </div>
 
         <div class="btn-group">
-            <a href="/books" class="btn btn-secondary">Cancel</a>
+            <a href="/librarian/books" class="btn btn-secondary">Cancel</a>
             <button type="submit" class="btn btn-primary">Save Book</button>
         </div>
     </form>
