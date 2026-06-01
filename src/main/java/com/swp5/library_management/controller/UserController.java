@@ -1,6 +1,6 @@
 package com.swp5.library_management.controller;
 
-import com.swp5.library_management.Entity.User;
+import com.swp5.library_management.entity.User;
 import com.swp5.library_management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
