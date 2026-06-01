@@ -107,6 +107,12 @@ public class BookController {
         }
     }
 
+    // library managment interface for librarian
+    @GetMapping("/list")
+    public String listBooks(Model model) {
+        model.addAttribute("books", bookService.getAllBooks());
+        return "books/list";
+    }
     // ── Librarian: Add Book ───────────────────────────────────────────────────
 
     /** Show the Add Book form (dành cho Librarian). */
