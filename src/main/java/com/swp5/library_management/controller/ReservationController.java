@@ -1,6 +1,5 @@
 package com.swp5.library_management.controller;
 
-import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,6 +14,8 @@ import com.swp5.library_management.dto.ReservationResultDTO;
 import com.swp5.library_management.repository.BookRepository;
 import com.swp5.library_management.repository.CampusRepository;
 import com.swp5.library_management.service.ReservationService;
+
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Controller xử lý Use Case UCR06 – Reserve Book Online.
@@ -55,14 +56,6 @@ public class ReservationController {
         return (String) session.getAttribute("loggedInUserId");
     }
 
-    /**
-     * Lấy campusId của người dùng đang đăng nhập từ HttpSession.
-     *
-     * @return campusId dạng Integer, hoặc null nếu chưa đăng nhập.
-     */
-    private Integer getCampusIdFromSession(HttpSession session) {
-        return (Integer) session.getAttribute("loggedInCampusId");
-    }
 
     // ── GET /reservations → Trang cá nhân: danh sách đặt chỗ ────────────────
 
@@ -127,23 +120,25 @@ public class ReservationController {
 
         ReservationResultDTO result = reservationService.reserveBook(patronId, bookId, campusId);
 
-        if ("RESERVED".equals(result.getResultType())) {
-            // Thành công → chuyển về trang cá nhân với flash message thành công
-            redirectAttrs.addFlashAttribute("successMsg",      result.getMessage());
-            redirectAttrs.addFlashAttribute("expirationDate",  result.getExpirationDate());
-            return "redirect:/reservations";
-
-        } else if ("NO_COPY".equals(result.getResultType())) {
-            // Exc 3/4: Hết sách → chuyển đến trang đăng ký waitlist
-            redirectAttrs.addFlashAttribute("noCopyMsg",  result.getMessage());
-            redirectAttrs.addFlashAttribute("bookId",     bookId);
-            redirectAttrs.addFlashAttribute("campusId",   campusId);
-            return "redirect:/reservations/reserve?bookId=" + bookId + "&showWaitlist=true&campusId=" + campusId;
-
-        } else {
-            // Exc 1/2: Lỗi tài khoản hoặc vượt giới hạn → quay lại form
-            redirectAttrs.addFlashAttribute("errorMsg", result.getMessage());
-            return "redirect:/reservations/reserve?bookId=" + bookId;
+        switch (result.getResultType()) {
+            case "RESERVED" -> {
+                // Thành công → chuyển về trang cá nhân với flash message thành công
+                redirectAttrs.addFlashAttribute("successMsg",      result.getMessage());
+                redirectAttrs.addFlashAttribute("expirationDate",  result.getExpirationDate());
+                return "redirect:/reservations";
+            }
+            case "NO_COPY" -> {
+                // Exc 3/4: Hết sách → chuyển đến trang đăng ký waitlist
+                redirectAttrs.addFlashAttribute("noCopyMsg",  result.getMessage());
+                redirectAttrs.addFlashAttribute("bookId",     bookId);
+                redirectAttrs.addFlashAttribute("campusId",   campusId);
+                return "redirect:/reservations/reserve?bookId=" + bookId + "&showWaitlist=true&campusId=" + campusId;
+            }
+            default -> {
+                // Exc 1/2: Lỗi tài khoản hoặc vượt giới hạn → quay lại form
+                redirectAttrs.addFlashAttribute("errorMsg", result.getMessage());
+                return "redirect:/reservations/reserve?bookId=" + bookId;
+            }
         }
     }
 
