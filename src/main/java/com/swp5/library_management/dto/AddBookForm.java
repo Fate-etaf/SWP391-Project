@@ -22,6 +22,7 @@ public class AddBookForm {
     private String defaultShelfCode; // raw shelf code string stored on the book
     private String subjectCode;     // must match an existing Subject.subjectCode
     private Integer copies;         // number of BookCopy records to create on save
+    private Integer campusId;       // campus to create the copies in
 
     // ── Getters & Setters ──────────────────────────────────────────────────────
 
@@ -60,5 +61,8 @@ public class AddBookForm {
 
     public Integer getCopies() { return copies; }
     public void setCopies(Integer copies) { this.copies = copies; }
+
+    public Integer getCampusId() { return campusId; }
+    public void setCampusId(Integer campusId) { this.campusId = campusId; }
 }
 

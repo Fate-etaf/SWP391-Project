@@ -82,7 +82,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
-    public Book saveBook(AddBookForm form) {
+    public Book saveBook(AddBookForm form, Integer campusId) {
 
         // ── 1. Resolve Author(s) — find or create ──────────────────────────────
         Set<Author> authors = new HashSet<>();
@@ -137,9 +137,11 @@ public class BookServiceImpl implements BookService {
 
         // ── 5. Create BookCopy records if copies count provided ────────────────
         if (form.getCopies() != null && form.getCopies() > 0) {
-            // Use the first campus in the DB as the default assignment campus
-            Campus defaultCampus = campusRepository.findAll()
-                    .stream().findFirst().orElse(null);
+            // Use the logged-in user's campus for the copies
+            Campus defaultCampus = null;
+            if (campusId != null) {
+                defaultCampus = campusRepository.findById(campusId).orElse(null);
+            }
 
             if (defaultCampus != null) {
                 for (int i = 1; i <= form.getCopies(); i++) {

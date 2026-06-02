@@ -19,7 +19,7 @@ public interface BookService {
      * Saves a new book from the Add-Book form.
      * Resolves the author name to an existing Author row (or creates one).
      */
-    Book saveBook(AddBookForm form);
+    Book saveBook(AddBookForm form, Integer campusId);
 
     // ── UCG01 – Search Books ──────────────────────────────────────────────────
 

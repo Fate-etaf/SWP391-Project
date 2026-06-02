@@ -53,8 +53,12 @@ public class ManageBookController {
      * POST /librarian/inventory/add → Lưu sách mới và redirect về danh sách.
      */
     @PostMapping("/inventory/add")
-    public String saveBook(@ModelAttribute("bookForm") AddBookForm form) {
-        bookService.saveBook(form);
+    public String saveBook(@ModelAttribute("bookForm") AddBookForm form, jakarta.servlet.http.HttpSession session) {
+        Integer campusId = form.getCampusId();
+        if (campusId == null) {
+            campusId = (Integer) session.getAttribute("loggedInCampusId");
+        }
+        bookService.saveBook(form, campusId);
         return "redirect:/librarian/inventory";
     }
 }
