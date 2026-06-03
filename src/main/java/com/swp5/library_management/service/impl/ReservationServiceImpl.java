@@ -38,14 +38,6 @@ public class ReservationServiceImpl implements ReservationService {
 
     private static final Logger log = LoggerFactory.getLogger(ReservationServiceImpl.class);
 
-    /** Số đơn đặt giữ chỗ tối đa mỗi bạn đọc (cấu hình từ application.properties) */
-    @Value("${app.reservation.max-active:3}")
-    private int maxActiveReservations;
-
-    /** Thời gian giữ chỗ (giờ) */
-    @Value("${app.reservation.hold-hours:24}")
-    private int holdHours;
-
     private final UserRepository        userRepository;
     private final BookRepository        bookRepository;
     private final BookCopyRepository    bookCopyRepository;
@@ -54,6 +46,9 @@ public class ReservationServiceImpl implements ReservationService {
     private final WaitlistRepository    waitlistRepository;
     private final NotificationRepository notificationRepository;
     private final EmailService          emailService;
+    private final com.swp5.library_management.service.SystemConfigService systemConfigService;
+    private final TransferRequestRepository transferRequestRepository;
+    private final TransferDetailRepository  transferDetailRepository;
 
     public ReservationServiceImpl(UserRepository userRepository,
                                   BookRepository bookRepository,
@@ -62,7 +57,10 @@ public class ReservationServiceImpl implements ReservationService {
                                   ReservationRepository reservationRepository,
                                   WaitlistRepository waitlistRepository,
                                   NotificationRepository notificationRepository,
-                                  EmailService emailService) {
+                                  EmailService emailService,
+                                  com.swp5.library_management.service.SystemConfigService systemConfigService,
+                                  TransferRequestRepository transferRequestRepository,
+                                  TransferDetailRepository transferDetailRepository) {
         this.userRepository        = userRepository;
         this.bookRepository        = bookRepository;
         this.bookCopyRepository    = bookCopyRepository;
@@ -71,6 +69,9 @@ public class ReservationServiceImpl implements ReservationService {
         this.waitlistRepository    = waitlistRepository;
         this.notificationRepository = notificationRepository;
         this.emailService          = emailService;
+        this.systemConfigService   = systemConfigService;
+        this.transferRequestRepository = transferRequestRepository;
+        this.transferDetailRepository = transferDetailRepository;
     }
 
     // =========================================================================
@@ -106,6 +107,7 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         // ── Bước 3: Kiểm tra giới hạn đơn đặt giữ chỗ ──────────────────────
+        int maxActiveReservations = systemConfigService.getIntConfig("MAX_BOOKS_STUDENT", 3);
         long activeCount = reservationRepository.countByPatronUserIdAndStatus(patronId, "Holding");
         if (activeCount >= maxActiveReservations) {
             // Exc 2: Vượt giới hạn
@@ -156,7 +158,49 @@ public class ReservationServiceImpl implements ReservationService {
         copy.setCopyStatus("Reserved");
         bookCopyRepository.save(copy);
 
+        // ── Branch 3: Rẽ nhánh mượn liên cơ sở (Khác Campus) ────────────────
+        if (!patron.getCampusId().equals(pickupCampusId)) {
+            Campus userCampus = campusRepository.findById(patron.getCampusId())
+                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy cơ sở người dùng: " + patron.getCampusId()));
+
+            TransferRequest transferRequest = TransferRequest.builder()
+                    .requestedBy(patron)
+                    .fromCampus(campus)
+                    .toCampus(userCampus)
+                    .requestedAt(LocalDateTime.now())
+                    .status("Pending")
+                    .build();
+            transferRequest = transferRequestRepository.saveAndFlush(transferRequest);
+
+            TransferDetail detail = TransferDetail.builder()
+                    .id(new TransferDetailId(transferRequest.getTransferId(), copy.getCopyId()))
+                    .transferRequest(transferRequest)
+                    .copy(copy)
+                    .build();
+            transferDetailRepository.save(detail);
+
+            notificationRepository.save(Notification.builder()
+                    .user(patron)
+                    .notificationType("INTER_CAMPUS_REQUESTED")
+                    .title("Yêu cầu mượn liên cơ sở")
+                    .content("Bạn đã yêu cầu mượn cuốn \"" + book.getTitle() + "\" từ " + campus.getCampusName() + ". Yêu cầu đang chờ thủ thư xử lý.")
+                    .status("Pending")
+                    .createdAt(LocalDateTime.now())
+                    .build());
+
+            log.info("[UCR15] Inter-campus request created: Patron={}, Book={}, Copy={}, From={}, To={}", patronId, bookId, copy.getCopyId(), pickupCampusId, patron.getCampusId());
+
+            return ReservationResultDTO.builder()
+                    .success(true)
+                    .resultType("RESERVED")
+                    .message("Sách hiện không có tại cơ sở của bạn. Yêu cầu mượn liên cơ sở đã được gửi đến thủ thư và đang chờ duyệt!")
+                    .build();
+        }
+
+        // ── Bước 7: Tạo đơn Reservation (Branch 1) ──────────────────────────
+
         // ── Bước 7: Tạo đơn Reservation ─────────────────────────────────────
+        int holdHours = systemConfigService.getIntConfig("RESERVATION_EXPIRE_HR", 72);
         LocalDateTime now        = LocalDateTime.now();
         LocalDateTime expiration = now.plusHours(holdHours);
 

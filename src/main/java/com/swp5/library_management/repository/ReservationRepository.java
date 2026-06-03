@@ -41,4 +41,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     boolean existsActiveReservation(@Param("patronId") String patronId,
                                     @Param("bookId") Integer bookId,
                                     @Param("campusId") Integer campusId);
+
+    /**
+     * Tìm các đơn giữ chỗ có trạng thái cụ thể và thời gian hết hạn trước một thời điểm nhất định.
+     */
+    List<Reservation> findByStatusAndExpirationDateBefore(String status, java.time.LocalDateTime date);
 }

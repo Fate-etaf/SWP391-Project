@@ -420,6 +420,20 @@
             if (diff <= 0) {
                 span.textContent = ' (Đã hết hạn)';
                 span.style.color = '#999';
+                
+                const itemDiv = span.closest('.reservation-item');
+                if (itemDiv) {
+                    // Ẩn nút hủy
+                    const actionsDiv = itemDiv.querySelector('.actions');
+                    if (actionsDiv) actionsDiv.style.display = 'none';
+                    
+                    // Cập nhật badge từ Đang giữ chỗ -> Hết hạn
+                    const badge = itemDiv.querySelector('.badge-holding');
+                    if (badge) {
+                        badge.textContent = '⌛ Hết hạn';
+                        badge.className = 'badge badge-expired';
+                    }
+                }
                 return;
             }
             const h = Math.floor(diff / 3600000);
