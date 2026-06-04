@@ -136,16 +136,19 @@ public class BookServiceImpl implements BookService {
         Book saved = bookRepository.save(book);
 
         // ── 5. Create BookCopy records if copies count provided ────────────────
+        System.out.println("DEBUG SAVEBOOK: copies=" + form.getCopies() + ", campusId=" + campusId);
         if (form.getCopies() != null && form.getCopies() > 0) {
             // Use the logged-in user's campus for the copies
             Campus defaultCampus = null;
             if (campusId != null) {
                 defaultCampus = campusRepository.findById(campusId).orElse(null);
             }
+            System.out.println("DEBUG SAVEBOOK: defaultCampus=" + (defaultCampus == null ? "null" : defaultCampus.getCampusName()));
 
             if (defaultCampus != null) {
                 for (int i = 1; i <= form.getCopies(); i++) {
                     String copyId = "BOOK-" + saved.getBookId() + "-" + i;
+                    System.out.println("DEBUG SAVEBOOK: Creating copy with ID: " + copyId);
                     BookCopy copy = BookCopy.builder()
                             .copyId(copyId)
                             .book(saved)
@@ -154,10 +157,12 @@ public class BookServiceImpl implements BookService {
                             .conditionStatus("Good")
                             .acquiredAt(LocalDateTime.now())
                             .build();
-                    bookCopyRepository.save(copy);
+                    BookCopy savedCopy = bookCopyRepository.saveAndFlush(copy);
+                    System.out.println("DEBUG SAVEBOOK: Saved copy: " + savedCopy.getCopyId());
                 }
             }
         }
+
 
         return saved;
     }
