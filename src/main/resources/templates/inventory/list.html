@@ -599,9 +599,11 @@
 
     <!-- ── Grid ── -->
     <div class="books-grid" id="books-grid" th:if="${not #lists.isEmpty(books)}">
-        <div class="book-card"
-             th:each="book : ${books}"
-             th:attr="data-title=${book.title}, data-authors=${book.authorNames}">
+        <a class="book-card"
+           th:each="book : ${books}"
+           th:href="@{/librarian/inventory/{id}(id=${book.bookId})}"
+           th:attr="data-title=${book.title}, data-authors=${book.authorNames}"
+           style="text-decoration: none; color: inherit; display: flex; flex-direction: column;">
 
             <!-- Cover -->
             <div class="book-cover">
@@ -668,7 +670,7 @@
                     <p class="isbn-row" th:text="'ISBN: ' + ${book.isbn}">ISBN: 978-xxx</p>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- ── Empty state ── -->
