@@ -39,7 +39,29 @@ public class BookCopy {
     @Column(name = "AcquiredAt")
     private LocalDateTime acquiredAt;
 
-    // Explicit getter for copyStatus (in case Lombok isn't processed)
+    /**
+     * Stores the value used to generate the QR code for this physical copy.
+     * Value = copyId (set automatically on first persist via @PostPersist).
+     * The actual QR image is rendered on demand by QrCodeService.
+     */
+    @Column(name = "QRCode", length = 30)
+    private String qrCode;
+
+    // ── JPA lifecycle ─────────────────────────────────────────────────────────
+
+    /**
+     * After the row is inserted for the first time, ensure qrCode == copyId.
+     * If the DB already set it, this is a no-op (same value).
+     */
+    @PostPersist
+    void initQrCode() {
+        if (this.qrCode == null) {
+            this.qrCode = this.copyId;
+        }
+    }
+
+    // ── Explicit getters (keep for safety alongside Lombok) ───────────────────
+
     public String getCopyStatus() {
         return copyStatus;
     }
@@ -48,3 +70,4 @@ public class BookCopy {
         return acquiredAt;
     }
 }
+
