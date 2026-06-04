@@ -1,14 +1,7 @@
 package com.swp5.library_management.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -19,19 +12,8 @@ import com.swp5.library_management.dto.AddBookForm;
 import com.swp5.library_management.dto.BookDetailDTO;
 import com.swp5.library_management.dto.BookSearchResultDTO;
 import com.swp5.library_management.dto.CopyRowDTO;
-import com.swp5.library_management.entity.Author;
-import com.swp5.library_management.entity.Book;
-import com.swp5.library_management.entity.BookCopy;
-import com.swp5.library_management.entity.Campus;
-import com.swp5.library_management.entity.Category;
-import com.swp5.library_management.entity.Publisher;
-import com.swp5.library_management.entity.Subject;
-import com.swp5.library_management.repository.AuthorRepository;
-import com.swp5.library_management.repository.BookCopyRepository;
-import com.swp5.library_management.repository.BookRepository;
-import com.swp5.library_management.repository.CampusRepository;
-import com.swp5.library_management.repository.PublisherRepository;
-import com.swp5.library_management.repository.SubjectRepository;
+import com.swp5.library_management.entity.*;
+import com.swp5.library_management.repository.*;
 import com.swp5.library_management.service.BookService;
 
 @Service
@@ -131,9 +113,9 @@ public class BookServiceImpl implements BookService {
         book.setCreatedAt(LocalDateTime.now());
         book.setAuthors(authors);
         book.setPublisher(publisher);
-        book.setSubject(subject);
+        book.setSubject(form.getSubjectCode() != null ? subject : null);
 
-        Book saved = bookRepository.save(book);
+        Book saved = bookRepository.saveAndFlush(book);
 
         // ── 5. Create BookCopy records if copies count provided ────────────────
         System.out.println("DEBUG SAVEBOOK: copies=" + form.getCopies() + ", campusId=" + campusId);
