@@ -27,6 +27,7 @@ public class LibrarianController {
     private final BorrowTicketRepository borrowTicketRepository;
     private final BorrowTicketDetailRepository borrowTicketDetailRepository;
     private final SystemConfigService systemConfigService;
+    private final ReservationRepository reservationRepository;
 
     private boolean isNotLibrarian(HttpSession session) {
         Boolean isLibrarian = (Boolean) session.getAttribute("isLibrarian");
@@ -97,7 +98,22 @@ public class LibrarianController {
             return "librarian/create-loan";
         }
         BookCopy copy = copyOpt.get();
-        if (!"Available".equalsIgnoreCase(copy.getCopyStatus())) {
+        Reservation matchedReservation = null;
+        if ("Reserved".equalsIgnoreCase(copy.getCopyStatus())) {
+            List<Reservation> reservations = reservationRepository.findByPatronUserIdAndStatusOrderByReservedAtDesc(patronId, "Holding");
+            for (Reservation r : reservations) {
+                if (r.getCopy() != null && r.getCopy().getCopyId().equals(copyId)) {
+                    matchedReservation = r;
+                    break;
+                }
+            }
+            if (matchedReservation == null) {
+                model.addAttribute("errorMsg", "Bản sao sách này hiện đang được đặt giữ chỗ bởi một Bạn đọc khác!");
+                model.addAttribute("patronId", patronId);
+                model.addAttribute("copyId", copyId);
+                return "librarian/create-loan";
+            }
+        } else if (!"Available".equalsIgnoreCase(copy.getCopyStatus())) {
             model.addAttribute("errorMsg", "Bản sao sách này hiện không sẵn sàng để mượn (Trạng thái hiện tại: " + copy.getCopyStatus() + ")!");
             model.addAttribute("patronId", patronId);
             model.addAttribute("copyId", copyId);
@@ -144,6 +160,12 @@ public class LibrarianController {
         // Update BookCopy status
         copy.setCopyStatus("Borrowed");
         bookCopyRepository.save(copy);
+
+        // Update Reservation status if checkout for a reserved copy
+        if (matchedReservation != null) {
+            matchedReservation.setStatus("Completed");
+            reservationRepository.save(matchedReservation);
+        }
 
         redirectAttrs.addFlashAttribute("successMsg", "Tạo đơn mượn sách thành công! Bạn đọc " + patron.getFullName() + " đã mượn bản sao " + copyId + " (Hạn trả: " + detail.getDueDate().toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ").");
         return "redirect:/librarian/create-loan";
