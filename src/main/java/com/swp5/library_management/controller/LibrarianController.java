@@ -111,11 +111,16 @@ public class LibrarianController {
             loanDays = systemConfigService.getIntConfig("LOAN_DAYS_LECTURER", 30);
         }
 
-        User librarian = (User) session.getAttribute("loggedInUser");
+        String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+        User librarian = null;
         Campus librarianCampus = null;
-        if (librarian != null && librarian.getCampusId() != null) {
-            librarianCampus = campusRepository.findById(librarian.getCampusId()).orElse(null);
+        if (loggedInUserId != null) {
+            librarian = userRepository.findById(loggedInUserId).orElse(null);
+            if (librarian != null && librarian.getCampusId() != null) {
+                librarianCampus = campusRepository.findById(librarian.getCampusId()).orElse(null);
+            }
         }
+
 
         // Create BorrowTicket
         BorrowTicket ticket = new BorrowTicket();
