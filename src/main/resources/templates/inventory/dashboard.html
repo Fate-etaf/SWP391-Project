@@ -1,241 +1,334 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Inventory Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-<div class="container py-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
-        <div>
-            <h2 class="mb-1">Inventory Overview</h2>
-            <p class="text-muted mb-0">Real-time stock, borrowed and overdue counts by campus.</p>
-        </div>
-        <div class="text-md-end">
-            <span class="badge rounded-pill bg-secondary">Live refresh every 15s</span>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-lg-3">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <small class="text-uppercase text-muted">In stock</small>
-                    <h3 id="summary-stock" class="mb-0">0</h3>
-                    <p class="text-muted mb-0">Total books available across campuses.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <small class="text-uppercase text-muted">Borrowed</small>
-                    <h3 id="summary-borrowed" class="mb-0">0</h3>
-                    <p class="text-muted mb-0">Books currently checked out.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <small class="text-uppercase text-muted">Overdue</small>
-                    <h3 id="summary-overdue" class="mb-0">0</h3>
-                    <p class="text-muted mb-0">Books overdue for return.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <small class="text-uppercase text-muted">Campuses</small>
-                    <h3 id="summary-campuses" class="mb-0">0</h3>
-                    <p class="text-muted mb-0">Campuses with inventory data.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 align-items-end mb-4">
-        <div class="col-sm-6 col-md-3">
-            <label class="form-label small text-uppercase text-muted">Campus</label>
-            <select id="filter-campus" class="form-select form-select-sm">
-                <option value="">All campuses</option>
-            </select>
-        </div>
-        <div class="col-sm-6 col-md-3">
-            <label class="form-label small text-uppercase text-muted">Category</label>
-            <select id="filter-category" class="form-select form-select-sm">
-                <option value="">All categories</option>
-            </select>
-        </div>
-        <div class="col-sm-6 col-md-2">
-            <label class="form-label small text-uppercase text-muted">From</label>
-            <input type="date" id="filter-from" class="form-control form-control-sm" />
-        </div>
-        <div class="col-sm-6 col-md-2">
-            <label class="form-label small text-uppercase text-muted">To</label>
-            <input type="date" id="filter-to" class="form-control form-control-sm" />
-        </div>
-        <div class="col-sm-12 col-md-2 d-grid">
-            <button id="apply-filters" class="btn btn-primary btn-sm">Filter</button>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <h5 class="card-title mb-1">Campus inventory</h5>
-                            <p class="text-muted mb-0">Available, borrowed and overdue counts for each campus.</p>
-                        </div>
-                    </div>
-                    <div class="chart-container" style="min-height: 320px; position: relative;">
-                        <canvas id="inventoryChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Campus details</h5>
-                    <div class="table-responsive">
-                        <table class="table table-borderless table-sm align-middle mb-0">
-                            <thead>
-                            <tr>
-                                <th>Campus</th>
-                                <th class="text-end">Total</th>
-                            </tr>
-                            </thead>
-                            <tbody id="overview-body">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    async function loadFilters() {
-        const [campRes, catRes] = await Promise.all([fetch('/api/campuses'), fetch('/api/categories')]);
-        if (campRes.ok) {
-            const campuses = await campRes.json();
-            const sel = document.getElementById('filter-campus');
-            campuses.forEach(c => {
-                const o = document.createElement('option'); o.value = c.campusId; o.text = c.campusName; sel.appendChild(o);
-            });
-        }
-        if (catRes.ok) {
-            const cats = await catRes.json();
-            const sel = document.getElementById('filter-category');
-            cats.forEach(c => {
-                const o = document.createElement('option'); o.value = c.categoryId; o.text = c.categoryName; sel.appendChild(o);
-            });
-        }
-    }
-
-    async function fetchStats(params) {
-        const url = params ? ('/api/inventory/stats?' + params) : '/api/inventory/overview';
-        const res = await fetch(url);
-        if (!res.ok) return null;
-        return res.json();
-    }
-
-    async function renderOverview(data) {
-        const tbody = document.getElementById('overview-body');
-        tbody.innerHTML = '';
-        if (!data || !data.campuses) return;
-
-        data.campuses.forEach(c => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${c.campusName || ('Campus ' + c.campusId)}</td>
-                <td class="text-end fw-semibold">${c.totalCopies}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        updateSummary(data.campuses);
-        updateChart(data.campuses);
-    }
-
-    let inventoryChart = null;
-    function createChart() {
-        const ctx = document.getElementById('inventoryChart').getContext('2d');
-        inventoryChart = new Chart(ctx, {
-            type: 'bar',
-            data: { labels: [], datasets: [] },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 12, padding: 16 } }
-                },
-                scales: {
-                    x: { stacked: true, grid: { display: false } },
-                    y: { beginAtZero: true, stacked: true, ticks: { precision: 0 } }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thống kê Kho sách - FLMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { 
+                    colors: { 
+                        fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A', orangeHover: '#D95F18' } 
+                    } 
                 }
             }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+    <!-- Thêm thư viện biểu đồ Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col">
+
+    <!-- NAVBAR TƯƠNG TỰ TRANG ADMIN/TRANSFERS -->
+    <header class="bg-fpt-dark text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.href='/home'">
+                    <div class="bg-fpt-orange text-white p-1.5 rounded-lg font-extrabold text-sm tracking-wider">FPT</div>
+                    <h1 class="text-md font-bold tracking-tight text-orange-400">FLMS <span class="text-xs text-slate-400 font-medium">| Administration</span></h1>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm font-semibold text-slate-300" th:text="${session.loggedInUser != null ? session.loggedInUser.fullName : 'Thủ thư'}">Thủ thư</span>
+                    <button onclick="window.location.href='/logout'" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded transition-all">Đăng xuất</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <!-- HEADER TRANG -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900">Tổng quan Kho sách (Inventory Dashboard)</h2>
+                <p class="text-sm text-slate-500 mt-1">Theo dõi thời gian thực số lượng sách tồn kho, đang mượn và quá hạn tại các cơ sở.</p>
+            </div>
+            <div class="mt-4 sm:mt-0 flex items-center space-x-2 bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-full border border-emerald-200">
+                <span class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+                <span class="text-xs font-semibold">Tự động làm mới mỗi 15s</span>
+            </div>
+        </div>
+
+        <!-- SUMMARY CARDS -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Tổng Số Lượng</p>
+                    <h3 id="summary-stock" class="text-2xl font-extrabold text-slate-800 leading-none">0</h3>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Đang Mượn</p>
+                    <h3 id="summary-borrowed" class="text-2xl font-extrabold text-slate-800 leading-none">0</h3>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500 shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Quá Hạn</p>
+                    <h3 id="summary-overdue" class="text-2xl font-extrabold text-red-600 leading-none">0</h3>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-full bg-fpt-orange/10 flex items-center justify-center text-fpt-orange shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Cơ Sở</p>
+                    <h3 id="summary-campuses" class="text-2xl font-extrabold text-slate-800 leading-none">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- FILTER SECTION -->
+        <div class="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-slate-200 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Cơ sở</label>
+                    <select id="filter-campus" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-fpt-orange focus:border-fpt-orange block p-2.5">
+                        <option value="">Tất cả cơ sở</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Thể loại</label>
+                    <select id="filter-category" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-fpt-orange focus:border-fpt-orange block p-2.5">
+                        <option value="">Tất cả thể loại</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Từ ngày</label>
+                    <input type="date" id="filter-from" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-fpt-orange focus:border-fpt-orange block p-2.5" />
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Đến ngày</label>
+                    <input type="date" id="filter-to" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-fpt-orange focus:border-fpt-orange block p-2.5" />
+                </div>
+                <div>
+                    <button id="apply-filters" class="w-full bg-fpt-orange hover:bg-fpt-orangeHover text-white py-2.5 px-4 rounded-lg text-sm font-bold transition-all shadow-md">
+                        Lọc dữ liệu
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHARTS & TABLES SECTION -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Biểu đồ -->
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-5 sm:p-6 flex flex-col h-full">
+                <div class="mb-4">
+                    <h3 class="text-lg font-bold text-slate-800">Biểu đồ Trạng thái Kho Sách</h3>
+                    <p class="text-xs text-slate-500 mt-1">Phân bổ số lượng sách: Sẵn sàng, Đang mượn, Quá hạn theo cơ sở.</p>
+                </div>
+                <div class="flex-grow relative min-h-[350px]">
+                    <canvas id="inventoryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Bảng chi tiết -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
+                <div class="p-5 sm:p-6 border-b border-slate-100">
+                    <h3 class="text-lg font-bold text-slate-800">Chi tiết theo Cơ sở</h3>
+                    <p class="text-xs text-slate-500 mt-1">Tổng số lượng ấn phẩm tại mỗi chi nhánh.</p>
+                </div>
+                <div class="flex-grow overflow-y-auto">
+                    <table class="min-w-full divide-y divide-slate-100">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Cơ sở</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng cộng</th>
+                            </tr>
+                        </thead>
+                        <tbody id="overview-body" class="bg-white divide-y divide-slate-100 text-sm">
+                            <!-- JS sẽ điền dữ liệu vào đây -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- JS LOGIC -->
+    <script>
+        async function loadFilters() {
+            const [campRes, catRes] = await Promise.all([fetch('/api/campuses'), fetch('/api/categories')]);
+            if (campRes.ok) {
+                const campuses = await campRes.json();
+                const sel = document.getElementById('filter-campus');
+                campuses.forEach(c => {
+                    const o = document.createElement('option'); o.value = c.campusId; o.text = c.campusName; sel.appendChild(o);
+                });
+            }
+            if (catRes.ok) {
+                const cats = await catRes.json();
+                const sel = document.getElementById('filter-category');
+                cats.forEach(c => {
+                    const o = document.createElement('option'); o.value = c.categoryId; o.text = c.categoryName; sel.appendChild(o);
+                });
+            }
+        }
+
+        async function fetchStats(params) {
+            const url = params ? ('/api/inventory/stats?' + params) : '/api/inventory/overview';
+            const res = await fetch(url);
+            if (!res.ok) return null;
+            return res.json();
+        }
+
+        async function renderOverview(data) {
+            const tbody = document.getElementById('overview-body');
+            tbody.innerHTML = '';
+            if (!data || !data.campuses) return;
+
+            data.campuses.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap font-medium text-slate-700">${c.campusName || ('Campus ' + c.campusId)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right font-bold text-fpt-navy">${c.totalCopies.toLocaleString()}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updateSummary(data.campuses);
+            updateChart(data.campuses);
+        }
+
+        let inventoryChart = null;
+        function createChart() {
+            const ctx = document.getElementById('inventoryChart').getContext('2d');
+            // Định dạng font cho Chart.js giống font Inter của Tailwind
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.color = "#64748b"; // text-slate-500
+
+            inventoryChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'bottom', 
+                            labels: { boxWidth: 12, padding: 20, font: { weight: '600' } } 
+                        },
+                        tooltip: {
+                            backgroundColor: '#1E293B',
+                            padding: 12,
+                            titleFont: { size: 13, family: "'Inter', sans-serif" },
+                            bodyFont: { size: 13, family: "'Inter', sans-serif" },
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            stacked: true, 
+                            grid: { display: false },
+                            ticks: { font: { weight: '500' } }
+                        },
+                        y: { 
+                            beginAtZero: true, 
+                            stacked: true, 
+                            grid: { borderDash: [4, 4], color: '#e2e8f0' },
+                            ticks: { precision: 0 } 
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart(campuses) {
+            if (!inventoryChart) createChart();
+            const labels = campuses.map(c => c.campusName || ('Cơ sở ' + c.campusId));
+            const available = campuses.map(c => c.available || 0);
+            const borrowed = campuses.map(c => c.borrowed || 0);
+            const overdue = campuses.map(c => c.overdue || 0);
+            // compute any copies not covered by the three tracked statuses so they appear
+            const other = campuses.map(c => Math.max(0, (c.totalCopies || 0) - (c.available || 0) - (c.borrowed || 0) - (c.overdue || 0)));
+
+            inventoryChart.data.labels = labels;
+            inventoryChart.data.datasets = [
+                // Sử dụng mã màu tương ứng với Tailwind Colors
+                { label: 'Sẵn sàng', backgroundColor: '#10b981', data: available, borderRadius: 6, barThickness: 32 }, // Emerald-500
+                { label: 'Đang mượn', backgroundColor: '#3b82f6', data: borrowed, borderRadius: 6, barThickness: 32 }, // Blue-500
+                { label: 'Quá hạn', backgroundColor: '#ef4444', data: overdue, borderRadius: 6, barThickness: 32 }, // Red-500
+                { label: 'Khác', backgroundColor: '#94a3b8', data: other, borderRadius: 6, barThickness: 32 } // Slate-400
+            ];
+            inventoryChart.update();
+        }
+
+        function updateSummary(campuses) {
+            const totalStock = campuses.reduce((sum, c) => sum + (c.totalCopies || 0), 0);
+            const totalBorrowed = campuses.reduce((sum, c) => sum + (c.borrowed || 0), 0);
+            const totalOverdue = campuses.reduce((sum, c) => sum + (c.overdue || 0), 0);
+            const activeCampuses = campuses.length;
+
+            // Update DOM with formatted numbers
+            document.getElementById('summary-stock').textContent = totalStock.toLocaleString();
+            document.getElementById('summary-borrowed').textContent = totalBorrowed.toLocaleString();
+            document.getElementById('summary-overdue').textContent = totalOverdue.toLocaleString();
+            document.getElementById('summary-campuses').textContent = activeCampuses.toLocaleString();
+        }
+
+        document.getElementById('apply-filters').addEventListener('click', async () => {
+            const campusId = document.getElementById('filter-campus').value;
+            const categoryId = document.getElementById('filter-category').value;
+            const from = document.getElementById('filter-from').value;
+            const to = document.getElementById('filter-to').value;
+            const params = new URLSearchParams();
+            if (campusId) params.set('campusId', campusId);
+            if (categoryId) params.set('categoryId', categoryId);
+            if (from) params.set('from', from);
+            if (to) params.set('to', to);
+            const data = await fetchStats(params.toString());
+            await renderOverview(data);
         });
-    }
 
-    function updateChart(campuses) {
-        if (!inventoryChart) createChart();
-        const labels = campuses.map(c => c.campusName || ('Campus ' + c.campusId));
-        const available = campuses.map(c => c.available || 0);
-        const borrowed = campuses.map(c => c.borrowed || 0);
-        const overdue = campuses.map(c => c.overdue || 0);
-        // compute any copies not covered by the three tracked statuses so they appear
-        const other = campuses.map(c => Math.max(0, (c.totalCopies || 0) - (c.available || 0) - (c.borrowed || 0) - (c.overdue || 0)));
-
-        inventoryChart.data.labels = labels;
-        inventoryChart.data.datasets = [
-            { label: 'Available', backgroundColor: '#198754', data: available, borderRadius: 8, barThickness: 24 },
-            { label: 'Borrowed', backgroundColor: '#0d6efd', data: borrowed, borderRadius: 8, barThickness: 24 },
-            { label: 'Overdue', backgroundColor: '#dc3545', data: overdue, borderRadius: 8, barThickness: 24 },
-            { label: 'Other', backgroundColor: '#6c757d', data: other, borderRadius: 8, barThickness: 24 }
-        ];
-        inventoryChart.update();
-    }
-
-    function updateSummary(campuses) {
-        const totalStock = campuses.reduce((sum, c) => sum + (c.totalCopies || 0), 0);
-        const totalBorrowed = campuses.reduce((sum, c) => sum + (c.borrowed || 0), 0);
-        const totalOverdue = campuses.reduce((sum, c) => sum + (c.overdue || 0), 0);
-        const activeCampuses = campuses.length;
-
-        document.getElementById('summary-stock').textContent = totalStock;
-        document.getElementById('summary-borrowed').textContent = totalBorrowed;
-        document.getElementById('summary-overdue').textContent = totalOverdue;
-        document.getElementById('summary-campuses').textContent = activeCampuses;
-    }
-
-    document.getElementById('apply-filters').addEventListener('click', async () => {
-        const campusId = document.getElementById('filter-campus').value;
-        const categoryId = document.getElementById('filter-category').value;
-        const from = document.getElementById('filter-from').value;
-        const to = document.getElementById('filter-to').value;
-        const params = new URLSearchParams();
-        if (campusId) params.set('campusId', campusId);
-        if (categoryId) params.set('categoryId', categoryId);
-        if (from) params.set('from', from);
-        if (to) params.set('to', to);
-        const data = await fetchStats(params.toString());
-        await renderOverview(data);
-    });
-
-    loadFilters();
-    (async () => {
-        const data = await fetchStats();
-        await renderOverview(data);
-    })();
-    setInterval(async () => { const d = await fetchStats(); await renderOverview(d); }, 15000);
-</script>
+        // Init
+        loadFilters();
+        (async () => {
+            const data = await fetchStats();
+            await renderOverview(data);
+        })();
+        
+        // Auto refresh every 15s
+        setInterval(async () => { 
+            // Giữ lại tham số bộ lọc khi tự động refresh
+            const campusId = document.getElementById('filter-campus').value;
+            const categoryId = document.getElementById('filter-category').value;
+            const from = document.getElementById('filter-from').value;
+            const to = document.getElementById('filter-to').value;
+            
+            let paramsString = "";
+            if (campusId || categoryId || from || to) {
+                const params = new URLSearchParams();
+                if (campusId) params.set('campusId', campusId);
+                if (categoryId) params.set('categoryId', categoryId);
+                if (from) params.set('from', from);
+                if (to) params.set('to', to);
+                paramsString = params.toString();
+            }
+            
+            const d = await fetchStats(paramsString); 
+            await renderOverview(d); 
+        }, 15000);
+    </script>
 </body>
 </html>

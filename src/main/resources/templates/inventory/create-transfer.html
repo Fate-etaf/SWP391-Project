@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo lệnh xuất kho - FLMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A' } } }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col">
+
+    <!-- NAVBAR NHƯ TRANG CHỦ -->
+    <header class="bg-fpt-dark text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.href='/home'">
+                    <div class="bg-fpt-orange text-white p-1.5 rounded-lg font-extrabold text-sm tracking-wider">FPT</div>
+                    <h1 class="text-md font-bold tracking-tight text-orange-400">FLMS <span class="text-xs text-slate-400 font-medium">| Administration</span></h1>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+        <div class="mb-6 flex items-center space-x-3">
+            <a href="/inventory/transfers" class="text-slate-400 hover:text-slate-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            </a>
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900">Tạo lệnh xuất kho mới</h2>
+                <p class="text-sm text-slate-500 mt-1">Lệnh sẽ chuyển trạng thái các sách này sang "Đang giao hàng" (In Transit)</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8">
+            <form action="/inventory/transfers/create" method="post" class="space-y-6">
+                
+                <!-- Nơi nhận -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Cơ sở nhận sách (To Campus) <span class="text-red-500">*</span></label>
+                    <select name="toCampusId" required class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-fpt-orange focus:border-fpt-orange block p-3">
+                        <option value="">-- Chọn cơ sở nhận --</option>
+                        <!-- Lặp qua campuses, nhưng ẩn cơ sở hiện tại của Thủ thư -->
+                        <option th:each="campus : ${campuses}" 
+                                th:if="${campus.campusId != session.loggedInUser.campusId}"
+                                th:value="${campus.campusId}" 
+                                th:text="${campus.campusName}"></option>
+                    </select>
+                </div>
+
+                <!-- Danh sách sách -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Mã bản sao sách (Copy IDs) <span class="text-red-500">*</span></label>
+                    <p class="text-xs text-slate-500 mb-2">Nhập các mã Barcode/RFID của sách, cách nhau bằng dấu phẩy (Ví dụ: CP-CC-HN-001, CP-DB-HN-001).</p>
+                    <textarea name="copyIds" rows="4" required placeholder="Nhập mã sách vào đây..." class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-fpt-orange focus:border-fpt-orange block p-3"></textarea>
+                </div>
+
+                <!-- Ghi chú -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Ghi chú (Tùy chọn)</label>
+                    <input type="text" name="note" placeholder="Ví dụ: Chuyển gấp theo yêu cầu sinh viên HE170001..." class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-fpt-orange focus:border-fpt-orange block p-3">
+                </div>
+
+                <div class="pt-4 flex items-center justify-end space-x-4 border-t border-slate-100">
+                    <a href="/inventory/transfers" class="text-sm font-semibold text-slate-500 hover:text-slate-700 px-4 py-2">Hủy bỏ</a>
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-all shadow-md">
+                        Xác nhận xuất kho
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

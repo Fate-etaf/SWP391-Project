@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết Lệnh Luân chuyển - FLMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A' } } }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col">
+
+    <!-- NAVBAR -->
+    <header class="bg-fpt-dark text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.href='/home'">
+                    <div class="bg-fpt-orange text-white p-1.5 rounded-lg font-extrabold text-sm tracking-wider">FPT</div>
+                    <h1 class="text-md font-bold tracking-tight text-orange-400">FLMS <span class="text-xs text-slate-400 font-medium">| Administration</span></h1>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+        <!-- Nút Back -->
+        <div class="mb-6 flex items-center space-x-3">
+            <a href="/inventory/transfers" class="text-slate-400 hover:text-slate-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            </a>
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900" th:text="'Chi tiết lệnh: #TR-' + ${transfer.transferId}">Chi tiết lệnh</h2>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+            <!-- Thông tin chung -->
+            <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Thông tin Điều phối</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-xs text-slate-500 mb-1">Cơ sở xuất phát</p>
+                        <p class="text-sm font-semibold text-slate-800" th:text="${transfer.fromCampus.campusName}"></p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 mb-1">Cơ sở đích đến</p>
+                        <p class="text-sm font-semibold text-fpt-orange" th:text="${transfer.toCampus.campusName}"></p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 mb-1">Người tạo lệnh</p>
+                        <p class="text-sm font-semibold text-slate-800" th:text="${transfer.requestedBy.fullName + ' (' + transfer.requestedBy.userId + ')'}"></p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 mb-1">Trạng thái hiện tại</p>
+                        <span th:if="${transfer.status == 'InTransit'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">Đang giao hàng (In Transit)</span>
+                        <span th:if="${transfer.status == 'Received'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Đã nhập kho (Received)</span>
+                        <span th:if="${transfer.status == 'Pending'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Chờ xử lý (Pending)</span>
+                        <span th:if="${transfer.status == 'Cancelled'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">Đã hủy (Cancelled)</span>
+                    </div>
+                    
+                    <div th:if="${transfer.note != null and !transfer.note.isEmpty()}" class="sm:col-span-2">
+                        <p class="text-xs text-slate-500 mb-1">Ghi chú</p>
+                        <p class="text-sm text-slate-700 italic bg-slate-100 p-3 rounded" th:text="${transfer.note}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="p-6 border-b border-slate-100">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Lịch trình thời gian</h3>
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-8 text-sm">
+                    <div>
+                        <p class="text-xs text-slate-500">Tạo lệnh</p>
+                        <p class="font-medium text-slate-800" th:text="${transfer.requestedAt != null ? #temporals.format(transfer.requestedAt, 'dd/MM/yyyy HH:mm') : '--'}"></p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">Xuất kho</p>
+                        <p class="font-medium text-slate-800" th:text="${transfer.shippedAt != null ? #temporals.format(transfer.shippedAt, 'dd/MM/yyyy HH:mm') : '--'}"></p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">Nhập kho</p>
+                        <p class="font-medium text-emerald-600" th:text="${transfer.receivedAt != null ? #temporals.format(transfer.receivedAt, 'dd/MM/yyyy HH:mm') : '--'}"></p>
+                        <p class="text-xs text-slate-500 mt-0.5" th:if="${transfer.confirmedBy != null}" th:text="'Bởi: ' + ${transfer.confirmedBy.fullName}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danh sách sách bên trong -->
+            <div class="p-0">
+                <div class="px-6 py-4 bg-slate-50/80 border-b border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-700">Danh sách ấn phẩm vận chuyển (<span th:text="${transfer.details.size()}"></span> cuốn)</h3>
+                </div>
+                <ul class="divide-y divide-slate-100">
+                    <li th:each="detail : ${transfer.details}" class="px-6 py-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-bold text-fpt-navy" th:text="${detail.copy.book.title}"></p>
+                            <div class="flex items-center space-x-3 mt-1">
+                                <span class="text-xs font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded" th:text="${detail.copy.copyId}"></span>
+                                <span class="text-xs text-slate-500" th:text="'Tình trạng: ' + ${detail.copy.conditionStatus}"></span>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+    </main>
+</body>
+</html>
