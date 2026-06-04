@@ -28,6 +28,7 @@ public class LibrarianController {
     private final BorrowTicketDetailRepository borrowTicketDetailRepository;
     private final SystemConfigService systemConfigService;
     private final ReservationRepository reservationRepository;
+    private final com.swp5.library_management.service.EmailService emailService;
 
     private boolean isNotLibrarian(HttpSession session) {
         Boolean isLibrarian = (Boolean) session.getAttribute("isLibrarian");
@@ -166,6 +167,16 @@ public class LibrarianController {
             matchedReservation.setStatus("Completed");
             reservationRepository.save(matchedReservation);
         }
+
+        // Send email confirmation to patron
+        String formattedDueDate = detail.getDueDate().format(DateTimeFormatter.ofPattern("HH:mm 'ngày' dd/MM/yyyy"));
+        emailService.sendLoanConfirmation(
+                patron.getEmail(),
+                patron.getFullName(),
+                copy.getBook().getTitle(),
+                copy.getCopyId(),
+                formattedDueDate
+        );
 
         redirectAttrs.addFlashAttribute("successMsg", "Tạo đơn mượn sách thành công! Bạn đọc " + patron.getFullName() + " đã mượn bản sao " + copyId + " (Hạn trả: " + detail.getDueDate().toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ").");
         return "redirect:/librarian/create-loan";

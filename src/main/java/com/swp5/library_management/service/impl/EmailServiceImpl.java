@@ -71,6 +71,15 @@ public class EmailServiceImpl implements EmailService {
         sendHtmlEmail(toEmail, subject, body);
     }
 
+    // ── Gửi xác nhận tạo phiếu mượn ──────────────────────────────────────
+
+    @Override
+    public void sendLoanConfirmation(String toEmail, String patronName, String bookTitle, String copyId, String dueDate) {
+        String subject = "[Thư viện FPT] Đăng ký mượn sách thành công";
+        String body = buildLoanConfirmationBody(patronName, bookTitle, copyId, dueDate);
+        sendHtmlEmail(toEmail, subject, body);
+    }
+
     // ── Helper: Gửi email HTML ────────────────────────────────────────────
 
     private void sendHtmlEmail(String to, String subject, String htmlBody) {
@@ -205,5 +214,39 @@ public class EmailServiceImpl implements EmailService {
                   </div>
                 </body></html>
                 """.formatted(patronName, bookTitle);
+    }
+
+    private String buildLoanConfirmationBody(String patronName, String bookTitle, String copyId, String dueDate) {
+        return """
+                <html><body style="font-family: Arial, sans-serif; color: #333;">
+                  <div style="max-width:600px; margin:auto; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+                    <div style="background:#003580; padding:20px; text-align:center;">
+                      <h2 style="color:#fff; margin:0;">📚 Thư viện FPT University</h2>
+                    </div>
+                    <div style="padding:24px;">
+                      <p>Xin chào <strong>%s</strong>,</p>
+                      <p>Phiếu mượn sách của bạn đã được lập thành công tại quầy thủ thư.</p>
+                      <table style="width:100%%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f5f5f5;">
+                          <td style="padding:10px; border:1px solid #ddd;"><strong>📖 Tên sách</strong></td>
+                          <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px; border:1px solid #ddd;"><strong>🔖 Mã bản sao</strong></td>
+                          <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr style="background:#f5f5f5;">
+                          <td style="padding:10px; border:1px solid #ddd;"><strong>⏰ Hạn trả sách</strong></td>
+                          <td style="padding:10px; border:1px solid #ddd; color:#e53935;"><strong>%s</strong></td>
+                        </tr>
+                      </table>
+                      <div style="background:#fff3e0; border-left:4px solid #ff9800; padding:12px; border-radius:4px;">
+                        <p style="margin:0;">⚠️ <strong>Lưu ý:</strong> Vui lòng hoàn trả sách trước hạn để tránh phát sinh phí phạt quá hạn nhé!</p>
+                      </div>
+                      <p style="margin-top:20px;">Chúc bạn đọc sách vui vẻ!<br><strong>Hệ thống Thư viện FPT University</strong></p>
+                    </div>
+                  </div>
+                </body></html>
+                """.formatted(patronName, bookTitle, copyId, dueDate);
     }
 }

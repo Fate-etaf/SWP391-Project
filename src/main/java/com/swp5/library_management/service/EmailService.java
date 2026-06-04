@@ -47,4 +47,15 @@ public interface EmailService {
      * @param bookTitle  Tên sách bị hủy xếp hàng chờ
      */
     void sendWaitlistCancellation(String toEmail, String patronName, String bookTitle);
+
+    /**
+     * Gửi email thông báo mượn sách thành công (khi thủ thư tạo phiếu mượn).
+     *
+     * @param toEmail    Địa chỉ email của bạn đọc
+     * @param patronName Tên bạn đọc
+     * @param bookTitle  Tên sách được mượn
+     * @param copyId     Mã bản sao sách vật lý
+     * @param dueDate    Hạn trả sách (ví dụ: "10/06/2026")
+     */
+    void sendLoanConfirmation(String toEmail, String patronName, String bookTitle, String copyId, String dueDate);
 }
