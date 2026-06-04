@@ -139,7 +139,7 @@
         <p>Fill in the details below to register a new book in the library catalog.</p>
     </div>
 
-    <form th:action="@{/librarian/books/add}" th:object="${bookForm}" method="post">
+    <form th:action="@{/librarian/inventory/add}" th:object="${bookForm}" method="post">
         
         <div class="form-group">
             <label for="title">Title <span style="color: #fb7185">*</span></label>
@@ -153,8 +153,8 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label for="isbn">ISBN</label>
-                <input type="text" id="isbn" th:field="*{isbn}" class="form-control" placeholder="978-0132350884"/>
+                <label for="isbn">ISBN <span style="color: #fb7185">*</span></label>
+                <input type="text" id="isbn" th:field="*{isbn}" class="form-control" required placeholder="978-0132350884"/>
             </div>
             
             <div class="form-group">
