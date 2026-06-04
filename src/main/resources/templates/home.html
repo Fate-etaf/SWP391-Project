@@ -43,12 +43,14 @@
 
                 <!-- Menu Navigation -->
                 <nav class="hidden md:flex space-x-8 font-medium text-sm">
-                    <a href="/home"   class="text-fpt-orange hover:text-orange-400 transition-colors py-2 border-b-2 border-fpt-orange">Trang chủ</a>
+                    <a href="/home"   class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Trang chủ</a>
                     <a href="/books"  class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Tra cứu sách</a>
+                    <a th:if="${session.loggedInUser != null}" href="/reservations" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Đặt chỗ của tôi</a>
+                    <a th:if="${session.loggedInUser != null}" href="/borrowing-history" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Lịch sử mượn trả</a>
                     <a href="#"       class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Yêu cầu mượn</a>
                     <a href="#"       class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Đặt phòng học nhóm</a>
-                    <a href="#"       class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Tin tức &amp; Sự kiện</a>
                 </nav>
+
 
                 <!-- User Corner -->
                 <div th:if="${session.loggedInUser != null}" class="flex items-center space-x-4">

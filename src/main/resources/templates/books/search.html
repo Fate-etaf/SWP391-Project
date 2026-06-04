@@ -49,13 +49,28 @@
             <nav class="hidden md:flex space-x-8 font-medium text-sm">
                 <a href="/home"  class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Trang chủ</a>
                 <a href="/books" class="text-fpt-orange py-2 border-b-2 border-fpt-orange">Tra cứu sách</a>
+                <a th:if="${session.loggedInUser != null}" href="/reservations" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Đặt chỗ của tôi</a>
+                <a th:if="${session.loggedInUser != null}" href="/borrowing-history" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Lịch sử mượn trả</a>
                 <a href="#"      class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Yêu cầu mượn</a>
                 <a href="#"      class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Đặt phòng học nhóm</a>
             </nav>
 
-            <div class="hidden lg:flex flex-col text-right">
-                <a href="/reservations" class="text-sm font-semibold text-fpt-orange hover:text-orange-400 transition-colors">Đơn đặt chỗ của tôi</a>
+            <div th:if="${session.loggedInUser != null}" class="hidden lg:flex items-center space-x-4">
+                <div class="text-right">
+                    <p class="text-xs text-slate-400">Xin chào,</p>
+                    <p class="text-sm font-semibold text-slate-100" th:text="${session.loggedInUser.fullName}">Tên Sinh Viên</p>
+                </div>
+                <button onclick="window.location.href='/logout'" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all border border-slate-700 flex items-center space-x-1.5">
+                    <span>Đăng xuất</span>
+                </button>
             </div>
+            
+            <div th:if="${session.loggedInUser == null}" class="hidden lg:block">
+                <button onclick="window.location.href='/login'" class="bg-fpt-orange hover:bg-fpt-orangeHover text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-fpt-orange/20">
+                    Đăng nhập
+                </button>
+            </div>
+
         </div>
     </div>
 </header>

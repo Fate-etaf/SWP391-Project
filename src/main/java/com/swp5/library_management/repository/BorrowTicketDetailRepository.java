@@ -19,4 +19,8 @@ public interface BorrowTicketDetailRepository extends JpaRepository<BorrowTicket
             "AND b.dueDate < :now " +
             "AND (b.status IS NULL OR b.status NOT IN ('Lost', 'Damaged'))")
     List<BorrowTicketDetail> findActiveOverdue(@Param("now") LocalDateTime now);
+
+    @EntityGraph(attributePaths = {"bookCopy", "bookCopy.book", "bookCopy.book.authors", "borrowTicket", "returnCampus"})
+    @Query("SELECT d FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId = :patronId ORDER BY d.borrowTicket.createdAt DESC")
+    List<BorrowTicketDetail> findHistoryByPatronId(@Param("patronId") String patronId);
 }
