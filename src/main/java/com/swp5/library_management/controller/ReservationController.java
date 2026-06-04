@@ -222,4 +222,11 @@ public class ReservationController {
         redirectAttrs.addFlashAttribute("errorMsg", "Lỗi: " + ex.getMessage());
         return "redirect:/books";
     }
+
+    @ExceptionHandler(Exception.class)
+    public String handleGeneralException(Exception ex, RedirectAttributes redirectAttrs) {
+        ex.printStackTrace();
+        redirectAttrs.addFlashAttribute("errorMsg", "Lỗi Server: " + ex.getMessage() + " | Loại lỗi: " + ex.getClass().getName());
+        return "redirect:/reservations";
+    }
 }
