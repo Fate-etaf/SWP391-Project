@@ -60,6 +60,9 @@
                     <p class="text-xs text-slate-400">Xin chào,</p>
                     <p class="text-sm font-semibold text-slate-100" th:text="${session.loggedInUser.fullName}">Tên Sinh Viên</p>
                 </div>
+                <button th:if="${session.isLibrarian}" onclick="window.location.href='/librarian/create-loan'" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-amber-500/10 flex items-center space-x-1">
+                    <span>📖 Tạo đơn mượn</span>
+                </button>
                 <button onclick="window.location.href='/logout'" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all border border-slate-700 flex items-center space-x-1.5">
                     <span>Đăng xuất</span>
                 </button>

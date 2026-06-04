@@ -46,9 +46,17 @@ public class UserController {
             session.setAttribute("loggedInUser", user);
             session.setAttribute("loggedInUserId", user.getUserId());
             session.setAttribute("loggedInCampusId", user.getCampusId());
+            
+            // Tải vai trò của người dùng
+            List<String> roles = userRepository.findRolesByUserId(user.getUserId());
+            session.setAttribute("loggedInUserRoles", roles);
+            session.setAttribute("isLibrarian", roles.contains("Librarian"));
+            session.setAttribute("isAdmin", roles.contains("Admin"));
+            
             redirectAttributes.addFlashAttribute("registeredName", user.getFullName());
             return "redirect:/home";
         }
+
 
         model.addAttribute("loginError", "Mã số, Email hoặc Cơ sở học tập không trùng khớp với dữ liệu hệ thống!");
         model.addAttribute("userId", userId);

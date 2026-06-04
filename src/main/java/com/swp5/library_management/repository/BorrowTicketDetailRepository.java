@@ -23,4 +23,8 @@ public interface BorrowTicketDetailRepository extends JpaRepository<BorrowTicket
     @EntityGraph(attributePaths = {"bookCopy", "bookCopy.book", "bookCopy.book.authors", "borrowTicket", "returnCampus"})
     @Query("SELECT d FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId = :patronId ORDER BY d.borrowTicket.createdAt DESC")
     List<BorrowTicketDetail> findHistoryByPatronId(@Param("patronId") String patronId);
+
+    @Query("SELECT COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId = :patronId AND d.returnDate IS NULL")
+    int countActiveBorrowedByPatronId(@Param("patronId") String patronId);
 }
+

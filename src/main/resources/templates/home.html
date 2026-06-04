@@ -52,19 +52,22 @@
                 </nav>
 
 
-                <!-- User Corner -->
-                <div th:if="${session.loggedInUser != null}" class="flex items-center space-x-4">
-                    <div class="hidden lg:block text-right">
-                        <p class="text-xs text-slate-400">Xin chào,</p>
-                        <p class="text-sm font-semibold text-slate-100" th:text="${session.loggedInUser.fullName}">Tên Sinh Viên</p>
-                    </div>
-                    <button onclick="window.location.href='/logout'" class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-all border border-slate-700 flex items-center space-x-2">
-                        <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                        </svg>
-                        <span>Đăng xuất</span>
-                    </button>
-                </div>
+                 <!-- User Corner -->
+                 <div th:if="${session.loggedInUser != null}" class="flex items-center space-x-4">
+                     <div class="hidden lg:block text-right">
+                         <p class="text-xs text-slate-400">Xin chào,</p>
+                         <p class="text-sm font-semibold text-slate-100" th:text="${session.loggedInUser.fullName}">Tên Sinh Viên</p>
+                     </div>
+                     <button th:if="${session.isLibrarian}" onclick="window.location.href='/librarian/create-loan'" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center space-x-1.5 shadow-lg shadow-amber-500/10">
+                         <span>📖 Tạo đơn mượn</span>
+                     </button>
+                     <button onclick="window.location.href='/logout'" class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-all border border-slate-700 flex items-center space-x-2">
+                         <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                         </svg>
+                         <span>Đăng xuất</span>
+                     </button>
+                 </div>
     
     <div th:if="${session.loggedInUser == null}">
         <button onclick="window.location.href='/login'" class="bg-fpt-orange hover:bg-fpt-orangeHover text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg shadow-fpt-orange/20 flex items-center space-x-2">
