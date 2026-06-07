@@ -27,7 +27,7 @@ public class BookCopy {
     private Campus campus;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ShelfID")
+    @JoinColumn(name = "ShelfCode", referencedColumnName = "ShelfCode")
     private Shelf shelf;
 
     @Column(name = "ConditionStatus", nullable = false, length = 20)

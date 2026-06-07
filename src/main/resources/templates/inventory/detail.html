@@ -449,7 +449,7 @@
 
                 <div class="copy-row-item">
                     <span class="label">Campus</span>
-                    <span th:text="${copy.campusName}">Campus</span>
+                    <span th:text="${copy.campus.campusName}">Campus</span>
                 </div>
 
                 <div class="copy-row-item">
@@ -472,12 +472,13 @@
 
                 <div th:if="${copy.shelfCode != null and copy.shelfCode != '—'}">
                     <span class="shelf-tag">
-                        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18"/>
+                        <svg width="11" height="11" fill="none" stroke="currentColor"
+                            stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M3 7h18M3 12h18M3 17h18"/>
                         </svg>
                         <span th:text="${copy.shelfCode}">SHELF</span>
-                        <span th:if="${copy.shelfName != null and copy.shelfName != '—'}"
-                              th:text="${'· ' + copy.shelfName}" style="opacity:0.7"></span>
                     </span>
                 </div>
             </div>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<nav class="navbar" th:fragment="navbar">
+    <a href="/" class="navbar-brand">
+        <div class="brand-icon">📚</div>
+        <div>
+            <span class="brand-text">FPT Library</span>
+            <span class="brand-sub">University Library Management</span>
+        </div>
+    </a>
+
+    <ul class="nav-links">
+        <li><a href="/" id="nav-home">Home</a></li>
+        <li><a href="/librarian/inventory/list" id="nav-books">Books</a></li>
+        <li><a href="/librarian/inventory" id="nav-dashboard">Dashboard</a></li>
+        <li><a href="#" id="nav-overdue">Overdue</a></li>
+        <li><a href="#" id="nav-rooms">Study Rooms</a></li>
+        <li><a href="#" id="nav-account">My Account</a></li>
+        <li><a href="#" id="nav-reservations">Reservations</a></li>
+    </ul>
+</nav>
+
+</body>
+</html>
