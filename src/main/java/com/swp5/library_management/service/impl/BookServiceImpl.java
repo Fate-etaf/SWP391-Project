@@ -161,12 +161,12 @@ public class BookServiceImpl implements BookService {
      *   4. Map kết quả sang DTO mà không cần truy cập lazy collection.
      */
     @Override
-    public List<BookSearchResultDTO> searchBooks(String keyword, String subjectCode, Integer campusId) {
+    public List<BookSearchResultDTO> searchBooks(String keyword, String subjectCode, Integer categoryId, Integer majorId, Integer campusId) {
         // Sanitize: blank string → null để WHERE clause bỏ qua bộ lọc
         String kw = StringUtils.hasText(keyword)     ? keyword.trim()     : null;
         String sc = StringUtils.hasText(subjectCode) ? subjectCode.trim() : null;
 
-        List<Book> books = bookRepository.searchBooks(kw, sc, campusId);
+        List<Book> books = bookRepository.searchBooks(kw, sc, categoryId, majorId, campusId);
         return mapBooksToSearchResults(books, campusId);
     }
 

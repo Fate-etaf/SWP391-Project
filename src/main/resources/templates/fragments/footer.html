@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style th:fragment="footer-style">
+        /* ── FOOTER ── */
+        footer { background: #1a1a2e; color: #aaa; padding: 40px 20px 20px; border-top: 4px solid #e87722; margin-top: 60px; }
+        footer .inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 32px; margin-bottom: 28px; }
+        footer h5 { color: #e0e0e0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
+        footer p, footer li { font-size: 12.5px; line-height: 1.8; }
+        footer ul { list-style: none; padding: 0; margin: 0; }
+        footer a { color: #aaa; text-decoration: none; }
+        footer a:hover { color: #e87722; }
+        .footer-brand { display: inline-block; background: #e87722; color: #fff; padding: 4px 12px; border-radius: 4px; font-weight: 800; font-size: 14px; margin-bottom: 12px; }
+        .footer-bottom { border-top: 1px solid #2e2e44; padding-top: 18px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; flex-wrap: wrap; gap: 8px; }
+        .footer-bottom a { color: #777; }
+        .footer-bottom a:hover { color: #e87722; }
+
+        @media (max-width: 768px) {
+            footer .inner { grid-template-columns: 1fr; gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<footer th:fragment="footer">
+    <div class="inner">
+        <div>
+            <span class="footer-brand">FPT Thư viện</span>
+            <p>Hệ thống FLMS là nền tảng quản lý thư viện hiện đại kết nối 5 cơ sở đào tạo của Đại học FPT trên toàn quốc.</p>
+        </div>
+        <div>
+            <h5>Danh mục</h5>
+            <ul>
+                <li><a href="#">Về FLMS</a></li>
+                <li><a href="/policies/rules">Hướng dẫn nội quy</a></li>
+                <li><a href="#">Khung phạt vi phạm</a></li>
+                <li><a href="#">Tài nguyên số E-book</a></li>
+            </ul>
+        </div>
+        <div>
+            <h5>Liên kết FPT</h5>
+            <ul>
+                <li><a href="https://fap.fpt.edu.vn" target="_blank">Trang học vụ FAP</a></li>
+                <li><a href="#">Hệ thống LMS</a></li>
+                <li><a href="#">Cổng hỗ trợ sinh viên</a></li>
+            </ul>
+        </div>
+        <div>
+            <h5>Cơ sở Hà Nội (Hòa Lạc)</h5>
+            <p>Khu Công nghệ cao Hòa Lạc, Km 29 Đại lộ Thăng Long, Thạch Thất, Hà Nội</p>
+            <p>Điện thoại: (024) 73001866</p>
+            <p>Email: library@fpt.edu.vn</p>
+        </div>
+    </div>
+    <div class="footer-bottom" style="max-width:1200px;margin:0 auto;">
+        <p>© 2026 FPT University Library. Developed by Team SWP391 Group 5.</p>
+        <div>
+            <a href="#">Chính sách bảo mật</a> &nbsp;|&nbsp; <a href="#">Điều khoản sử dụng</a>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

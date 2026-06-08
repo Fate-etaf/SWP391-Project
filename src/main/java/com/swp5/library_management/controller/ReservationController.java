@@ -35,13 +35,16 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final CampusRepository   campusRepository;
     private final BookRepository     bookRepository;
+    private final com.swp5.library_management.repository.UserRepository userRepository;
 
     public ReservationController(ReservationService reservationService,
                                  CampusRepository campusRepository,
-                                 BookRepository bookRepository) {
+                                 BookRepository bookRepository,
+                                 com.swp5.library_management.repository.UserRepository userRepository) {
         this.reservationService = reservationService;
         this.campusRepository   = campusRepository;
         this.bookRepository     = bookRepository;
+        this.userRepository     = userRepository;
     }
 
     // ── Hàm tiện ích: Lấy patronId từ Session, redirect về login nếu chưa đăng nhập ──
@@ -96,6 +99,11 @@ public class ReservationController {
         var bookOpt = bookRepository.findById(bookId);
         if (bookOpt.isEmpty()) {
             return "redirect:/books";
+        }
+
+        var userOpt = userRepository.findById(patronId);
+        if (userOpt.isPresent()) {
+            model.addAttribute("userCampusId", userOpt.get().getCampusId());
         }
 
         model.addAttribute("book",     bookOpt.get());

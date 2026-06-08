@@ -345,13 +345,21 @@
     </div>
 </div>
 
-<script>
+<script th:inline="javascript">
+    const userCampusId = /*[[${userCampusId}]]*/ null;
+
     function openConfirmModal() {
         const campusSelect = document.getElementById('campusSelect');
         if (campusSelect && !campusSelect.value) {
             alert('Vui lòng chọn cơ sở thư viện muốn đến nhận sách!');
             return;
         }
+
+        if (userCampusId && campusSelect.value !== userCampusId.toString()) {
+            alert('Bạn đọc không có quyền mượn sách ở thư viện này. Vui lòng liên hệ với thủ thư để được trợ giúp!');
+            return;
+        }
+
         document.getElementById('confirmModal').classList.add('active');
     }
 

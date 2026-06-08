@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <th:block th:replace="~{fragments/header :: head('Dịch vụ gia hạn sách - FPTU Library')}"></th:block>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <style>
+        /* ── ARTICLE CONTENT ── */
+        .page-header { background: #f7f7f7; padding: 40px 20px; border-bottom: 1px solid #ddd; }
+        .page-header .inner { max-width: 900px; margin: 0 auto; }
+        .page-header h1 { font-size: 28px; color: #1a1a2e; margin-bottom: 8px; }
+        .page-meta { font-size: 13px; color: #777; display: flex; gap: 16px; }
+        
+        .article-body { max-width: 900px; margin: 40px auto; padding: 0 20px; font-size: 15px; color: #333; }
+        .article-body h2 { font-size: 20px; color: #e87722; margin-top: 32px; margin-bottom: 16px; font-weight: 700; }
+        .article-body h3 { font-size: 17px; color: #1a1a2e; margin-top: 24px; margin-bottom: 12px; font-weight: 600; }
+        .article-body p { margin-bottom: 16px; }
+        .article-body ul { margin-bottom: 16px; padding-left: 20px; }
+        .article-body li { margin-bottom: 8px; }
+        .article-body a { color: #e87722; text-decoration: none; font-weight: 600; }
+        .article-body a:hover { text-decoration: underline; }
+        .alert-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 16px; margin: 20px 0; border-radius: 4px; color: #856404; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header('service')}"></div>
+
+<div class="page-header">
+    <div class="inner">
+        <h1>Dịch vụ gia hạn sách</h1>
+        <div class="page-meta">
+            <span>📅 14/05/2021</span>
+            <span>👁️ 8448 lượt xem</span>
+        </div>
+    </div>
+</div>
+
+<main class="article-body">
+    <p>Bạn đọc thân mến,</p>
+    <p>Trường hợp khi đã đến hạn trả sách nhưng bạn đọc chưa nghiên cứu xong, cần thêm thời gian để đọc thì có thể sử dụng dịch vụ này.</p>
+    <p>Thư viện xin gửi tới các bạn một số thông tin về dịch vụ gia hạn sách như sau:</p>
+
+    <ul>
+        <li>Số lượt gia hạn sách: 04 lượt;</li>
+        <li>Thời gian mỗi lượt gia hạn sách tương đương với thời gian mượn sách: 1 tuần/tài liệu tiếng Việt và 2 tuần/tài liệu ngoại văn.</li>
+    </ul>
+
+    <h2>Cách thức gia hạn sách:</h2>
+
+    <h3>Cách 𝟏: Bạn đọc tự gia hạn: hướng dẫn <a href="#">TẠI ĐÂY</a>:</h3>
+    
+    <h3>Cách 𝟐: Gửi email tới "Thuvien_fu_hoalac@fpt.edu.vn"</h3>
+    <ul>
+        <li>Chủ đề mail "Xin gia hạn sách"</li>
+        <li>Nội dung mail các bạn cần ghi rõ họ tên + mã sinh viên/nhân viên,</li>
+        <li>Lý do xin gia hạn sách và thời hạn mong muốn nếu cần (để Thư viện xem xét tùy từng trường hợp nha)</li>
+        <li>Ký tên (VD Họ tên, số điện thoại liên hệ, CLB em tham gia,...)</li>
+    </ul>
+
+    <div class="alert-box">
+        <strong>LƯU Ý:</strong> Tuyệt đối 𝐊𝐇Ô̂𝐍𝐆 𝐑𝐄𝐏𝐋𝐘 𝐀𝐔𝐓𝐎𝐌𝐀𝐈𝐋, các bạn nhớ soạn mail mới để đặt chủ đề mail đúng nha.<br>
+        <span style="font-size:13px;">(Mail tự động ngoài việc thông báo hạn trả còn là hướng dẫn cách gia hạn nên các bạn đọc kỹ chữ đừng bỏ qua nhé.)</span>
+    </div>
+
+    <h3>Cách 𝟑: Gọi điện thoại trực tiếp</h3>
+    <p>Gọi điện thoại trực tiếp tới Thư viện (liên hệ trong giờ hành chính) theo số: <strong>024 6680 5912</strong></p>
+
+    <h3>Cách 𝟒: Inbox fanpage</h3>
+    <p>Inbox page <a href="https://www.facebook.com/thuvienfu">https://www.facebook.com/thuvienfu</a> : gửi mã sinh viên/ nhân viên để Admin hỗ trợ nhé.</p>
+
+    <p style="margin-top: 32px; font-weight: 600; color: #e87722;">Chúc các bạn luôn có nhiều niềm vui và học tập tốt!</p>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

@@ -28,13 +28,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HomeController {
 
     private final HomeService homeService;
+    private final com.swp5.library_management.repository.SubjectRepository subjectRepository;
+    private final com.swp5.library_management.repository.CategoryRepository categoryRepository;
+    private final com.swp5.library_management.repository.MajorRepository majorRepository;
 
     @GetMapping({"/", "/home"})
     public String home(Model model) {
-        model.addAttribute("stats",         homeService.getHomeStats());
-        model.addAttribute("campuses",      homeService.getCampusNames());
-        model.addAttribute("categories",    homeService.getFeaturedCategories(5));
-        model.addAttribute("featuredBooks", homeService.getFeaturedBooks());
+        model.addAttribute("stats", homeService.getHomeStats());
+        model.addAttribute("campuses", homeService.getCampuses());
+        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("majors", majorRepository.findAll());
+
         return "home";
     }
 }
+

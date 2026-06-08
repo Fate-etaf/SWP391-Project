@@ -29,11 +29,11 @@ public interface HomeService {
     HomeStatsDTO getHomeStats();
 
     /**
-     * Lấy danh sách tên các cơ sở để populate dropdown tìm kiếm.
+     * Lấy danh sách các cơ sở để populate dropdown tìm kiếm.
      *
-     * @return Danh sách tên cơ sở (List<String>), trực tiếp dùng được trong Thymeleaf.
+     * @return Danh sách cơ sở (List<com.swp5.library_management.entity.Campus>).
      */
-    List<String> getCampusNames();
+    List<com.swp5.library_management.entity.Campus> getCampuses();
 
     /**
      * Lấy danh sách thể loại nổi bật để hiển thị phần Categories.
@@ -49,4 +49,9 @@ public interface HomeService {
      * @return Danh sách {@link FeaturedBookDTO} từ 4 cuốn sách mới nhất trong DB.
      */
     List<FeaturedBookDTO> getFeaturedBooks();
+
+    /**
+     * Lấy tất cả các thể loại, mỗi thể loại kèm theo 5 sách ngẫu nhiên.
+     */
+    List<com.swp5.library_management.dto.CategorySectionDTO> getCategoriesWithRandomBooks();
 }

@@ -80,11 +80,8 @@ public class HomeServiceImpl implements HomeService {
     // ─────────────────────────────────────────────────────────────────────────
 
     @Override
-    public List<String> getCampusNames() {
-        return campusRepository.findAll()
-                .stream()
-                .map(Campus::getCampusName)
-                .collect(Collectors.toList());
+    public List<com.swp5.library_management.entity.Campus> getCampuses() {
+        return campusRepository.findAll();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -145,6 +142,46 @@ public class HomeServiceImpl implements HomeService {
                     .categoryName(categoryName)
                     .available(book.getAvailableCount() > 0)
                     .coverColor(COVER_COLORS[i % COVER_COLORS.length])
+                    .build());
+        }
+        return result;
+    }
+
+    @Override
+    public List<com.swp5.library_management.dto.CategorySectionDTO> getCategoriesWithRandomBooks() {
+        List<com.swp5.library_management.entity.Category> allCategories = categoryRepository.findAll();
+        List<com.swp5.library_management.dto.CategorySectionDTO> result = new ArrayList<>();
+
+        for (com.swp5.library_management.entity.Category category : allCategories) {
+            List<com.swp5.library_management.entity.Book> randomBooks = bookRepository.findTop5RandomByCategory(category.getCategoryId());
+            
+            if (randomBooks.isEmpty()) {
+                continue;
+            }
+
+            List<com.swp5.library_management.dto.FeaturedBookDTO> bookDTOs = new ArrayList<>();
+            for (int i = 0; i < randomBooks.size(); i++) {
+                com.swp5.library_management.entity.Book book = randomBooks.get(i);
+                
+                String subjectCode = (book.getSubject() != null)
+                        ? book.getSubject().getSubjectCode()
+                        : "N/A";
+                        
+                bookDTOs.add(com.swp5.library_management.dto.FeaturedBookDTO.builder()
+                        .bookId(book.getBookId())
+                        .title(book.getTitle())
+                        .authorNames(book.getAuthorNames())
+                        .subjectCode(subjectCode)
+                        .isbn(book.getIsbn() != null ? book.getIsbn() : "N/A")
+                        .categoryName(category.getCategoryName())
+                        .available(book.getAvailableCount() > 0)
+                        .coverColor(COVER_COLORS[i % COVER_COLORS.length])
+                        .build());
+            }
+
+            result.add(com.swp5.library_management.dto.CategorySectionDTO.builder()
+                    .categoryName(category.getCategoryName())
+                    .books(bookDTOs)
                     .build());
         }
         return result;
