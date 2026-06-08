@@ -1,7 +1,6 @@
 package com.swp5.library_management.service.impl;
 
 import com.swp5.library_management.entity.Book;
-import com.swp5.library_management.entity.Campus;
 import com.swp5.library_management.entity.Category;
 import com.swp5.library_management.dto.CategoryCardDTO;
 import com.swp5.library_management.dto.FeaturedBookDTO;
@@ -19,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.NumberFormat;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
