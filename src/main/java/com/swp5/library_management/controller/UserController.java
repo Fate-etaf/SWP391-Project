@@ -42,29 +42,39 @@ public class UserController {
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            // Lưu thông tin người dùng vào Session để các trang khác dùng được
+            
+            // 1. Lưu thông tin người dùng cơ bản vào Session
             session.setAttribute("loggedInUser", user);
             session.setAttribute("loggedInUserId", user.getUserId());
             session.setAttribute("loggedInCampusId", user.getCampusId());
-            
-            // Tải vai trò của người dùng
-            List<String> roles = userRepository.findRolesByUserId(user.getUserId());
-            session.setAttribute("loggedInUserRoles", roles);
-            session.setAttribute("isLibrarian", roles.contains("Librarian"));
-            session.setAttribute("isAdmin", roles.contains("Admin"));
-            
             redirectAttributes.addFlashAttribute("registeredName", user.getFullName());
+            
+            // 2. PHÂN QUYỀN NGẦM: Bốc trực tiếp ID/Tên từ thực thể Role liên kết
+            if (user.getRole() != null) {
+                String roleName = user.getRole().getRoleName(); // Hãy check xem trong Role.java đặt thuộc tính là roleName hay name nhé
+                int roleId = user.getRole().getRoleId();
+                
+                // Lưu trạng thái quyền vào session phòng hờ giao diện Frontend cần dùng
+                session.setAttribute("isLibrarian", "Librarian".equalsIgnoreCase(roleName) || roleId == 2);
+                session.setAttribute("isAdmin", "Admin".equalsIgnoreCase(roleName) || roleId == 1);
+                
+                // 3. ĐIỀU HƯỚNG THÔNG MINH: Nếu là Admin (1) hoặc Thủ thư (2) -> Vào thẳng trang Dashboard
+                if ("Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId == 1 || roleId == 2) {
+                    return "redirect:/inventory/dashboard"; 
+                }
+            }
+
+            // Mặc định: Nếu là Student (Sinh viên) hoặc Giảng viên lướt trang chung -> Vào màn hình Home
             return "redirect:/home";
         }
 
-
+        // Luồng xử lý khi sai tài khoản giữ nguyên
         model.addAttribute("loginError", "Mã số, Email hoặc Cơ sở học tập không trùng khớp với dữ liệu hệ thống!");
         model.addAttribute("userId", userId);
         model.addAttribute("email", email);
         model.addAttribute("campusId", campusId);
         return "login";
     }
-
     // === ĐĂNG XUẤT ===
     @GetMapping("/logout")
     public String logout(HttpSession session) {
