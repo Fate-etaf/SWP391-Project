@@ -22,6 +22,39 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private com.swp5.library_management.repository.CampusRepository campusRepository;
+
+    @GetMapping("/profile")
+    public String showProfile(HttpSession session, Model model) {
+        String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+        if (loggedInUserId == null) {
+            return "redirect:/login";
+        }
+        Optional<User> userOpt = userRepository.findById(loggedInUserId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            model.addAttribute("user", user);
+            
+            String campusName = "Unknown";
+            if (user.getCampusId() != null) {
+                campusName = campusRepository.findById(user.getCampusId())
+                        .map(com.swp5.library_management.entity.Campus::getCampusName)
+                        .orElse("Unknown");
+            }
+            model.addAttribute("campusName", campusName);
+            
+            // role check for UI sidebar
+            String roleName = user.getRole() != null ? user.getRole().getRoleName() : "Student";
+            int roleId = user.getRole() != null ? user.getRole().getRoleId() : 1;
+            model.addAttribute("roleName", roleName);
+            model.addAttribute("isLibrarianOrAdmin", "Librarian".equalsIgnoreCase(roleName) || "Admin".equalsIgnoreCase(roleName) || roleId == 3 || roleId == 4);
+            
+            return "profile";
+        }
+        return "redirect:/login";
+    }
 
     // === 1. LUỒNG ĐĂNG NHẬP (GIỮ NGUYÊN HOÀN HẢO) ===
     @GetMapping("/login")
@@ -55,15 +88,14 @@ public class UserController {
                 int roleId = user.getRole().getRoleId();
                 
                 // Lưu trạng thái quyền vào session phòng hờ giao diện Frontend cần dùng
-                session.setAttribute("isLibrarian", "Librarian".equalsIgnoreCase(roleName) || roleId == 2);
-                session.setAttribute("isAdmin", "Admin".equalsIgnoreCase(roleName) || roleId == 1);
+                session.setAttribute("isLibrarian", "Librarian".equalsIgnoreCase(roleName) || roleId == 3);
+                session.setAttribute("isAdmin", "Admin".equalsIgnoreCase(roleName) || roleId == 4);
                 
-                // 3. ĐIỀU HƯỚNG THÔNG MINH: Nếu là Admin (1) hoặc Thủ thư (2) -> Vào thẳng trang Dashboard
-                if ("Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId == 1 || roleId == 2) {
-                    return "redirect:librarian/inventory"; 
+                // 3. ĐIỀU HƯỚNG THÔNG MINH: Nếu là Admin (4) hoặc Thủ thư (3) -> Vào thẳng trang Dashboard
+                if ("Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId == 4 || roleId == 3) {
+                    return "redirect:/librarian/inventory"; 
                 }
             }
-
             // Mặc định: Nếu là Student (Sinh viên) hoặc Giảng viên lướt trang chung -> Vào màn hình Home
             return "redirect:/home";
         }
