@@ -48,98 +48,17 @@
             </p>
         </div>
 
-        <!-- Search Form -->
-        <form action="/books" method="get" id="search-form"
-              class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 shadow-2xl">
-
-            <!-- Keyword row -->
-            <div class="flex items-center bg-white rounded-xl px-4 py-3 mb-3 shadow-inner">
-                <svg class="w-5 h-5 text-slate-400 shrink-0 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-                <input id="keyword" name="keyword" type="text"
-                       th:value="${keyword}"
-                       placeholder="Nhập tiêu đề, tên tác giả hoặc ISBN..."
-                       class="search-input w-full bg-transparent text-slate-800 font-medium focus:outline-none placeholder-slate-400 text-sm">
-                <button type="button" onclick="document.getElementById('keyword').value=''"
-                        class="text-slate-400 hover:text-slate-600 ml-2 text-lg leading-none">&times;</button>
-            </div>
-
-            <!-- Filter row -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                <!-- Campus dropdown -->
-                <div class="flex items-center bg-white/90 text-slate-700 rounded-xl px-4 py-2.5">
-                    <svg class="w-4 h-4 text-fpt-orange shrink-0 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    <select id="campusId" name="campusId" class="w-full bg-transparent text-sm font-medium focus:outline-none cursor-pointer min-w-0">
-                        <option value="">Tất cả cơ sở</option>
-                        <option th:each="campus : ${campuses}"
-                                th:value="${campus.campusId}"
-                                th:text="${campus.campusName}"
-                                th:selected="${campus.campusId == selectedCampusId}">Campus</option>
-                    </select>
-                </div>
-
-                <!-- Major dropdown -->
-                <div class="flex items-center bg-white/90 text-slate-700 rounded-xl px-4 py-2.5">
-                    <svg class="w-4 h-4 text-fpt-orange shrink-0 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
-                    </svg>
-                    <select id="majorId" name="majorId" class="w-full bg-transparent text-sm font-medium focus:outline-none cursor-pointer min-w-0">
-                        <option value="">Tất cả chuyên ngành</option>
-                        <option value="-1" th:selected="${selectedMajorId == -1}">Sách ngoài chuyên ngành</option>
-                        <option th:each="major : ${majors}"
-                                th:value="${major.majorId}"
-                                th:text="${major.majorName}"
-                                th:selected="${major.majorId == selectedMajorId}">Major</option>
-                    </select>
-                </div>
-
-                <!-- Category dropdown -->
-                <div class="flex items-center bg-white/90 text-slate-700 rounded-xl px-4 py-2.5">
-                    <svg class="w-4 h-4 text-fpt-orange shrink-0 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                    </svg>
-                    <select id="categoryId" name="categoryId" class="w-full bg-transparent text-sm font-medium focus:outline-none cursor-pointer min-w-0">
-                        <option value="">Tất cả thể loại</option>
-                        <option th:each="category : ${categories}"
-                                th:value="${category.categoryId}"
-                                th:text="${category.categoryName}"
-                                th:selected="${category.categoryId == selectedCategoryId}">Category</option>
-                    </select>
-                </div>
-
-                <!-- Search button -->
-                <button type="submit" id="search-btn"
-                        class="bg-fpt-orange hover:bg-fpt-orangeHover text-white py-2.5 px-6 rounded-xl font-bold transition-all text-sm shadow-lg shadow-orange-500/30 flex items-center justify-center space-x-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <span>Tìm kiếm</span>
-                </button>
-            </div>
-
-            <!-- Active filter chips -->
-            <div th:if="${hasSearch}" class="flex flex-wrap gap-2 mt-3">
-                <span th:if="${#strings.length(keyword ?: '') > 0}"
-                      class="inline-flex items-center bg-orange-500/20 text-orange-200 text-xs font-medium px-3 py-1 rounded-full">
-                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 3a1 1 0 012 0v5.5a.5.5 0 001 0V4a1 1 0 112 0v4.5a.5.5 0 001 0V6a1 1 0 112 0v5a7 7 0 11-14 0V9a1 1 0 012 0v2.5a.5.5 0 001 0V4a1 1 0 012 0v4.5a.5.5 0 001 0V3z" clip-rule="evenodd"/></svg>
-                    Từ khoá: <span th:text="' ' + ${keyword}" class="ml-1 font-semibold"></span>
-                </span>
-                <span th:if="${selectedSubjectCode != null and !#strings.isEmpty(selectedSubjectCode)}"
-                      class="inline-flex items-center bg-blue-500/20 text-blue-200 text-xs font-medium px-3 py-1 rounded-full">
-                    Môn học: <span th:text="' ' + ${selectedSubjectCode}" class="ml-1 font-semibold"></span>
-                </span>
-            </div>
-        </form>
+        <!-- Search Form (Fragment) -->
+        <div th:replace="~{fragments/search-bar :: search-form}"></div>
     </div>
 </section>
 
 <!-- ═══════════════════════════════════════════════ RESULTS SECTION ══ -->
 <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
-
+    <div class="flex flex-col lg:flex-row gap-8">
+        
+        <!-- Khối Kết Quả Tìm Kiếm (Bên Trái) -->
+        <div class="flex-grow lg:w-3/4">
     <!-- ── UCG01 Normal Flow: Kết quả tìm kiếm ─────────────────────── -->
     <div th:if="${hasSearch and !noResults}">
         <div class="flex items-center justify-between mb-6">
@@ -157,7 +76,7 @@
             </a>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             <div th:each="book : ${results}" class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm card-hover flex flex-col">
                 <!-- Cover mockup -->
                 <div class="h-40 w-full bg-gradient-to-br flex flex-col justify-between p-4 text-white relative select-none"
@@ -243,13 +162,71 @@
         </th:block>
     </div>
 
+        </div>
+
+        <!-- Cột Sidebar Danh mục (Bên Phải) -->
+        <aside class="w-full lg:w-1/4 flex-shrink-0">
+            <div class="sticky top-24 flex flex-col gap-6">
+                <!-- Chuyên ngành -->
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="bg-fpt-navy text-white px-4 py-3 font-bold text-sm tracking-wide">
+                        CHUYÊN NGÀNH
+                    </div>
+                    <ul class="flex flex-col text-[13px] font-medium text-slate-700 divide-y divide-slate-100">
+                        <li>
+                            <a href="/books" class="block px-4 py-2.5 hover:bg-slate-50 transition-colors"
+                               th:classappend="${selectedMajorId == null ? 'text-fpt-orange font-bold bg-orange-50' : ''}">
+                                Tất cả chuyên ngành
+                            </a>
+                        </li>
+                        <li>
+                            <a th:href="@{/books(majorId=-1)}" class="block px-4 py-2.5 hover:bg-slate-50 transition-colors"
+                               th:classappend="${selectedMajorId != null and selectedMajorId == -1 ? 'text-fpt-orange font-bold bg-orange-50' : ''}">
+                                Sách ngoài chuyên ngành
+                            </a>
+                        </li>
+                        <li th:each="major : ${majors}">
+                            <a th:href="@{/books(majorId=${major.majorId})}" 
+                               class="block px-4 py-2.5 hover:bg-slate-50 transition-colors truncate"
+                               th:title="${major.majorName}"
+                               th:classappend="${selectedMajorId == major.majorId ? 'text-fpt-orange font-bold bg-orange-50' : ''}"
+                               th:text="${major.majorName}">Major</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Thể loại -->
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="bg-fpt-navy text-white px-4 py-3 font-bold text-sm tracking-wide">
+                        DANH MỤC THỂ LOẠI
+                    </div>
+                    <ul class="grid grid-cols-2 text-[13px] font-medium text-slate-700">
+                        <li class="col-span-2 border-b border-slate-100">
+                            <a href="/books" class="block px-4 py-2.5 hover:bg-slate-50 transition-colors"
+                               th:classappend="${selectedCategoryId == null ? 'text-fpt-orange font-bold bg-orange-50' : ''}">
+                                Tất cả
+                            </a>
+                        </li>
+                        <li th:each="category : ${categories}" class="border-b border-slate-100 even:border-l even:border-slate-100">
+                            <a th:href="@{/books(categoryId=${category.categoryId})}" 
+                               class="block px-3 py-2.5 hover:bg-slate-50 transition-colors truncate"
+                               th:title="${category.categoryName}"
+                               th:classappend="${selectedCategoryId == category.categoryId ? 'text-fpt-orange font-bold bg-orange-50' : ''}"
+                               th:text="${category.categoryName}">Category</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+    </div>
 </main>
 
 <!-- ═════════════════════════════════════ THYMELEAF FRAGMENT: BOOK GRID ══ -->
 <!-- Fragment tái sử dụng để render grid sách (dùng cho cả E1 fallback và trang chủ search) -->
 <th:block th:fragment="book-grid(books, campusId)">
     <div th:if="${books != null and !#lists.isEmpty(books)}"
-         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+         class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         <div th:each="book : ${books}" class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm card-hover flex flex-col">
             <div class="h-40 w-full bg-gradient-to-br flex flex-col justify-between p-4 text-white select-none"
                  th:classappend="${book.coverColor}">

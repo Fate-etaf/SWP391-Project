@@ -22,6 +22,8 @@
             }
         }
     </script>
+    <style th:replace="~{fragments/header :: header-style}"></style>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -61,47 +63,7 @@
 <body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col">
 
 <!-- ═══════════════════════════════════════════════════════ NAV BAR ══ -->
-<header class="bg-fpt-dark text-white sticky top-0 z-50 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-20">
-            <div class="flex items-center space-x-3">
-                <div class="bg-fpt-orange text-white p-2.5 rounded-lg font-extrabold text-xl tracking-wider shadow-lg">FPT</div>
-                <div>
-                    <h1 class="text-lg font-bold tracking-tight leading-none text-orange-400">FLMS</h1>
-                    <p class="text-xs text-slate-400 font-medium">Library Management System</p>
-                </div>
-            </div>
-            <nav class="hidden md:flex space-x-8 font-medium text-sm">
-                <a href="/home"  class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Trang chủ</a>
-                <a href="/books" class="text-fpt-orange py-2 border-b-2 border-fpt-orange">Tra cứu sách</a>
-                <a th:if="${session.loggedInUser != null}" href="/reservations" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Đặt chỗ của tôi</a>
-                <a th:if="${session.loggedInUser != null}" href="/borrowing-history" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Lịch sử mượn trả</a>
-                <a href="#"      class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Yêu cầu mượn</a>
-                <a href="#"      class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Đặt phòng học nhóm</a>
-            </nav>
-            <div th:if="${session.loggedInUser != null}" class="hidden lg:flex items-center space-x-4">
-                <div class="text-right">
-                    <p class="text-xs text-slate-400">Xin chào,</p>
-                    <p class="text-sm font-semibold text-slate-100" th:text="${session.loggedInUser.fullName}">Tên Sinh Viên</p>
-                </div>
-                <button th:if="${session.isLibrarian}" onclick="window.location.href='/librarian/create-loan'" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-amber-500/10 flex items-center space-x-1">
-                    <span>📖 Tạo đơn mượn</span>
-                </button>
-                <button onclick="window.location.href='/logout'" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all border border-slate-700 flex items-center space-x-1.5">
-                    <span>Đăng xuất</span>
-                </button>
-            </div>
-            
-            <div th:if="${session.loggedInUser == null}" class="hidden lg:block">
-                <button onclick="window.location.href='/login'" class="bg-fpt-orange hover:bg-fpt-orangeHover text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-fpt-orange/20">
-                    Đăng nhập
-                </button>
-            </div>
-
-        </div>
-    </div>
-</header>
-
+<div th:replace="~{fragments/header :: header('books')}"></div>
 <!-- ═══════════════════════════════════════════════════ BREADCRUMB ══ -->
 <div class="bg-white border-b border-slate-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
@@ -334,11 +296,7 @@
 </main>
 
 <!-- ═══════════════════════════════════════════════════════ FOOTER ══ -->
-<footer class="bg-fpt-dark text-white border-t-4 border-fpt-orange pt-10 pb-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500">
-        &copy; 2026 FPT University Library. Developed by Team SWP391 Group 5.
-    </div>
-</footer>
+<div th:replace="~{fragments/footer :: footer}"></div>
 
 </body>
 </html>
