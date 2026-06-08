@@ -32,7 +32,7 @@ public interface BookService {
      * @param campusId    Campus để lọc số bản sao có sẵn. Null = tất cả campus.
      * @return Danh sách {@link BookSearchResultDTO} sắp xếp theo ngày nhập mới nhất.
      */
-    List<BookSearchResultDTO> searchBooks(String keyword, String subjectCode, Integer campusId);
+    List<BookSearchResultDTO> searchBooks(String keyword, String subjectCode, Integer categoryId, Integer majorId, Integer campusId);
 
     /**
      * UCG01 – E1 Fallback: Lấy 8 cuốn sách mới nhất khi tìm không ra kết quả.

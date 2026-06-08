@@ -70,6 +70,12 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
                b.isbn LIKE CONCAT('%',:keyword,'%'))
           AND (:subjectCode IS NULL OR :subjectCode = '' OR
                b.subject.subjectCode = :subjectCode)
+          AND (:categoryId IS NULL OR
+               EXISTS (SELECT c FROM b.categories c WHERE c.categoryId = :categoryId))
+          AND (:majorId IS NULL OR
+               (:majorId > 0 AND EXISTS (SELECT 1 FROM Major m JOIN m.subjects ms WHERE m.majorId = :majorId AND ms.subjectCode = b.subject.subjectCode)) OR
+               (:majorId = -1 AND (b.subject IS NULL OR NOT EXISTS (SELECT 1 FROM Major m2 JOIN m2.subjects ms2 WHERE ms2.subjectCode = b.subject.subjectCode)))
+              )
           AND (:campusId IS NULL OR
                EXISTS (SELECT bc FROM BookCopy bc
                        WHERE bc.book = b AND bc.campus.campusId = :campusId))
@@ -77,6 +83,8 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     """)
     List<Book> searchBooks(@Param("keyword")     String  keyword,
                            @Param("subjectCode") String  subjectCode,
+                           @Param("categoryId")  Integer categoryId,
+                           @Param("majorId")     Integer majorId,
                            @Param("campusId")    Integer campusId);
 
     // ────────────────────────────────────────────────────────────────────────
@@ -102,4 +110,10 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
      */
     @EntityGraph(attributePaths = {"authors", "categories", "copies", "subject"})
     List<Book> findTop8ByOrderByCreatedAtDesc();
+
+    /**
+     * Lấy 5 cuốn sách ngẫu nhiên theo thể loại (Dùng NEWID() của SQL Server)
+     */
+    @Query(value = "SELECT TOP 5 b.* FROM Books b JOIN BookCategories bc ON b.BookID = bc.BookID WHERE bc.CategoryID = :categoryId ORDER BY NEWID()", nativeQuery = true)
+    List<Book> findTop5RandomByCategory(@Param("categoryId") Integer categoryId);
 }
