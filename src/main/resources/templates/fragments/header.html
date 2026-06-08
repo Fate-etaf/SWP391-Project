@@ -62,7 +62,7 @@
             <div class="right-info">
                 <span class="hours">Open: 08:15 - 21:00 Weekday | 08:00 - 12:00 &amp; 13:00 - 17:00 Weekend</span>
                 <div class="lang-switch">
-                    <a href="#">Vietnamese</a> | <a href="#">Logout</a>
+                    <a href="#">Vietnamese</a>
                 </div>
                 <span th:if="${session.loggedInUser != null}" class="user-name" th:text="${session.loggedInUser.fullName}">Sinh viên</span>
                 <a th:if="${session.loggedInUser != null}" href="/logout" class="btn-logout">Đăng xuất</a>
