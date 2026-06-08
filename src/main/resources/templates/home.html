@@ -3,6 +3,23 @@
 <head>
     <th:block th:replace="~{fragments/header :: head('Welcome to FPTU Library')}"></th:block>
     <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B',
+                            dark: '#0F172A',
+                            orangeHover: '#D95F18'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         /* ── HERO ── */
         .hero {
@@ -53,78 +70,7 @@
             letter-spacing: 0.3px;
         }
 
-        /* Search bar glass style */
-        .glass-search-box {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-            padding: 16px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            max-width: 800px;
-            margin: 0 auto 16px;
-            text-align: left;
-        }
-        .keyword-row {
-            display: flex;
-            align-items: center;
-            background: #fff;
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 12px;
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-        }
-        .search-icon {
-            width: 20px; height: 20px;
-            color: #94a3b8;
-            margin-right: 12px;
-            flex-shrink: 0;
-        }
-        .keyword-input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: #1e293b;
-            font-weight: 500;
-            font-size: 14px;
-            font-family: inherit;
-        }
-        .keyword-input::placeholder { color: #94a3b8; }
-        .keyword-input:focus {
-            box-shadow: 0 0 0 3px rgba(242,113,37,0.25);
-            border-radius: 4px;
-        }
-        .clear-btn {
-            color: #94a3b8; background: none; border: none; font-size: 20px; cursor: pointer; line-height: 1; padding: 0 0 0 8px; margin-left: 8px;
-        }
-        .clear-btn:hover { color: #475569; }
-        .filter-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 12px;
-        }
-        .filter-item {
-            display: flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 12px;
-            padding: 10px 16px;
-        }
-        .filter-select {
-            width: 100%; background: transparent; border: none; outline: none; font-size: 14px; font-weight: 500; color: #334155; cursor: pointer; font-family: inherit;
-        }
-        .submit-btn {
-            background: #e87722;
-            color: white;
-            display: flex; align-items: center; justify-content: center;
-            padding: 10px 24px; border-radius: 12px; border: none;
-            font-weight: 700; font-size: 14px; cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 10px 15px -3px rgba(232,119,34,0.3);
-            font-family: inherit;
-        }
-        .submit-btn:hover { background: #c96210; }
+        /* (Search box CSS moved to Tailwind inside search-bar fragment) */
 
         /* Quick links */
         .quick-links {
@@ -390,71 +336,15 @@
         <p class="hero-subtitle">Tra cứu tài nguyên học thuật – Đặt giữ chỗ – Mượn sách tại tất cả các cơ sở FPT</p>
 
         <!-- Search bar with JS validation & advanced look -->
-        <form action="/books" method="get" id="search-form" onsubmit="if(!this.keyword.value.trim()){ alert('Vui lòng nhập từ khóa tìm kiếm'); return false; }" class="glass-search-box">
-            <!-- Keyword row -->
-            <div class="keyword-row">
-                <svg class="search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-                <input id="keyword" name="keyword" type="text"
-                       placeholder="Nhập tiêu đề, tên tác giả hoặc ISBN..."
-                       class="keyword-input">
-                <button type="button" onclick="document.getElementById('keyword').value=''" class="clear-btn">&times;</button>
-            </div>
-
-            <!-- Filter row -->
-            <div class="filter-row">
-                <!-- Campus select -->
-                <div class="filter-item">
-                    <svg class="w-4 h-4 text-fpt-orange shrink-0 mr-2" style="width:16px; height:16px; color:#e87722; margin-right:8px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    <select id="campusId" name="campusId" class="filter-select">
-                        <option value="">Tất cả cơ sở</option>
-                        <option th:each="campus : ${campuses}" th:value="${campus.campusId}" th:text="${campus.campusName}">Campus</option>
-                    </select>
-                </div>
-
-                <!-- Major select -->
-                <div class="filter-item">
-                    <svg class="w-4 h-4 text-fpt-orange shrink-0 mr-2" style="width:16px; height:16px; color:#e87722; margin-right:8px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
-                    </svg>
-                    <select id="majorId" name="majorId" class="filter-select">
-                        <option value="">Tất cả chuyên ngành</option>
-                        <option value="-1">Sách ngoài chuyên ngành</option>
-                        <option th:each="major : ${majors}" th:value="${major.majorId}" th:text="${major.majorName}">Major</option>
-                    </select>
-                </div>
-
-                <!-- Category select -->
-                <div class="filter-item">
-                    <svg class="w-4 h-4 text-fpt-orange shrink-0 mr-2" style="width:16px; height:16px; color:#e87722; margin-right:8px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                    </svg>
-                    <select id="categoryId" name="categoryId" class="filter-select">
-                        <option value="">Tất cả thể loại</option>
-                        <option th:each="category : ${categories}" th:value="${category.categoryId}" th:text="${category.categoryName}">Category</option>
-                    </select>
-                </div>
-
-                <!-- Search button -->
-                <button type="submit" class="submit-btn">
-                    <svg class="w-4 h-4" style="width:16px; height:16px; margin-right:8px;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <span>Tìm kiếm</span>
-                </button>
-            </div>
-        </form>
-
+        <div th:replace="~{fragments/search-bar :: search-form}"></div>
+    </br>
+    </br>
+    <div>
         <!-- Quick links -->
         <div class="quick-links">
             <a href="#">💬 Chatbot</a>
-            <a href="#">🔍 Advanced Search</a>
             <a href="#">📋 Request material</a>
-            <a href="/books">📚 New material</a>
+            <a href="#">📚 New material</a>
             <a href="#">📖 Read a lot</a>
         </div>
     </div>
@@ -467,14 +357,6 @@
         <a href="/books" class="how-card">
             <div class="icon">📚</div>
             <div class="label">Tra cứu &amp; Đặt sách</div>
-        </a>
-        <a href="/reservations" class="how-card alt">
-            <div class="icon">📋</div>
-            <div class="label">Book List Đặt chỗ</div>
-        </a>
-        <a href="#" class="how-card">
-            <div class="icon">🏫</div>
-            <div class="label">OPAC - Tìm theo cơ sở</div>
         </a>
         <a href="#" class="how-card alt">
             <div class="icon">🔄</div>

@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title}">FPTU Library</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
+    <style th:replace="~{fragments/header :: header-style}"></style>
+</head>
+<body>
+
+<style th:fragment="header-style">
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', Arial, sans-serif; color: #222; background: #fff; line-height: 1.6; }
 
@@ -43,9 +47,7 @@
             .top-bar .site-title { font-size: 16px; }
             .main-nav .inner { overflow-x: auto; }
         }
-    </style>
-</head>
-<body>
+</style>
 
 <div th:fragment="header(activeNav)">
     <!-- ═══════════════════ TOP BAR ═══════════════════ -->
@@ -89,11 +91,9 @@
                 <div class="dropdown-menu">
                     <a href="/services/borrowing">Dịch vụ mượn, trả tài liệu</a>
                     <a href="/services/renewal">Dịch vụ gia hạn tài liệu</a>
-                    <a href="#">Bạn đọc tự gia hạn tài liệu</a>
                     <a href="#">Dịch vụ đề nghị tài liệu</a>
                     <a href="/services/group-study">Dịch vụ phòng học nhóm</a>
                     <a href="#">Phí thư viện</a>
-                    <a href="#">MyEnglishLAB</a>
                 </div>
             </div>
             
