@@ -60,7 +60,7 @@ public class UserController {
                 
                 // 3. ĐIỀU HƯỚNG THÔNG MINH: Nếu là Admin (1) hoặc Thủ thư (2) -> Vào thẳng trang Dashboard
                 if ("Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId == 1 || roleId == 2) {
-                    return "redirect:/inventory/dashboard"; 
+                    return "redirect:librarian/inventory"; 
                 }
             }
 
