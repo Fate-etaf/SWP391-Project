@@ -40,5 +40,9 @@ public class User {
     @Column(name = "BorrowingLocked", nullable = false)
     @Builder.Default
     private Boolean borrowingLocked = false;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "RoleID")
+    private Role role;
 }
 
