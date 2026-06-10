@@ -100,11 +100,8 @@
             <a href="/books" th:classappend="${activeNav == 'collection' ? 'active' : ''}">Bộ sưu tập</a>
             <a href="#" th:classappend="${activeNav == 'news' ? 'active' : ''}">Tin tức</a>
             
-            <span th:if="${session.loggedInUser != null}" style="margin-left:auto; color:#e87722; font-size:14px; font-weight:600; padding:14px 8px;" th:text="${session.loggedInUser.fullName}"></span>
-            <a th:if="${session.isLibrarian}" href="/librarian/create-loan" class="nav-item nav-librarian-btn" th:style="${session.loggedInUser != null ? '' : 'margin-left:auto'}">📖 Tạo đơn mượn</a>
+            <a th:if="${session.loggedInUser != null}" href="/profile" style="margin-left:auto; color:#e87722; font-size:14px; font-weight:600; padding:14px 8px; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" th:text="${session.loggedInUser.fullName}"></a>
             
-            <a th:if="${session.loggedInUser != null}" href="/reservations" th:classappend="${activeNav == 'reservations' ? 'active' : ''}">Đặt chỗ của tôi</a>
-            <a th:if="${session.loggedInUser != null}" href="/borrowing-history" th:classappend="${activeNav == 'history' ? 'active' : ''}">Lịch sử mượn trả</a>
         </div>
     </nav>
 </div>

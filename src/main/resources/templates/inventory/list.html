@@ -8,6 +8,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false },
+            theme: { extend: { colors: { fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A', orangeHover: '#D95F18' } } } }
+        }
+    </script>
+    <style th:replace="~{fragments/header :: header-style}"></style>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
     <style>
         /* ─── Design Tokens ─────────────────────────────────────────────────── */
         :root {
@@ -56,9 +65,7 @@
 
         /* ─── Hero / Page Header ─────────────────────────────────────────────── */
         .page-hero {
-            padding: 3rem 2rem 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
+            padding: 3rem 0 2rem;
         }
 
         .hero-title {
@@ -79,9 +86,7 @@
 
         /* ─── Toolbar ────────────────────────────────────────────────────────── */
         .toolbar {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem 1.5rem;
+            padding: 0 0 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -140,9 +145,7 @@
 
         /* ─── Books Grid ─────────────────────────────────────────────────────── */
         .books-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem 4rem;
+            padding: 0 0 4rem;
         }
 
         .books-grid {
@@ -460,18 +463,23 @@
 </head>
 <body>
 <!-- ═══ NAVIGATION ══════════════════════════════════════════════════════════ -->
-    <header th:replace="~{fragments/navbar :: navbar}"></header>
+    <div th:replace="~{fragments/header :: header('librarian')}"></div>
 <!-- background decoration -->
 <div class="orb orb-1" aria-hidden="true"></div>
 <div class="orb orb-2" aria-hidden="true"></div>
 
 
 
-<!-- ═══ PAGE HERO ══════════════════════════════════════════════════════════ -->
-<div class="page-hero">
-    <h1 class="hero-title">Book Catalog</h1>
-    <p class="hero-subtitle">Explore books across all FPT University campuses</p>
-</div>
+<main class="flex-grow max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
+    <!-- SIDEBAR -->
+    <div th:replace="~{fragments/sidebar :: sidebar('list')}"></div>
+
+    <div class="flex-grow min-w-0">
+        <!-- ═══ PAGE HERO ══════════════════════════════════════════════════════════ -->
+        <div class="page-hero">
+            <h1 class="hero-title">Book Catalog</h1>
+            <p class="hero-subtitle">Explore books across all FPT University campuses</p>
+        </div>
 
 <!-- ═══ TOOLBAR ════════════════════════════════════════════════════════════ -->
 <div class="toolbar">
@@ -590,7 +598,10 @@
         <h2>No books in the catalog yet</h2>
         <p>Add books via the Librarian dashboard or import them from the acquisition module.</p>
     </div>
+    </div>
 </div>
+    </div>
+</main>
 
 <!-- ═══ CLIENT-SIDE SEARCH (no page reload) ════════════════════════════════ -->
 <script>
@@ -612,6 +623,7 @@
         }
     })();
 </script>
+<div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>
 
