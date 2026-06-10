@@ -19,6 +19,7 @@ import com.swp5.library_management.entity.Campus;
 import com.swp5.library_management.entity.Category;
 import com.swp5.library_management.repository.CampusRepository;
 import com.swp5.library_management.repository.CategoryRepository;
+import com.swp5.library_management.repository.ShelfRepository;
 import com.swp5.library_management.service.BookService;
 import com.swp5.library_management.service.InventoryService;
 import com.swp5.library_management.service.dto.InventoryOverviewDTO;
@@ -30,15 +31,18 @@ public class InventoryController {
     private final InventoryService inventoryService;
     private final CampusRepository campusRepository;
     private final CategoryRepository categoryRepository;
+    private final ShelfRepository shelfRepository;
     private final BookService      bookService;
 
     public InventoryController(InventoryService inventoryService,
                                CampusRepository campusRepository,
                                CategoryRepository categoryRepository,
+                               ShelfRepository shelfRepository,
                                BookService      bookService) {
         this.inventoryService = inventoryService;
         this.campusRepository = campusRepository;
         this.categoryRepository = categoryRepository;
+        this.shelfRepository = shelfRepository;
         this.bookService = bookService;
     }
 
@@ -51,6 +55,7 @@ public class InventoryController {
      @GetMapping("/inventory/add")
     public String showAddBookForm(Model model) {
         model.addAttribute("bookForm", new AddBookForm());
+        model.addAttribute("shelves", shelfRepository.findAll());
         return "inventory/add";
     }
 
@@ -73,7 +78,8 @@ public class InventoryController {
             Model model) {
         try {
             BookDetailDTO book = bookService.getBookDetail(id, campusId);
-            model.addAttribute("book",             book);
+            System.out.println("DTO copies size = " + book.getCopies().size());
+            model.addAttribute("book", book);
             model.addAttribute("campuses",         campusRepository.findAll());
             model.addAttribute("selectedCampusId", campusId);
             return "inventory/detail";

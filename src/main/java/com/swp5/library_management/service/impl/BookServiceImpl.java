@@ -38,19 +38,22 @@ public class BookServiceImpl implements BookService {
     private final PublisherRepository publisherRepository;
     private final SubjectRepository   subjectRepository;
     private final CampusRepository    campusRepository;
+    private final ShelfRepository     shelfRepository;
 
     public BookServiceImpl(BookRepository bookRepository,
                            BookCopyRepository bookCopyRepository,
                            AuthorRepository authorRepository,
                            PublisherRepository publisherRepository,
                            SubjectRepository subjectRepository,
-                           CampusRepository campusRepository) {
+                           CampusRepository campusRepository,
+                           ShelfRepository shelfRepository) {
         this.bookRepository      = bookRepository;
         this.bookCopyRepository  = bookCopyRepository;
         this.authorRepository    = authorRepository;
         this.publisherRepository = publisherRepository;
         this.subjectRepository   = subjectRepository;
         this.campusRepository    = campusRepository;
+        this.shelfRepository     = shelfRepository;
     }
 
     // ── Librarian: getAllBooks ─────────────────────────────────────────────────
@@ -109,7 +112,7 @@ public class BookServiceImpl implements BookService {
         book.setCoverImageUrl(form.getCoverImageUrl());
         book.setDescription(form.getDescription());
         book.setEdition(form.getEdition());
-        book.setDefaultShelfCode(form.getDefaultShelfCode());
+        book.setShelfCode(form.getShelfCode());
         book.setCreatedAt(LocalDateTime.now());
         book.setAuthors(authors);
         book.setPublisher(publisher);
@@ -126,7 +129,9 @@ public class BookServiceImpl implements BookService {
                 defaultCampus = campusRepository.findById(campusId).orElse(null);
             }
             System.out.println("DEBUG SAVEBOOK: defaultCampus=" + (defaultCampus == null ? "null" : defaultCampus.getCampusName()));
-
+            Shelf shelf = shelfRepository
+            .findById(saved.getShelfCode())
+            .orElseThrow();
             if (defaultCampus != null) {
                 for (int i = 1; i <= form.getCopies(); i++) {
                     String copyId = "BOOK-" + saved.getBookId() + "-" + i;
@@ -135,6 +140,7 @@ public class BookServiceImpl implements BookService {
                             .copyId(copyId)
                             .book(saved)
                             .campus(defaultCampus)
+                            .shelf(shelf)
                             .copyStatus("Available")
                             .conditionStatus("Good")
                             .acquiredAt(LocalDateTime.now())
@@ -189,13 +195,16 @@ public class BookServiceImpl implements BookService {
      */
     @Override
     public BookDetailDTO getBookDetail(Integer bookId, Integer campusId) {
+        
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new NoSuchElementException(
                         "Book not found with id: " + bookId));
-
+            System.out.println("Book ID = " + bookId);
+            System.out.println("Copies from entity = " + book.getCopies().size());
         // ── Lọc và sắp xếp bản sao theo campus ──────────────────────────────
         List<BookCopy> copies;
         if (campusId != null) {
+            
             copies = book.getCopies().stream()
                     .filter(c -> c.getCampus().getCampusId().equals(campusId))
                     .collect(Collectors.toList());

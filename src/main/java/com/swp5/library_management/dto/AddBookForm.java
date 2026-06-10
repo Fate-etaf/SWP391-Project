@@ -19,7 +19,7 @@ public class AddBookForm {
     // ── New librarian fields ───────────────────────────────────────────────────
     private String publisherName;   // resolved to Publisher entity (find or create)
     private String edition;         // e.g. "3rd Edition"
-    private String defaultShelfCode; // raw shelf code string stored on the book
+    private String shelfCode;      // must match an existing Shelf.shelfCode in the selected campus;
     private String subjectCode;     // must match an existing Subject.subjectCode
     private Integer copies;         // number of BookCopy records to create on save
     private Integer campusId;       // campus to create the copies in
@@ -53,8 +53,8 @@ public class AddBookForm {
     public String getEdition() { return edition; }
     public void setEdition(String edition) { this.edition = edition; }
 
-    public String getDefaultShelfCode() { return defaultShelfCode; }
-    public void setDefaultShelfCode(String defaultShelfCode) { this.defaultShelfCode = defaultShelfCode; }
+    public String getShelfCode() { return shelfCode; }
+    public void setShelfCode(String shelfCode) { this.shelfCode = shelfCode; }
 
     public String getSubjectCode() { return subjectCode; }
     public void setSubjectCode(String subjectCode) { this.subjectCode = subjectCode; }
