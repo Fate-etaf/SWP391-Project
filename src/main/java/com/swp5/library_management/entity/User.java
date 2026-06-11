@@ -1,7 +1,22 @@
 package com.swp5.library_management.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import java.util.HashSet;
+import java.util.Set;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "Users",schema = "dbo")
@@ -44,5 +59,27 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RoleID")
     private Role role;
+    
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "UserRoles",
+        schema = "dbo",
+        joinColumns = @JoinColumn(name = "UserID"),
+        inverseJoinColumns = @JoinColumn(name = "RoleID")
+    )
+    @Builder.Default
+    private Set<Role> roles = new HashSet<>();
+
+    // Hàm tiện ích để Controller và HTML kiểm tra quyền 
+    public boolean isLibrarian() {
+        if (this.roles == null || this.roles.isEmpty()) return false;
+        return this.roles.stream()
+                .anyMatch(role -> "Librarian".equalsIgnoreCase(role.getRoleName()));
+    }
+
+    // Thêm thủ công Getter cho userId để IDE không báo lỗi
+    public String getUserId() {
+        return this.userId;
+    }
 }
 
