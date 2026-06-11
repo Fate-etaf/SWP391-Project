@@ -51,7 +51,7 @@ public interface HomeService {
     List<FeaturedBookDTO> getFeaturedBooks();
 
     /**
-     * Lấy tất cả các thể loại, mỗi thể loại kèm theo 5 sách ngẫu nhiên.
+     * Lấy tất cả các chuyên ngành và sách ngoài chuyên ngành, mỗi chuyên ngành kèm theo 5 sách ngẫu nhiên.
      */
-    List<com.swp5.library_management.dto.CategorySectionDTO> getCategoriesWithRandomBooks();
+    List<com.swp5.library_management.dto.BookSectionDTO> getMajorsWithRandomBooks();
 }

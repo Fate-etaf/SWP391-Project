@@ -6,7 +6,7 @@
 <body>
 
 <!-- Fragment: search-form -->
-<form th:fragment="search-form" action="/books" method="get" id="search-form"
+<form th:fragment="search-form" th:action="${searchAction != null ? searchAction : '/books'}" method="get" id="search-form"
       class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 shadow-2xl w-full max-w-4xl mx-auto text-left">
 
     <!-- Keyword row -->
