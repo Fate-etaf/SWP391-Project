@@ -99,7 +99,17 @@
             
             <a href="/books" th:classappend="${activeNav == 'collection' ? 'active' : ''}">Bộ sưu tập</a>
             <a href="#" th:classappend="${activeNav == 'news' ? 'active' : ''}">Tin tức</a>
-            
+
+            <th:block th:if="${session.loggedInUser != null and session.loggedInUser.isLibrarian()}">
+                <div class="dropdown">
+                    <span class="nav-item" style="color: #e87722; font-weight: 700;">Quản trị Kho ▾</span>
+                    <div class="dropdown-menu">
+                        <a href="/librarian/inventory/dashboard">📊 Dashboard Kho sách</a>
+                        <a href="/inventory/transfers">🚚 Luân chuyển sách</a>
+                    </div>
+                </div>
+            </th:block>
+
             <a th:if="${session.loggedInUser != null}" href="/profile" style="margin-left:auto; color:#e87722; font-size:14px; font-weight:600; padding:14px 8px; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" th:text="${session.loggedInUser.fullName}"></a>
             
         </div>

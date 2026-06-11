@@ -138,7 +138,7 @@
     <!-- JS LOGIC -->
     <script>
         async function loadFilters() {
-            const [campRes, catRes] = await Promise.all([fetch('/api/campuses'), fetch('/api/categories')]);
+            const [campRes, catRes] = await Promise.all([fetch('/librarian/api/campuses'), fetch('/librarian/api/categories')]);
             if (campRes.ok) {
                 const campuses = await campRes.json();
                 const sel = document.getElementById('filter-campus');
@@ -156,7 +156,7 @@
         }
 
         async function fetchStats(params) {
-            const url = params ? ('/api/inventory/stats?' + params) : '/api/inventory/overview';
+            const url = params ? ('/librarian/api/inventory/stats?' + params) : '/librarian/api/inventory/overview';
             const res = await fetch(url);
             if (!res.ok) return null;
             return res.json();
