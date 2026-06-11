@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
     <title>Inventory Dashboard</title>
@@ -15,6 +15,7 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-between relative overflow-x-hidden">
 
@@ -132,38 +133,39 @@
         </div>
         </div>
     </main>
+    </main>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    async function loadFilters() {
-        const [campRes, catRes] = await Promise.all([fetch('/api/campuses'), fetch('/api/categories')]);
-        if (campRes.ok) {
-            const campuses = await campRes.json();
-            const sel = document.getElementById('filter-campus');
-            campuses.forEach(c => {
-                const o = document.createElement('option'); o.value = c.campusId; o.text = c.campusName; sel.appendChild(o);
-            });
+    <!-- JS LOGIC -->
+    <script>
+        async function loadFilters() {
+            const [campRes, catRes] = await Promise.all([fetch('/librarian/api/campuses'), fetch('/librarian/api/categories')]);
+            if (campRes.ok) {
+                const campuses = await campRes.json();
+                const sel = document.getElementById('filter-campus');
+                campuses.forEach(c => {
+                    const o = document.createElement('option'); o.value = c.campusId; o.text = c.campusName; sel.appendChild(o);
+                });
+            }
+            if (catRes.ok) {
+                const cats = await catRes.json();
+                const sel = document.getElementById('filter-category');
+                cats.forEach(c => {
+                    const o = document.createElement('option'); o.value = c.categoryId; o.text = c.categoryName; sel.appendChild(o);
+                });
+            }
         }
-        if (catRes.ok) {
-            const cats = await catRes.json();
-            const sel = document.getElementById('filter-category');
-            cats.forEach(c => {
-                const o = document.createElement('option'); o.value = c.categoryId; o.text = c.categoryName; sel.appendChild(o);
-            });
+
+        async function fetchStats(params) {
+            const url = params ? ('/librarian/api/inventory/stats?' + params) : '/librarian/api/inventory/overview';
+            const res = await fetch(url);
+            if (!res.ok) return null;
+            return res.json();
         }
-    }
 
-    async function fetchStats(params) {
-        const url = params ? ('/api/inventory/stats?' + params) : '/api/inventory/overview';
-        const res = await fetch(url);
-        if (!res.ok) return null;
-        return res.json();
-    }
-
-    async function renderOverview(data) {
-        const tbody = document.getElementById('overview-body');
-        tbody.innerHTML = '';
-        if (!data || !data.campuses) return;
+        async function renderOverview(data) {
+            const tbody = document.getElementById('overview-body');
+            tbody.innerHTML = '';
+            if (!data || !data.campuses) return;
 
         data.campuses.forEach(c => {
             const tr = document.createElement('tr');
@@ -174,9 +176,9 @@
             tbody.appendChild(tr);
         });
 
-        updateSummary(data.campuses);
-        updateChart(data.campuses);
-    }
+            updateSummary(data.campuses);
+            updateChart(data.campuses);
+        }
 
     let inventoryChart = null;
     function createChart() {
@@ -240,40 +242,62 @@
         inventoryChart.update();
     }
 
-    function updateSummary(campuses) {
-        const totalStock = campuses.reduce((sum, c) => sum + (c.totalCopies || 0), 0);
-        const totalBorrowed = campuses.reduce((sum, c) => sum + (c.borrowed || 0), 0);
-        const totalOverdue = campuses.reduce((sum, c) => sum + (c.overdue || 0), 0);
-        const activeCampuses = campuses.length;
+        function updateSummary(campuses) {
+            const totalStock = campuses.reduce((sum, c) => sum + (c.totalCopies || 0), 0);
+            const totalBorrowed = campuses.reduce((sum, c) => sum + (c.borrowed || 0), 0);
+            const totalOverdue = campuses.reduce((sum, c) => sum + (c.overdue || 0), 0);
+            const activeCampuses = campuses.length;
 
-        document.getElementById('summary-stock').textContent = totalStock;
-        document.getElementById('summary-borrowed').textContent = totalBorrowed;
-        document.getElementById('summary-overdue').textContent = totalOverdue;
-        document.getElementById('summary-campuses').textContent = activeCampuses;
-    }
+            // Update DOM with formatted numbers
+            document.getElementById('summary-stock').textContent = totalStock.toLocaleString();
+            document.getElementById('summary-borrowed').textContent = totalBorrowed.toLocaleString();
+            document.getElementById('summary-overdue').textContent = totalOverdue.toLocaleString();
+            document.getElementById('summary-campuses').textContent = activeCampuses.toLocaleString();
+        }
 
-    document.getElementById('apply-filters').addEventListener('click', async () => {
-        const campusId = document.getElementById('filter-campus').value;
-        const categoryId = document.getElementById('filter-category').value;
-        const from = document.getElementById('filter-from').value;
-        const to = document.getElementById('filter-to').value;
-        const params = new URLSearchParams();
-        if (campusId) params.set('campusId', campusId);
-        if (categoryId) params.set('categoryId', categoryId);
-        if (from) params.set('from', from);
-        if (to) params.set('to', to);
-        const data = await fetchStats(params.toString());
-        await renderOverview(data);
-    });
+        document.getElementById('apply-filters').addEventListener('click', async () => {
+            const campusId = document.getElementById('filter-campus').value;
+            const categoryId = document.getElementById('filter-category').value;
+            const from = document.getElementById('filter-from').value;
+            const to = document.getElementById('filter-to').value;
+            const params = new URLSearchParams();
+            if (campusId) params.set('campusId', campusId);
+            if (categoryId) params.set('categoryId', categoryId);
+            if (from) params.set('from', from);
+            if (to) params.set('to', to);
+            const data = await fetchStats(params.toString());
+            await renderOverview(data);
+        });
 
-    loadFilters();
-    (async () => {
-        const data = await fetchStats();
-        await renderOverview(data);
-    })();
-    setInterval(async () => { const d = await fetchStats(); await renderOverview(d); }, 15000);
-</script>
-
+        // Init
+        loadFilters();
+        (async () => {
+            const data = await fetchStats();
+            await renderOverview(data);
+        })();
+        
+        // Auto refresh every 15s
+        setInterval(async () => { 
+            // Giữ lại tham số bộ lọc khi tự động refresh
+            const campusId = document.getElementById('filter-campus').value;
+            const categoryId = document.getElementById('filter-category').value;
+            const from = document.getElementById('filter-from').value;
+            const to = document.getElementById('filter-to').value;
+            
+            let paramsString = "";
+            if (campusId || categoryId || from || to) {
+                const params = new URLSearchParams();
+                if (campusId) params.set('campusId', campusId);
+                if (categoryId) params.set('categoryId', categoryId);
+                if (from) params.set('from', from);
+                if (to) params.set('to', to);
+                paramsString = params.toString();
+            }
+            
+            const d = await fetchStats(paramsString); 
+            await renderOverview(d); 
+        }, 15000);
+    </script>
     <div class="relative z-10">
         <div th:replace="~{fragments/footer :: footer}"></div>
     </div>
