@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,20 +16,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.swp5.library_management.dto.AddBookForm;
 import com.swp5.library_management.dto.BookDetailDTO;
+import com.swp5.library_management.dto.BookSearchResultDTO;
 import com.swp5.library_management.entity.Campus;
 import com.swp5.library_management.entity.Category;
 import com.swp5.library_management.repository.CampusRepository;
 import com.swp5.library_management.repository.CategoryRepository;
+import com.swp5.library_management.repository.MajorRepository;
 import com.swp5.library_management.repository.ShelfRepository;
+import com.swp5.library_management.repository.SubjectRepository;
 import com.swp5.library_management.service.BookService;
+import com.swp5.library_management.service.HomeService;
 import com.swp5.library_management.service.InventoryService;
 import com.swp5.library_management.service.dto.InventoryOverviewDTO;
-
-import com.swp5.library_management.repository.MajorRepository;
-import com.swp5.library_management.repository.SubjectRepository;
-import com.swp5.library_management.service.HomeService;
-import org.springframework.util.StringUtils;
-import com.swp5.library_management.dto.BookSearchResultDTO;
 
 @Controller
 @RequestMapping("/librarian")
@@ -139,7 +138,7 @@ public class InventoryController {
             return "error/404";
         }
     }
-    @GetMapping("/inventory")
+    @GetMapping("/inventory/dashboard")
     public String dashboard(Model model) {
         return "inventory/dashboard";
     }

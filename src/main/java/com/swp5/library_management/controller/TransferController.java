@@ -21,7 +21,7 @@ import jakarta.servlet.http.HttpSession;
 
 
 @Controller
-@RequestMapping("/inventory/transfers")
+@RequestMapping("/librarian/inventory/transfers")
 public class TransferController {
 
     private final CampusRepository campusRepository;

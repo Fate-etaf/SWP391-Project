@@ -532,7 +532,7 @@
                         <div>
                             <h3 class="text-xl font-extrabold text-white">Kết quả tìm kiếm</h3>
                             <p class="text-sm text-slate-400 mt-0.5">
-                                Tìm thấy <span class="font-bold text-fpt-orange" th:text="${#lists.size(results)}">0</span> tài liệu phù hợp
+                                Tìm thấy <span class="font-bold text-fpt-orange" th:text="${results != null ? #lists.size(results) : 0}">0</span> tài liệu phù hợp
                             </p>
                         </div>
                         <a href="/librarian/inventory/list" class="text-sm text-slate-500 hover:text-fpt-orange transition-colors flex items-center">
