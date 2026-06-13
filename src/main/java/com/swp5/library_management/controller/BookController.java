@@ -70,13 +70,13 @@ public class BookController {
             model.addAttribute("results", results);
             model.addAttribute("noResults", results.isEmpty());
             
-            // Nếu không có kết quả, có thể hiển thị lại categorySections
+            // Nếu không có kết quả, hiển thị lại majorSections
             if (results.isEmpty()) {
-                model.addAttribute("categorySections", homeService.getCategoriesWithRandomBooks());
+                model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
             }
         } else {
-            // Hiển thị fallback (category suggestion)
-            model.addAttribute("categorySections", homeService.getCategoriesWithRandomBooks());
+            // Hiển thị gợi ý theo chuyên ngành
+            model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
         }
 
         // Populate dropdowns

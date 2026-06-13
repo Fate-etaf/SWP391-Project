@@ -112,8 +112,14 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     List<Book> findTop8ByOrderByCreatedAtDesc();
 
     /**
-     * Lấy 5 cuốn sách ngẫu nhiên theo thể loại (Dùng NEWID() của SQL Server)
+     * Lấy 5 cuốn sách ngẫu nhiên theo chuyên ngành (Dùng NEWID() của SQL Server)
      */
-    @Query(value = "SELECT TOP 5 b.* FROM Books b JOIN BookCategories bc ON b.BookID = bc.BookID WHERE bc.CategoryID = :categoryId ORDER BY NEWID()", nativeQuery = true)
-    List<Book> findTop5RandomByCategory(@Param("categoryId") Integer categoryId);
+    @Query(value = "SELECT TOP 5 b.* FROM Books b JOIN MajorSubjects ms ON b.SubjectCode = ms.SubjectCode WHERE ms.MajorID = :majorId ORDER BY NEWID()", nativeQuery = true)
+    List<Book> findTop5RandomByMajor(@Param("majorId") Integer majorId);
+
+    /**
+     * Lấy 5 cuốn sách ngẫu nhiên không thuộc chuyên ngành nào (Dùng NEWID() của SQL Server)
+     */
+    @Query(value = "SELECT TOP 5 b.* FROM Books b WHERE b.SubjectCode IS NULL OR NOT EXISTS (SELECT 1 FROM MajorSubjects ms WHERE ms.SubjectCode = b.SubjectCode) ORDER BY NEWID()", nativeQuery = true)
+    List<Book> findTop5RandomOutsideMajors();
 }

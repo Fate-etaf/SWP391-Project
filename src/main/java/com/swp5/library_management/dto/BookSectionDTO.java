@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategorySectionDTO {
-    private String categoryName;
+public class BookSectionDTO {
+    private String sectionName;
     private List<FeaturedBookDTO> books;
 }

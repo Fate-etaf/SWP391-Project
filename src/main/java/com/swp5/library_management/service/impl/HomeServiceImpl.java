@@ -10,6 +10,7 @@ import com.swp5.library_management.repository.BookRepository;
 import com.swp5.library_management.repository.CampusRepository;
 import com.swp5.library_management.repository.CategoryRepository;
 import com.swp5.library_management.repository.UserRepository;
+import com.swp5.library_management.repository.MajorRepository;
 import com.swp5.library_management.service.HomeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +31,7 @@ public class HomeServiceImpl implements HomeService {
     private final CampusRepository    campusRepository;
     private final CategoryRepository  categoryRepository;
     private final UserRepository      userRepository;   // ← Đã inject được vì User entity tồn tại
+    private final MajorRepository     majorRepository;
 
     // ── Bảng màu xoay vòng cho thẻ Category ───────────────────────────────────
     private static final String[] CATEGORY_BG_CLASSES = {
@@ -141,49 +143,69 @@ public class HomeServiceImpl implements HomeService {
                     .categoryName(categoryName)
                     .available(book.getAvailableCount() > 0)
                     .coverColor(COVER_COLORS[i % COVER_COLORS.length])
+                    .coverImageUrl(book.getCoverImageUrl())
                     .build());
         }
         return result;
     }
 
     @Override
-    public List<com.swp5.library_management.dto.CategorySectionDTO> getCategoriesWithRandomBooks() {
-        List<com.swp5.library_management.entity.Category> allCategories = categoryRepository.findAll();
-        List<com.swp5.library_management.dto.CategorySectionDTO> result = new ArrayList<>();
+    public List<com.swp5.library_management.dto.BookSectionDTO> getMajorsWithRandomBooks() {
+        List<com.swp5.library_management.entity.Major> allMajors = majorRepository.findAll();
+        List<com.swp5.library_management.dto.BookSectionDTO> result = new ArrayList<>();
 
-        for (com.swp5.library_management.entity.Category category : allCategories) {
-            List<com.swp5.library_management.entity.Book> randomBooks = bookRepository.findTop5RandomByCategory(category.getCategoryId());
+        for (com.swp5.library_management.entity.Major major : allMajors) {
+            List<com.swp5.library_management.entity.Book> randomBooks = bookRepository.findTop5RandomByMajor(major.getMajorId());
             
             if (randomBooks.isEmpty()) {
                 continue;
             }
 
-            List<com.swp5.library_management.dto.FeaturedBookDTO> bookDTOs = new ArrayList<>();
-            for (int i = 0; i < randomBooks.size(); i++) {
-                com.swp5.library_management.entity.Book book = randomBooks.get(i);
-                
-                String subjectCode = (book.getSubject() != null)
-                        ? book.getSubject().getSubjectCode()
-                        : "N/A";
-                        
-                bookDTOs.add(com.swp5.library_management.dto.FeaturedBookDTO.builder()
-                        .bookId(book.getBookId())
-                        .title(book.getTitle())
-                        .authorNames(book.getAuthorNames())
-                        .subjectCode(subjectCode)
-                        .isbn(book.getIsbn() != null ? book.getIsbn() : "N/A")
-                        .categoryName(category.getCategoryName())
-                        .available(book.getAvailableCount() > 0)
-                        .coverColor(COVER_COLORS[i % COVER_COLORS.length])
-                        .build());
-            }
-
-            result.add(com.swp5.library_management.dto.CategorySectionDTO.builder()
-                    .categoryName(category.getCategoryName())
-                    .books(bookDTOs)
+            result.add(com.swp5.library_management.dto.BookSectionDTO.builder()
+                    .sectionName(major.getMajorName())
+                    .books(mapToFeaturedBookDTOs(randomBooks))
                     .build());
         }
+
+        // Sách ngoài chuyên ngành
+        List<com.swp5.library_management.entity.Book> outsideBooks = bookRepository.findTop5RandomOutsideMajors();
+        if (!outsideBooks.isEmpty()) {
+            result.add(com.swp5.library_management.dto.BookSectionDTO.builder()
+                    .sectionName("Sách ngoài chuyên ngành")
+                    .books(mapToFeaturedBookDTOs(outsideBooks))
+                    .build());
+        }
+
         return result;
+    }
+
+    private List<com.swp5.library_management.dto.FeaturedBookDTO> mapToFeaturedBookDTOs(List<com.swp5.library_management.entity.Book> books) {
+        List<com.swp5.library_management.dto.FeaturedBookDTO> bookDTOs = new ArrayList<>();
+        for (int i = 0; i < books.size(); i++) {
+            com.swp5.library_management.entity.Book book = books.get(i);
+            
+            String subjectCode = (book.getSubject() != null)
+                    ? book.getSubject().getSubjectCode()
+                    : "N/A";
+
+            String categoryName = "N/A";
+            if (book.getCategories() != null && !book.getCategories().isEmpty()) {
+                categoryName = book.getCategories().iterator().next().getCategoryName();
+            }
+                    
+            bookDTOs.add(com.swp5.library_management.dto.FeaturedBookDTO.builder()
+                    .bookId(book.getBookId())
+                    .title(book.getTitle())
+                    .authorNames(book.getAuthorNames())
+                    .subjectCode(subjectCode)
+                    .isbn(book.getIsbn() != null ? book.getIsbn() : "N/A")
+                    .categoryName(categoryName)
+                    .available(book.getAvailableCount() > 0)
+                    .coverColor(COVER_COLORS[i % COVER_COLORS.length])
+                    .coverImageUrl(book.getCoverImageUrl())
+                    .build());
+        }
+        return bookDTOs;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
