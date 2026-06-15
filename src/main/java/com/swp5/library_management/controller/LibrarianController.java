@@ -58,6 +58,9 @@ public class LibrarianController {
             return "redirect:/login";
         }
 
+        patronId = patronId.trim();
+        copyId = copyId.trim();
+
         // Validate patron
         Optional<User> patronOpt = userRepository.findById(patronId);
         if (patronOpt.isEmpty()) {

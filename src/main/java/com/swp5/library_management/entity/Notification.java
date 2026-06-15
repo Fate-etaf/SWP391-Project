@@ -54,4 +54,9 @@ public class Notification {
     @Column(name = "CreatedAt", nullable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    /** Trạng thái đã xem trên web UI */
+    @Column(name = "IsRead", nullable = false)
+    @Builder.Default
+    private boolean read = false;
 }
