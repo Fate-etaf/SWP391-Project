@@ -80,6 +80,15 @@ public class EmailServiceImpl implements EmailService {
         sendHtmlEmail(toEmail, subject, body);
     }
 
+    // ── Gửi xác nhận đề nghị tài liệu mới ─────────────────────────────────
+
+    @Override
+    public void sendMaterialRequestConfirmation(String toEmail, String patronName, String bookTitle, String author, String priority) {
+        String subject = "[Thư viện FPT] Đăng ký đề nghị tài liệu mới thành công";
+        String body = buildMaterialRequestConfirmBody(patronName, bookTitle, author, priority);
+        sendHtmlEmail(toEmail, subject, body);
+    }
+
     // ── Helper: Gửi email HTML ────────────────────────────────────────────
 
     private void sendHtmlEmail(String to, String subject, String htmlBody) {
@@ -248,5 +257,39 @@ public class EmailServiceImpl implements EmailService {
                   </div>
                 </body></html>
                 """.formatted(patronName, bookTitle, copyId, dueDate);
+    }
+
+    private String buildMaterialRequestConfirmBody(String patronName, String bookTitle, String author, String priority) {
+        return """
+                <html><body style="font-family: Arial, sans-serif; color: #333;">
+                  <div style="max-width:600px; margin:auto; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+                    <div style="background:#e87722; padding:20px; text-align:center;">
+                      <h2 style="color:#fff; margin:0;">📚 Thư viện FPT University</h2>
+                    </div>
+                    <div style="padding:24px;">
+                      <p>Xin chào <strong>%s</strong>,</p>
+                      <p>Yêu cầu đề nghị tài liệu mới của bạn đã được tiếp nhận thành công!</p>
+                      <table style="width:100%%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f5f5f5;">
+                          <td style="padding:10px; border:1px solid #ddd;"><strong>📖 Tên tài liệu</strong></td>
+                          <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px; border:1px solid #ddd;"><strong>✍️ Tác giả</strong></td>
+                          <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr style="background:#f5f5f5;">
+                          <td style="padding:10px; border:1px solid #ddd;"><strong>⚡ Mức độ ưu tiên</strong></td>
+                          <td style="padding:10px; border:1px solid #ddd;"><strong>%s</strong></td>
+                        </tr>
+                      </table>
+                      <div style="background:#e8f5e9; border-left:4px solid #4caf50; padding:12px; border-radius:4px;">
+                        <p style="margin:0;">✅ Đơn đề nghị của bạn đang ở trạng thái <strong>Chờ duyệt</strong>. Thủ thư sẽ xem xét và phản hồi trong thời gian sớm nhất.</p>
+                      </div>
+                      <p style="margin-top:20px;">Trân trọng,<br><strong>Hệ thống Thư viện FPT University</strong></p>
+                    </div>
+                  </div>
+                </body></html>
+                """.formatted(patronName, bookTitle, author, priority);
     }
 }
