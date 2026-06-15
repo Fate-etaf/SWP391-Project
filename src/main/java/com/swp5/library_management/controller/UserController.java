@@ -1,8 +1,10 @@
 package com.swp5.library_management.controller;
 
-import com.swp5.library_management.entity.User;
-import com.swp5.library_management.repository.UserRepository;
-import jakarta.servlet.http.HttpSession;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import com.swp5.library_management.entity.User;
+import com.swp5.library_management.repository.UserRepository;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class UserController {
@@ -93,7 +95,7 @@ public class UserController {
                 
                 // 3. ĐIỀU HƯỚNG THÔNG MINH: Nếu là Admin (4) hoặc Thủ thư (3) -> Vào thẳng trang Dashboard
                 if ("Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId == 4 || roleId == 3) {
-                    return "redirect:/librarian/inventory"; 
+                    return "redirect:/librarian/inventory/dashboard"; 
                 }
             }
             // Mặc định: Nếu là Student (Sinh viên) hoặc Giảng viên lướt trang chung -> Vào màn hình Home
