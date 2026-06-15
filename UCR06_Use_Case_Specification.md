@@ -8,7 +8,8 @@
 
 ## 1. Tóm tắt (Brief Description)
 Use Case này cho phép Bạn đọc (Patron) đã đăng nhập vào hệ thống Thư viện FPT University thực hiện đặt giữ trước một bản sách vật lý (Book Copy) còn trống tại một cơ sở (Campus) xác định để đến nhận trong thời hạn quy định (mặc định là 24 giờ). 
-- Nếu cơ sở được chọn hết bản sách sẵn sàng, Bạn đọc có thể lựa chọn đăng ký xếp hàng vào **Danh sách chờ (Waitlist)**.
+- Nếu cơ sở được chọn hết bản sách sẵn sàng nhưng có ở cơ sở khác, Bạn đọc có thể tạo yêu cầu **Mượn liên cơ sở (Inter-campus Borrow)**.
+- Nếu tất cả các cơ sở đều hết sách (hoặc Bạn đọc không muốn mượn liên cơ sở), Bạn đọc có thể lựa chọn đăng ký xếp hàng vào **Danh sách chờ (Waitlist)**.
 - Bạn đọc có thể chủ động **Hủy đặt giữ chỗ (Cancel Reservation)** đối với các đơn đang chờ nhận sách hoặc **Hủy đăng ký xếp hàng chờ (Cancel Waitlist)** nếu không còn nhu cầu mượn sách.
 
 ---
@@ -33,6 +34,9 @@ Use Case này cho phép Bạn đọc (Patron) đã đăng nhập vào hệ thố
 * **Trường hợp đăng ký xếp hàng chờ thành công (Exc 3/4):**
   - Một bản ghi `Waitlist` được tạo mới với trạng thái `Waiting`.
   - Hệ thống ghi nhận thông báo nội bộ và gửi email xác nhận xếp hàng thành công kèm số thứ tự hiện tại.
+* **Trường hợp yêu cầu mượn liên cơ sở thành công (Exc 5):**
+  - Hệ thống ghi nhận yêu cầu Mượn liên cơ sở.
+  - Một Request (Yêu cầu) được tạo và gửi đến Thủ thư ở cơ sở có sách để xử lý. Luồng đặt mượn online kết thúc tại đây.
 * **Trường hợp hủy đặt chỗ thành công (Alt 1):**
   - Trạng thái đơn đặt chỗ (`Reservation`) chuyển thành `Cancelled`.
   - Bản sách vật lý liên kết được trả về trạng thái tự do `Available` để phục vụ bạn đọc khác.
@@ -106,7 +110,7 @@ Use Case này cho phép Bạn đọc (Patron) đã đăng nhập vào hệ thố
 * Tại bước 3 luồng chính, nếu số lượng đơn đặt giữ chỗ đang ở trạng thái `Holding` của Bạn đọc đạt từ 3 đơn trở lên:
   - Hệ thống từ chối giao dịch, hiển thị thông báo lỗi: *"Thao tác bị từ chối! Bạn đã có [X]/3 đơn đặt giữ chỗ đang hoạt động. Vui lòng hủy bớt đơn cũ trước khi tiếp tục."* và dừng Use Case.
 
-#### Exc 3: Cơ sở được chọn hết bản sách vật lý sẵn sàng
+#### Exc 3: Cơ sở được chọn hết bản sách vật lý sẵn sàng (Tất cả đều hết)
 * Tại bước 5 luồng chính, nếu hệ thống không tìm thấy bất kỳ bản sách nào của đầu sách đó tại cơ sở được chọn có trạng thái `Available`:
   - Hệ thống chuyển hướng Bạn đọc sang giao diện **Đăng ký xếp hàng chờ**.
   - Bạn đọc xác nhận muốn đăng ký xếp hàng chờ.
@@ -118,6 +122,14 @@ Use Case này cho phép Bạn đọc (Patron) đã đăng nhập vào hệ thố
 * Tại bước 6 luồng chính, nếu bản sách vật lý vừa được tìm thấy đã bị thay đổi trạng thái sang `Reserved` hoặc `Borrowed` bởi một tiến trình song song của bạn đọc khác ngay trước khi thực hiện khóa:
   - Hệ thống ghi nhận cảnh báo xung đột (Log).
   - Hệ thống tự động chuyển đổi luồng xử lý sang **Exc 3** (Gợi ý Bạn đọc đăng ký xếp hàng chờ do sách đã bị đặt).
+
+#### Exc 5: Cơ sở được chọn hết sách nhưng cơ sở khác CÓ sách (Mượn liên cơ sở)
+* Tại bước 5 luồng chính, nếu hệ thống không tìm thấy bản sách `Available` tại cơ sở được chọn, nhưng phát hiện có bản sách `Available` ở cơ sở khác:
+  - Hệ thống hiển thị tùy chọn **"Mượn liên cơ sở"** (Inter-campus Borrow).
+  - Bạn đọc nhấn chọn "Mượn liên cơ sở".
+  - Hệ thống tự động ghi nhận đây là yêu cầu Mượn liên cơ sở.
+  - Hệ thống tạo một Request gửi đến Thủ thư ở cơ sở đang có sách (Bàn giao cho Người 4 xử lý).
+  - *(Luồng đặt mượn online dừng tại đây. Trong lúc chờ cơ sở kia duyệt, Bạn đọc có thể bấm Hủy yêu cầu. Khi Người 4 xử lý xong và sách về tới nơi, Reader sẽ mang Thông báo + CCCD đến quầy Checkout như Nhánh chính).*
 
 ---
 
