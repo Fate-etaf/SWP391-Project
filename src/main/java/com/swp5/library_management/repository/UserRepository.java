@@ -1,12 +1,11 @@
 package com.swp5.library_management.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 import com.swp5.library_management.entity.User;
 
-@Repository
+
 public interface UserRepository extends JpaRepository<User, String> {
 
     boolean existsByUserId(String userId);
@@ -25,4 +24,4 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     @org.springframework.data.jpa.repository.Query(value = "SELECT r.RoleName FROM Roles r JOIN UserRoles ur ON r.RoleID = ur.RoleID WHERE ur.UserID = :userId", nativeQuery = true)
     java.util.List<String> findRolesByUserId(@org.springframework.data.repository.query.Param("userId") String userId);
-}
+}

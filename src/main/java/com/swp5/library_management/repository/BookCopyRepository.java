@@ -2,14 +2,13 @@ package com.swp5.library_management.repository;
 
 import com.swp5.library_management.entity.BookCopy;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-@Repository
+
 public interface BookCopyRepository extends JpaRepository<BookCopy, String> {
 
     /**

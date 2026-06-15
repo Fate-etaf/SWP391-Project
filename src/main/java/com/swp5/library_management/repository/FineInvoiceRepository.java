@@ -7,12 +7,11 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import com.swp5.library_management.entity.BorrowTicketDetail;
 import com.swp5.library_management.entity.FineInvoice;
 
-@Repository
+
 public interface FineInvoiceRepository extends JpaRepository<FineInvoice, Integer> {
 
     Optional<FineInvoice> findByTicketDetailAndViolationType(

@@ -1,9 +1,9 @@
 package com.swp5.library_management.service;
 
-import com.swp5.library_management.dto.AddBookForm;
-import com.swp5.library_management.dto.BookDetailDTO;
-import com.swp5.library_management.dto.BookSearchResultDTO;
 import com.swp5.library_management.entity.Book;
+import com.swp5.library_management.librarian.dto.AddBookForm;
+import com.swp5.library_management.librarian.dto.BookDetailDTO;
+import com.swp5.library_management.librarian.dto.BookSearchResultDTO;
 
 import java.util.List;
 import java.util.NoSuchElementException;

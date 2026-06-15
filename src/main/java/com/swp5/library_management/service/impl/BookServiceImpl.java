@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import com.swp5.library_management.dto.AddBookForm;
-import com.swp5.library_management.dto.BookDetailDTO;
-import com.swp5.library_management.dto.BookSearchResultDTO;
-import com.swp5.library_management.dto.CopyRowDTO;
 import com.swp5.library_management.entity.*;
+import com.swp5.library_management.librarian.dto.AddBookForm;
+import com.swp5.library_management.librarian.dto.BookDetailDTO;
+import com.swp5.library_management.librarian.dto.BookSearchResultDTO;
+import com.swp5.library_management.librarian.dto.CopyRowDTO;
 import com.swp5.library_management.repository.*;
 import com.swp5.library_management.service.BookService;
 

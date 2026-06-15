@@ -7,11 +7,10 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import com.swp5.library_management.entity.BorrowTicketDetail;
 
-@Repository
+
 public interface BorrowTicketDetailRepository extends JpaRepository<BorrowTicketDetail, Integer> {
 
     @EntityGraph(attributePaths = {"bookCopy", "bookCopy.book", "borrowTicket", "borrowTicket.patron"})
@@ -40,7 +39,7 @@ public interface BorrowTicketDetailRepository extends JpaRepository<BorrowTicket
     @Query("SELECT COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.campus.campusId = :campusId AND d.status = 'Overdue' AND d.returnDate IS NULL")
     long countCurrentOverdue(@Param("campusId") Integer campusId);
 
-    @Query("SELECT new com.swp5.library_management.dto.TransactionRecordDTO(" +
+    @Query("SELECT new com.swp5.library_management.admin.dto.TransactionRecordDTO(" +
            "b.title, c.copyId, p.fullName, l.fullName, t.createdAt, d.dueDate, d.returnDate, d.status) " +
            "FROM BorrowTicketDetail d " +
            "JOIN d.borrowTicket t " +
@@ -51,7 +50,7 @@ public interface BorrowTicketDetailRepository extends JpaRepository<BorrowTicket
            "WHERE t.campus.campusId = :campusId " +
            "AND (t.createdAt BETWEEN :startDate AND :endDate OR d.returnDate BETWEEN :startDate AND :endDate) " +
            "ORDER BY t.createdAt DESC")
-    java.util.List<com.swp5.library_management.dto.TransactionRecordDTO> getTransactionDetails(
+    java.util.List<com.swp5.library_management.admin.dto.TransactionRecordDTO> getTransactionDetails(
             @Param("campusId") Integer campusId, 
             @Param("startDate") java.time.LocalDateTime startDate, 
             @Param("endDate") java.time.LocalDateTime endDate);
