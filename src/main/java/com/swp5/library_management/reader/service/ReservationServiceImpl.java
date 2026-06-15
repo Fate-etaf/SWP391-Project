@@ -2,8 +2,8 @@ package com.swp5.library_management.reader.service;
 
 import com.swp5.library_management.reader.dto.ReservationResultDTO;
 import com.swp5.library_management.entity.*;
+import com.swp5.library_management.librarian.service.EmailService;
 import com.swp5.library_management.repository.*;
-import com.swp5.library_management.service.EmailService;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,6 +1,7 @@
 package com.swp5.library_management.librarian.controller;
 
 import com.swp5.library_management.entity.*;
+import com.swp5.library_management.librarian.service.EmailService;
 import com.swp5.library_management.librarian.service.SystemConfigService;
 import com.swp5.library_management.repository.*;
 import jakarta.servlet.http.HttpSession;
@@ -28,7 +29,7 @@ public class LibrarianController {
     private final BorrowTicketDetailRepository borrowTicketDetailRepository;
     private final SystemConfigService systemConfigService;
     private final ReservationRepository reservationRepository;
-    private final com.swp5.library_management.service.EmailService emailService;
+    private final EmailService emailService;
 
     private boolean isNotLibrarian(HttpSession session) {
         Boolean isLibrarian = (Boolean) session.getAttribute("isLibrarian");

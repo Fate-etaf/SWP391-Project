@@ -1,4 +1,4 @@
-package com.swp5.library_management.service;
+package com.swp5.library_management.librarian.service;
 
 /**
  * Service gửi email thông báo.
