@@ -50,7 +50,7 @@ public interface BorrowTicketDetailRepository extends JpaRepository<BorrowTicket
            "WHERE t.campus.campusId = :campusId " +
            "AND (t.createdAt BETWEEN :startDate AND :endDate OR d.returnDate BETWEEN :startDate AND :endDate) " +
            "ORDER BY t.createdAt DESC")
-    java.util.List<com.swp5.library_management.admin.dto.TransactionRecordDTO> getTransactionDetails(
+    java.util.List<com.swp5.library_management.dto.TransactionRecordDTO> getTransactionDetails(
             @Param("campusId") Integer campusId, 
             @Param("startDate") java.time.LocalDateTime startDate, 
             @Param("endDate") java.time.LocalDateTime endDate);
