@@ -39,7 +39,7 @@ public interface BorrowTicketDetailRepository extends JpaRepository<BorrowTicket
     @Query("SELECT COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.campus.campusId = :campusId AND d.status = 'Overdue' AND d.returnDate IS NULL")
     long countCurrentOverdue(@Param("campusId") Integer campusId);
 
-    @Query("SELECT new com.swp5.library_management.admin.dto.TransactionRecordDTO(" +
+    @Query("SELECT new com.swp5.library_management.dto.TransactionRecordDTO(" +
            "b.title, c.copyId, p.fullName, l.fullName, t.createdAt, d.dueDate, d.returnDate, d.status) " +
            "FROM BorrowTicketDetail d " +
            "JOIN d.borrowTicket t " +
