@@ -138,7 +138,7 @@ public class InventoryController {
             return "error/404";
         }
     }
-    @GetMapping("/inventory")
+    @GetMapping("/inventory/dashboard")
     public String dashboard(Model model) {
         return "inventory/dashboard";
     }
