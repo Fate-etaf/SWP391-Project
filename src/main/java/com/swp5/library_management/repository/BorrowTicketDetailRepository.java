@@ -41,7 +41,8 @@ public interface BorrowTicketDetailRepository extends JpaRepository<BorrowTicket
     long countCurrentOverdue(@Param("campusId") Integer campusId);
 
     @Query("SELECT new com.swp5.library_management.dto.TransactionRecordDTO(" +
-           "b.title, c.copyId, p.fullName, l.fullName, t.createdAt, d.dueDate, d.returnDate, d.status) " +
+           "b.title, c.copyId, p.userId, p.fullName, l.fullName, t.createdAt, d.dueDate, d.returnDate, d.status, d.renewalCount, " +
+           "COALESCE((SELECT SUM(f.fineAmount) FROM FineInvoice f WHERE f.ticketDetail = d), 0)) " +
            "FROM BorrowTicketDetail d " +
            "JOIN d.borrowTicket t " +
            "JOIN t.patron p " +
