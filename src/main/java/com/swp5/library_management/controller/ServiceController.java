@@ -98,7 +98,7 @@ public class ServiceController {
                     .publisher(publisher)
                     .language(language)
                     .bookLink(bookLink)
-                    .requestUrgency(requestUrgency)
+                    .priority(requestUrgency)
                     .reason(reason)
                     .email(email)
                     .feedback(feedback)

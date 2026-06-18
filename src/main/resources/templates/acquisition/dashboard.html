@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Acquisition Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A', orangeHover: '#D95F18' } } } }
+        }
+    </script>
+    <style th:replace="~{fragments/header :: header-style}"></style>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-between relative overflow-x-hidden">
+
+    <!-- Ambient Background Glows -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
+    </div>
+
+    <div class="relative z-50">
+        <div th:replace="~{fragments/header :: header('librarian')}"></div>
+    </div>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
+        
+        <!-- SIDEBAR -->
+        <div th:replace="~{fragments/sidebar :: sidebar('acquisition')}"></div>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="flex-grow min-w-0">
+            <div class="flex flex-col xl:flex-row justify-between items-start gap-3 mb-8">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-slate-100 tracking-tight mb-1">Acquisition Dashboard</h2>
+                    <p class="text-sm text-slate-400">Manage and track material requests and orders.</p>
+                </div>
+                <div class="text-right mt-2 md:mt-0">
+                    <a href="/librarian/acquisition/dashboard" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg bg-fpt-orange text-white hover:bg-fpt-orangeHover transition-colors shadow-lg">
+                        Refresh Data
+                    </a>
+                </div>
+            </div>
+
+            <!-- Statistics Grid -->
+            <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+                <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-4 shadow-xl flex flex-col items-center text-center">
+                    <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Pending</h3>
+                    <div class="text-2xl font-extrabold text-amber-400" th:text="${pendingCount}">0</div>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-4 shadow-xl flex flex-col items-center text-center">
+                    <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Approved</h3>
+                    <div class="text-2xl font-extrabold text-emerald-400" th:text="${approvedCount}">0</div>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-4 shadow-xl flex flex-col items-center text-center">
+                    <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Rejected</h3>
+                    <div class="text-2xl font-extrabold text-red-400" th:text="${rejectedCount}">0</div>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-4 shadow-xl flex flex-col items-center text-center">
+                    <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">On Order</h3>
+                    <div class="text-2xl font-extrabold text-blue-400" th:text="${orderedCount}">0</div>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-4 shadow-xl flex flex-col items-center text-center">
+                    <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Arrived</h3>
+                    <div class="text-2xl font-extrabold text-purple-400" th:text="${arrivedCount}">0</div>
+                </div>
+                <div class="bg-slate-800/80 border border-slate-700 backdrop-blur-xl rounded-2xl p-4 shadow-xl flex flex-col items-center text-center">
+                    <h3 class="text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-2">Available</h3>
+                    <div class="text-2xl font-extrabold text-slate-100" th:text="${availableBooksCount}">0</div>
+                </div>
+            </div>
+
+            <!-- Filters & Search -->
+            <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-4 mb-6 shadow-xl">
+                <form action="/librarian/acquisition/dashboard" method="get" class="flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <div class="flex-1 w-full relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-slate-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <input type="text" name="search" th:value="${currentSearch}" placeholder="Search by title, author, ID..." 
+                               class="block w-full pl-10 pr-3 py-2 border border-slate-700 rounded-lg bg-slate-800/50 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-fpt-orange focus:border-fpt-orange sm:text-sm">
+                        <input type="hidden" name="status" th:value="${currentStatus}">
+                    </div>
+                    <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+                        <a th:href="@{/librarian/acquisition/dashboard(search=${currentSearch})}" 
+                           th:classappend="${currentStatus == null or currentStatus == ''} ? 'bg-fpt-orange text-white border-fpt-orange' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
+                           class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap">All</a>
+                        <a th:href="@{/librarian/acquisition/dashboard(status='Pending', search=${currentSearch})}" 
+                           th:classappend="${currentStatus == 'Pending'} ? 'bg-fpt-orange text-white border-fpt-orange' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
+                           class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap">Pending</a>
+                        <a th:href="@{/librarian/acquisition/dashboard(status='Approved', search=${currentSearch})}" 
+                           th:classappend="${currentStatus == 'Approved'} ? 'bg-fpt-orange text-white border-fpt-orange' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
+                           class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap">Approved</a>
+                        <a th:href="@{/librarian/acquisition/dashboard(status='Ordered', search=${currentSearch})}" 
+                           th:classappend="${currentStatus == 'Ordered'} ? 'bg-fpt-orange text-white border-fpt-orange' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
+                           class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap">Ordered</a>
+                        <a th:href="@{/librarian/acquisition/dashboard(status='Arrived', search=${currentSearch})}" 
+                           th:classappend="${currentStatus == 'Arrived'} ? 'bg-fpt-orange text-white border-fpt-orange' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'"
+                           class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap">Arrived</a>
+                    </div>
+                    <button type="submit" class="hidden">Search</button>
+                </form>
+            </div>
+
+            <!-- Data Table -->
+            <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-800">
+                        <thead class="bg-slate-800/50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Request ID</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Book Title</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Source</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800">
+                            <tr th:each="req : ${requests}" class="hover:bg-slate-800/30 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="text-sm font-bold text-slate-300" th:text="'REQ' + ${#numbers.formatInteger(req.requestId, 3)}">REQ001</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-semibold text-slate-200" th:text="${req.title}">Clean Code</div>
+                                    <div class="text-xs text-slate-500" th:text="${req.author}">Robert C. Martin</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="text-sm font-medium text-slate-400" th:text="${req.patron.isLibrarian() ? 'School' : 'Reader'}">Reader</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2.5 py-1 text-xs font-bold rounded-full"
+                                          th:classappend="${req.status == 'Pending'} ? 'bg-amber-500/20 text-amber-400' : 
+                                                         (${req.status == 'Approved'} ? 'bg-emerald-500/20 text-emerald-400' :
+                                                         (${req.status == 'Ordered'} ? 'bg-blue-500/20 text-blue-400' :
+                                                         (${req.status == 'Arrived'} ? 'bg-purple-500/20 text-purple-400' :
+                                                         (${req.status == 'Rejected'} ? 'bg-red-500/20 text-red-400' : 'bg-slate-700 text-slate-300'))))"
+                                          th:text="${req.status}">Pending</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="#" class="text-fpt-orange hover:text-fpt-orangeHover transition-colors">View</a>
+                                </td>
+                            </tr>
+                            <tr th:if="${requests == null or requests.isEmpty()}">
+                                <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+                                    No requests found matching the current filters.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div class="relative z-50">
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </div>
+
+</body>
+</html>

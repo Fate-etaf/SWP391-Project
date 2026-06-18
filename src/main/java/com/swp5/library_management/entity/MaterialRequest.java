@@ -2,10 +2,13 @@ package com.swp5.library_management.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Check;
 import java.time.LocalDateTime;
 
+@SuppressWarnings("deprecation")
 @Entity
 @Table(name = "MaterialRequests", schema = "dbo")
+@Check(constraints = "Status IN ('Pending', 'Approved', 'Rejected', 'Ordered', 'Available', 'Arrived')")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -40,8 +43,8 @@ public class MaterialRequest {
     @Column(name = "BookLink", length = 500)
     private String bookLink;
 
-    @Column(name = "RequestUrgency", length = 100)
-    private String requestUrgency;
+    @Column(name = "Priority", length = 100)
+    private String priority;
 
     @Column(name = "Reason", nullable = false, length = 1000)
     private String reason;

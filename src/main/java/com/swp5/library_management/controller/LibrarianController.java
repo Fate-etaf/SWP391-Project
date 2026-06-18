@@ -28,6 +28,7 @@ public class LibrarianController {
     private final CampusRepository campusRepository;
     private final BorrowTicketRepository borrowTicketRepository;
     private final BorrowTicketDetailRepository borrowTicketDetailRepository;
+    private final MaterialRequestRepository materialRequestRepository;
     private final SystemConfigService systemConfigService;
     private final ReservationRepository reservationRepository;
     private final EmailService emailService;
@@ -185,5 +186,35 @@ public class LibrarianController {
 
         redirectAttrs.addFlashAttribute("successMsg", "Tạo đơn mượn sách thành công! Bạn đọc " + patron.getFullName() + " đã mượn bản sao " + copyId + " (Hạn trả: " + detail.getDueDate().toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ").");
         return "redirect:/librarian/create-loan";
+    }
+    // ── 4. ACquisition dashboard ──
+    @GetMapping("/acquisition/dashboard")
+    public String dashboard(@RequestParam(required = false) String status,
+                            @RequestParam(required = false) String search,
+                            Model model) {
+        
+        long pendingCount = materialRequestRepository.countByStatus("Pending");
+        long approvedCount = materialRequestRepository.countByStatus("Approved");
+        long rejectedCount = materialRequestRepository.countByStatus("Rejected");
+        long orderedCount = materialRequestRepository.countByStatus("Ordered");
+        long arrivedCount = materialRequestRepository.countByStatus("Arrived");
+        
+        long availableBooksCount = bookCopyRepository.countByCopyStatus("Available");
+
+        List<MaterialRequest> requests;
+        requests = materialRequestRepository.findByStatusAndSearchTerm(status, search);
+
+        model.addAttribute("pendingCount", pendingCount);
+        model.addAttribute("approvedCount", approvedCount);
+        model.addAttribute("rejectedCount", rejectedCount);
+        model.addAttribute("orderedCount", orderedCount);
+        model.addAttribute("arrivedCount", arrivedCount);
+        model.addAttribute("availableBooksCount", availableBooksCount);
+        
+        model.addAttribute("requests", requests);
+        model.addAttribute("currentStatus", status);
+        model.addAttribute("currentSearch", search);
+
+        return "acquisition/dashboard";
     }
 }
