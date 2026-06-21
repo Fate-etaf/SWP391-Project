@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Desk Return Center - FLMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'fpt-orange': '#F27124',
+                        'fpt-orangeHover': '#e0651f',
+                        'fpt-navy': '#1A233A',
+                        'fpt-dark': '#0F172A',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .scan-line {
+            height: 2px;
+            background: #F27124;
+            position: absolute;
+            width: 100%;
+            z-index: 10;
+            top: 0;
+            left: 0;
+            animation: move-scan-line 3s infinite linear;
+            box-shadow: 0 0 8px #F27124;
+        }
+        @keyframes move-scan-line {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+<header class="bg-fpt-dark text-white sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+            <div class="flex items-center space-x-3">
+                <div class="bg-fpt-orange text-white p-2.5 rounded-lg font-extrabold text-xl tracking-wider shadow-lg">FPT</div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight leading-none text-orange-400">FLMS</h1>
+                    <p class="text-xs text-slate-400 font-medium">Library Management System</p>
+                </div>
+            </div>
+            <nav class="hidden md:flex space-x-8 font-medium text-sm">
+                <a href="/home" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Trang chủ</a>
+                <a href="/borrowing" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Đang mượn</a>
+                <a href="/borrowing/return-center" class="text-fpt-orange hover:text-orange-400 transition-colors py-2 border-b-2 border-fpt-orange">Desk Return Center</a>
+                <a href="/violations/overdue" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Quá hạn</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- CỘT TRÁI: KHU VỰC QUÉT CHÍNH -->
+        <div class="lg:col-span-8 space-y-6">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden p-8 md:p-12">
+                <div class="flex flex-col items-center text-center mb-10">
+                    <div class="w-20 h-20 bg-fpt-orange/10 rounded-2xl flex items-center justify-center text-fpt-orange mb-4">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 17h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tight">Return Desk</h2>
+                    <p class="text-slate-500 font-medium max-w-md mt-2">Sử dụng điện thoại (Barcode to PC) hoặc máy quét vật lý để nhận sách trả.</p>
+                </div>
+
+                <!-- Alert Messages -->
+                <div th:if="${successMsg}" class="mb-8 p-5 bg-emerald-50 border border-emerald-100 text-emerald-800 text-sm font-bold rounded-2xl flex items-center gap-4 animate-bounce">
+                    <div class="w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <span th:text="${successMsg}"></span>
+                </div>
+
+                <div th:if="${errorMsg}" class="mb-8 p-5 bg-red-50 border border-red-100 text-red-800 text-sm font-bold rounded-2xl flex items-center gap-4">
+                    <div class="w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <span th:text="${errorMsg}"></span>
+                </div>
+
+                <!-- SCANNER INPUT (Main area for Barcode to PC) -->
+                <div class="relative group">
+                    <div class="absolute inset-0 bg-fpt-orange/5 blur-2xl rounded-3xl opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                    <div class="relative">
+                        <form id="returnForm" th:action="@{/borrowing/return-barcode}" method="post">
+                            <input type="text" id="barcodeInput" name="copyId" autocomplete="off" autofocus
+                                   placeholder="Đang sẵn sàng quét..."
+                                   class="w-full bg-slate-50 border-4 border-slate-100 rounded-3xl px-8 py-8 text-2xl font-black text-slate-900 focus:outline-none focus:border-fpt-orange focus:ring-8 focus:ring-fpt-orange/10 transition-all placeholder:text-slate-300 text-center uppercase tracking-widest shadow-inner"/>
+                        </form>
+                        
+                        <!-- Visual scanning line overlay -->
+                        <div class="absolute inset-x-8 top-1/2 -translate-y-1/2 pointer-events-none flex justify-between px-2">
+                             <div class="w-1 h-8 bg-fpt-orange rounded-full opacity-20"></div>
+                             <div class="w-1 h-8 bg-fpt-orange rounded-full opacity-20"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center gap-6 mt-12 text-slate-400">
+                    <div class="flex items-center gap-2">
+                        <kbd class="px-3 py-1.5 bg-slate-200 text-slate-500 rounded-lg text-xs font-bold border-b-2 border-slate-300">ENTER</kbd>
+                        <span class="text-xs font-semibold">Để hoàn tất</span>
+                    </div>
+                    <div class="w-1 h-1 bg-slate-300 rounded-full"></div>
+                    <p class="text-xs font-semibold italic text-emerald-500 flex items-center gap-1.5">
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        Đã kết nối với ứng dụng điện thoại
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Guide section -->
+            <div class="bg-indigo-950 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center gap-8 border border-white/10">
+                <div class="w-32 h-32 bg-white/10 rounded-2xl flex items-center justify-center p-4">
+                    <img src="https://barcodetopc.com/images/barcode_to_pc_logo.png" alt="Barcode to PC" class="w-full h-full object-contain filter invert brightness-200">
+                </div>
+                <div class="flex-1 text-center md:text-left">
+                    <h3 class="text-xl font-bold mb-2">Cách dùng điện thoại thay máy quét</h3>
+                    <ol class="text-sm text-indigo-200 space-y-2 list-decimal list-inside">
+                        <li>Mở ứng dụng <b>Barcode to PC</b> trên cả điện thoại và máy tính.</li>
+                        <li>Kết nối 2 thiết bị vào cùng mạng Wi-Fi.</li>
+                        <li>Trong trang này, hãy đảm bảo ô nhập liệu đang có con trỏ (nháy).</li>
+                        <li>Dùng điện thoại quét mã vạch, mã sẽ tự động được nhập vào đây.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: CÔNG CỤ TEST (SIDEBAR) -->
+        <div class="lg:col-span-4 space-y-6">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-xl p-8 sticky top-28">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-extrabold text-slate-900 tracking-tight">Đang mượn (Test)</h3>
+                    <span class="bg-indigo-100 text-indigo-600 text-[10px] font-black px-2 py-1 rounded-md uppercase">Simulation</span>
+                </div>
+                
+                <p class="text-xs text-slate-400 mb-6 leading-relaxed">Nhấn vào một cuốn sách dưới đây nếu bạn muốn giả lập hành động quét mà không cần điện thoại.</p>
+
+                <div class="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                    <div th:each="item : ${borrowingItems}" 
+                         th:attr="onclick='simulateScan(\'' + ${item.bookCopy.copyId} + '\')'"
+                         class="group border border-slate-100 hover:border-fpt-orange hover:bg-orange-50/30 p-4 rounded-2xl cursor-pointer transition-all duration-300">
+                        <h4 class="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-fpt-orange transition-colors" th:text="${item.bookCopy.book.title}">Title</h4>
+                        <div class="flex items-center justify-between mt-2">
+                             <span class="text-[10px] font-mono font-semibold text-slate-400 group-hover:text-slate-500" th:text="${item.bookCopy.copyId}">ABC-123</span>
+                             <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full group-hover:bg-fpt-orange group-hover:text-white transition-colors">CHỌN</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div th:if="${borrowingItems.isEmpty()}" class="py-12 text-center">
+                    <div class="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <p class="text-xs text-slate-400 italic">Hiện không có cuốn sách nào đang được mượn để giả lập.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Tự động focus vào ô nhập liệu khi tải trang
+    const input = document.getElementById('barcodeInput');
+    window.onload = () => input.focus();
+
+    // Giữ cho ô nhập luôn được focus nếu thủ thư lỡ bấm ra ngoài
+    document.addEventListener('click', () => {
+        input.focus();
+    });
+
+    // Hàm giả lập quét
+    function simulateScan(copyId) {
+        input.value = copyId;
+        document.getElementById('returnForm').submit();
+    }
+</script>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+</style>
+
+</body>
+</html>

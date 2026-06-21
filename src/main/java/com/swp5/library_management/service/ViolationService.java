@@ -8,13 +8,23 @@ import java.util.List;
 
 public interface ViolationService {
 
-    List<BorrowTicketDetail> getOverdueBooks();
+    /** Sách đang được mượn (chưa trả) */
+    List<BorrowTicketDetail> getBorrowingBooks();
+
+    /** Sách đã trả nhưng quá hạn */
+    List<BorrowTicketDetail> getReturnedOverdueBooks();
 
     long calculateOverdueDays(LocalDate dueDate);
+
+    /** Xác nhận trả sách */
+    void returnBook(Integer borrowTicketDetailId);
 
     FineInvoice createOverdueFine(Integer borrowTicketDetailId);
 
     FineInvoice createLostBookFine(Integer borrowTicketDetailId);
 
     FineInvoice createDamagedBookFine(Integer borrowTicketDetailId);
+
+    /** Trả sách qua mã Barcode (CopyID) */
+    BorrowTicketDetail returnByCopyId(String copyId);
 }
