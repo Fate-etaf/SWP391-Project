@@ -103,22 +103,21 @@ public class InventoryServiceImpl implements InventoryService {
         return new InventoryOverviewDTO(list);
     }
 
-    // ========================================================================
-    // --- BƯỚC 2: LOGIC TÍNH TOÁN CHO INVENTORY DASHBOARD ---
-    // ========================================================================
+    // --- LOGIC INVENTORY DASHBOARD ---
+
     @Override
     public DashboardDataDTO getDashboardData(Integer campusId, List<String> subjectCodes, List<String> conditions,
             List<String> statuses) {
         DashboardDataDTO dto = new DashboardDataDTO();
 
-        // 1. TOP CARDS
+        // TOP CARDS
         dto.setTotalCopies(bookCopyRepository.countTotalCopiesByCampus(campusId));
         dto.setBorrowedCopies(bookCopyRepository.countByCampusCampusIdAndCopyStatus(campusId, "Borrowed"));
         dto.setOverdueCopies(borrowTicketDetailRepository.countCurrentOverdue(campusId));
         dto.setPendingInboundTransfers(transferRequestRepository.countPendingInboundRequests(campusId));
 
-        // 2. DATA TABLES
-        // 2.1 Bảng "Điểm nóng Waitlist" & Smart Column Logic (Xuyên cơ sở)
+        // DATA TABLES
+        // Bảng "Điểm nóng Waitlist" & Smart Column Logic (Xuyên cơ sở)
         List<DashboardDataDTO.WaitlistHotspotDTO> hotspots = waitlistRepository.findTopWaitlistHotspots(campusId,
                 PageRequest.of(0, 5));
         for (DashboardDataDTO.WaitlistHotspotDTO hotspot : hotspots) {
@@ -139,10 +138,10 @@ public class InventoryServiceImpl implements InventoryService {
         }
         dto.setWaitlistHotspots(hotspots);
 
-        // 2.2 Bảng "Sách quá hạn cần thu hồi"
+        // Bảng "Sách quá hạn cần thu hồi"
         dto.setOverdueBooks(borrowTicketDetailRepository.findOverdueActionsByCampus(campusId, PageRequest.of(0, 10)));
 
-        // 3. CHARTS DATA (Phân loại bằng Map để trả về JSON chuẩn cho Chart.js)
+        // CHARTS DATA (Phân loại bằng Map để trả về JSON chuẩn cho Chart.js)
         boolean hasSubjectCodes = subjectCodes != null && !subjectCodes.isEmpty();
         List<String> safeSubjectCodes = hasSubjectCodes ? subjectCodes : java.util.Arrays.asList("");
 
@@ -153,7 +152,7 @@ public class InventoryServiceImpl implements InventoryService {
         List<String> safeStatuses = hasStatuses ? statuses : java.util.Arrays.asList("");
 
         List<Object[]> chartRawData = bookCopyRepository.getChartDataByCampusAndFilters(
-                campusId, 
+                campusId,
                 hasSubjectCodes, safeSubjectCodes,
                 hasConditions, safeConditions,
                 hasStatuses, safeStatuses);
@@ -166,11 +165,11 @@ public class InventoryServiceImpl implements InventoryService {
             String status = row[1] != null ? row[1].toString() : "Unknown";
             Long count = (Long) row[2];
 
-            // 3.1 Cấu trúc cho Stacked Bar Chart (Dữ liệu đa chiều)
+            // Cấu trúc cho Stacked Bar Chart (Dữ liệu đa chiều)
             stackedBarData.putIfAbsent(subject, new HashMap<>());
             stackedBarData.get(subject).put(status, stackedBarData.get(subject).getOrDefault(status, 0L) + count);
 
-            // 3.2 Cấu trúc cho Doughnut Chart (Cắt lát theo 1 trạng thái cụ thể)
+            // Cấu trúc cho Doughnut Chart (Cắt lát theo 1 trạng thái cụ thể)
             // Do Data đã được query Database filter theo statuses nên không cần check lại
             doughnutData.put(subject, doughnutData.getOrDefault(subject, 0L) + count);
         }
