@@ -30,7 +30,19 @@ public class HomeController {
     private final HomeService homeService;
 
     @GetMapping({"/", "/home"})
-    public String home(Model model) {
+    public String home(Model model, org.springframework.security.core.Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated() && !authentication.getPrincipal().equals("anonymousUser")) {
+            if (authentication.getPrincipal() instanceof com.swp5.library_management.security.CustomUserDetails) {
+                com.swp5.library_management.security.CustomUserDetails userDetails = (com.swp5.library_management.security.CustomUserDetails) authentication.getPrincipal();
+                model.addAttribute("registeredName", userDetails.getName());
+            } else if (authentication.getPrincipal() instanceof org.springframework.security.oauth2.core.user.OAuth2User) {
+                org.springframework.security.oauth2.core.user.OAuth2User oauthUser = (org.springframework.security.oauth2.core.user.OAuth2User) authentication.getPrincipal();
+                model.addAttribute("registeredName", oauthUser.getAttribute("name"));
+            } else {
+                model.addAttribute("registeredName", authentication.getName());
+            }
+        }
+        
         model.addAttribute("stats",         homeService.getHomeStats());
         model.addAttribute("campuses",      homeService.getCampusNames());
         model.addAttribute("categories",    homeService.getFeaturedCategories(5));

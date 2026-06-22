@@ -13,6 +13,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     boolean existsByEmail(String email);
 
+    Optional<User> findByEmail(String email);
     /**
      * Đếm số User theo trạng thái.
      * Dùng trong HomeServiceImpl.getHomeStats() để lấy số "Bạn đọc tích cực".

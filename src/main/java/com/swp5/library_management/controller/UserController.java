@@ -24,7 +24,12 @@ public class UserController {
 
     // === 1. LUỒNG ĐĂNG NHẬP (GIỮ NGUYÊN HOÀN HẢO) ===
     @GetMapping("/login")
-    public String showLoginForm() {
+    public String showLoginForm(@RequestParam(value = "error", required = false) String error, Model model) {
+        if ("not_activated".equals(error)) {
+            model.addAttribute("loginError", "Tài khoản Google của bạn chưa được kích hoạt/chưa có trên hệ thống.");
+        } else if (error != null) {
+            model.addAttribute("loginError", "Đăng nhập thất bại!");
+        }
         return "login"; 
     }
 
@@ -40,6 +45,12 @@ public class UserController {
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+            
+            // Tạo Spring Security Session cho đăng nhập thủ công
+            com.swp5.library_management.security.CustomUserDetails userDetails = new com.swp5.library_management.security.CustomUserDetails(user, new java.util.HashMap<>());
+            org.springframework.security.authentication.UsernamePasswordAuthenticationToken auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
+
             redirectAttributes.addFlashAttribute("registeredName", user.getFullName());
             return "redirect:/home";
         }
