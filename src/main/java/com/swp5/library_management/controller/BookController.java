@@ -58,6 +58,7 @@ public class BookController {
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) Integer majorId,
             @RequestParam(required = false) Integer campusId,
+            @RequestParam(required = false, defaultValue = "false") boolean ajax,
             Model model) {
 
         boolean hasSearch = StringUtils.hasText(keyword)
@@ -94,6 +95,9 @@ public class BookController {
         model.addAttribute("selectedMajorId",    majorId);
         model.addAttribute("hasSearch",          hasSearch);
 
+        if (ajax) {
+            return "books/search :: searchResults";
+        }
         return "books/search";
     }
 
@@ -109,13 +113,27 @@ public class BookController {
     public String viewBookDetail(
             @PathVariable Integer id,
             @RequestParam(required = false) Integer campusId,
+            @RequestParam(required = false, defaultValue = "false") boolean ajax,
+            jakarta.servlet.http.HttpSession session,
             Model model) {
+
+        if (campusId == null) {
+            Integer loggedInCampusId = (Integer) session.getAttribute("loggedInCampusId");
+            if (loggedInCampusId != null) {
+                campusId = loggedInCampusId;
+            }
+        } else if (campusId == 0) {
+            campusId = null; // 0 means all campuses
+        }
 
         try {
             BookDetailDTO book = bookService.getBookDetail(id, campusId);
             model.addAttribute("book",            book);
             model.addAttribute("campuses",        campusRepository.findAll());
             model.addAttribute("selectedCampusId", campusId);
+            if (ajax) {
+                return "books/detail :: copiesSection";
+            }
             return "books/detail";
 
         } catch (NoSuchElementException e) {

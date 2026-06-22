@@ -115,10 +115,15 @@
                             <span class="w-2 h-2 bg-emerald-400 rounded-full mr-2 animate-pulse"></span>
                             Còn sách để mượn
                         </div>
-                        <div th:unless="${book.hasAvailableCopy}"
+                        <div th:if="${!book.hasAvailableCopy and !#lists.isEmpty(book.copies)}"
+                             class="flex items-center justify-center bg-orange-500/20 border border-orange-500/40 text-orange-300 rounded-xl py-2 px-3 text-sm font-semibold">
+                            <span class="w-2 h-2 bg-orange-400 rounded-full mr-2"></span>
+                            Sách đang bận
+                        </div>
+                        <div th:if="${#lists.isEmpty(book.copies)}"
                              class="flex items-center justify-center bg-red-500/20 border border-red-500/40 text-red-300 rounded-xl py-2 px-3 text-sm font-semibold">
                             <span class="w-2 h-2 bg-red-400 rounded-full mr-2"></span>
-                            Hết sách tại campus này
+                            Không có sách ở campus này
                         </div>
 
                         <!-- UCG02 – A1: Reserve button (hiện khi có bản Available) -->
@@ -200,7 +205,8 @@
     </section>
 
     <!-- ── Copies Table Section ────────────────────────────────────────── -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" id="copiesSectionContainer">
+        <div th:fragment="copiesSection" class="transition-opacity duration-200 w-full h-full">
 
         <!-- Campus Filter (tabs) -->
         <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
@@ -215,7 +221,7 @@
 
             <!-- Campus filter pills -->
             <div class="flex flex-wrap gap-2">
-                <a th:href="@{/books/{id}(id=${book.bookId})}"
+                <a th:href="@{/books/{id}(id=${book.bookId}, campusId=0)}"
                    class="campus-tab text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200 hover:border-fpt-orange hover:text-fpt-orange transition-all"
                    th:classappend="${selectedCampusId == null ? 'active' : 'bg-white text-slate-600'}">
                     Tất cả cơ sở
@@ -275,7 +281,7 @@
             </div>
             <p class="text-sm font-semibold text-slate-700 mb-1">Không có bản sao tại cơ sở này</p>
             <p class="text-xs text-slate-400">Thử chọn một cơ sở khác hoặc xem tất cả cơ sở.</p>
-            <a th:href="@{/books/{id}(id=${book.bookId})}"
+            <a th:href="@{/books/{id}(id=${book.bookId}, campusId=0)}"
                class="mt-3 inline-block text-xs text-fpt-orange hover:text-fpt-orangeHover font-semibold transition-colors">
                Xem tất cả cơ sở →
             </a>
@@ -291,12 +297,58 @@
                 Quay lại tìm kiếm
             </a>
         </div>
+        </div>
     </section>
 
 </main>
 
 <!-- ═══════════════════════════════════════════════════════ FOOTER ══ -->
 <div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Hàm gắn sự kiện click cho các tab campus
+        function attachCampusTabEvents() {
+            const container = document.getElementById('copiesSectionContainer');
+            if(!container) return;
+            
+            const tabs = container.querySelectorAll('.campus-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const url = new URL(this.href);
+                    url.searchParams.set('ajax', 'true');
+                    
+                    const innerFrag = container.firstElementChild;
+                    if(innerFrag) innerFrag.style.opacity = '0.5';
+                    
+                    fetch(url, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        container.innerHTML = html;
+                        
+                        // Đổi URL trình duyệt mà không reload
+                        url.searchParams.delete('ajax');
+                        window.history.pushState({}, '', url.toString());
+                        
+                        // Gắn lại sự kiện cho các DOM mới
+                        attachCampusTabEvents();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching copies:', error);
+                        if(innerFrag) innerFrag.style.opacity = '1';
+                    });
+                });
+            });
+        }
+
+        // Khởi chạy lần đầu
+        attachCampusTabEvents();
+    });
+</script>
 
 </body>
 </html>

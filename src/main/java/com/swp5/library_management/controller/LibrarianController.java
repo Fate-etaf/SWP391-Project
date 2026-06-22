@@ -47,6 +47,36 @@ public class LibrarianController {
         return "librarian/create-loan";
     }
 
+    // ── API: GET HOLDING RESERVATIONS FOR PATRON ──
+    @GetMapping("/api/holding-reservations")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<?> getHoldingReservations(@RequestParam String patronId, HttpSession session) {
+        if (isNotLibrarian(session)) {
+            return org.springframework.http.ResponseEntity.status(403).body("Access Denied");
+        }
+        String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+        User librarian = null;
+        if (loggedInUserId != null) {
+            librarian = userRepository.findById(loggedInUserId).orElse(null);
+        }
+        if (librarian == null || librarian.getCampusId() == null) {
+            return org.springframework.http.ResponseEntity.badRequest().body("Librarian campus unknown");
+        }
+
+        List<Reservation> reservations = reservationRepository.findByPatronUserIdAndStatusOrderByReservedAtDesc(patronId.trim(), "Holding");
+        
+        Integer libCampusId = librarian.getCampusId();
+        var dtos = reservations.stream()
+                .filter(r -> r.getCopy() != null && r.getCopy().getCampus() != null && r.getCopy().getCampus().getCampusId().equals(libCampusId))
+                .map(r -> java.util.Map.of(
+                        "reservationId", r.getReservationId(),
+                        "copyId", r.getCopy().getCopyId(),
+                        "bookTitle", r.getCopy().getBook().getTitle()
+                )).toList();
+
+        return org.springframework.http.ResponseEntity.ok(dtos);
+    }
+
     // ── 3. CREATE LOAN RECORD (POST HANDLER) ──
     @PostMapping("/create-loan")
     @Transactional

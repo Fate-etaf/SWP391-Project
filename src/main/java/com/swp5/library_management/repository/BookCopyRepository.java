@@ -24,6 +24,10 @@ public interface BookCopyRepository extends JpaRepository<BookCopy, String> {
 
     long countByCampusCampusIdAndCopyStatus(Integer campusId, String copyStatus);
 
+    long countByBookBookIdAndCampusCampusId(Integer bookId, Integer campusId);
+
+    long countByBookBookIdAndCampusCampusIdAndCopyStatus(Integer bookId, Integer campusId, String copyStatus);
+
     List<BookCopy> findByCampusCampusId(Integer campusId);
 
     @Query("SELECT bc.copyStatus, COUNT(bc) FROM BookCopy bc WHERE bc.campus.campusId = :campusId GROUP BY bc.copyStatus")
