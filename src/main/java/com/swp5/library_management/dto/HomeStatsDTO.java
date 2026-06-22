@@ -23,11 +23,7 @@ public class HomeStatsDTO {
     /** Số bản sao đang ở trạng thái "Available" (sẵn sàng cho mượn) */
     private long availableCopies;
 
-    /**
-     * Số bạn đọc tích cực.
-     * TODO: Cần inject UserRepository.countByStatus("Active") khi có Entity User/Reader.
-     *       Hiện tại giữ giá trị 0 để không block việc build project.
-     */
+    /** Số bạn đọc tích cực */
     private long activeReaders;
 
     /** Tổng số cơ sở đang kết nối vào hệ thống */

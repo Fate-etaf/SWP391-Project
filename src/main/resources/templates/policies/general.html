@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <th:block th:replace="~{fragments/header :: head('Chính sách chung - FPTU Library')}"></th:block>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <style>
+        /* ── ARTICLE CONTENT ── */
+        .page-header { background: #f7f7f7; padding: 40px 20px; border-bottom: 1px solid #ddd; }
+        .page-header .inner { max-width: 900px; margin: 0 auto; }
+        .page-header h1 { font-size: 28px; color: #1a1a2e; margin-bottom: 8px; }
+        .page-meta { font-size: 13px; color: #777; display: flex; gap: 16px; }
+        
+        .article-body { max-width: 900px; margin: 40px auto; padding: 0 20px; font-size: 15px; color: #333; }
+        .article-body h2 { font-size: 20px; color: #e87722; margin-top: 32px; margin-bottom: 16px; font-weight: 700; }
+        .article-body h3 { font-size: 17px; color: #1a1a2e; margin-top: 24px; margin-bottom: 12px; font-weight: 600; }
+        .article-body p { margin-bottom: 16px; }
+        .article-body ul { margin-bottom: 16px; padding-left: 20px; }
+        .article-body li { margin-bottom: 8px; }
+        .article-body a { color: #e87722; text-decoration: none; font-weight: 600; }
+        .article-body a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header('policy')}"></div>
+
+<div class="page-header">
+    <div class="inner">
+        <h1>Chính sách Thư viện trường Đại học FPT</h1>
+        <div class="page-meta">
+            <span>📅 29/09/2025</span>
+            <span>👁️ 7321 lượt xem</span>
+        </div>
+    </div>
+</div>
+
+<main class="article-body">
+    <h2>Chính sách chung</h2>
+    <p><strong>Phạm vi áp dụng:</strong> Tất cả mọi người</p>
+    <p>Các thư viện của FPTU tại 5 cơ sở Hà Nội, Đà Nẵng, Quy nhơn, Hồ Chí Minh, Cần Thơ cung cấp một số dịch vụ cho phép sử dụng tài nguyên thư viện miễn phí, bao gồm:</p>
+
+    <ul>
+        <li>
+            <strong>Truy cập tự động miễn phí vào Internet và không gian học tập tại thư viện:</strong>
+            <p>Thư viện cung cấp truy cập miễn phí vào Internet phục vụ học tập và nghiên cứu, tại đây có nhân viên chuyên nghiệp hỗ trợ bạn đọc.</p>
+        </li>
+        <li>
+            <strong>Truy cập miễn phí vào tài nguyên sách tại chỗ:</strong>
+            <p>Thư viện cung cấp truy cập vào tài nguyên sách miễn phí tại chỗ.<br>Đối với con em của giảng viên, nhân viên ở mọi cấp học đều có thể mượn sách về đọc.</p>
+        </li>
+        <li>
+            <strong>Truy cập miễn phí vào các bài báo khoa học và luận văn tốt nghiệp của sinh viên FPTU:</strong>
+            <p>Trên trang web <a href="http://ds.libol.fpt.edu.vn/">http://ds.libol.fpt.edu.vn/</a> và một số tài nguyên trực tuyến khác của các thư viện FPTU.</p>
+        </li>
+        <li>
+            <strong>Hội chợ sách và các hoạt động:</strong>
+            <p>Với mục tiêu thúc đẩy văn hóa đọc và xã hội học thuật, thư viện mở cửa miễn phí cho mọi đối tượng tham dự các sự kiện, hoạt động như: Hội chợ sách FPTU, Thử Thách Đọc Sách 7 Ngày, triển lãm, hội thảo về sách, về nghệ thuật thường xuyên được tổ chức.</p>
+        </li>
+    </ul>
+
+    <hr style="margin: 40px 0; border: none; border-top: 1px dashed #ccc;">
+
+    <h2>General Policy</h2>
+    <p><strong>Scope of application:</strong> Everyone.</p>
+    <p>The libraries at all campuses of FPTU provide several services that allow free use of library resources, including:</p>
+
+    <ul>
+        <li>
+            <strong>Free automatic access to the Internet and study space in the library:</strong>
+            <p>The library provides free Internet access for study and research, with professional staff available to support readers.</p>
+        </li>
+        <li>
+            <strong>Free access to on-site book resources:</strong>
+            <p>The library provides free on-site access to book collections.<br>Children of faculty and staff, at all educational levels, are allowed to borrow books to take home.</p>
+        </li>
+        <li>
+            <strong>Free access to scientific articles and students’ graduation theses:</strong>
+            <p>On the website <a href="http://ds.libol.fpt.edu.vn/">http://ds.libol.fpt.edu.vn/</a> and some other online resources of the libraries.</p>
+        </li>
+        <li>
+            <strong>Book fairs and activities:</strong>
+            <p>With the goal of promoting a reading culture and an academic society, the library is open free of charge to everyone to participate in events and activities such as: Book Fairs, the 7-Day Reading Challenge, exhibitions, seminars on books and arts, which are regularly organized.</p>
+        </li>
+    </ul>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

@@ -7,11 +7,10 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import com.swp5.library_management.entity.Book;
 
-@Repository
+
 public interface BookRepository extends JpaRepository<Book, Integer> {
 
     /**
@@ -70,6 +69,12 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
                b.isbn LIKE CONCAT('%',:keyword,'%'))
           AND (:subjectCode IS NULL OR :subjectCode = '' OR
                b.subject.subjectCode = :subjectCode)
+          AND (:categoryId IS NULL OR
+               EXISTS (SELECT c FROM b.categories c WHERE c.categoryId = :categoryId))
+          AND (:majorId IS NULL OR
+               (:majorId > 0 AND EXISTS (SELECT 1 FROM Major m JOIN m.subjects ms WHERE m.majorId = :majorId AND ms.subjectCode = b.subject.subjectCode)) OR
+               (:majorId = -1 AND (b.subject IS NULL OR NOT EXISTS (SELECT 1 FROM Major m2 JOIN m2.subjects ms2 WHERE ms2.subjectCode = b.subject.subjectCode)))
+              )
           AND (:campusId IS NULL OR
                EXISTS (SELECT bc FROM BookCopy bc
                        WHERE bc.book = b AND bc.campus.campusId = :campusId))
@@ -77,6 +82,8 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     """)
     List<Book> searchBooks(@Param("keyword")     String  keyword,
                            @Param("subjectCode") String  subjectCode,
+                           @Param("categoryId")  Integer categoryId,
+                           @Param("majorId")     Integer majorId,
                            @Param("campusId")    Integer campusId);
 
     // ────────────────────────────────────────────────────────────────────────
@@ -102,4 +109,16 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
      */
     @EntityGraph(attributePaths = {"authors", "categories", "copies", "subject"})
     List<Book> findTop8ByOrderByCreatedAtDesc();
+
+    /**
+     * Lấy 5 cuốn sách ngẫu nhiên theo chuyên ngành (Dùng NEWID() của SQL Server)
+     */
+    @Query(value = "SELECT TOP 5 b.* FROM Books b JOIN MajorSubjects ms ON b.SubjectCode = ms.SubjectCode WHERE ms.MajorID = :majorId ORDER BY NEWID()", nativeQuery = true)
+    List<Book> findTop5RandomByMajor(@Param("majorId") Integer majorId);
+
+    /**
+     * Lấy 5 cuốn sách ngẫu nhiên không thuộc chuyên ngành nào (Dùng NEWID() của SQL Server)
+     */
+    @Query(value = "SELECT TOP 5 b.* FROM Books b WHERE b.SubjectCode IS NULL OR NOT EXISTS (SELECT 1 FROM MajorSubjects ms WHERE ms.SubjectCode = b.SubjectCode) ORDER BY NEWID()", nativeQuery = true)
+    List<Book> findTop5RandomOutsideMajors();
 }

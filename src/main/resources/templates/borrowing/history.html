@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử mượn trả – FLMS | Thư viện Đại học FPT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B',
+                            dark: '#0F172A',
+                            orangeHover: '#D95F18'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style th:replace="~{fragments/header :: header-style}"></style>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .card-hover { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -10px rgba(0,0,0,0.15); }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
+<!-- ═══════════════════════════════════════════════════════ NAV BAR ══ -->
+<div th:replace="~{fragments/header :: header('history')}"></div>
+
+
+    <!-- ═══════════════════════════════════════════════════ MAIN CONTENT ══ -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
+        
+        <!-- Header Section -->
+        <div class="mb-8">
+            <span class="bg-blue-50 text-blue-600 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase border border-blue-100">
+                Tài khoản bạn đọc
+            </span>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-3 mb-2 tracking-tight">
+                Lịch sử mượn trả sách
+            </h2>
+            <p class="text-slate-500 text-sm">
+                Theo dõi toàn bộ các cuốn sách bạn đang mượn, đã trả, hoặc quá hạn tại các cơ sở của Thư viện FPT.
+            </p>
+        </div>
+
+        <!-- ── STATS COUNTERS ── -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <!-- Counter 1: Total -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+                <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Tổng lượt mượn</p>
+                    <h3 class="text-xl md:text-2xl font-bold text-slate-800" th:text="${#lists.size(historyList)}">0</h3>
+                </div>
+            </div>
+
+            <!-- Counter 2: Borrowing -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Đang giữ mượn</p>
+                    <h3 class="text-xl md:text-2xl font-bold text-slate-800" id="stats-borrowing">0</h3>
+                </div>
+            </div>
+
+            <!-- Counter 3: Returned -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Đã hoàn trả</p>
+                    <h3 class="text-xl md:text-2xl font-bold text-slate-800" id="stats-returned">0</h3>
+                </div>
+            </div>
+
+            <!-- Counter 4: Overdue -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center space-x-4">
+                <div class="p-3 bg-rose-50 text-rose-600 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Quá hạn trả</p>
+                    <h3 class="text-xl md:text-2xl font-bold text-rose-600 animate-pulse" id="stats-overdue">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── FILTER BAR ── -->
+        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <!-- Tabs -->
+            <div class="flex flex-wrap gap-1.5">
+                <button onclick="filterHistory('All')" id="btn-filter-All" class="px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 bg-fpt-orange text-white">
+                    Tất cả
+                </button>
+                <button onclick="filterHistory('Borrowing')" id="btn-filter-Borrowing" class="px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-600 hover:bg-slate-100 hover:text-slate-800">
+                    Đang mượn
+                </button>
+                <button onclick="filterHistory('Returned')" id="btn-filter-Returned" class="px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-600 hover:bg-slate-100 hover:text-slate-800">
+                    Đã trả
+                </button>
+                <button onclick="filterHistory('Overdue')" id="btn-filter-Overdue" class="px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-600 hover:bg-slate-100 hover:text-slate-800">
+                    Quá hạn
+                </button>
+                <button onclick="filterHistory('LostDamaged')" id="btn-filter-LostDamaged" class="px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-600 hover:bg-slate-100 hover:text-slate-800">
+                    Hỏng / Mất
+                </button>
+            </div>
+            
+            <!-- Quick Search inside borrowing -->
+            <div class="relative w-full md:w-80">
+                <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input id="searchInput" type="text" oninput="searchBorrowings()" placeholder="Tìm kiếm theo tiêu đề..." 
+                       class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/25 placeholder-slate-400">
+            </div>
+        </div>
+
+        <!-- ── MAIN CARDS CONTAINER ── -->
+        <div th:if="${historyList != null and !#lists.isEmpty(historyList)}" id="history-grid" 
+             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <!-- Dynamic Borrowing Card -->
+            <div th:each="item : ${historyList}" 
+                 th:data-status="${item.status}" 
+                 th:data-title="${#strings.toLowerCase(item.bookTitle)}"
+                 class="history-card bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm flex flex-col card-hover">
+                
+                <!-- Card Header Color Cover -->
+                <div class="h-32 w-full bg-gradient-to-br flex flex-col justify-between p-4 text-white relative select-none"
+                     th:classappend="${item.coverColor}">
+                    <div class="flex justify-between items-start">
+                        <!-- Book Copy Code -->
+                        <span class="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase backdrop-blur-sm"
+                              th:text="${item.copyId}">COPYID</span>
+                        
+                        <!-- Status Badge -->
+                        <div>
+                            <!-- Borrowing -->
+                            <span th:if="${item.status == 'Borrowing'}" class="bg-amber-500/90 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase shadow-sm">
+                                🟡 Đang mượn
+                            </span>
+                            <!-- Returned -->
+                            <span th:if="${item.status == 'Returned'}" class="bg-emerald-500/90 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase shadow-sm">
+                                🟢 Đã trả
+                            </span>
+                            <!-- Overdue -->
+                            <span th:if="${item.status == 'Overdue'}" class="bg-rose-500/90 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase shadow-sm animate-pulse">
+                                🔴 Quá hạn
+                            </span>
+                            <!-- Lost -->
+                            <span th:if="${item.status == 'Lost'}" class="bg-slate-600/90 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase shadow-sm">
+                                ⚫ Bị mất
+                            </span>
+                            <!-- Damaged -->
+                            <span th:if="${item.status == 'Damaged'}" class="bg-slate-600/90 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase shadow-sm">
+                                ⚫ Bị hỏng
+                            </span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-extrabold text-sm tracking-tight line-clamp-2 leading-snug"
+                            th:text="${item.bookTitle}">Book Title</h4>
+                        <span class="text-[10px] text-slate-300 truncate block mt-0.5" th:text="${item.authorNames}">Author</span>
+                    </div>
+                </div>
+
+                <!-- Card Details Body -->
+                <div class="p-5 flex-grow flex flex-col justify-between text-xs text-slate-600 space-y-4">
+                    <div class="grid grid-cols-2 gap-y-3 gap-x-2">
+                        <div>
+                            <p class="text-slate-400 font-medium">Mã đơn mượn</p>
+                            <p class="font-semibold text-slate-800" th:text="${'#' + item.ticketId}">#0</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400 font-medium">Lượt gia hạn</p>
+                            <p class="font-semibold text-slate-800" th:text="${item.renewalCount != null ? item.renewalCount + ' lần' : '0 lần'}">0 lần</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400 font-medium">Ngày mượn</p>
+                            <p class="font-semibold text-slate-800" th:text="${#temporals.format(item.borrowDate, 'dd/MM/yyyy')}">--/--/----</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400 font-medium">Hạn trả sách</p>
+                            <p class="font-semibold" 
+                               th:classappend="${item.status == 'Overdue' ? 'text-rose-600 font-bold' : 'text-slate-800'}"
+                               th:text="${#temporals.format(item.dueDate, 'dd/MM/yyyy')}">--/--/----</p>
+                        </div>
+                    </div>
+
+                    <!-- Return Info Alert -->
+                    <div th:if="${item.returnDate != null}" class="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center space-x-2 text-emerald-800">
+                        <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"></path>
+                        </svg>
+                        <div class="leading-tight">
+                            <p class="font-bold">Đã trả ngày:</p>
+                            <p class="text-[10px]" th:text="${#temporals.format(item.returnDate, 'HH:mm - dd/MM/yyyy') + (item.returnCampusName != null ? ' tại ' + item.returnCampusName : '')}"></p>
+                        </div>
+                    </div>
+
+                    <div th:if="${item.status == 'Overdue'}" class="p-3 bg-rose-50 border border-rose-100 rounded-xl flex items-center space-x-2 text-rose-800">
+                        <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        <div class="leading-tight">
+                            <p class="font-bold">Sách đã bị quá hạn trả!</p>
+                            <p class="text-[10px]">Vui lòng trả sớm và đóng phạt (nếu có) tại quầy thư viện.</p>
+                        </div>
+                    </div>
+
+                    <div th:if="${item.status == 'Lost'}" class="p-3 bg-slate-100 border border-slate-200 rounded-xl flex items-center space-x-2 text-slate-800">
+                        <span class="text-sm shrink-0">⚫</span>
+                        <div class="leading-tight">
+                            <p class="font-bold">Đã báo mất sách</p>
+                            <p class="text-[10px]">Đang được hệ thống ghi nhận và xử lý hóa đơn phạt.</p>
+                        </div>
+                    </div>
+
+                    <div th:if="${item.status == 'Damaged'}" class="p-3 bg-slate-100 border border-slate-200 rounded-xl flex items-center space-x-2 text-slate-800">
+                        <span class="text-sm shrink-0">⚫</span>
+                        <div class="leading-tight">
+                            <p class="font-bold">Sách bị hỏng</p>
+                            <p class="text-[10px]">Đang được ghi nhận và đưa vào quy trình bảo trì.</p>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Book details link -->
+                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-[10px] text-slate-400">Campus: <strong th:text="${item.copyId != null ? #strings.substring(item.copyId, 0, 2) : 'FPT'}">HN</strong></span>
+                        <a th:if="${item.bookId != null}" th:href="@{/books/{id}(id=${item.bookId})}"
+                           class="text-fpt-orange hover:text-fpt-orangeHover font-semibold transition-colors flex items-center space-x-1">
+                            <span>Chi tiết sách</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── EMPTY STATE ── -->
+        <div id="empty-state" class="hidden bg-white border border-slate-200/80 rounded-2xl p-12 text-center shadow-sm">
+            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Không tìm thấy lịch sử mượn phù hợp</h3>
+            <p class="text-sm text-slate-400 max-w-md mx-auto">
+                Hiện chưa có cuốn sách nào khớp với bộ lọc hoặc từ khoá tìm kiếm hiện tại của bạn.
+            </p>
+        </div>
+
+        <div th:if="${historyList == null or #lists.isEmpty(historyList)}" class="bg-white border border-slate-200/80 rounded-2xl p-12 text-center shadow-sm">
+            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Bạn chưa từng mượn cuốn sách nào</h3>
+            <p class="text-sm text-slate-400 max-w-md mx-auto mb-6">
+                Lịch sử mượn trả sẽ hiển thị tại đây sau khi bạn đến quầy thư viện làm thủ tục mượn sách giấy từ thủ thư.
+            </p>
+            <a href="/books" class="bg-fpt-orange hover:bg-fpt-orangeHover text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-all inline-block shadow-lg shadow-fpt-orange/20">
+                Tra cứu sách mượn ngay
+            </a>
+        </div>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════ FOOTER ══ -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- ═══════════════════════════════════════════════════════ SCRIPTS ══ -->
+    <script>
+        let currentFilter = 'All';
+
+        // Calculate stats on load
+        document.addEventListener("DOMContentLoaded", () => {
+            calculateStats();
+        });
+
+        function calculateStats() {
+            const cards = document.querySelectorAll(".history-card");
+            let borrowingCount = 0;
+            let returnedCount = 0;
+            let overdueCount = 0;
+
+            cards.forEach(card => {
+                const status = card.getAttribute("data-status");
+                if (status === "Borrowing") borrowingCount++;
+                else if (status === "Returned") returnedCount++;
+                else if (status === "Overdue") overdueCount++;
+            });
+
+            const statsBorrowing = document.getElementById("stats-borrowing");
+            const statsReturned = document.getElementById("stats-returned");
+            const statsOverdue = document.getElementById("stats-overdue");
+
+            if (statsBorrowing) statsBorrowing.innerText = borrowingCount;
+            if (statsReturned) statsReturned.innerText = returnedCount;
+            if (statsOverdue) statsOverdue.innerText = overdueCount;
+        }
+
+        function filterHistory(filterType) {
+            currentFilter = filterType;
+            
+            // Toggle active class in tab buttons
+            const filterButtons = ["All", "Borrowing", "Returned", "Overdue", "LostDamaged"];
+            filterButtons.forEach(btn => {
+                const element = document.getElementById(`btn-filter-${btn}`);
+                if (element) {
+                    if (btn === filterType) {
+                        element.classList.remove("text-slate-600", "hover:bg-slate-100", "hover:text-slate-800");
+                        element.classList.add("bg-fpt-orange", "text-white");
+                    } else {
+                        element.classList.remove("bg-fpt-orange", "text-white");
+                        element.classList.add("text-slate-600", "hover:bg-slate-100", "hover:text-slate-800");
+                    }
+                }
+            });
+
+            applyFilters();
+        }
+
+        function searchBorrowings() {
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const searchVal = document.getElementById("searchInput").value.toLowerCase().trim();
+            const cards = document.querySelectorAll(".history-card");
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const status = card.getAttribute("data-status");
+                const title = card.getAttribute("data-title") || "";
+                
+                let matchesStatus = false;
+                if (currentFilter === 'All') {
+                    matchesStatus = true;
+                } else if (currentFilter === 'LostDamaged') {
+                    matchesStatus = (status === 'Lost' || status === 'Damaged');
+                } else {
+                    matchesStatus = (status === currentFilter);
+                }
+
+                const matchesSearch = title.includes(searchVal);
+
+                if (matchesStatus && matchesSearch) {
+                    card.style.display = "flex";
+                    visibleCount++;
+                } else {
+                    card.style.display = "none";
+                }
+            });
+
+            const grid = document.getElementById("history-grid");
+            const emptyState = document.getElementById("empty-state");
+
+            if (grid && emptyState) {
+                if (visibleCount === 0 && cards.length > 0) {
+                    emptyState.classList.remove("hidden");
+                } else {
+                    emptyState.classList.add("hidden");
+                }
+            }
+        }
+    </script>
+</body>
+</html>

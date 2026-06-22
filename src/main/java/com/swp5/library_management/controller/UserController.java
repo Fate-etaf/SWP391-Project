@@ -1,8 +1,11 @@
 package com.swp5.library_management.controller;
 
-import com.swp5.library_management.entity.User;
-import com.swp5.library_management.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import com.swp5.library_management.repository.CampusRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,16 +14,52 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import com.swp5.library_management.entity.User;
+import com.swp5.library_management.repository.UserRepository;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class UserController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    
+    private final CampusRepository campusRepository;
+
+    UserController(UserRepository userRepository, CampusRepository campusRepository) {
+        this.userRepository = userRepository;
+        this.campusRepository = campusRepository;
+    }
+
+    @GetMapping("/profile")
+    public String showProfile(HttpSession session, Model model) {
+        String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+        if (loggedInUserId == null) {
+            return "redirect:/login";
+        }
+        Optional<User> userOpt = userRepository.findById(loggedInUserId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            model.addAttribute("user", user);
+            
+            String campusName = "Unknown";
+            if (user.getCampusId() != null) {
+                campusName = campusRepository.findById(user.getCampusId())
+                        .map(com.swp5.library_management.entity.Campus::getCampusName)
+                        .orElse("Unknown");
+            }
+            model.addAttribute("campusName", campusName);
+            
+            // role check for UI sidebar
+            String roleName = user.getRole() != null ? user.getRole().getRoleName() : "Student";
+            int roleId = user.getRole() != null ? user.getRole().getRoleId() : 1;
+            model.addAttribute("roleName", roleName);
+            model.addAttribute("isLibrarianOrAdmin", "Librarian".equalsIgnoreCase(roleName) || "Admin".equalsIgnoreCase(roleName) || roleId == 3 || roleId == 4);
+            
+            return "profile";
+        }
+        return "redirect:/login";
+    }
 
     // === 1. LUỒNG ĐĂNG NHẬP (GIỮ NGUYÊN HOÀN HẢO) ===
     @GetMapping("/login")
@@ -38,6 +77,7 @@ public class UserController {
             @RequestParam("userId") String userId,
             @RequestParam("email") String email,
             @RequestParam("campusId") Integer campusId,
+            HttpSession session,
             RedirectAttributes redirectAttributes,
             Model model) {
 
@@ -46,17 +86,47 @@ public class UserController {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             
+            // 1. Lưu thông tin người dùng cơ bản vào Session
+            session.setAttribute("loggedInUser", user);
+            session.setAttribute("loggedInUserId", user.getUserId());
+            session.setAttribute("loggedInCampusId", user.getCampusId());
+
             // Tạo Spring Security Session cho đăng nhập thủ công
             com.swp5.library_management.security.CustomUserDetails userDetails = new com.swp5.library_management.security.CustomUserDetails(user, new java.util.HashMap<>());
             org.springframework.security.authentication.UsernamePasswordAuthenticationToken auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
-
             redirectAttributes.addFlashAttribute("registeredName", user.getFullName());
+            
+            // 2. PHÂN QUYỀN NGẦM: Bốc trực tiếp ID/Tên từ thực thể Role liên kết
+            if (user.getRole() != null) {
+                String roleName = user.getRole().getRoleName(); // Hãy check xem trong Role.java đặt thuộc tính là roleName hay name nhé
+                int roleId = user.getRole().getRoleId();
+                
+                // Lưu trạng thái quyền vào session phòng hờ giao diện Frontend cần dùng
+                session.setAttribute("isLibrarian", "Librarian".equalsIgnoreCase(roleName) || roleId == 3);
+                session.setAttribute("isAdmin", "Admin".equalsIgnoreCase(roleName) || roleId == 4);
+                
+                // 3. ĐIỀU HƯỚNG THÔNG MINH: Nếu là Admin (4) hoặc Thủ thư (3) -> Vào thẳng trang Dashboard
+                if ("Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId == 4 || roleId == 3) {
+                    return "redirect:/librarian/inventory/dashboard"; 
+                }
+            }
+            // Mặc định: Nếu là Student (Sinh viên) hoặc Giảng viên lướt trang chung -> Vào màn hình Home
             return "redirect:/home";
         }
 
+        // Luồng xử lý khi sai tài khoản giữ nguyên
         model.addAttribute("loginError", "Mã số, Email hoặc Cơ sở học tập không trùng khớp với dữ liệu hệ thống!");
+        model.addAttribute("userId", userId);
+        model.addAttribute("email", email);
+        model.addAttribute("campusId", campusId);
         return "login";
+    }
+    // === ĐĂNG XUẤT ===
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate(); // Xóa toàn bộ session
+        return "redirect:/login";
     }
 
     // === 2. GIAO DIỆN IMPORT EXCEL ===

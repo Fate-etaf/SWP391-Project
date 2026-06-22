@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo lệnh xuất kho - FLMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A', orangeHover: '#D95F18' } } } }
+        }
+    </script>
+    <style th:replace="~{fragments/header :: header-style}"></style>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-between relative overflow-x-hidden">
+
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
+    </div>
+
+    <div class="relative z-50">
+        <div th:replace="~{fragments/header :: header('librarian')}"></div>
+    </div>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
+        <div th:replace="~{fragments/sidebar :: sidebar('transfers')}"></div>
+
+        <div class="flex-grow min-w-0 max-w-3xl">
+            <div class="mb-6 flex items-center space-x-3">
+                <a href="/librarian/inventory/transfers" class="text-slate-500 hover:text-fpt-orange transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                </a>
+                <div>
+                    <span class="bg-fpt-orange/20 text-orange-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase mb-3 inline-block">New Transfer</span>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Tạo lệnh xuất kho mới</h2>
+                    <p class="text-sm text-slate-400 mt-1">Lệnh sẽ chuyển trạng thái các sách này sang "Đang giao hàng" (In Transit).</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 sm:p-8 shadow-2xl">
+                <form action="/librarian/inventory/transfers/create" method="post" class="space-y-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Cơ sở nhận sách <span class="text-rose-400">*</span></label>
+                        <select name="toCampusId" required class="w-full bg-[#0e1625] border border-slate-700 text-slate-200 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors">
+                            <option value="">-- Chọn cơ sở nhận --</option>
+                            <option th:each="campus : ${campuses}"
+                                    th:if="${campus.campusId != session.loggedInUser.campusId}"
+                                    th:value="${campus.campusId}"
+                                    th:text="${campus.campusName}"></option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mã bản sao sách <span class="text-rose-400">*</span></label>
+                        <p class="text-xs text-slate-500 mb-2">Nhập các mã Barcode/RFID của sách, cách nhau bằng dấu phẩy.</p>
+                        <textarea name="copyIds" rows="4" required placeholder="Ví dụ: CP-CC-HN-001, CP-DB-HN-001" class="w-full bg-[#0e1625] border border-slate-700 text-slate-200 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors placeholder:text-slate-600"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ghi chú</label>
+                        <input type="text" name="note" placeholder="Ví dụ: Chuyển gấp theo yêu cầu sinh viên HE170001..." class="w-full bg-[#0e1625] border border-slate-700 text-slate-200 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors placeholder:text-slate-600">
+                    </div>
+
+                    <div class="pt-4 flex items-center justify-end space-x-4 border-t border-slate-800">
+                        <a href="/librarian/inventory/transfers" class="text-sm font-semibold text-slate-400 hover:text-slate-200 px-4 py-2 transition-colors">Hủy bỏ</a>
+                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-600/20 border border-emerald-500">
+                            Xác nhận xuất kho
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div class="relative z-10 mt-auto">
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </div>
+</body>
+</html>

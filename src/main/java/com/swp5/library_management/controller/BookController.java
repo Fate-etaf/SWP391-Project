@@ -5,6 +5,7 @@ import com.swp5.library_management.dto.BookSearchResultDTO;
 import com.swp5.library_management.repository.CampusRepository;
 import com.swp5.library_management.repository.SubjectRepository;
 import com.swp5.library_management.service.BookService;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -24,13 +25,22 @@ public class BookController {
     private final BookService      bookService;
     private final CampusRepository campusRepository;
     private final SubjectRepository subjectRepository;
+    private final com.swp5.library_management.service.HomeService homeService;
+    private final com.swp5.library_management.repository.CategoryRepository categoryRepository;
+    private final com.swp5.library_management.repository.MajorRepository majorRepository;
 
     public BookController(BookService bookService,
                           CampusRepository campusRepository,
-                          SubjectRepository subjectRepository) {
+                          SubjectRepository subjectRepository,
+                          com.swp5.library_management.service.HomeService homeService,
+                          com.swp5.library_management.repository.CategoryRepository categoryRepository,
+                          com.swp5.library_management.repository.MajorRepository majorRepository) {
         this.bookService      = bookService;
         this.campusRepository = campusRepository;
         this.subjectRepository = subjectRepository;
+        this.homeService = homeService;
+        this.categoryRepository = categoryRepository;
+        this.majorRepository = majorRepository;
     }
 
     // ── UCG01: Search Books ───────────────────────────────────────────────────
@@ -45,35 +55,43 @@ public class BookController {
     public String searchBooks(
             @RequestParam(required = false) String  keyword,
             @RequestParam(required = false) String  subjectCode,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) Integer majorId,
             @RequestParam(required = false) Integer campusId,
             Model model) {
 
         boolean hasSearch = StringUtils.hasText(keyword)
                          || StringUtils.hasText(subjectCode)
+                         || categoryId != null
+                         || majorId != null
                          || campusId != null;
 
         if (hasSearch) {
-            List<BookSearchResultDTO> results = bookService.searchBooks(keyword, subjectCode, campusId);
+            List<BookSearchResultDTO> results = bookService.searchBooks(keyword, subjectCode, categoryId, majorId, campusId);
             model.addAttribute("results", results);
             model.addAttribute("noResults", results.isEmpty());
-
-            // UCG01 – E1: Hiển thị sách mới nhất khi không tìm thấy kết quả
+            
+            // Nếu không có kết quả, hiển thị lại majorSections
             if (results.isEmpty()) {
-                model.addAttribute("recentBooks", bookService.getRecentBooks(campusId));
+                model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
             }
         } else {
-            // Chưa tìm kiếm → hiện gợi ý là sách mới nhất
-            model.addAttribute("recentBooks", bookService.getRecentBooks(campusId));
+            // Hiển thị gợi ý theo chuyên ngành
+            model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
         }
 
         // Populate dropdowns
         model.addAttribute("campuses",    campusRepository.findAll());
         model.addAttribute("subjects",    subjectRepository.findAll());
+        model.addAttribute("categories",  categoryRepository.findAll());
+        model.addAttribute("majors",      majorRepository.findAll());
 
         // Giữ lại giá trị filter trên form sau khi submit
         model.addAttribute("keyword",            keyword);
         model.addAttribute("selectedCampusId",   campusId);
         model.addAttribute("selectedSubjectCode", subjectCode);
+        model.addAttribute("selectedCategoryId", categoryId);
+        model.addAttribute("selectedMajorId",    majorId);
         model.addAttribute("hasSearch",          hasSearch);
 
         return "books/search";

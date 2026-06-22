@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <th:block th:replace="~{fragments/header :: head('Giới thiệu Thư viện - FPTU Library')}"></th:block>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <style>
+        /* ── ARTICLE CONTENT ── */
+        .page-header { background: #f7f7f7; padding: 40px 20px; border-bottom: 1px solid #ddd; }
+        .page-header .inner { max-width: 900px; margin: 0 auto; }
+        .page-header h1 { font-size: 28px; color: #1a1a2e; margin-bottom: 8px; }
+        .page-meta { font-size: 13px; color: #777; display: flex; gap: 16px; }
+        
+        .article-body { max-width: 900px; margin: 40px auto; padding: 0 20px; font-size: 15px; color: #333; }
+        .article-body h2 { font-size: 20px; color: #e87722; margin-top: 32px; margin-bottom: 16px; font-weight: 700; }
+        .article-body h3 { font-size: 17px; color: #1a1a2e; margin-top: 24px; margin-bottom: 12px; font-weight: 600; }
+        .article-body p { margin-bottom: 16px; }
+        .article-body ul { margin-bottom: 16px; padding-left: 20px; }
+        .article-body li { margin-bottom: 8px; }
+        .article-body a { color: #e87722; text-decoration: none; font-weight: 600; }
+        .article-body a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header('policy')}"></div>
+
+<div class="page-header">
+    <div class="inner">
+        <h1>Giới thiệu Thư viện trường Đại học FPT Hà Nội</h1>
+        <div class="page-meta">
+            <span>📅 14/05/2021</span>
+            <span>👁️ 12898 lượt xem</span>
+        </div>
+    </div>
+</div>
+
+<main class="article-body">
+    <p>Thư viện trường ĐH FPT cơ sở Hà Nội được chính thức thành lập theo quyết định số 1029/QĐ-ĐHFPT ngày 09/12/2015 của Hiệu trưởng trường ĐH FPT. Chức năng và nhiệm vụ của thư viện như sau:</p>
+
+    <h2>Chức năng:</h2>
+    <p>Là phòng học liệu tích hợp được xây dựng và phát triển nhằm hỗ trợ hiệu quả việc giảng dạy, nghiên cứu và các hoạt động thông tin học thuật tới đội ngũ giảng viên, nhân viên và sinh viên FPT.</p>
+
+    <h2>Nhiệm vụ:</h2>
+    <ul>
+        <li>Thu thập, bổ sung, xử lý, thông báo, cung cấp tài liệu, thông tin về các lĩnh vực khoa học nhằm hỗ trợ hiệu quả cho việc giảng dạy, nghiên cứu, học tập và các hoạt động học thuật của đội ngũ giảng viên, nhân viên và sinh viên;</li>
+        <li>Đảm bảo cung cấp thông tin cho người dùng tin một cách đầy đủ, chính xác, đúng đối tượng, điều tra, đánh giá đúng nhu cầu tin của giảng viên, cán bộ nghiên cứu, học viên cao học, nghiên cứu sinh và sinh viên;</li>
+        <li>Tham mưu, lập kế hoạch dài hạn, ngắn hạn cho giám đốc cơ sở đào tạo về công tác thông tin tư liệu;</li>
+        <li>Tổ chức sắp xếp, lưu trữ, bảo quản kho tư liệu của cơ sở bao gồm tất cả các loại hình ấn phẩm và vật mang tin;</li>
+        <li>Xây dựng hệ thống tra cứu tin thích hợp nhằm phục vụ và phổ biến thông tin cho toàn thể người dùng tin;</li>
+        <li>Thu thập, lưu chiểu những ấn phẩm do Nhà trường xuất bản, các luận văn, đồ án tốt nghiệp;</li>
+        <li>Phát triển quan hệ trao đổi, hợp tác trực tiếp với các trung tâm thông tin – thư viện, các tổ chức khoa học, các trường đại học trong và ngoài nước.</li>
+    </ul>
+
+    <h2>Bộ sưu tập</h2>
+    <ul>
+        <li>Thư viện đang quản lý gần 48.000 tên sách với hơn 85.000 bản sách;</li>
+        <li>4 cơ sở dữ liệu (CSDL):</li>
+    </ul>
+
+    <div style="background: #f9fafb; padding: 16px 20px; border-radius: 8px; margin: 16px 0;">
+        <p><strong>* CSDL thư mục (opac):</strong> Tra cứu sách giáo trình và tham khảo (sách giấy) có trong thư viện; hướng dẫn xem tại link <a href="https://library.fpt.edu.vn/Pages/Index/10">https://library.fpt.edu.vn/Pages/Index/10</a></p>
+        
+        <p><strong>* CSDL nội sinh (Dspace):</strong> Tra cứu đồ án tốt nghiệp của sinh viên các khóa; tài nguyên môn học, bài báo khoa học,...;<br>
+        Hướng dẫn xem tại link: <a href="https://library.fpt.edu.vn/Pages/Index/13">https://library.fpt.edu.vn/Pages/Index/13</a></p>
+        
+        <p><strong>* CSDL sách trực tuyến Books24x7:</strong> Đây là CSDL trường ĐH FPT mua quyền truy cập hàng năm. CSDL này gồm tài liệu thuộc các chủ đề như: Công nghệ thông tin, Kỹ thuật, Kinh tế, tài chính,... hướng dẫn xem tại link: <a href="https://library.fpt.edu.vn/Pages/Index/11">https://library.fpt.edu.vn/Pages/Index/11</a></p>
+        
+        <p><strong>* Cổng truy cập nguồn tin điện tử VISTA:</strong> Cổng thông tin này có thể giúp bạn đọc tiếp cận tài liệu ở một số cơ sở dữ liệu nổi tiếng. Các CSDL bao gồm:</p>
+        <ul style="margin-left: 20px; margin-top: 8px;">
+            <li>Sciencedirect - <a href="https://www.sciencedirect.com/">https://www.sciencedirect.com/</a></li>
+            <li>Springer - <a href="https://link.springer.com/">https://link.springer.com/</a></li>
+            <li>Proquest - <a href="https://www.proquest.com/">https://www.proquest.com/</a></li>
+            <li>IEEE - <a href="https://ieeexplore.ieee.org/Xplore/home.jsp">https://ieeexplore.ieee.org/Xplore/home.jsp</a></li>
+        </ul>
+        <p style="margin-top: 8px;"><em>Đối với nguồn tin này, bạn đọc cần khai thác thông qua thủ thư tại thư viện</em></p>
+    </div>
+
+    <p>Ngoài ra còn rất nhiều loại báo, tạp chí cùng các tài liệu với nhiều loại hình như: CD-Rom; DVD, hộp linh kiện điện tử,...</p>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

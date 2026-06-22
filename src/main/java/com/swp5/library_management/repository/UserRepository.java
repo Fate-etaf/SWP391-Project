@@ -23,4 +23,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     
     // Tự động sinh câu lệnh SQL: SELECT * FROM Users WHERE UserID = ? AND Email = ? AND CampusID = ?
     Optional<User> findByUserIdAndEmailAndCampusId(String userId, String email, Integer campusId);
+
+    @org.springframework.data.jpa.repository.Query(value = "SELECT r.RoleName FROM Roles r JOIN UserRoles ur ON r.RoleID = ur.RoleID WHERE ur.UserID = :userId", nativeQuery = true)
+    java.util.List<String> findRolesByUserId(@org.springframework.data.repository.query.Param("userId") String userId);
 }

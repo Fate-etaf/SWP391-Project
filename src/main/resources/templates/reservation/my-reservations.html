@@ -223,13 +223,21 @@
 <body>
 
 <!-- Header -->
-<div class="header">
-    <span style="font-size:1.6rem;">📚</span>
-    <div>
-        <h1>Thư viện FPT University</h1>
-        <a href="/">← Trang chủ</a>
+<div class="header" style="justify-content: space-between; display: flex; width: 100%;">
+    <div style="display: flex; align-items: center; gap: 14px;">
+        <span style="font-size:1.6rem;">📚</span>
+        <div>
+            <h1>Thư viện FPT University</h1>
+            <a href="/">← Trang chủ</a>
+        </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <a th:if="${session.isLibrarian}" href="/librarian/create-loan" style="color: #fbbf24; text-decoration: none; font-size: .9rem; font-weight: bold;">📖 Tạo đơn mượn</a>
+        <a href="/reservations" style="font-weight: 600; color: #fff; text-decoration: none; font-size: .9rem;">Đặt chỗ của tôi</a>
+        <a href="/borrowing-history" style="color: rgba(255,255,255,.75); text-decoration: none; font-size: .9rem;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.75)'">Lịch sử mượn trả</a>
     </div>
 </div>
+
 
 <div class="container">
 
@@ -420,6 +428,20 @@
             if (diff <= 0) {
                 span.textContent = ' (Đã hết hạn)';
                 span.style.color = '#999';
+                
+                const itemDiv = span.closest('.reservation-item');
+                if (itemDiv) {
+                    // Ẩn nút hủy
+                    const actionsDiv = itemDiv.querySelector('.actions');
+                    if (actionsDiv) actionsDiv.style.display = 'none';
+                    
+                    // Cập nhật badge từ Đang giữ chỗ -> Hết hạn
+                    const badge = itemDiv.querySelector('.badge-holding');
+                    if (badge) {
+                        badge.textContent = '⌛ Hết hạn';
+                        badge.className = 'badge badge-expired';
+                    }
+                }
                 return;
             }
             const h = Math.floor(diff / 3600000);

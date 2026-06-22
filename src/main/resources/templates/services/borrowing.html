@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <th:block th:replace="~{fragments/header :: head('Dịch vụ mượn, trả tài liệu - FPTU Library')}"></th:block>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <style>
+        /* ── ARTICLE CONTENT ── */
+        .page-header { background: #f7f7f7; padding: 40px 20px; border-bottom: 1px solid #ddd; }
+        .page-header .inner { max-width: 900px; margin: 0 auto; }
+        .page-header h1 { font-size: 28px; color: #1a1a2e; margin-bottom: 8px; }
+        .page-meta { font-size: 13px; color: #777; display: flex; gap: 16px; }
+        
+        .article-body { max-width: 900px; margin: 40px auto; padding: 0 20px; font-size: 15px; color: #333; }
+        .article-body h2 { font-size: 20px; color: #e87722; margin-top: 32px; margin-bottom: 16px; font-weight: 700; }
+        .article-body h3 { font-size: 17px; color: #1a1a2e; margin-top: 24px; margin-bottom: 12px; font-weight: 600; }
+        .article-body p { margin-bottom: 16px; }
+        .article-body ul { margin-bottom: 16px; padding-left: 20px; }
+        .article-body li { margin-bottom: 8px; }
+        .article-body a { color: #e87722; text-decoration: none; font-weight: 600; }
+        .article-body a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header('service')}"></div>
+
+<div class="page-header">
+    <div class="inner">
+        <h1>Dịch vụ mượn, trả tài liệu</h1>
+        <div class="page-meta">
+            <span>📅 14/05/2021</span>
+            <span>👁️ 13461 lượt xem</span>
+        </div>
+    </div>
+</div>
+
+<main class="article-body">
+    <p>Dịch vụ này nhằm mục đích giúp bạn đọc có thể mượn sách về nhà. Bạn đọc cần biết một số thông tin sau:</p>
+
+    <h2>1. MƯỢN SÁCH</h2>
+
+    <h3>1.1 Hạn ngạch:</h3>
+    <ul>
+        <li>Bạn đọc là Sinh viên, học sinh: Được mượn tối đa 10 tài liệu cùng lúc;</li>
+        <li>Bạn đọc là CBGV: Được mượn tối đa 20 tài liệu cùng lúc.</li>
+    </ul>
+
+    <h3>1.2 Điều kiện:</h3>
+    <ul>
+        <li>Bạn đọc là Học sinh, Sinh viên, CBGV tại Trường Đại học FPT;</li>
+        <li>Bạn đọc cần xuất trình thẻ sinh viên hoặc Căn cước công dân (VNeID) khi mượn (KHÔNG DÙNG ẢNH CHỤP);</li>
+        <li>Không sử dụng thẻ của bạn đọc khác khi mượn sách tại thư viện;</li>
+        <li>Bạn đọc không vi phạm nội quy thư viện.</li>
+    </ul>
+
+    <h3>1.3 Cách thức mượn đối với sách tham khảo:</h3>
+    <ul>
+        <li>Bạn đọc tự tìm sách trên giá, xem hướng dẫn tìm sách <a href="#">TẠI ĐÂY</a>;</li>
+        <li>Lựa chọn các tài liệu phù hợp;</li>
+        <li>Làm thủ tục mượn tại quầy thủ thư;</li>
+        <li>Thời hạn mượn: Sách tiếng Việt 7 ngày/tài liệu | sách ngoại văn, song ngữ: 14 ngày/tài liệu, mỗi tài liệu có 4 lượt gia hạn nếu cần.</li>
+    </ul>
+
+    <h3>1.4 Cách thức mượn đối với sách giáo trình:</h3>
+    <ul>
+        <li>Bạn đọc mượn, nhận giáo trình tại quầy theo thông báo của thư viện;</li>
+        <li>Bạn đọc kiểm tra sách trong vòng 3 ngày sau khi mượn, nếu phát hiện sách bị hư hại, bạn đọc có thể đổi một cuốn sách khác.</li>
+        <li>Thời hạn mượn: Theo kỳ học như lịch thông báo.</li>
+    </ul>
+
+    <h3>1.5 Yêu cầu khi mượn sách:</h3>
+    <ul>
+        <li>Cần kiểm tra kỹ tình trạng sách trước khi rời khỏi quầy thủ thư (tờ Book Condition dán sau sách), nếu phát hiện tình trạng hư hại khác hãy báo Thủ thư note lại ngay;</li>
+        <li>Phải giữ gìn sách cẩn thận, không: viết, vẽ, làm ướt, làm rách hỏng hay tẩy, xóa,... lên nội dung sách.</li>
+    </ul>
+
+    <h3>1.6 Phí phạt nếu vi phạm nội quy:</h3>
+    <ul>
+        <li>Quá hạn sách: 5.000vnđ/tài liệu/ngày (bao gồm ngày nghỉ);</li>
+        <li>Đền sách: Bằng giá tiền thư viện nhập sách cộng tiền quá hạn sách (nếu có);</li>
+        <li>Hư hỏng sách: Tùy theo mức độ ảnh hưởng, thủ thư sẽ là người đưa ra mức phí phạt tương ứng, tối đa bằng giá đền sách.</li>
+    </ul>
+
+    <h2>2. TRẢ SÁCH</h2>
+    <p>Bạn đọc mang sách đã mượn tới quầy thủ thư (phòng 107 hoặc phòng 108 tòa nhà Delta) để thực hiện trả sách.</p>
+    
+    <h3>Yêu cầu:</h3>
+    <ul>
+        <li>Bạn đọc cần trả sách đúng hạn, không để quá hạn sách;</li>
+        <li>Có thể nhờ người khác mang sách đi trả và tự check lại danh mục sách trên website Thư viện (xem hướng dẫn <a href="#">TẠI ĐÂY</a>).</li>
+    </ul>
+
+    <h3>Thông tin liên hệ:</h3>
+    <p>
+        <strong>SĐT:</strong> 02466.805.912 (gọi trong giờ hành chính)<br>
+        <strong>Email:</strong> thuvien_fu_hoalac@fpt.edu.vn<br>
+        <strong>Website:</strong> <a href="http://library.fpt.edu.vn">http://library.fpt.edu.vn</a><br>
+        <strong>Fanpage:</strong> <a href="https://www.facebook.com/thuvienfu">https://www.facebook.com/thuvienfu</a>
+    </p>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

@@ -1,10 +1,11 @@
 package com.swp5.library_management.controller;
 
-import com.swp5.library_management.service.HomeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import com.swp5.library_management.service.HomeService;
 
 /**
  * Controller cho trang chủ (Home Page) — đúng chuẩn MVC.
@@ -28,6 +29,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HomeController {
 
     private final HomeService homeService;
+    private final com.swp5.library_management.repository.SubjectRepository subjectRepository;
+    private final com.swp5.library_management.repository.CategoryRepository categoryRepository;
+    private final com.swp5.library_management.repository.MajorRepository majorRepository;
 
     @GetMapping({"/", "/home"})
     public String home(Model model, org.springframework.security.core.Authentication authentication) {
@@ -42,11 +46,13 @@ public class HomeController {
                 model.addAttribute("registeredName", authentication.getName());
             }
         }
-        
-        model.addAttribute("stats",         homeService.getHomeStats());
-        model.addAttribute("campuses",      homeService.getCampusNames());
-        model.addAttribute("categories",    homeService.getFeaturedCategories(5));
+
+        model.addAttribute("stats", homeService.getHomeStats());
+        model.addAttribute("campuses", homeService.getCampuses());
+        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("majors", majorRepository.findAll());
         model.addAttribute("featuredBooks", homeService.getFeaturedBooks());
         return "home";
     }
 }
+

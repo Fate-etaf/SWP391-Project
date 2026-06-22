@@ -4,11 +4,11 @@ import com.swp5.library_management.entity.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+
 
 import java.util.List;
 
-@Repository
+
 public interface ReservationRepository extends JpaRepository<Reservation, Integer> {
 
     /**
@@ -41,4 +41,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     boolean existsActiveReservation(@Param("patronId") String patronId,
                                     @Param("bookId") Integer bookId,
                                     @Param("campusId") Integer campusId);
+
+    /**
+     * Tìm các đơn giữ chỗ có trạng thái cụ thể và thời gian hết hạn trước một thời điểm nhất định.
+     */
+    List<Reservation> findByStatusAndExpirationDateBefore(String status, java.time.LocalDateTime date);
 }

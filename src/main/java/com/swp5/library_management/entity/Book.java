@@ -51,8 +51,8 @@ public class Book {
     @Column(name = "CoverImageURL", length = 500)
     private String coverImageUrl;
 
-    @Column(name = "DefaultShelfCode", length = 50)
-    private String defaultShelfCode;
+    @Column(name = "ShelfCode", length = 50)
+    private String shelfCode;
 
     @Column(name = "CreatedAt", nullable = false)
     private LocalDateTime createdAt;

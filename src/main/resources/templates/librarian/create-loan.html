@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lập Đơn Mượn Sách – FLMS | Thư viện Đại học FPT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B',
+                            dark: '#0F172A',
+                            orangeHover: '#D95F18'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style th:replace="~{fragments/header :: header-style}"></style>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen text-slate-100 flex flex-col justify-between">
+
+    <!-- ═══════════════════════════════════════════════════════ NAV BAR ══ -->
+    <div th:replace="~{fragments/header :: header('librarian')}"></div>
+
+    <!-- ═══════════════════════════════════════════════════ MAIN CONTENT ══ -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col md:flex-row gap-8">
+        
+        <!-- SIDEBAR -->
+        <div th:replace="~{fragments/sidebar :: sidebar('create-loan')}"></div>
+
+        <div class="flex-grow min-w-0 max-w-2xl">
+
+
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative">
+            <h2 class="text-2xl font-extrabold text-slate-100 mb-2 tracking-tight">Lập Đơn Mượn Sách Tại Quầy</h2>
+            <p class="text-xs text-slate-400 mb-8 leading-relaxed">
+                Nhập chính xác thông tin Bạn đọc (Mã sinh viên/Giảng viên) và Mã bản sao vật lý của cuốn sách giấy để tạo bản ghi cho mượn mới.
+            </p>
+
+            <!-- Success Alert -->
+            <div th:if="${successMsg != null}" class="mb-6 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-5 py-4 rounded-2xl text-xs flex items-start space-x-3">
+                <span class="text-sm">✅</span>
+                <span th:text="${successMsg}">Tạo đơn mượn thành công!</span>
+            </div>
+
+            <!-- Error Alert -->
+            <div th:if="${errorMsg != null}" class="mb-6 bg-rose-500/10 border border-rose-500/30 text-rose-400 px-5 py-4 rounded-2xl text-xs flex items-start space-x-3">
+                <span class="text-sm">❌</span>
+                <span th:text="${errorMsg}">Mã bạn đọc không hợp lệ!</span>
+            </div>
+
+            <!-- Checkout Form -->
+            <form th:action="@{/librarian/create-loan}" method="POST" class="space-y-6">
+                
+                <!-- Patron ID field -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-450 uppercase tracking-wider mb-2.5">Mã số Bạn đọc (Patron ID)</label>
+                    <div class="relative flex items-center">
+                        <span class="absolute left-4 text-slate-500 text-sm font-extrabold select-none">#</span>
+                        <input id="patronId" name="patronId" type="text" th:value="${patronId}" required placeholder="Ví dụ: HE180001, GV00011" autocomplete="off"
+                               class="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-11 pr-4 py-3.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-700 font-medium">
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-2">Định danh của Sinh viên/Giảng viên tương ứng trong file Excel danh sách.</p>
+                </div>
+
+                <!-- Book Copy ID field -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-450 uppercase tracking-wider mb-2.5">Mã bản sao sách (Copy ID)</label>
+                    <div class="relative flex items-center">
+                        <svg class="w-4 h-4 text-slate-500 absolute left-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                        </svg>
+                        <input id="copyId" name="copyId" type="text" th:value="${copyId}" required placeholder="Ví dụ: SE-01, MC-01" autocomplete="off"
+                               class="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-11 pr-4 py-3.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-700 font-mono">
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-2">Mã nhãn barcode dán trực tiếp trên sách vật lý dán ngoài bìa sau.</p>
+                </div>
+
+                <!-- Submit and cancel -->
+                <div class="flex items-center space-x-4 pt-4">
+                    <button type="submit" class="flex-grow bg-fpt-orange hover:bg-fpt-orangeHover text-white py-3.5 rounded-xl font-bold transition-all text-sm shadow-lg shadow-fpt-orange/15 active:scale-[0.99]">
+                        Tạo Đơn Mượn Sách (Check-out)
+                    </button>
+                    <a href="/home" class="px-6 py-3.5 border border-slate-850 hover:bg-slate-800 text-slate-350 rounded-xl text-sm font-semibold transition-all">
+                        Hủy bỏ
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Guide Panel -->
+        <div class="mt-8 bg-slate-950/40 border border-slate-850 rounded-2xl p-6 text-xs text-slate-450 space-y-3">
+            <h4 class="font-bold text-slate-300 uppercase tracking-wider">Lưu ý nghiệp vụ đối với thủ thư:</h4>
+            <ul class="list-disc pl-4 space-y-2 leading-relaxed">
+                <li>Hạn trả sách tiêu chuẩn: <strong class="text-orange-400">14 ngày</strong> cho Sinh viên, và <strong class="text-orange-400">30 ngày</strong> cho Giảng viên.</li>
+                <li>Hệ thống tự động kiểm tra số lượng sách đang mượn song hành (tối đa <strong class="text-orange-400">3 cuốn</strong> đối với sinh viên).</li>
+                <li>Không thể cho mượn các bản sách có trạng thái khác <strong class="text-emerald-400">Available</strong> (ví dụ: đã có người mượn, hỏng đang bảo trì, hoặc đã báo mất).</li>
+            </ul>
+        </div>
+
+        </div>
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════ FOOTER ══ -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ của tôi — FLMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B',
+                            dark: '#0F172A',
+                            orangeHover: '#D95F18'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style th:replace="~{fragments/header :: header-style}"></style>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-between relative overflow-y-auto">
+
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
+    </div>
+
+    <div th:replace="~{fragments/header :: header('profile')}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col md:flex-row gap-8">
+        
+        <div th:replace="~{fragments/sidebar :: sidebar('profile')}"></div>
+
+        <div class="flex-grow text-slate-100">
+            
+            <div class="mb-6 flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-100 tracking-tight">Chi tiết hồ sơ</h2>
+                    <p class="text-sm text-slate-400 mt-1">Quản lý thông tin định danh và tài khoản thư viện của bạn.</p>
+                </div>
+            </div>
+
+            <div th:if="${successMessage}" class="p-4 mb-4 text-sm text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center space-x-2">
+                <span>✅</span>
+                <span th:text="${successMessage}"></span>
+            </div>
+            <div th:if="${errorMessage}" class="p-4 mb-4 text-sm text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center space-x-2">
+                <span>⚠️</span>
+                <span th:text="${errorMessage}"></span>
+            </div>
+
+            <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-8 shadow-2xl relative">
+                
+                <div class="absolute top-8 right-8">
+                    <span th:if="${user.status == 'Active'}" class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span>Đang hoạt động</span>
+                    </span>
+                    <span th:unless="${user.status == 'Active'}" class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                        <span>Vô hiệu hóa</span>
+                    </span>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-200 border-b border-slate-800 pb-4 mb-6">Thông tin cá nhân</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
+                    
+                    <div>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Họ và Tên</p>
+                        <div class="flex items-center space-x-3 text-slate-200 font-medium">
+                            <div class="p-2 bg-slate-800 rounded-lg text-slate-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></div>
+                            <span th:text="${user.fullName}">Nguyen Van A</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Mã số (User ID)</p>
+                        <div class="flex items-center space-x-3 text-slate-200 font-medium font-mono">
+                            <div class="p-2 bg-slate-800 rounded-lg text-slate-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg></div>
+                            <span th:text="${user.userId}">HE180000</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Địa chỉ Email</p>
+                        <div class="flex items-center space-x-3 text-slate-200 font-medium">
+                            <div class="p-2 bg-slate-800 rounded-lg text-slate-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>
+                            <span th:text="${user.email}">user@fpt.edu.vn</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Cơ sở học tập</p>
+                        <div class="flex items-center space-x-3 text-slate-200 font-medium">
+                            <div class="p-2 bg-slate-800 rounded-lg text-slate-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg></div>
+                            <span th:text="${campusName}">Hà Nội</span>
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 md:col-span-2 pt-4 border-t border-slate-800/60">
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Tình trạng thẻ Thư viện</p>
+                        <div th:if="${user.borrowingLocked}" class="bg-rose-500/10 border border-rose-500/30 text-rose-400 px-4 py-3 rounded-xl text-sm flex items-start space-x-3">
+                            <span class="text-lg">⚠️</span>
+                            <div>
+                                <p class="font-bold">Thẻ đang bị khóa mượn sách!</p>
+                                <p class="text-xs text-rose-400/80 mt-0.5">Tài khoản của bạn hiện không thể tạo đơn mượn mới. Vui lòng liên hệ thủ thư hoặc kiểm tra sách mượn quá hạn.</p>
+                            </div>
+                        </div>
+                        <div th:unless="${user.borrowingLocked}" class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-xl text-sm flex items-start space-x-3">
+                            <span class="text-lg">✅</span>
+                            <div>
+                                <p class="font-bold">Đủ điều kiện mượn sách</p>
+                                <p class="text-xs text-emerald-400/80 mt-0.5">Tài khoản hoàn toàn hợp lệ, không vi phạm chính sách mượn trả.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 md:col-span-2 pt-6 border-t border-slate-800/60">
+                        <p class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-4">
+                            Layout bảo mật
+                        </p>
+                        
+                        <div th:if="${infoMessage}" class="p-3 mb-4 text-xs text-sky-400 bg-sky-500/10 border border-sky-500/20 rounded-xl" th:text="${infoMessage}"></div>
+
+                        <form th:action="@{/profile/change-password}" method="POST" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mật khẩu hiện tại</label>
+                                    <input type="password" name="currentPassword" required 
+                                           placeholder="Mật khẩu cũ" th:value="${keepCurrentPassword}"
+                                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-fpt-orange transition-colors">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mật khẩu mới</label>
+                                    <input type="password" name="newPassword" required 
+                                           placeholder="Mật khẩu mới" th:value="${keepNewPassword}"
+                                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-fpt-orange transition-colors">
+                                </div>
+                            </div>
+
+                            <div th:if="${showOtpInput}" class="bg-slate-950/80 border border-dashed border-slate-800 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-end animate-fade-in">
+                                <div class="flex-grow">
+                                    <label class="block text-xs font-bold text-fpt-orange uppercase tracking-wider mb-2">Nhập mã định danh OTP (6 số từ Gmail)</label>
+                                    <input type="text" name="otp" required maxlength="6"
+                                           placeholder="------"
+                                           class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-center text-sm font-mono tracking-widest text-white focus:outline-none focus:border-fpt-orange">
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end">
+                                <button type="submit" 
+                                        class="px-6 py-2.5 bg-fpt-orange hover:bg-fpt-orangeHover text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-fpt-orange/10">
+                                    <span th:text="${showOtpInput} ? 'Xác nhận đổi mật khẩu' : 'Nhận mã OTP xác thực'">Nhận mã OTP xác thực</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div> 
+            
+        </div> 
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

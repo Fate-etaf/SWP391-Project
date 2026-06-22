@@ -14,9 +14,8 @@ import lombok.*;
 public class Shelf {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ShelfID")
-    private Integer shelfId;
+    @Column(name = "ShelfCode", nullable = false, length = 50)
+    private String shelfCode;
 
     @Column(name = "ShelfNumber", nullable = false)
     private Integer shelfNumber;
@@ -24,9 +23,6 @@ public class Shelf {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CampusID", nullable = false)
     private Campus campus;
-
-    @Column(name = "ShelfCode", nullable = false, length = 50)
-    private String shelfCode;
 
     @Column(name = "ShelfName", length = 100)
     private String shelfName;

@@ -139,7 +139,7 @@
         <p>Fill in the details below to register a new book in the library catalog.</p>
     </div>
 
-    <form th:action="@{/librarian/books/add}" th:object="${bookForm}" method="post">
+    <form th:action="@{/librarian/inventory/add}" th:object="${bookForm}" method="post">
         
         <div class="form-group">
             <label for="title">Title <span style="color: #fb7185">*</span></label>
@@ -153,13 +153,19 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label for="isbn">ISBN</label>
-                <input type="text" id="isbn" th:field="*{isbn}" class="form-control" placeholder="978-0132350884"/>
+                <label for="isbn">ISBN <span style="color: #fb7185">*</span></label>
+                <input type="text" id="isbn" th:field="*{isbn}" class="form-control" required placeholder="978-0132350884"/>
             </div>
             
             <div class="form-group">
                 <label for="language">Language <span style="color: #fb7185">*</span></label>
-                <input type="text" id="language" th:field="*{language}" class="form-control" required placeholder="E.g., English"/>
+                <select id="language" th:field="*{language}" class="form-control" required>
+                    <option value="Vietnamese">Vietnamese</option>
+                    <option value="English">English</option>
+                    <option value="Japanese">Japanese</option>
+                    <option value="Korean">Korean</option>
+                    <option value="Chinese">Chinese</option>
+                </select>
             </div>
         </div>
 
@@ -176,8 +182,16 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label for="defaultShelfCode">Default Shelf Code</label>
-                <input type="text" id="defaultShelfCode" th:field="*{defaultShelfCode}" class="form-control" placeholder="E.g., IT-A3"/>
+                <label for="shelfCode">Shelf Location</label>
+                <select id="shelfCode"
+                        th:field="*{shelfCode}"
+                        class="form-control">
+                    <option value="">-- Select Shelf --</option>
+                    <option th:each="shelf : ${shelves}"
+                            th:value="${shelf.shelfCode}"
+                            th:text="${shelf.shelfCode + ' - ' + shelf.shelfCodeTopic}">
+                    </option>
+                </select>
             </div>
             <div class="form-group">
                 <label for="subjectCode">Subject Code</label>
@@ -200,9 +214,23 @@
             <textarea id="description" th:field="*{description}" class="form-control" rows="4" placeholder="Brief summary of the book..."></textarea>
         </div>
 
-        <div class="form-group">
-            <label for="Copies">Number of Copies</label>
-            <input type="number" id="Copies" th:field="*{copies}" class="form-control" placeholder="Enter the number of copies"/>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="Copies">Number of Copies</label>
+                <input type="number" id="Copies" th:field="*{copies}" class="form-control" placeholder="Enter the number of copies"/>
+            </div>
+            
+            <div class="form-group">
+                <label for="campusId">Campus</label>
+                <select id="campusId" th:field="*{campusId}" class="form-control" required>
+                    <option value="" disabled selected>Select a campus</option>
+                    <option value="1">Hòa Lạc</option>
+                    <option value="2">Cần Thơ</option>
+                    <option value="3">Đà Nẵng</option>
+                    <option value="4">Tp.Hồ Chí Minh</option>
+                    <option value="5">Quy Nhơn</option>
+                </select>
+            </div>
         </div>
 
         <div class="btn-group">

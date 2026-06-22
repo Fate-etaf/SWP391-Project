@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">FPTU Library</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style th:replace="~{fragments/header :: header-style}"></style>
+</head>
+<body>
+
+<style th:fragment="header-style">
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', Arial, sans-serif; color: #222; background: #fff; line-height: 1.6; }
+
+        /* ── TOP BAR ── */
+        .top-bar { background: #1a1a2e; color: #ccc; font-size: 12px; padding: 6px 0; }
+        .top-bar .inner { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; }
+        .top-bar .brand { display: flex; align-items: center; gap: 12px; }
+        .top-bar .fpt-logo-box { background: #fff; border-radius: 4px; padding: 4px 10px; font-weight: 900; font-size: 13px; color: #e87722; }
+        .top-bar .site-title { font-size: 22px; font-weight: 700; color: #fff; }
+        .top-bar .site-title span { color: #e87722; }
+        .top-bar .right-info { display: flex; align-items: center; gap: 16px; }
+        .top-bar .hours { font-size: 12px; color: #aaa; }
+        .top-bar .lang-switch a { color: #88aaff; text-decoration: none; font-size: 12px; }
+        .top-bar .lang-switch a:hover { text-decoration: underline; }
+        .top-bar .btn-logout { background: transparent; border: 1px solid #555; color: #ccc; padding: 4px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; text-decoration: none; }
+        .top-bar .btn-logout:hover { background: #333; color: #fff; }
+        .top-bar .user-name { color: #e87722; font-weight: 600; }
+
+        /* ── MAIN NAV ── */
+        .main-nav { background: #2b2b2b; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        .main-nav .inner { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; }
+        .main-nav a, .main-nav .nav-item { display: inline-block; padding: 14px 16px; color: #ddd; text-decoration: none; font-size: 14px; font-weight: 500; transition: background 0.2s, color 0.2s; cursor: pointer; position: relative; white-space: nowrap; }
+        .main-nav a:hover, .main-nav .nav-item:hover { background: #e87722; color: #fff; }
+        .main-nav a.active, .main-nav .nav-item.active { background: #e87722; color: #fff; }
+        
+        .dropdown { position: relative; }
+        .dropdown .dropdown-menu { display: none; position: absolute; top: 100%; left: 0; background: #2b2b2b; min-width: 240px; border-top: 3px solid #e87722; box-shadow: 0 8px 24px rgba(0,0,0,0.35); z-index: 2000; }
+        .dropdown:hover .dropdown-menu { display: block; }
+        .dropdown-menu a { display: block; padding: 11px 20px; color: #ccc; font-size: 13.5px; font-weight: 400; border-bottom: 1px solid #3a3a3a; text-decoration: none; }
+        .dropdown-menu a:hover { background: #e87722; color: #fff; }
+        .nav-librarian-btn { margin-left: auto; background: #e87722; color: #fff !important; padding: 10px 18px !important; border-radius: 4px; font-weight: 700 !important; font-size: 13px !important; }
+        .nav-librarian-btn:hover { background: #c96210 !important; }
+
+        @media (max-width: 768px) {
+            .top-bar .site-title { font-size: 16px; }
+            .main-nav .inner { overflow-x: auto; }
+        }
+</style>
+
+<div th:fragment="header(activeNav)">
+    <!-- ═══════════════════ TOP BAR ═══════════════════ -->
+    <div class="top-bar">
+        <div class="inner">
+            <div class="brand">
+                <div class="fpt-logo-box">FPT<br>UNIVERSITY</div>
+                <div>
+                    <div class="site-title"><a href="/home" style="color:inherit;text-decoration:none;">Welcome to <span>FPTU Library</span></a></div>
+                </div>
+            </div>
+            <div class="right-info">
+                <span class="hours">Open: 08:15 - 21:00 Weekday | 08:00 - 12:00 &amp; 13:00 - 17:00 Weekend</span>
+                <div class="lang-switch">
+                    <a href="#">Vietnamese</a>
+                </div>
+                <span th:if="${session.loggedInUser != null}" class="user-name" th:text="${session.loggedInUser.fullName}">Sinh viên</span>
+                <a th:if="${session.loggedInUser != null}" href="/logout" class="btn-logout">Đăng xuất</a>
+                <a th:if="${session.loggedInUser == null}" href="/login" class="btn-logout">Đăng nhập</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ MAIN NAV ═══════════════════ -->
+    <nav class="main-nav">
+        <div class="inner">
+            <a href="/home" th:classappend="${activeNav == 'home' ? 'active' : ''}">Trang chủ</a>
+            
+            <div class="dropdown">
+                <span class="nav-item" th:classappend="${activeNav == 'policy' ? 'active' : ''}">Chính sách ▾</span>
+                <div class="dropdown-menu">
+                    <a href="/policies/general">Chính sách chung</a>
+                    <a href="/policies/intro">Giới thiệu thư viện</a>
+                    <a href="/policies/rules">Nội quy</a>
+                    <a href="/policies/hours">Giờ mở cửa</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <span class="nav-item" th:classappend="${activeNav == 'service' ? 'active' : ''}">Dịch vụ ▾</span>
+                <div class="dropdown-menu">
+                    <a href="/services/borrowing">Dịch vụ mượn, trả tài liệu</a>
+                    <a href="/services/renewal">Dịch vụ gia hạn tài liệu</a>
+                    <a href="/services/request-material">Dịch vụ đề nghị tài liệu</a>
+                    <a href="/services/group-study">Dịch vụ phòng học nhóm</a>
+                    <a href="#">Phí thư viện</a>
+                </div>
+            </div>
+            
+            <a href="/books" th:classappend="${activeNav == 'collection' ? 'active' : ''}">Bộ sưu tập</a>
+            <a href="#" th:classappend="${activeNav == 'news' ? 'active' : ''}">Tin tức</a>
+
+            <th:block th:if="${session.loggedInUser != null and session.loggedInUser.isLibrarian()}">
+                <div class="dropdown">
+                    <span class="nav-item" style="color: #e87722; font-weight: 700;">Quản trị Kho ▾</span>
+                    <div class="dropdown-menu">
+                        <a href="/librarian/inventory/dashboard">Dashboard Kho sách</a>
+                        <a href="/librarian/inventory/transfers">Luân chuyển sách</a>
+                        <a href="/librarian/reports">Báo cáo Hoạt động</a>
+                    </div>
+                </div>
+            </th:block>
+            
+            <!-- NOTIFICATIONS -->
+            <div class="dropdown" th:if="${session.loggedInUser != null}" style="margin-left:auto; margin-right: 5px;">
+                <span class="nav-item" style="position: relative; cursor: pointer; padding: 14px 10px;" id="notif-bell">
+                    <svg fill="currentColor" style="width: 20px; height: 20px;" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                    <span id="notif-badge" style="position: absolute; top: 6px; right: 2px; background: #e74c3c; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; font-weight: bold; display: none;">0</span>
+                </span>
+                <div class="dropdown-menu" style="right: 0; left: auto; width: 340px; max-height: 450px; overflow-y: auto; background: #fff; border-top: 3px solid #e87722; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
+                    <div style="padding: 10px 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; color: #333; position: sticky; top: 0; background: #fff; z-index: 10;">
+                        <strong style="font-size: 14px;">Thông báo</strong>
+                        <button onclick="markAllAsRead()" id="mark-all-read-btn" style="font-size: 12px; color: #e87722; background: none; border: none; cursor: pointer; display: none;">Đánh dấu đã đọc tất cả</button>
+                    </div>
+                    <div id="notif-list" style="color: #333; display: flex; flex-direction: column;">
+                        <div style="padding: 20px; text-align: center; color: #888; font-size: 13px;">Đang tải...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <a th:if="${session.loggedInUser != null}" href="/profile" style="color:#e87722; font-size:14px; font-weight:600; padding:14px 8px; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" th:text="${session.loggedInUser.fullName}"></a>
+            
+        </div>
+    </nav>
+
+    <!-- NOTIFICATION SCRIPT (MUST BE INSIDE THE FRAGMENT TO BE INCLUDED) -->
+    <script th:if="${session.loggedInUser != null}">
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchNotifications();
+        });
+
+        function fetchNotifications() {
+            fetch('/api/notifications')
+                .then(res => {
+                    if (!res.ok) {
+                        return res.text().then(text => { throw new Error(res.status + ' ' + text); });
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    const badge = document.getElementById('notif-badge');
+                    if (data.unreadCount > 0) {
+                        badge.textContent = data.unreadCount > 99 ? '99+' : data.unreadCount;
+                        badge.style.display = 'block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+
+                    const list = document.getElementById('notif-list');
+                    const btnAll = document.getElementById('mark-all-read-btn');
+                    
+                    if (!data.notifications || data.notifications.length === 0) {
+                        list.innerHTML = '<div style="padding: 30px 20px; text-align: center; color: #888;"><svg style="width:40px;height:40px;margin:0 auto 10px;color:#ddd;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg><p>Bạn chưa có thông báo nào mới.</p></div>';
+                        btnAll.style.display = 'none';
+                        return;
+                    }
+
+                    btnAll.style.display = data.unreadCount > 0 ? 'block' : 'none';
+                    list.innerHTML = '';
+                    
+                    data.notifications.forEach(n => {
+                        const bg = n.read ? '#fff' : '#fff5eb';
+                        const fw = n.read ? '400' : '600';
+                        const dot = n.read ? '' : '<span style="width:8px;height:8px;border-radius:50%;background:#e87722;display:inline-block;flex-shrink:0;margin-top:5px;"></span>';
+                        
+                        const div = document.createElement('div');
+                        div.style = `padding: 12px 15px; border-bottom: 1px solid #f0f0f0; background: ${bg}; cursor: pointer; display: flex; gap: 10px; transition: background 0.2s;`;
+                        div.onmouseover = () => div.style.background = '#f9f9f9';
+                        div.onmouseout = () => div.style.background = bg;
+                        
+                        div.onclick = () => {
+                            if (!n.read) {
+                                fetch(`/api/notifications/${n.notificationId}/read`, { method: 'POST' })
+                                    .then(() => { fetchNotifications(); });
+                            }
+                            if (n.notificationType === 'WAITLIST_READY') window.location.href = '/reservations/new';
+                            else if (n.notificationType === 'FINE_ALERT') window.location.href = '/profile/fines';
+                        };
+                        
+                        div.innerHTML = `
+                            ${dot}
+                            <div style="flex-grow: 1;">
+                                <div style="font-size: 14px; font-weight: ${fw}; color: #333; margin-bottom: 4px;">${n.title}</div>
+                                <div style="font-size: 13px; color: #666; line-height: 1.4; margin-bottom: 6px;">${n.content}</div>
+                                <div style="font-size: 11px; color: #999;">${n.createdAtFormatted}</div>
+                            </div>
+                        `;
+                        list.appendChild(div);
+                    });
+                })
+                .catch(err => {
+                    const list = document.getElementById('notif-list');
+                    if (list) {
+                        list.innerHTML = `<div style="padding: 20px; text-align: center; color: #e74c3c; font-size: 13px;">Lỗi tải dữ liệu!<br><span style="font-size:11px;color:#888;">${err.message}</span></div>`;
+                    }
+                });
+        }
+
+        function markAllAsRead() {
+            fetch('/api/notifications/read-all', { method: 'POST' })
+                .then(() => { fetchNotifications(); });
+        }
+    </script>
+</div>
+</body>
+</html>
