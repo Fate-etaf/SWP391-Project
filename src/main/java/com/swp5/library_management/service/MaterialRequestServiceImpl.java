@@ -70,7 +70,7 @@ public class MaterialRequestServiceImpl implements MaterialRequestService {
                 patron.getFullName(),
                 request.getTitle(),
                 request.getAuthor(),
-                request.getRequestUrgency()
+                request.getPriority()
         );
 
         log.info("[MaterialRequest] Request #{} created for Patron={}. Email confirmation sent to={}",

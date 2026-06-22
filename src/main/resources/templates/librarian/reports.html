@@ -22,10 +22,13 @@
     </div>
 
     <div class="relative z-50">
-        <div th:replace="~{fragments/header :: header('reports')}"></div>
+        <div th:replace="~{fragments/header :: header('librarian')}"></div>
     </div>
 
-    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 relative z-10 flex flex-col gap-8">
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
+        <div th:replace="~{fragments/sidebar :: sidebar('reports')}"></div>
+
+        <div class="flex-grow min-w-0 flex flex-col gap-8">
         
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 border-b border-slate-800 pb-6">
             <div>
@@ -112,6 +115,7 @@
             <p class="text-sm text-slate-500 mt-2">Dữ liệu cơ sở của bạn đang gặp vấn đề hoặc bạn không có quyền truy cập.</p>
         </div>
 
+        </div>
     </main>
 
     <div class="relative z-10 mt-auto">

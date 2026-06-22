@@ -3,6 +3,7 @@ package com.swp5.library_management.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -289,5 +290,23 @@ public class EmailServiceImpl implements EmailService {
                   </div>
                 </body></html>
                 """.formatted(patronName, bookTitle, author, priority);
+    }
+
+   @Override
+    public void sendOtpEmail(String toEmail, String subject, String content) {
+        try {
+            // 1. Tạo cấu trúc tin nhắn Mail đơn giản của Spring
+            org.springframework.mail.SimpleMailMessage message = new org.springframework.mail.SimpleMailMessage();
+            message.setTo(toEmail);       // Người nhận (Email sinh viên)
+            message.setSubject(subject);   // Tiêu đề email
+            message.setText(content);     // Nội dung chứa mã OTP
+
+            // 2. Ra lệnh cho bộ gửi mail bắn tin nhắn đi sang Server Google
+            mailSender.send(message);
+            System.out.println("======> ĐÃ GỬI MAIL THÀNH CÔNG TỚI GMAIL THẬT: " + toEmail);
+        } catch (Exception e) {
+            System.out.println("======> LỖI KẾT NỐI SMTP GMAIL: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 }

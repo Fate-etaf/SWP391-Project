@@ -85,7 +85,7 @@ public class TransferController {
             // Gửi thông báo lỗi nếu có sách không hợp lệ
             redirectAttributes.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
         }
-        return "redirect:/inventory/transfers";
+        return "redirect:/librarian/inventory/transfers";
     }
 
     // 3. Xem chi tiết một lệnh luân chuyển
@@ -109,7 +109,7 @@ public class TransferController {
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("errorMsg", "Lỗi hủy lệnh: " + e.getMessage());
             }
-            return "redirect:/inventory/transfers";
+            return "redirect:/librarian/inventory/transfers";
         }
         return "redirect:/login";
     }
@@ -125,7 +125,7 @@ public class TransferController {
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("errorMsg", "Lỗi xử lý: " + e.getMessage());
             }
-            return "redirect:/inventory/transfers";
+            return "redirect:/librarian/inventory/transfers";
         }
         return "redirect:/login";
     }
@@ -138,7 +138,7 @@ public class TransferController {
         // BẢO MẬT: Kiểm tra xem người đang bấm nút có đăng nhập và có đúng là Thủ thư không
         if (user != null && user.isLibrarian()) {
             transferService.confirmReceipt(transferId, user.getUserId());
-            return "redirect:/inventory/transfers";
+            return "redirect:/librarian/inventory/transfers";
         }
         
         // Nếu không có quyền hoặc chưa đăng nhập, đá văng về trang login
