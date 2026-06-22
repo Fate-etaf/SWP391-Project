@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tạo lệnh xuất kho - FLMS</title>
+    <title>Tạo lệnh luân chuyển - FLMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -36,7 +36,7 @@
                 </a>
                 <div>
                     <span class="bg-fpt-orange/20 text-orange-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase mb-3 inline-block">New Transfer</span>
-                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Tạo lệnh xuất kho mới</h2>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Tạo lệnh luân chuyển mới</h2>
                     <p class="text-sm text-slate-400 mt-1">Lệnh sẽ chuyển trạng thái các sách này sang "Đang giao hàng" (In Transit).</p>
                 </div>
             </div>
@@ -83,7 +83,7 @@
                     <div class="pt-4 flex items-center justify-end space-x-4 border-t border-slate-800">
                         <a href="/librarian/inventory/transfers" class="text-sm font-semibold text-slate-400 hover:text-slate-200 px-4 py-2 transition-colors">Hủy bỏ</a>
                         <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-600/20 border border-emerald-500">
-                            Xác nhận xuất kho
+                            Xác nhận luân chuyển
                         </button>
                     </div>
                 </form>
@@ -104,8 +104,17 @@
 
         function updateCopyIds() {
             const selectedCampusId = fromCampusSelect.value;
-            if (selectedCampusId && campusCopiesMap && campusCopiesMap[selectedCampusId]) {
-                copyIdsTextarea.value = campusCopiesMap[selectedCampusId].join(', ');
+            if (selectedCampusId && campusCopiesMap && campusCopiesMap[selectedCampusId] && campusCopiesMap[selectedCampusId].length > 0) {
+                // Lấy số lượng sinh viên đang chờ từ URL (mặc định là 1 nếu không có)
+                const urlParams = new URLSearchParams(window.location.search);
+                const waitCount = parseInt(urlParams.get('waitingCount')) || 1;
+                
+                // Trích xuất số lượng mã sách tương ứng với số sinh viên chờ (tối đa bằng số lượng sách hiện có)
+                const maxCopies = Math.min(waitCount, campusCopiesMap[selectedCampusId].length);
+                const selectedCopies = campusCopiesMap[selectedCampusId].slice(0, maxCopies);
+                
+                // Nối các mã sách bằng dấu phẩy
+                copyIdsTextarea.value = selectedCopies.join(', ');
             } else {
                 // Chỉ clear nếu load từ gợi ý, nếu user tự nhập thì không clear
                 if (campusCopiesMap && Object.keys(campusCopiesMap).length > 0) {
@@ -131,7 +140,26 @@
         });
 
         // Trigger on load
+        if (campusCopiesMap && Object.keys(campusCopiesMap).length > 0) {
+            let currentFrom = fromCampusSelect.value;
+            // Nếu Cơ sở xuất phát hiện tại không có sách, tự động chọn cơ sở khác có sách
+            if (!currentFrom || !campusCopiesMap[currentFrom] || campusCopiesMap[currentFrom].length === 0) {
+                let toCampus = toCampusSelect.value;
+                let availableCampuses = Object.keys(campusCopiesMap);
+                // Ưu tiên chọn cơ sở có sách mà khác với Cơ sở nhận
+                let bestCampus = availableCampuses.find(c => c !== toCampus) || availableCampuses[0];
+                fromCampusSelect.value = bestCampus;
+            }
+        }
+
         if (fromCampusSelect.value) {
+            updateCopyIds();
+        }
+        
+        // Nếu vô tình from == to (vd người dùng chỉ định URL lỗi), cảnh báo
+        if (fromCampusSelect.value === toCampusSelect.value && fromCampusSelect.value !== '') {
+            alert('Cơ sở xuất phát không được trùng với cơ sở nhận. Vui lòng chọn cơ sở xuất phát khác!');
+            fromCampusSelect.value = '';
             updateCopyIds();
         }
         /*]]>*/

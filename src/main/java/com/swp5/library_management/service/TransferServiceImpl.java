@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.swp5.library_management.entity.BookCopy;
 import com.swp5.library_management.entity.Campus;
 import com.swp5.library_management.entity.TransferDetail;
+import com.swp5.library_management.entity.TransferDetailId;
 import com.swp5.library_management.entity.TransferRequest;
 import com.swp5.library_management.entity.User;
 import com.swp5.library_management.repository.BookCopyRepository;
@@ -98,6 +99,12 @@ public class TransferServiceImpl implements TransferService {
             bookCopyRepository.save(copy);
 
             TransferDetail detail = new TransferDetail();
+
+            // Khởi tạo ID nhúng (EmbeddedId) để Hibernate có thể tự động map key
+            TransferDetailId detailId = new TransferDetailId();
+            detailId.setCopyId(copy.getCopyId());
+            detail.setId(detailId);
+
             detail.setTransferRequest(request);
             detail.setCopy(copy);
             details.add(detail);
@@ -165,6 +172,11 @@ public class TransferServiceImpl implements TransferService {
 
         User user = userRepository.findById(confirmedByUserId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin người xác nhận!"));
+
+        // BẢO MẬT: Chỉ Thủ thư thuộc cơ sở đích (Đến đâu) mới được bấm Xác nhận nhập kho
+        if (!request.getToCampus().getCampusId().equals(user.getCampusId())) {
+            throw new RuntimeException("Từ chối truy cập: Chỉ thủ thư tại cơ sở ĐÍCH ĐẾN mới có quyền xác nhận nhập kho lô hàng này!");
+        }
 
         request.setStatus("Received");
         request.setReceivedAt(LocalDateTime.now()); // Ghi nhận thời gian nhập kho

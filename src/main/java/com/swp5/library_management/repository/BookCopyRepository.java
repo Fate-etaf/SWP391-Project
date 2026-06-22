@@ -103,7 +103,7 @@ public interface BookCopyRepository extends JpaRepository<BookCopy, String> {
   // Trả về mảng Object[] chứa: [Tên Cơ sở (String), Số lượng Available (Long)]
   @Query("SELECT c.campus.campusName, COUNT(c) " +
       "FROM BookCopy c " +
-      "WHERE c.book.subject.subjectCode = (SELECT b.subject.subjectCode FROM Book b WHERE b.bookId = :bookId) " +
+      "WHERE c.book.bookId = :bookId " +
       "AND c.campus.campusId != :excludeCampusId " +
       "AND c.copyStatus = 'Available' " +
       "GROUP BY c.campus.campusName")

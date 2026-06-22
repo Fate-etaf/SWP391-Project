@@ -87,7 +87,7 @@
                                 </td>
                                 <td class="px-5 py-4 text-right">
                                     <!-- Gắn Param vào URL để trang Create tự động hứng -->
-                                    <a th:href="@{/librarian/inventory/transfers/create(targetCampusId=${hotspot.campusId}, suggestedBookTitle=${hotspot.title}, suggestedBookId=${hotspot.bookId})}" 
+                                    <a th:href="@{/librarian/inventory/transfers/create(targetCampusId=${hotspot.campusId}, suggestedBookTitle=${hotspot.title}, suggestedBookId=${hotspot.bookId}, waitingCount=${hotspot.waitingCount})}" 
                                        class="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 px-3 py-1.5 rounded font-bold transition-colors whitespace-nowrap inline-flex items-center space-x-1">
                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
                                        <span>Tạo lệnh gửi đi</span>
@@ -168,7 +168,7 @@
                                             </button>
                                         </form>
 
-                                        <form th:if="${req.status == 'InTransit'}" th:action="@{/librarian/inventory/transfers/{id}/confirm(id=${req.transferId})}" method="post" class="inline">
+                                        <form th:if="${req.status == 'InTransit' and req.toCampus.campusId == session.loggedInUser.campusId}" th:action="@{/librarian/inventory/transfers/{id}/confirm(id=${req.transferId})}" method="post" class="inline">
                                             <button type="submit" onclick="return confirm('Xác nhận lô sách này đã về tới cơ sở của bạn?')" class="text-emerald-300 hover:text-emerald-200 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg transition-colors font-bold">
                                                 Xác nhận nhập kho
                                             </button>

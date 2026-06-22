@@ -244,7 +244,7 @@
                                     </td>
                                     <td class="px-4 py-3 text-xs text-emerald-400/90 font-medium" th:text="${hotspot.crossCampusStockInfo}"></td>
                                     <td class="px-5 py-3 text-right">
-                                        <a th:if="${hotspot.canRequestTransfer}" th:href="@{/librarian/inventory/transfers/create(targetCampusId=${session.loggedInUser.campusId}, suggestedBookTitle=${hotspot.title}, suggestedBookId=${hotspot.bookId})}" class="text-[11px] bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30 px-3 py-1.5 rounded font-bold transition-colors whitespace-nowrap inline-block">Xin Luân chuyển</a>
+                                        <a th:if="${hotspot.canRequestTransfer}" th:href="@{/librarian/inventory/transfers/create(targetCampusId=${session.loggedInUser.campusId}, suggestedBookTitle=${hotspot.title}, suggestedBookId=${hotspot.bookId}, waitingCount=${hotspot.waitingCount})}" class="text-[11px] bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30 px-3 py-1.5 rounded font-bold transition-colors whitespace-nowrap inline-block">Xin Luân chuyển</a>
                                         <a th:unless="${hotspot.canRequestTransfer}" href="#" class="text-[11px] bg-slate-700 border border-slate-600 text-slate-300 hover:bg-slate-600 px-3 py-1.5 rounded font-bold transition-colors whitespace-nowrap inline-block">Đề xuất mua</a>
                                     </td>
                                 </tr>
