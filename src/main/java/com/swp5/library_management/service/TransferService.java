@@ -5,21 +5,23 @@ import java.util.List;
 import com.swp5.library_management.entity.TransferRequest;
 
 public interface TransferService {
-    
-    // 1. Lấy danh sách tất cả lệnh luân chuyển (Sắp xếp mới nhất lên đầu)
+    // 1. Xem danh sách
     List<TransferRequest> getAllTransfers();
-    
-    // 2. Tạo lệnh luân chuyển mới (Bước 1 của Use Case)
-    TransferRequest createTransfer(Integer fromCampusId, Integer toCampusId, List<String> copyIds, String requestedByUserId, String note);
 
-    // 3. Cập nhật trạng thái đang giao hàng (Bước 2 của Use Case)
-    void markAsInTransit(Integer transferId);
+    // 2. Xem chi tiết
+    TransferRequest getTransferById(Integer transferId);
 
-    // 4. Xác nhận nhập kho thành công (Bước 3 của Use Case)
-    void confirmReceipt(Integer transferId, String confirmedByUserId);
-    
-    // 5. Hủy lệnh luân chuyển (Alt 2 của Use Case)
+    // 3. Tạo lệnh xuất kho (Precondition: Sách Available & Thuộc cơ sở người tạo)
+    void createTransfer(Integer fromCampusId, Integer toCampusId, List<String> copyIds, String requestedByUserId,
+            String note);
+
+    // 4. Hủy lệnh (Alt 2: Trả sách về Available)
     void cancelTransfer(Integer transferId);
 
-    TransferRequest getTransferById(Integer transferId);
+    // 5. Giao cho vận chuyển (Đổi sang InTransit) - Bổ sung tham số thứ 2 để kiểm
+    // tra quyền
+    void markAsInTransit(Integer transferId, Integer librarianCampusId);
+
+    // 6. Nhập kho (Postcondition: Cập nhật CampusID và đưa sách về Available)
+    void confirmReceipt(Integer transferId, String confirmedByUserId);
 }

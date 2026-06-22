@@ -37,10 +37,11 @@
                     <p class="text-sm text-slate-400 mt-1">Điều phối và xác nhận nhập/xuất sách giữa các cơ sở.</p>
                 </div>
 
-                <a href="/librarian/inventory/transfers/create" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-600/20 border border-emerald-500 flex items-center space-x-2">
+                <!-- ĐÃ SỬA: Gắn onclick để chuyển hướng tới trang Tạo Lệnh -->
+                <button onclick="window.location.href='/librarian/inventory/transfers/create'" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-600/20 border border-emerald-500 flex items-center space-x-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
-                    <span>Tạo lệnh xuất kho</span>
-                </a>
+                    <span>Tạo lệnh luân chuyển</span>
+                </button>
             </div>
 
             <div th:if="${successMsg}" class="mb-6 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-4 py-3 rounded-xl flex items-center space-x-3">
@@ -51,6 +52,54 @@
                 <svg class="w-5 h-5 text-rose-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
                 <span class="text-sm font-medium" th:text="${errorMsg}"></span>
             </div>
+            <!-- BẢNG NHU CẦU LUÂN CHUYỂN (WAITLIST TỪ CƠ SỞ KHÁC) -->
+            <div class="bg-slate-900/60 backdrop-blur-xl shadow-2xl border border-slate-800 rounded-2xl overflow-hidden mb-8" th:if="${waitlistHotspots != null and !waitlistHotspots.isEmpty()}">
+                <div class="p-5 border-b border-slate-800 bg-orange-950/20 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-100 flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-fpt-orange" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span>Gợi ý luân chuyển (Cơ sở khác đang thiếu sách)</span>
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1">Các đầu sách sinh viên cơ sở khác đang phải xếp hàng chờ, trong khi cơ sở của bạn đang có sẵn.</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-800">
+                        <thead class="bg-slate-950/50">
+                            <tr>
+                                <th class="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase">Sách đang thiếu</th>
+                                <th class="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase">Cơ sở yêu cầu</th>
+                                <th class="px-5 py-3 text-center text-xs font-bold text-slate-500 uppercase">Số SV chờ</th>
+                                <th class="px-5 py-3 text-right text-xs font-bold text-slate-500 uppercase">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/80 text-sm">
+                            <tr th:each="hotspot : ${waitlistHotspots}" class="hover:bg-slate-800/40 transition-colors">
+                                <td class="px-5 py-4">
+                                    <p class="font-bold text-slate-200 line-clamp-1" th:title="${hotspot.title}" th:text="${hotspot.title}"></p>
+                                    <p class="text-xs text-slate-500 font-mono" th:text="${hotspot.isbn}"></p>
+                                </td>
+                                <td class="px-5 py-4">
+                                    <span class="font-semibold text-slate-300" th:text="${hotspot.campusName}"></span>
+                                </td>
+                                <td class="px-5 py-4 text-center">
+                                    <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold rounded-full bg-red-500/20 text-red-400 border border-red-500/20" th:text="${hotspot.waitingCount}"></span>
+                                </td>
+                                <td class="px-5 py-4 text-right">
+                                    <!-- Gắn Param vào URL để trang Create tự động hứng -->
+                                    <a th:href="@{/librarian/inventory/transfers/create(targetCampusId=${hotspot.campusId}, suggestedBookTitle=${hotspot.title}, suggestedBookId=${hotspot.bookId})}" 
+                                       class="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 px-3 py-1.5 rounded font-bold transition-colors whitespace-nowrap inline-flex items-center space-x-1">
+                                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+                                       <span>Tạo lệnh gửi đi</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <h3 class="text-lg font-bold text-slate-100 mb-4 px-2">Lịch sử Điều phối (Transfer Logs)</h3>
 
             <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden">
                 <div class="overflow-x-auto">
@@ -104,6 +153,7 @@
 
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex flex-wrap items-center justify-end gap-2">
+                                        <!-- ĐÃ SỬA: Đổi button thành thẻ <a> để nhảy sang trang xem chi tiết đúng ID -->
                                         <a th:href="@{/librarian/inventory/transfers/{id}(id=${req.transferId})}" class="text-fpt-orange hover:text-orange-300 bg-fpt-orange/10 border border-fpt-orange/20 px-3 py-1.5 rounded-lg transition-colors inline-block">Chi tiết</a>
 
                                         <form th:if="${req.status == 'Pending'}" th:action="@{/librarian/inventory/transfers/{id}/cancel(id=${req.transferId})}" method="post" class="inline">
@@ -112,9 +162,9 @@
                                             </button>
                                         </form>
 
-                                        <form th:if="${req.status == 'Pending'}" th:action="@{/librarian/inventory/transfers/{id}/ship(id=${req.transferId})}" method="post" class="inline">
+                                        <form th:if="${req.status == 'Pending' and req.fromCampus.campusId == session.loggedInUser.campusId}" th:action="@{/librarian/inventory/transfers/{id}/ship(id=${req.transferId})}" method="post" class="inline">
                                             <button type="submit" class="text-blue-300 hover:text-blue-200 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-lg transition-colors font-bold">
-                                                Xuất kho đi
+                                                Luân chuyển đi
                                             </button>
                                         </form>
 

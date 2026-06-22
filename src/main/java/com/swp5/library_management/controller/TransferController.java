@@ -2,7 +2,14 @@ package com.swp5.library_management.controller;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.swp5.library_management.entity.BookCopy;
+
+import com.swp5.library_management.repository.BookCopyRepository;
+import com.swp5.library_management.repository.WaitlistRepository;
+import com.swp5.library_management.dto.WaitlistHotspotDTO;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,88 +26,108 @@ import com.swp5.library_management.service.TransferService;
 
 import jakarta.servlet.http.HttpSession;
 
-
 @Controller
 @RequestMapping("/librarian/inventory/transfers")
 public class TransferController {
 
-    private final CampusRepository campusRepository;
     private final TransferService transferService;
+    private final CampusRepository campusRepository;
+    private final WaitlistRepository waitlistRepository;
+    private final BookCopyRepository bookCopyRepository;
 
-    public TransferController(TransferService transferService, CampusRepository campusRepository) {
+    public TransferController(TransferService transferService, CampusRepository campusRepository, WaitlistRepository waitlistRepository, BookCopyRepository bookCopyRepository) {
         this.transferService = transferService;
         this.campusRepository = campusRepository;
+        this.waitlistRepository = waitlistRepository;
+        this.bookCopyRepository = bookCopyRepository;
     }
 
     // Hiển thị giao diện danh sách luân chuyển
     @GetMapping
     public String listTransfers(Model model, HttpSession session) {
-        // Kiểm tra quyền: Chỉ cho phép Librarian truy cập
         User user = (User) session.getAttribute("loggedInUser");
-        if (user == null || !user.isLibrarian()) {
+        if (user == null || !user.isLibrarian())
             return "redirect:/login";
-        }
 
         model.addAttribute("transfers", transferService.getAllTransfers());
-        return "inventory/transfers"; 
+        
+        // Lấy Top 5 sách đang được Waitlist nhiều nhất từ các cơ sở khác
+        List<WaitlistHotspotDTO> hotspots = waitlistRepository.findSuggestedTransfers(user.getCampusId())
+                .stream().limit(5).collect(Collectors.toList());
+        model.addAttribute("waitlistHotspots", hotspots);
+
+        return "inventory/transfers";
     }
 
     // 1. Hiển thị Form tạo lệnh
     @GetMapping("/create")
-    public String showCreateForm(Model model, HttpSession session) {
+    public String showCreateForm(@RequestParam(value = "suggestedBookId", required = false) Integer suggestedBookId, Model model, HttpSession session) {
         User user = (User) session.getAttribute("loggedInUser");
-        if (user == null || !user.isLibrarian()) return "redirect:/login";
+        if (user == null || !user.isLibrarian())
+            return "redirect:/login";
 
-        // Lấy danh sách các cơ sở để render vào Dropdown
         model.addAttribute("campuses", campusRepository.findAll());
-        return "inventory/create-transfer"; 
+        
+        if (suggestedBookId != null) {
+            // Lấy tất cả available copies của sách này trên TOÀN HỆ THỐNG
+            List<BookCopy> availableCopies = bookCopyRepository.findByBookBookIdAndCopyStatus(suggestedBookId, "Available");
+            
+            // Map<CampusId, List<CopyId>>
+            Map<Integer, List<String>> campusCopiesMap = availableCopies.stream()
+                .collect(Collectors.groupingBy(
+                    c -> c.getCampus().getCampusId(),
+                    Collectors.mapping(BookCopy::getCopyId, Collectors.toList())
+                ));
+            
+            model.addAttribute("campusCopiesMap", campusCopiesMap);
+            model.addAttribute("suggestedBookId", suggestedBookId);
+        }
+        
+        return "inventory/create-transfer";
     }
 
     // 2. Xử lý Form Submit để tạo lệnh
     @PostMapping("/create")
-    public String processCreateTransfer(@RequestParam("toCampusId") Integer toCampusId,
-                                        @RequestParam("copyIds") String copyIdsStr,
-                                        @RequestParam(value = "note", required = false) String note,
-                                        HttpSession session, 
-                                        RedirectAttributes redirectAttributes) {
+    public String processCreateTransfer(
+            @RequestParam("fromCampusId") Integer fromCampusId,
+            @RequestParam("toCampusId") Integer toCampusId,
+            @RequestParam("copyIds") String copyIdsStr,
+            @RequestParam(value = "note", required = false) String note,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
         User user = (User) session.getAttribute("loggedInUser");
-        if (user == null || !user.isLibrarian()) return "redirect:/login";
+        if (user == null || !user.isLibrarian())
+            return "redirect:/login";
 
         try {
-            // Lấy cơ sở gốc chính là cơ sở mà Thủ thư đang làm việc
-            Integer fromCampusId = user.getCampusId(); 
-
-            // Chuyển chuỗi các mã sách (cách nhau bằng dấu phẩy) thành List<String>
             List<String> copyIds = Arrays.stream(copyIdsStr.split(","))
-                                         .map(String::trim)
-                                         .filter(s -> !s.isEmpty())
-                                         .collect(Collectors.toList());
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
 
-            // Gọi Service để tạo lệnh
             transferService.createTransfer(fromCampusId, toCampusId, copyIds, user.getUserId(), note);
-            
-            // Gửi thông báo thành công sang trang danh sách
             redirectAttributes.addFlashAttribute("successMsg", "Tạo lệnh xuất kho thành công!");
         } catch (Exception e) {
-            // Gửi thông báo lỗi nếu có sách không hợp lệ
             redirectAttributes.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
         }
         return "redirect:/librarian/inventory/transfers";
     }
 
     // 3. Xem chi tiết một lệnh luân chuyển
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public String viewTransferDetail(@PathVariable("id") Integer transferId, Model model, HttpSession session) {
         User user = (User) session.getAttribute("loggedInUser");
-        if (user == null || !user.isLibrarian()) return "redirect:/login";
+        if (user == null || !user.isLibrarian())
+            return "redirect:/login";
 
         model.addAttribute("transfer", transferService.getTransferById(transferId));
-        return "inventory/transfer-detail"; 
+        return "inventory/transfer-detail";
     }
 
     // 4. Xác nhận HỦY LỆNH (Trường hợp tạo nhầm)
-    @PostMapping("/{id}/cancel")
-    public String cancelTransfer(@PathVariable("id") Integer transferId, HttpSession session, RedirectAttributes redirectAttributes) {
+    @PostMapping("/{id:\\d+}/cancel")
+    public String cancelTransfer(@PathVariable("id") Integer transferId, HttpSession session,
+            RedirectAttributes redirectAttributes) {
         User user = (User) session.getAttribute("loggedInUser");
         if (user != null && user.isLibrarian()) {
             try {
@@ -115,12 +142,13 @@ public class TransferController {
     }
 
     // 5. Cập nhật trạng thái GIAO HÀNG (In Transit)
-    @PostMapping("/{id}/ship")
-    public String shipTransfer(@PathVariable("id") Integer transferId, HttpSession session, RedirectAttributes redirectAttributes) {
+    @PostMapping("/{id:\\d+}/ship")
+    public String shipTransfer(@PathVariable("id") Integer transferId, HttpSession session,
+            RedirectAttributes redirectAttributes) {
         User user = (User) session.getAttribute("loggedInUser");
         if (user != null && user.isLibrarian()) {
             try {
-                transferService.markAsInTransit(transferId);
+                transferService.markAsInTransit(transferId, user.getCampusId());
                 redirectAttributes.addFlashAttribute("successMsg", "Lô sách đã được giao cho đơn vị vận chuyển!");
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("errorMsg", "Lỗi xử lý: " + e.getMessage());
@@ -130,18 +158,20 @@ public class TransferController {
         return "redirect:/login";
     }
 
-    // Xử lý hành động "Xác nhận nhập kho"
-    @PostMapping("/{id}/confirm")
-    public String confirmTransferReceipt(@PathVariable("id") Integer transferId, HttpSession session) {
+    // 6. Xử lý hành động "Xác nhận nhập kho"
+    @PostMapping("/{id:\\d+}/confirm")
+    public String confirmTransferReceipt(@PathVariable("id") Integer transferId, HttpSession session,
+            RedirectAttributes redirectAttributes) {
         User user = (User) session.getAttribute("loggedInUser");
-        
-        // BẢO MẬT: Kiểm tra xem người đang bấm nút có đăng nhập và có đúng là Thủ thư không
         if (user != null && user.isLibrarian()) {
-            transferService.confirmReceipt(transferId, user.getUserId());
+            try {
+                transferService.confirmReceipt(transferId, user.getUserId());
+                redirectAttributes.addFlashAttribute("successMsg", "Xác nhận nhập kho thành công!");
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMsg", "Lỗi xác nhận: " + e.getMessage());
+            }
             return "redirect:/librarian/inventory/transfers";
         }
-        
-        // Nếu không có quyền hoặc chưa đăng nhập, đá văng về trang login
         return "redirect:/login";
     }
 }

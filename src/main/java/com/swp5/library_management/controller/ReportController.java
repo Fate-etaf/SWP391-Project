@@ -1,103 +1,87 @@
 package com.swp5.library_management.controller;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import com.swp5.library_management.dto.ReportSummaryDTO;
+import com.swp5.library_management.dto.ReportDataDTO;
+import com.swp5.library_management.dto.ReportFilterDTO;
 import com.swp5.library_management.entity.User;
-import com.swp5.library_management.repository.UserRepository;
+import com.swp5.library_management.repository.CampusRepository;
 import com.swp5.library_management.service.ReportService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequestMapping("/librarian/reports")
-@RequiredArgsConstructor
 public class ReportController {
 
     private final ReportService reportService;
-    private final UserRepository userRepository;
+    private final CampusRepository campusRepository;
 
-    private boolean isNotLibrarian(HttpSession session) {
-        Boolean isLibrarian = (Boolean) session.getAttribute("isLibrarian");
-        return isLibrarian == null || !isLibrarian;
+    public ReportController(ReportService reportService, CampusRepository campusRepository) {
+        this.reportService = reportService;
+        this.campusRepository = campusRepository;
     }
 
-    // 1. Giao diện báo cáo trực quan
+    // Xử lý toàn bộ logic Load lần đầu & Apply Filter thông qua Form GET
     @GetMapping
-    public String viewReports(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
-            HttpSession session, Model model) {
-        
-        if (isNotLibrarian(session)) return "redirect:/login";
-
-        // Mặc định lấy dữ liệu của tháng hiện tại nếu không chọn ngày
-        if (fromDate == null) fromDate = LocalDate.now().withDayOfMonth(1);
-        if (toDate == null) toDate = LocalDate.now();
-
-        LocalDateTime start = fromDate.atStartOfDay();
-        LocalDateTime end = toDate.atTime(23, 59, 59);
-
-        // Lấy CampusID của thủ thư đang đăng nhập
-        String loggedInUserId = (String) session.getAttribute("loggedInUserId");
-        User librarian = userRepository.findById(loggedInUserId).orElse(null);
-        Integer campusId = (librarian != null) ? librarian.getCampusId() : null;
-
-        if (campusId != null) {
-            ReportSummaryDTO reportData = reportService.getCampusReportSummary(campusId, start, end);
-            model.addAttribute("reportData", reportData);
+    public String viewTransactionReport(@ModelAttribute("filter") ReportFilterDTO filter,
+            HttpSession session,
+            Model model) {
+        // 1. Kiểm tra quyền truy cập
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null || !user.isLibrarian()) {
+            return "redirect:/login";
         }
 
-        model.addAttribute("fromDate", fromDate);
-        model.addAttribute("toDate", toDate);
+        // 2. Bảo mật tham số (Role-based Param Injection)
+        // Nếu là Thủ thư chi nhánh, ép cứng CampusID. Admin thì được quyền xem và lọc.
+        if (user.getRole() != null && user.getRole().getRoleName().equalsIgnoreCase("LIBRARIAN")) {
+            filter.setCampusId(user.getCampusId());
+        }
 
-        // Return view (Bạn sẽ tạo file reports.html tương tự dashboard.html)
-        return "librarian/reports"; 
+        // Thiết lập ngày mặc định nếu mới vào trang lần đầu
+        filter.initDefaultDatesIfNull();
+
+        // 3. Gọi Service xử lý dữ liệu động dựa theo reportType
+        ReportDataDTO<?> reportData = reportService.generateReport(filter);
+
+        // 4. Đẩy dữ liệu ra View
+        model.addAttribute("data", reportData);
+        model.addAttribute("campuses", campusRepository.findAll()); // Dành cho Admin chọn
+
+        // Trả về giao diện Thymeleaf (sẽ được xây dựng sau)
+        return "librarian/reports";
     }
 
-    // 2. Export ra file Excel
+    // Nút Export Excel sẽ gọi vào endpoint này (bỏ qua Pagination)
     @GetMapping("/export")
-    public ResponseEntity<InputStreamResource> exportExcel(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
-            HttpSession session) throws IOException {
+    public void exportReportToExcel(@ModelAttribute("filter") ReportFilterDTO filter,
+            HttpSession session,
+            HttpServletResponse response) throws IOException {
 
-        if (isNotLibrarian(session)) return ResponseEntity.status(403).build();
+        // 1. Kiểm tra quyền truy cập (Quan trọng để tránh ai đó có link gọi trực tiếp)
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null || !user.isLibrarian()) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Bạn không có quyền tải báo cáo này.");
+            return;
+        }
 
-        if (fromDate == null) fromDate = LocalDate.now().withDayOfMonth(1);
-        if (toDate == null) toDate = LocalDate.now();
+        // 2. Bảo mật tham số Campus
+        if (user.getRole() != null && user.getRole().getRoleName().equalsIgnoreCase("LIBRARIAN")) {
+            filter.setCampusId(user.getCampusId());
+        }
 
-        LocalDateTime start = fromDate.atStartOfDay();
-        LocalDateTime end = toDate.atTime(23, 59, 59);
+        filter.initDefaultDatesIfNull();
 
-        String loggedInUserId = (String) session.getAttribute("loggedInUserId");
-        User librarian = userRepository.findById(loggedInUserId).orElse(null);
-        Integer campusId = (librarian != null) ? librarian.getCampusId() : null;
-
-        ByteArrayInputStream in = reportService.generateExcelReport(campusId, start, end);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", "attachment; filename=Library_Report_" + fromDate + "_to_" + toDate + ".xlsx");
-
-        return ResponseEntity
-                .ok()
-                .headers(headers)
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .body(new InputStreamResource(in));
+        // 3. Gọi Service để ghi đè dữ liệu thẳng vào response (Trình duyệt sẽ tự động
+        // tải file)
+        reportService.exportTransactionReportToExcel(filter, response);
     }
 }
