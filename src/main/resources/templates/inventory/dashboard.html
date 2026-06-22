@@ -19,7 +19,6 @@
 </head>
 <body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-between relative overflow-x-hidden">
 
-    <!-- Ambient Background Glows -->
     <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
         <div class="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
@@ -30,112 +29,105 @@
     </div>
 
     <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
-        <!-- SIDEBAR -->
         <div th:replace="~{fragments/sidebar :: sidebar('dashboard')}"></div>
 
         <div class="flex-grow min-w-0">
             <div class="flex flex-col xl:flex-row justify-between items-start gap-3 mb-8">
-            <div>
-                <h2 class="text-3xl font-extrabold text-slate-100 tracking-tight mb-1">Inventory Overview</h2>
-                <p class="text-sm text-slate-400">Real-time stock, borrowed and overdue counts by campus.</p>
+                <div>
+                    <h2 class="text-3xl font-extrabold text-slate-100 tracking-tight mb-1">Inventory Overview</h2>
+                    <p class="text-sm text-slate-400">Real-time stock, borrowed and overdue counts by campus.</p>
+                </div>
+                <div class="text-right mt-2 md:mt-0">
+                    <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 text-xs font-bold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span>Live refresh every 15s</span>
+                    </span>
+                </div>
             </div>
-            <div class="text-right mt-2 md:mt-0">
-                <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 text-xs font-bold">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Live refresh every 15s</span>
-                </span>
-            </div>
-        </div>
 
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <!-- Card 1 -->
-            <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl flex flex-col">
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">In stock</p>
-                <h3 id="summary-stock" class="text-4xl font-extrabold text-slate-100 mb-1">0</h3>
-                <p class="text-[10px] text-slate-400 mt-auto">Total books available across campuses.</p>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl flex flex-col">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">In stock</p>
+                    <h3 id="summary-stock" class="text-4xl font-extrabold text-slate-100 mb-1">0</h3>
+                    <p class="text-[10px] text-slate-400 mt-auto">Total books available across campuses.</p>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl flex flex-col">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Borrowed</p>
+                    <h3 id="summary-borrowed" class="text-4xl font-extrabold text-blue-400 mb-1">0</h3>
+                    <p class="text-[10px] text-slate-400 mt-auto">Books currently checked out.</p>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl flex flex-col">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Overdue</p>
+                    <h3 id="summary-overdue" class="text-4xl font-extrabold text-rose-400 mb-1">0</h3>
+                    <p class="text-[10px] text-slate-400 mt-auto">Books overdue for return.</p>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl flex flex-col">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Campuses</p>
+                    <h3 id="summary-campuses" class="text-4xl font-extrabold text-emerald-400 mb-1">0</h3>
+                    <p class="text-[10px] text-slate-400 mt-auto">Campuses with inventory data.</p>
+                </div>
             </div>
-            <!-- Card 2 -->
-            <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl flex flex-col">
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Borrowed</p>
-                <h3 id="summary-borrowed" class="text-4xl font-extrabold text-blue-400 mb-1">0</h3>
-                <p class="text-[10px] text-slate-400 mt-auto">Books currently checked out.</p>
-            </div>
-            <!-- Card 3 -->
-            <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl flex flex-col">
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Overdue</p>
-                <h3 id="summary-overdue" class="text-4xl font-extrabold text-rose-400 mb-1">0</h3>
-                <p class="text-[10px] text-slate-400 mt-auto">Books overdue for return.</p>
-            </div>
-            <!-- Card 4 -->
-            <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl flex flex-col">
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Campuses</p>
-                <h3 id="summary-campuses" class="text-4xl font-extrabold text-emerald-400 mb-1">0</h3>
-                <p class="text-[10px] text-slate-400 mt-auto">Campuses with inventory data.</p>
-            </div>
-        </div>
 
-        <div class="bg-slate-950/40 border border-slate-800 rounded-2xl p-6 mb-8 shadow-inner">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Campus</label>
-                    <select id="filter-campus" class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors">
-                        <option value="">All campuses</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Category</label>
-                    <select id="filter-category" class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors">
-                        <option value="">All categories</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">From</label>
-                    <input type="date" id="filter-from" class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors" />
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">To</label>
-                    <input type="date" id="filter-to" class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors" />
-                </div>
-                <div class="pt-2">
-                    <button id="apply-filters" class="w-full bg-fpt-orange hover:bg-fpt-orangeHover text-white py-2.5 rounded-xl font-bold transition-all text-sm shadow-lg shadow-fpt-orange/20 active:scale-[0.98]">
-                        Filter Results
-                    </button>
+            <div class="bg-slate-950/40 border border-slate-800 rounded-2xl p-6 mb-8 shadow-inner">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Campus</label>
+                        <select id="filter-campus" class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors">
+                            <option value="">All campuses</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Category</label>
+                        <select id="filter-category" class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors">
+                            <option value="">All categories</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">From</label>
+                        <input type="date" id="filter-from" class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">To</label>
+                        <input type="date" id="filter-to" class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors" />
+                    </div>
+                    <div class="pt-2">
+                        <button id="apply-filters" class="w-full bg-fpt-orange hover:bg-fpt-orangeHover text-white py-2.5 rounded-xl font-bold transition-all text-sm shadow-lg shadow-fpt-orange/20 active:scale-[0.98]">
+                            Filter Results
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div class="lg:col-span-2 bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
-                <div class="mb-6">
-                    <h5 class="text-lg font-bold text-slate-100 mb-1">Campus inventory</h5>
-                    <p class="text-xs text-slate-400">Available, borrowed and overdue counts for each campus.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div class="lg:col-span-2 bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
+                    <div class="mb-6">
+                        <h5 class="text-lg font-bold text-slate-100 mb-1">Campus inventory</h5>
+                        <p class="text-xs text-slate-400">Available, borrowed and overdue counts for each campus.</p>
+                    </div>
+                    <div class="relative h-[320px] w-full">
+                        <canvas id="inventoryChart"></canvas>
+                    </div>
                 </div>
-                <div class="relative h-[320px] w-full">
-                    <canvas id="inventoryChart"></canvas>
+                
+                <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl flex flex-col">
+                    <h5 class="text-lg font-bold text-slate-100 mb-6 border-b border-slate-800 pb-4">Campus details</h5>
+                    <div class="flex-grow overflow-auto">
+                        <table class="w-full text-sm text-slate-300">
+                            <thead>
+                                <tr>
+                                    <th class="text-left pb-3 font-semibold text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px]">Campus</th>
+                                    <th class="text-right pb-3 font-semibold text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px]">Total Copies</th>
+                                </tr>
+                            </thead>
+                            <tbody id="overview-body" class="divide-y divide-slate-800/50">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            
-            <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl flex flex-col">
-                <h5 class="text-lg font-bold text-slate-100 mb-6 border-b border-slate-800 pb-4">Campus details</h5>
-                <div class="flex-grow overflow-auto">
-                    <table class="w-full text-sm text-slate-300">
-                        <thead>
-                            <tr>
-                                <th class="text-left pb-3 font-semibold text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px]">Campus</th>
-                                <th class="text-right pb-3 font-semibold text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px]">Total Copies</th>
-                            </tr>
-                        </thead>
-                        <tbody id="overview-body" class="divide-y divide-slate-800/50">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
         </div>
     </main>
-    </main>
 
-    <!-- JS LOGIC -->
     <script>
         async function loadFilters() {
             const [campRes, catRes] = await Promise.all([fetch('/librarian/api/campuses'), fetch('/librarian/api/categories')]);
@@ -167,80 +159,71 @@
             tbody.innerHTML = '';
             if (!data || !data.campuses) return;
 
-        data.campuses.forEach(c => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="py-3 text-slate-200">${c.campusName || ('Campus ' + c.campusId)}</td>
-                <td class="py-3 text-right font-semibold text-fpt-orange">${c.totalCopies}</td>
-            `;
-            tbody.appendChild(tr);
-        });
+            data.campuses.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3 text-slate-200">${c.campusName || ('Campus ' + c.campusId)}</td>
+                    <td class="py-3 text-right font-semibold text-fpt-orange">${c.totalCopies}</td>
+                `;
+                tbody.appendChild(tr);
+            });
 
             updateSummary(data.campuses);
             updateChart(data.campuses);
         }
 
-    let inventoryChart = null;
-    function createChart() {
-        const ctx = document.getElementById('inventoryChart').getContext('2d');
-        Chart.defaults.color = '#94a3b8';
-        Chart.defaults.font.family = "'Inter', sans-serif";
-        
-        inventoryChart = new Chart(ctx, {
-            type: 'bar',
-            data: { labels: [], datasets: [] },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { 
-                        position: 'bottom', 
-                        labels: { boxWidth: 12, padding: 20, color: '#cbd5e1' } 
+        let inventoryChart = null;
+        function createChart() {
+            const ctx = document.getElementById('inventoryChart').getContext('2d');
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            
+            inventoryChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'bottom', 
+                            labels: { boxWidth: 12, padding: 20, color: '#cbd5e1' } 
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#cbd5e1',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 6
+                        }
                     },
-                    tooltip: {
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                        titleColor: '#f1f5f9',
-                        bodyColor: '#cbd5e1',
-                        borderColor: '#334155',
-                        borderWidth: 1,
-                        padding: 12,
-                        boxPadding: 6
-                    }
-                },
-                scales: {
-                    x: { 
-                        stacked: true, 
-                        grid: { display: false, drawBorder: false },
-                        ticks: { color: '#94a3b8' }
-                    },
-                    y: { 
-                        beginAtZero: true, 
-                        stacked: true, 
-                        grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
-                        ticks: { precision: 0, color: '#94a3b8' }
+                    scales: {
+                        x: { stacked: true, grid: { display: false, drawBorder: false }, ticks: { color: '#94a3b8' } },
+                        y: { beginAtZero: true, stacked: true, grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false }, ticks: { precision: 0, color: '#94a3b8' } }
                     }
                 }
-            }
-        });
-    }
+            });
+        }
 
-    function updateChart(campuses) {
-        if (!inventoryChart) createChart();
-        const labels = campuses.map(c => c.campusName || ('Campus ' + c.campusId));
-        const available = campuses.map(c => c.available || 0);
-        const borrowed = campuses.map(c => c.borrowed || 0);
-        const overdue = campuses.map(c => c.overdue || 0);
-        const other = campuses.map(c => Math.max(0, (c.totalCopies || 0) - (c.available || 0) - (c.borrowed || 0) - (c.overdue || 0)));
+        function updateChart(campuses) {
+            if (!inventoryChart) createChart();
+            const labels = campuses.map(c => c.campusName || ('Campus ' + c.campusId));
+            const available = campuses.map(c => c.available || 0);
+            const borrowed = campuses.map(c => c.borrowed || 0);
+            const overdue = campuses.map(c => c.overdue || 0);
+            const other = campuses.map(c => Math.max(0, (c.totalCopies || 0) - (c.available || 0) - (c.borrowed || 0) - (c.overdue || 0)));
 
-        inventoryChart.data.labels = labels;
-        inventoryChart.data.datasets = [
-            { label: 'Available', backgroundColor: '#34d399', data: available, borderRadius: 6, barThickness: 20 },
-            { label: 'Borrowed', backgroundColor: '#60a5fa', data: borrowed, borderRadius: 6, barThickness: 20 },
-            { label: 'Overdue', backgroundColor: '#fb7185', data: overdue, borderRadius: 6, barThickness: 20 },
-            { label: 'Other', backgroundColor: '#64748b', data: other, borderRadius: 6, barThickness: 20 }
-        ];
-        inventoryChart.update();
-    }
+            inventoryChart.data.labels = labels;
+            inventoryChart.data.datasets = [
+                { label: 'Available', backgroundColor: '#34d399', data: available, borderRadius: 6, barThickness: 20 },
+                { label: 'Borrowed', backgroundColor: '#60a5fa', data: borrowed, borderRadius: 6, barThickness: 20 },
+                { label: 'Overdue', backgroundColor: '#fb7185', data: overdue, borderRadius: 6, barThickness: 20 },
+                { label: 'Other', backgroundColor: '#64748b', data: other, borderRadius: 6, barThickness: 20 }
+            ];
+            inventoryChart.update();
+        }
 
         function updateSummary(campuses) {
             const totalStock = campuses.reduce((sum, c) => sum + (c.totalCopies || 0), 0);
@@ -248,7 +231,6 @@
             const totalOverdue = campuses.reduce((sum, c) => sum + (c.overdue || 0), 0);
             const activeCampuses = campuses.length;
 
-            // Update DOM with formatted numbers
             document.getElementById('summary-stock').textContent = totalStock.toLocaleString();
             document.getElementById('summary-borrowed').textContent = totalBorrowed.toLocaleString();
             document.getElementById('summary-overdue').textContent = totalOverdue.toLocaleString();
@@ -269,6 +251,44 @@
             await renderOverview(data);
         });
 
+       // ════════════ TỰ ĐỘNG CHÈN MENU AN TOÀN, CHUẨN XÁC 100% ════════════
+        // ════════════ TỰ ĐỘNG CHÈN MENU SINH VIÊN CHUẨN XÁC ════════════
+        window.addEventListener('DOMContentLoaded', () => {
+            // 1. Tìm chính xác nút "Danh mục Sách" để làm mốc chèn
+            const allLinks = document.querySelectorAll('a');
+            let targetButton = null;
+
+            allLinks.forEach(link => {
+                if (link.textContent.includes('Danh mục Sách') || link.getAttribute('href') === '/librarian/books') {
+                    targetButton = link;
+                }
+            });
+
+            // 2. Chèn nút Quản lý Sinh viên ngay phía dưới nút Danh mục Sách
+            if (targetButton && targetButton.parentNode) {
+                const parentNode = targetButton.parentNode;
+                const existingLink = parentNode.querySelector('a[href="/librarian/students"]');
+                
+                if (!existingLink) {
+                    const studentMenu = document.createElement('a');
+                    studentMenu.href = '/librarian/students';
+                    
+                    // Copy nguyên class giao diện thường (màu xám) của nút Danh mục Sách
+                    studentMenu.className = targetButton.className;
+                    
+                    studentMenu.innerHTML = `
+                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                        <span class="text-sm font-medium">Quản lý Sinh viên</span>
+                    `;
+                    
+                    // Chèn hậu bối ngay sau nút Danh mục Sách
+                    targetButton.insertAdjacentElement('afterend', studentMenu);
+                }
+            }
+        });
+
         // Init
         loadFilters();
         (async () => {
@@ -276,14 +296,12 @@
             await renderOverview(data);
         })();
         
-        // Auto refresh every 15s
+        // Auto refresh
         setInterval(async () => { 
-            // Giữ lại tham số bộ lọc khi tự động refresh
             const campusId = document.getElementById('filter-campus').value;
             const categoryId = document.getElementById('filter-category').value;
             const from = document.getElementById('filter-from').value;
             const to = document.getElementById('filter-to').value;
-            
             let paramsString = "";
             if (campusId || categoryId || from || to) {
                 const params = new URLSearchParams();
@@ -293,7 +311,6 @@
                 if (to) params.set('to', to);
                 paramsString = params.toString();
             }
-            
             const d = await fetchStats(paramsString); 
             await renderOverview(d); 
         }, 15000);
@@ -301,6 +318,5 @@
     <div class="relative z-10">
         <div th:replace="~{fragments/footer :: footer}"></div>
     </div>
-
 </body>
 </html>

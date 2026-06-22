@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Kích hoạt tài khoản</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+    <div class="container vh-100 d-flex justify-content-center align-items-center">
+        <div class="card p-4 shadow" style="width: 400px;">
+            <h3 class="text-center mb-3">Kích hoạt tài khoản</h3>
+            <p class="text-muted text-center small">Mã OTP đã được gửi về Gmail của bạn. Vui lòng kiểm tra và nhập vào đây để kích hoạt.</p>
+            
+            <form th:action="@{/activate}" method="post">
+                <input type="hidden" name="userId" th:value="${param.userId}" />
+                
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Nhập mã OTP gồm 6 số:</label>
+                    <input type="text" name="otp" class="form-control text-center fs-4" placeholder="------" required maxlength="6">
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100">Xác nhận kích hoạt</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
