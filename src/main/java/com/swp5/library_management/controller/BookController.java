@@ -10,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.swp5.library_management.security.CustomUserDetails;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -114,13 +116,18 @@ public class BookController {
             @PathVariable Integer id,
             @RequestParam(required = false) Integer campusId,
             @RequestParam(required = false, defaultValue = "false") boolean ajax,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             jakarta.servlet.http.HttpSession session,
             Model model) {
 
         if (campusId == null) {
-            Integer loggedInCampusId = (Integer) session.getAttribute("loggedInCampusId");
-            if (loggedInCampusId != null) {
-                campusId = loggedInCampusId;
+            if (userDetails != null && userDetails.getUser() != null && userDetails.getUser().getCampusId() != null) {
+                campusId = userDetails.getUser().getCampusId();
+            } else {
+                Integer loggedInCampusId = (Integer) session.getAttribute("loggedInCampusId");
+                if (loggedInCampusId != null) {
+                    campusId = loggedInCampusId;
+                }
             }
         } else if (campusId == 0) {
             campusId = null; // 0 means all campuses
