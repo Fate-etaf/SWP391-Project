@@ -305,50 +305,5 @@
 <!-- ═══════════════════════════════════════════════════════ FOOTER ══ -->
 <div th:replace="~{fragments/footer :: footer}"></div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Hàm gắn sự kiện click cho các tab campus
-        function attachCampusTabEvents() {
-            const container = document.getElementById('copiesSectionContainer');
-            if(!container) return;
-            
-            const tabs = container.querySelectorAll('.campus-tab');
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    const url = new URL(this.href);
-                    url.searchParams.set('ajax', 'true');
-                    
-                    const innerFrag = container.firstElementChild;
-                    if(innerFrag) innerFrag.style.opacity = '0.5';
-                    
-                    fetch(url, {
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                    })
-                    .then(response => response.text())
-                    .then(html => {
-                        container.innerHTML = html;
-                        
-                        // Đổi URL trình duyệt mà không reload
-                        url.searchParams.delete('ajax');
-                        window.history.pushState({}, '', url.toString());
-                        
-                        // Gắn lại sự kiện cho các DOM mới
-                        attachCampusTabEvents();
-                    })
-                    .catch(error => {
-                        console.error('Error fetching copies:', error);
-                        if(innerFrag) innerFrag.style.opacity = '1';
-                    });
-                });
-            });
-        }
-
-        // Khởi chạy lần đầu
-        attachCampusTabEvents();
-    });
-</script>
-
 </body>
 </html>
