@@ -4,6 +4,11 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -166,13 +171,16 @@ public class BookServiceImpl implements BookService {
      *   4. Map kết quả sang DTO mà không cần truy cập lazy collection.
      */
     @Override
-    public List<BookSearchResultDTO> searchBooks(String keyword, String subjectCode, Integer categoryId, Integer majorId, Integer campusId) {
+    public Page<BookSearchResultDTO> searchBooks(String keyword, String subjectCode, Integer categoryId, Integer majorId, Integer campusId, int page, int size) {
         // Sanitize: blank string → null để WHERE clause bỏ qua bộ lọc
         String kw = StringUtils.hasText(keyword)     ? keyword.trim()     : null;
         String sc = StringUtils.hasText(subjectCode) ? subjectCode.trim() : null;
 
-        List<Book> books = bookRepository.searchBooks(kw, sc, categoryId, majorId, campusId);
-        return mapBooksToSearchResults(books, campusId);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Book> bookPage = bookRepository.searchBooks(kw, sc, categoryId, majorId, campusId, pageable);
+        
+        List<BookSearchResultDTO> dtoList = mapBooksToSearchResults(bookPage.getContent(), campusId);
+        return new PageImpl<>(dtoList, pageable, bookPage.getTotalElements());
     }
 
     // ── UCG01 – E1 Fallback: getRecentBooks ───────────────────────────────────

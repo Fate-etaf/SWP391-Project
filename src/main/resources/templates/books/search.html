@@ -91,7 +91,7 @@
                     <div>
                         <h3 class="text-xl font-extrabold text-slate-900">Kết quả tìm kiếm</h3>
                         <p class="text-sm text-slate-500 mt-0.5">
-                            Tìm thấy <span class="font-bold text-fpt-orange" th:text="${#lists.size(results)}">0</span> tài liệu phù hợp
+                            Tìm thấy <span class="font-bold text-fpt-orange" th:text="${totalElements != null ? totalElements : 0}">0</span> tài liệu phù hợp
                         </p>
                     </div>
                     <a href="/books" class="text-sm text-slate-500 hover:text-fpt-orange transition-colors flex items-center">
@@ -162,6 +162,27 @@
                 </div>
             </div>
         </div>
+                
+                <!-- ── Phân trang (Pagination) ── -->
+                <div th:if="${totalPages != null and totalPages > 1}" class="mt-8 flex justify-center pb-4">
+                    <nav class="flex items-center space-x-1.5">
+                        <a th:if="${currentPage > 0}" href="#" th:data-page="${currentPage - 1}" class="pagination-link w-8 h-8 flex items-center justify-center border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                            &lt;
+                        </a>
+                        
+                        <th:block th:each="p : ${#numbers.sequence(0, totalPages - 1)}">
+                            <a href="#" th:data-page="${p}" 
+                               th:text="${p + 1}"
+                               class="pagination-link w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors"
+                               th:classappend="${currentPage == p ? 'bg-fpt-orange text-white shadow-sm shadow-orange-500/30' : 'border border-slate-200 text-slate-600 hover:bg-slate-50'}">1</a>
+                        </th:block>
+                        
+                        <a th:if="${currentPage < totalPages - 1}" href="#" th:data-page="${currentPage + 1}" class="pagination-link w-8 h-8 flex items-center justify-center border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                            &gt;
+                        </a>
+                    </nav>
+                </div>
+
             </div> <!-- close flex-1 -->
         </div> <!-- close flex -->
     </div>
@@ -217,6 +238,7 @@
         </th:block>
     </div>
 
+        </div>
         </div>
 
         <!-- Cột Sidebar Danh mục (Bên Phải) -->
@@ -369,18 +391,30 @@
     document.addEventListener("DOMContentLoaded", function() {
         const searchForm = document.getElementById('search-form');
         if (searchForm) {
-            // Lắng nghe thay đổi trên các ô chọn Dropdown
             const selects = searchForm.querySelectorAll('select');
             selects.forEach(select => {
                 select.addEventListener('change', function() {
-                    performAjaxSearch();
+                    performAjaxSearch(0);
                 });
             });
+
+            // Lắng nghe click cho phân trang
+            const container = document.getElementById('searchResultsContainer');
+            if (container) {
+                container.addEventListener('click', function(e) {
+                    const paginationLink = e.target.closest('.pagination-link');
+                    if (paginationLink) {
+                        e.preventDefault();
+                        const page = paginationLink.getAttribute('data-page');
+                        performAjaxSearch(page);
+                    }
+                });
+            }
 
             // Chặn sự kiện submit gốc của Form
             searchForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                performAjaxSearch();
+                performAjaxSearch(0);
             });
             
             // Xử lý nút xóa từ khóa (nếu có)
@@ -389,7 +423,7 @@
                 clearBtn.addEventListener('click', function(e) {
                     e.preventDefault(); // chặn hành vi gốc (chỉ xoá value)
                     document.getElementById('keyword').value = '';
-                    performAjaxSearch();
+                    performAjaxSearch(0);
                 });
             }
 
@@ -400,18 +434,19 @@
                 keywordInput.addEventListener('input', function() {
                     clearTimeout(timeout);
                     timeout = setTimeout(function() {
-                        performAjaxSearch();
+                        performAjaxSearch(0);
                     }, 600);
                 });
             }
         }
 
-        function performAjaxSearch() {
+        function performAjaxSearch(page = 0) {
             const formData = new FormData(searchForm);
             const params = new URLSearchParams();
             for (const [key, value] of formData.entries()) {
                 if (value) params.append(key, value);
             }
+            params.append('page', page);
             params.append('ajax', 'true');
             
             const container = document.getElementById('searchResultsContainer');

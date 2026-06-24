@@ -532,7 +532,7 @@
                         <div>
                             <h3 class="text-xl font-extrabold text-white">Kết quả tìm kiếm</h3>
                             <p class="text-sm text-slate-400 mt-0.5">
-                                Tìm thấy <span class="font-bold text-fpt-orange" th:text="${results != null ? #lists.size(results) : 0}">0</span> tài liệu phù hợp
+                                Tìm thấy <span class="font-bold text-fpt-orange" th:text="${totalElements != null ? totalElements : 0}">0</span> tài liệu phù hợp
                             </p>
                         </div>
                         <a href="/librarian/inventory/list" class="text-sm text-slate-500 hover:text-fpt-orange transition-colors flex items-center">
@@ -543,6 +543,26 @@
                         </a>
                     </div>
                     <div th:replace="~{inventory/list :: inventory-book-grid(${results}, ${selectedCampusId})}"></div>
+                    
+                    <!-- ── Phân trang (Pagination) ── -->
+                    <div th:if="${totalPages != null and totalPages > 1}" class="mt-8 flex justify-center pb-4">
+                        <nav class="flex items-center space-x-1.5">
+                            <a th:if="${currentPage > 0}" href="#" th:data-page="${currentPage - 1}" class="pagination-link w-8 h-8 flex items-center justify-center border border-[#1e293b] bg-[#131c2e] rounded-lg text-sm font-medium text-slate-300 hover:bg-[#1a2540] transition-colors">
+                                &lt;
+                            </a>
+                            
+                            <th:block th:each="p : ${#numbers.sequence(0, totalPages - 1)}">
+                                <a href="#" th:data-page="${p}" 
+                                   th:text="${p + 1}"
+                                   class="pagination-link w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors"
+                                   th:classappend="${currentPage == p ? 'bg-fpt-orange text-white shadow-sm shadow-orange-500/30' : 'border border-[#1e293b] bg-[#131c2e] text-slate-300 hover:bg-[#1a2540]'}">1</a>
+                            </th:block>
+                            
+                            <a th:if="${currentPage < totalPages - 1}" href="#" th:data-page="${currentPage + 1}" class="pagination-link w-8 h-8 flex items-center justify-center border border-[#1e293b] bg-[#131c2e] rounded-lg text-sm font-medium text-slate-300 hover:bg-[#1a2540] transition-colors">
+                                &gt;
+                            </a>
+                        </nav>
+                    </div>
                 </div>
 
                 <!-- ── UCG01 E1: Không tìm thấy kết quả ────────────────────────── -->
@@ -728,6 +748,37 @@
 </th:block>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchForm = document.getElementById('search-form');
+        if (searchForm) {
+            let pageInput = searchForm.querySelector('input[name="page"]');
+            if (!pageInput) {
+                pageInput = document.createElement('input');
+                pageInput.type = 'hidden';
+                pageInput.name = 'page';
+                pageInput.value = '0';
+                searchForm.appendChild(pageInput);
+            }
+
+            document.querySelectorAll('.pagination-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    pageInput.value = this.getAttribute('data-page');
+                    searchForm.submit();
+                });
+            });
+            
+            searchForm.addEventListener('submit', function(e) {
+                if(document.activeElement && !document.activeElement.classList.contains('pagination-link') && e.submitter && !e.submitter.classList.contains('pagination-link')) {
+                    pageInput.value = '0';
+                }
+            });
+        }
+    });
+</script>
+
 </body>
 </html>
 
