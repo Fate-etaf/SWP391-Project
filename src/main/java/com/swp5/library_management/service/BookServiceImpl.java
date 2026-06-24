@@ -280,14 +280,24 @@ public class BookServiceImpl implements BookService {
                 .map(Book::getBookId)
                 .collect(Collectors.toList());
 
-        // Batch count: 1 query duy nhất cho tất cả sách
-        List<Object[]> countRows = (campusId != null)
+        // Batch count cho available (có sẵn)
+        List<Object[]> availableRows = (campusId != null)
                 ? bookCopyRepository.countAvailableByBookIdsAndCampus(bookIds, campusId)
                 : bookCopyRepository.countAvailableByBookIds(bookIds);
 
         Map<Integer, Long> availableMap = new HashMap<>();
-        for (Object[] row : countRows) {
+        for (Object[] row : availableRows) {
             availableMap.put((Integer) row[0], (Long) row[1]);
+        }
+
+        // Batch count cho total (tổng cộng)
+        List<Object[]> totalRows = (campusId != null)
+                ? bookCopyRepository.countTotalByBookIdsAndCampus(bookIds, campusId)
+                : bookCopyRepository.countTotalByBookIds(bookIds);
+
+        Map<Integer, Long> totalMap = new HashMap<>();
+        for (Object[] row : totalRows) {
+            totalMap.put((Integer) row[0], (Long) row[1]);
         }
 
         List<BookSearchResultDTO> result = new ArrayList<>();
@@ -309,6 +319,7 @@ public class BookServiceImpl implements BookService {
                     .subjectCode(subjectCode)
                     .categoryNames(categoryNames.isEmpty() ? "Chưa phân loại" : categoryNames)
                     .availableCount(availableMap.getOrDefault(book.getBookId(), 0L))
+                    .totalCount(totalMap.getOrDefault(book.getBookId(), 0L))
                     .coverImageUrl(book.getCoverImageUrl())
                     .coverColor(COVER_COLORS[i % COVER_COLORS.length])
                     .build());

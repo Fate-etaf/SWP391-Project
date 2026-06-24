@@ -88,4 +88,22 @@ public interface BookCopyRepository extends JpaRepository<BookCopy, String> {
     """)
     List<Object[]> countAvailableByBookIdsAndCampus(@Param("bookIds") List<Integer> bookIds,
                                                      @Param("campusId") Integer campusId);
+
+    @Query("""
+        SELECT bc.book.bookId, COUNT(bc)
+        FROM BookCopy bc
+        WHERE bc.book.bookId IN :bookIds
+        GROUP BY bc.book.bookId
+    """)
+    List<Object[]> countTotalByBookIds(@Param("bookIds") List<Integer> bookIds);
+
+    @Query("""
+        SELECT bc.book.bookId, COUNT(bc)
+        FROM BookCopy bc
+        WHERE bc.campus.campusId = :campusId
+          AND bc.book.bookId IN :bookIds
+        GROUP BY bc.book.bookId
+    """)
+    List<Object[]> countTotalByBookIdsAndCampus(@Param("bookIds") List<Integer> bookIds,
+                                                @Param("campusId") Integer campusId);
 }

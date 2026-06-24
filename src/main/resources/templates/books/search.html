@@ -146,10 +146,10 @@
                         <!-- Available count badge -->
                         <div class="flex items-center space-x-1.5">
                             <span class="w-2 h-2 rounded-full"
-                                  th:classappend="${book.availableCount > 0 ? 'bg-emerald-500' : 'bg-red-400'}"></span>
+                                  th:classappend="${book.availableCount > 0 ? 'bg-emerald-500' : (book.totalCount > 0 ? 'bg-orange-400' : 'bg-red-400')}"></span>
                             <span class="text-xs font-semibold"
-                                  th:classappend="${book.availableCount > 0 ? 'text-emerald-700' : 'text-red-600'}"
-                                  th:text="${book.availableCount > 0 ? book.availableCount + ' bản còn' : 'Hết sách'}">
+                                  th:classappend="${book.availableCount > 0 ? 'text-emerald-700' : (book.totalCount > 0 ? 'text-orange-600' : 'text-red-600')}"
+                                  th:text="${book.availableCount > 0 ? book.availableCount + ' bản còn' : (book.totalCount > 0 ? 'Đang bận' : 'Hết sách')}">
                                 Còn sách
                             </span>
                         </div>
@@ -365,10 +365,10 @@
                 <div class="mt-auto flex items-center justify-between pt-3 border-t border-slate-100">
                     <div class="flex items-center space-x-1.5">
                         <span class="w-2 h-2 rounded-full"
-                              th:classappend="${book.available ? 'bg-emerald-500' : 'bg-red-400'}"></span>
+                              th:classappend="${book.availableCount > 0 ? 'bg-emerald-500' : (book.totalCount > 0 ? 'bg-orange-400' : 'bg-red-400')}"></span>
                         <span class="text-xs font-semibold"
-                              th:classappend="${book.available ? 'text-emerald-700' : 'text-red-600'}"
-                              th:text="${book.available ? 'Còn sách' : 'Hết sách'}">Còn sách</span>
+                              th:classappend="${book.availableCount > 0 ? 'text-emerald-700' : (book.totalCount > 0 ? 'text-orange-600' : 'text-red-600')}"
+                              th:text="${book.availableCount > 0 ? 'Còn sách' : (book.totalCount > 0 ? 'Đang bận' : 'Hết sách')}">Còn sách</span>
                     </div>
                     <a th:href="@{/books/{id}(id=${book.bookId}, campusId=${campusId})}"
                        class="bg-fpt-navy hover:bg-slate-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-all">
