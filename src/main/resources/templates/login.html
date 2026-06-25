@@ -60,7 +60,71 @@
             <span th:text="${session.loginError}">Bạn không có quyền truy cập! Tài khoản này chưa được import vào hệ thống.</span>
         </div>
 
-        <div class="py-4">
+        <div th:if="${session['SPRING_SECURITY_LAST_EXCEPTION'] != null}" class="mb-6 bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 px-4 py-3 rounded-xl text-xs font-medium text-left flex items-start gap-2 relative z-20 animate-fade-in">
+            <span>⚠️</span>
+            <span th:text="${session['SPRING_SECURITY_LAST_EXCEPTION'].message}">Lỗi chi tiết từ Spring Security</span>
+        </div>
+
+        <div th:if="${loginError != null}" class="mb-6 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-xs font-medium text-left flex items-start gap-2 relative z-20 animate-fade-in">
+            <span>🔒</span>
+            <span th:text="${loginError}">Thông tin xác thực không chính xác hoặc chưa được import!</span>
+        </div>
+
+        <div th:if="${infoMessage != null}" class="mb-6 bg-blue-500/10 border border-blue-500/30 text-blue-400 px-4 py-3 rounded-xl text-xs font-medium text-left flex items-start gap-2 relative z-20 animate-fade-in">
+            <span>ℹ️</span>
+            <span th:text="${infoMessage}">Thông báo</span>
+        </div>
+
+        <form th:action="@{/login}" method="POST" class="space-y-4 mb-6 text-left">
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Mã số (Roll Number / User ID)</label>
+                <div class="relative flex items-center">
+                    <span class="absolute left-4 text-slate-500 text-sm font-bold select-none">#</span>
+                    <input type="text" name="userId" placeholder="Ví dụ: HE180000" required autocomplete="off"
+                           class="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Địa chỉ Email</label>
+                <div class="relative flex items-center">
+                    <svg class="w-4 h-4 text-slate-500 absolute left-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    <input type="email" name="email" placeholder="username@fpt.edu.vn" required autocomplete="off"
+                           class="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Cơ sở học tập (Campus)</label>
+                <div class="relative flex items-center">
+                    <svg class="w-4 h-4 text-slate-500 absolute left-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    </svg>
+                    <select name="campusId" required class="w-full bg-slate-950 border border-slate-800 text-slate-300 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all cursor-pointer appearance-none">
+                        <option value="" disabled selected>-- Chọn cơ sở học tập --</option>
+                        <option value="1">Hà Nội</option>
+                        <option value="2">Đà Nẵng</option>
+                        <option value="3">TP. Hồ Chí Minh</option>
+                        <option value="4">Cần Thơ</option>
+                        <option value="5">Quy Nhơn</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-fpt-orange hover:bg-fpt-orangeHover text-white py-3 rounded-xl font-bold transition-all text-sm shadow-lg shadow-fpt-orange/20 active:scale-[0.99] mt-4">
+                Xác thực đăng nhập
+            </button>
+        </form>
+
+        <div class="flex items-center gap-4 mb-4">
+            <div class="h-px bg-slate-800 flex-grow"></div>
+            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Hoặc đăng nhập nhanh</span>
+            <div class="h-px bg-slate-800 flex-grow"></div>
+        </div>
+
+        <div class="pb-2">
             <a href="/oauth2/authorization/google" 
                class="w-full flex items-center justify-center gap-3.5 bg-slate-950 hover:bg-fpt-orange text-white border border-slate-800 hover:border-fpt-orange rounded-xl py-3.5 transition-all duration-300 font-semibold text-sm shadow-xl hover:shadow-fpt-orange/20 active:scale-[0.99] group">
                 

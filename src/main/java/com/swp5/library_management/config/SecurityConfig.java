@@ -38,48 +38,52 @@ public class SecurityConfig {
                 .loginPage("/login")
                 // --- ĐOẠN XỬ LÝ GÁN SESSION KHI ĐĂNG NHẬP GOOGLE THÀNH CÔNG ---
                .successHandler((request, response, authentication) -> {
-    OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-    String email = oAuth2User.getAttribute("email");
-    
-    // Tìm kiếm sinh viên trong SQL Server bằng email
-    Optional<User> userOpt = userRepository.findByEmail(email);
-    
-    if (userOpt.isPresent()) {
-        User user = userOpt.get();
+    try {
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        String email = oAuth2User.getAttribute("email");
+        System.out.println("Google email: " + email);
         
-        if ("Pending".equalsIgnoreCase(user.getStatus())) {
-            user.setStatus("Active");
-            userRepository.save(user);
-        }
+        Optional<User> userOpt = userRepository.findByEmail(email);
         
-        jakarta.servlet.http.HttpSession session = request.getSession();
-        
-        // 🟢 THÊM DÒNG NÀY: Xóa sạch thông báo lỗi cũ trong session ngay khi đăng nhập thành công
-        session.removeAttribute("loginError");
-        
-        session.setAttribute("loggedInUser", user);
-        session.setAttribute("loggedInUserId", user.getUserId());
-        session.setAttribute("loggedInCampusId", user.getCampusId());
-        
-        // Cấp quyền Librarian/Admin cho Google Login
-        if (user.getRole() != null) {
-            String roleName = user.getRole().getRoleName();
-            int roleId = user.getRole().getRoleId();
-            session.setAttribute("isLibrarian", "Librarian".equalsIgnoreCase(roleName) || roleId == 3);
-            session.setAttribute("isAdmin", "Admin".equalsIgnoreCase(roleName) || roleId == 4);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            System.out.println("Found user: " + user.getUserId());
             
-            if ("Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId == 4 || roleId == 3) {
-                response.sendRedirect("/librarian/inventory/dashboard");
-                return;
+            if ("Pending".equalsIgnoreCase(user.getStatus())) {
+                user.setStatus("Active");
+                userRepository.save(user);
             }
+            
+            jakarta.servlet.http.HttpSession session = request.getSession();
+            session.removeAttribute("loginError");
+            session.setAttribute("loggedInUser", user);
+            session.setAttribute("loggedInUserId", user.getUserId());
+            session.setAttribute("loggedInCampusId", user.getCampusId());
+            
+            if (user.getRole() != null) {
+                String roleName = user.getRole().getRoleName();
+                int roleId = user.getRole().getRoleId();
+                System.out.println("User role: " + roleName + ", " + roleId);
+                session.setAttribute("isLibrarian", "Librarian".equalsIgnoreCase(roleName) || roleId == 3);
+                session.setAttribute("isAdmin", "Admin".equalsIgnoreCase(roleName) || roleId == 4);
+                
+                if ("Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId == 4 || roleId == 3) {
+                    response.sendRedirect("/librarian/inventory/dashboard");
+                    return;
+                }
+            }
+            
+            response.sendRedirect("/home");
+        } else {
+            System.out.println("User not found for email: " + email);
+            jakarta.servlet.http.HttpSession session = request.getSession();
+            session.setAttribute("loginError", "Bạn không có quyền truy cập! Tài khoản này chưa được import vào hệ thống.");
+            response.sendRedirect("/login");
         }
-        
-        response.sendRedirect("/home");
-    } else {
-        // 🔴 ĐOẠN XỬ LÝ KHI KHÔNG CÓ QUYỀN TRUY CẬP (GIỮ NGUYÊN HOẶC CHỈNH CHỮ CHO ĐẸP)
-        jakarta.servlet.http.HttpSession session = request.getSession();
-        session.setAttribute("loginError", "Bạn không có quyền truy cập! Tài khoản này chưa được import vào hệ thống.");
-        response.sendRedirect("/login");
+    } catch (Exception e) {
+        System.out.println("Exception in successHandler: " + e.getMessage());
+        e.printStackTrace();
+        response.sendRedirect("/login?error");
     }
 })
             )

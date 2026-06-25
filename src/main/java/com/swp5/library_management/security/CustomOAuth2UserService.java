@@ -21,25 +21,34 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
-        OAuth2User oAuth2User = delegate.loadUser(userRequest);
+        try {
+            OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
+            OAuth2User oAuth2User = delegate.loadUser(userRequest);
 
-        String email = oAuth2User.getAttribute("email");
-        if (email == null) {
-            throw new OAuth2AuthenticationException(new OAuth2Error("invalid_email"), "Không tìm thấy email từ Google");
+            String email = oAuth2User.getAttribute("email");
+            if (email == null) {
+                throw new OAuth2AuthenticationException(new OAuth2Error("invalid_email"), "Không tìm thấy email từ Google");
+            }
+
+            // Kiểm tra xem email có tồn tại trong hệ thống (đã import qua Excel) chưa
+            Optional<User> userOpt = userRepository.findByEmail(email);
+            if (userOpt.isEmpty()) {
+                throw new OAuth2AuthenticationException(new OAuth2Error("unauthorized_email"), "Tài khoản Google của bạn chưa được kích hoạt/chưa có trên hệ thống.");
+            }
+
+            User user = userOpt.get();
+            if (!"Active".equalsIgnoreCase(user.getStatus())) {
+                throw new OAuth2AuthenticationException(new OAuth2Error("inactive_account"), "Tài khoản của bạn đã bị khóa.");
+            }
+
+            return new CustomUserDetails(user, oAuth2User.getAttributes());
+        } catch (OAuth2AuthenticationException e) {
+            System.out.println("OAuth2 Exception in CustomOAuth2UserService: " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            System.out.println("Unknown Exception in CustomOAuth2UserService: " + e.getMessage());
+            e.printStackTrace();
+            throw new OAuth2AuthenticationException(new OAuth2Error("internal_error"), e.getMessage());
         }
-
-        // Kiểm tra xem email có tồn tại trong hệ thống (đã import qua Excel) chưa
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty()) {
-            throw new OAuth2AuthenticationException(new OAuth2Error("unauthorized_email"), "Tài khoản Google của bạn chưa được kích hoạt/chưa có trên hệ thống.");
-        }
-
-        User user = userOpt.get();
-        if (!"Active".equalsIgnoreCase(user.getStatus())) {
-            throw new OAuth2AuthenticationException(new OAuth2Error("inactive_account"), "Tài khoản của bạn đã bị khóa.");
-        }
-
-        return new CustomUserDetails(user, oAuth2User.getAttributes());
     }
 }
