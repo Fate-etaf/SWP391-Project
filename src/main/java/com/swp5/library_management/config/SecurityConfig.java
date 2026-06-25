@@ -61,6 +61,19 @@ public class SecurityConfig {
         session.setAttribute("loggedInUserId", user.getUserId());
         session.setAttribute("loggedInCampusId", user.getCampusId());
         
+        // Cấp quyền Librarian/Admin cho Google Login
+        if (user.getRole() != null) {
+            String roleName = user.getRole().getRoleName();
+            int roleId = user.getRole().getRoleId();
+            session.setAttribute("isLibrarian", "Librarian".equalsIgnoreCase(roleName) || roleId == 3);
+            session.setAttribute("isAdmin", "Admin".equalsIgnoreCase(roleName) || roleId == 4);
+            
+            if ("Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId == 4 || roleId == 3) {
+                response.sendRedirect("/librarian/inventory/dashboard");
+                return;
+            }
+        }
+        
         response.sendRedirect("/home");
     } else {
         // 🔴 ĐOẠN XỬ LÝ KHI KHÔNG CÓ QUYỀN TRUY CẬP (GIỮ NGUYÊN HOẶC CHỈNH CHỮ CHO ĐẸP)

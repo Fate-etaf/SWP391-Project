@@ -58,7 +58,7 @@ public class User {
     @Builder.Default
     private Boolean borrowingLocked = false;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "RoleID")
     private Role role;
     
@@ -74,9 +74,13 @@ public class User {
 
     // Hàm tiện ích để Controller và HTML kiểm tra quyền 
     public boolean isLibrarian() {
-        if (this.roles == null || this.roles.isEmpty()) return false;
-        return this.roles.stream()
-                .anyMatch(role -> "Librarian".equalsIgnoreCase(role.getRoleName()));
+        if (this.role != null && (this.role.getRoleId() == 3 || "Librarian".equalsIgnoreCase(this.role.getRoleName()))) {
+            return true;
+        }
+        if (this.roles != null && !this.roles.isEmpty()) {
+            return this.roles.stream().anyMatch(role -> "Librarian".equalsIgnoreCase(role.getRoleName()) || role.getRoleId() == 3);
+        }
+        return false;
     }
 
     // Thêm thủ công Getter cho userId để IDE không báo lỗi
