@@ -79,4 +79,12 @@ public interface EmailService {
      * @param author       Tác giả sách đề nghị
      */
     void sendMaterialRequestApproval(String toEmail, String patronName, String bookTitle, String author);
+        /**
+     * Gửi email thông báo mã OTP kích hoạt hoặc đặt lại mật khẩu tài khoản.
+     *
+     * @param toEmail  Địa chỉ email của bạn đọc
+     * @param subject  Tiêu đề email
+     * @param content  Nội dung thông báo (chứa mã OTP)
+     */
+    void sendOtpEmail(String toEmail, String subject, String content);
 }

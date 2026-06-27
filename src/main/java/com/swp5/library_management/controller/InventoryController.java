@@ -2,7 +2,7 @@ package com.swp5.library_management.controller;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -78,6 +78,7 @@ public class InventoryController {
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) Integer majorId,
             @RequestParam(required = false) Integer campusId,
+            @RequestParam(defaultValue = "0") int page,
             Model model) {
 
         boolean hasSearch = StringUtils.hasText(keyword)
@@ -87,11 +88,14 @@ public class InventoryController {
                          || campusId != null;
 
         if (hasSearch) {
-            List<BookSearchResultDTO> results = bookService.searchBooks(keyword, subjectCode, categoryId, majorId, campusId);
-            model.addAttribute("results", results);
-            model.addAttribute("noResults", results.isEmpty());
+            Page<BookSearchResultDTO> resultPage = bookService.searchBooks(keyword, subjectCode, categoryId, majorId, campusId, page, 12);
+            model.addAttribute("results", resultPage.getContent());
+            model.addAttribute("totalPages", resultPage.getTotalPages());
+            model.addAttribute("totalElements", resultPage.getTotalElements());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("noResults", resultPage.isEmpty());
             
-            if (results.isEmpty()) {
+            if (resultPage.isEmpty()) {
                 model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
             }
         } else {

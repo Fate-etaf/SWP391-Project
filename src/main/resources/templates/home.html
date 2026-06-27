@@ -70,8 +70,6 @@
             letter-spacing: 0.3px;
         }
 
-        /* (Search box CSS moved to Tailwind inside search-bar fragment) */
-
         /* Quick links */
         .quick-links {
             display: flex;
@@ -326,7 +324,6 @@
 
 <div th:replace="~{fragments/header :: header('home')}"></div>
 
-<!-- ═══════════════════ HERO ═══════════════════ -->
 <section class="hero">
     <div class="hero-bg"></div>
     <div class="hero-photo"></div>
@@ -335,12 +332,10 @@
         <h1 class="hero-title">Welcome to <span>FPTU Library</span></h1>
         <p class="hero-subtitle">Tra cứu tài nguyên học thuật – Đặt giữ chỗ – Mượn sách tại tất cả các cơ sở FPT</p>
 
-        <!-- Search bar with JS validation & advanced look -->
         <div th:replace="~{fragments/search-bar :: search-form}"></div>
     </br>
     </br>
     <div>
-        <!-- Quick links -->
         <div class="quick-links">
             <a href="#">💬 Chatbot</a>
             <a href="#">📋 Request material</a>
@@ -350,7 +345,6 @@
     </div>
 </section>
 
-<!-- ═══════════════════ HOW TO USE ═══════════════════ -->
 <section class="how-to">
     <h2>How to use FPTU Library</h2>
     <div class="how-to-grid">
@@ -373,7 +367,6 @@
     </div>
 </section>
 
-<!-- ═══════════════════ STATS ═══════════════════ -->
 <section class="stats-band">
     <div class="inner">
         <div class="stat-item">
@@ -396,7 +389,6 @@
 </section>
 
 
-<!-- ═══════════════════ SERVICES ═══════════════════ -->
 <section class="services-section">
     <div class="inner">
         <div style="text-align:center; margin-bottom:32px;">
@@ -432,8 +424,40 @@
     </div>
 </section>
 
-<!-- ═══════════════════ FOOTER ═══════════════════ -->
 <div th:replace="~{fragments/footer :: footer}"></div>
+
+<script th:inline="javascript">
+    // 1. Nhận trạng thái từ Session Java đẩy sang
+   // 1. Nhận trạng thái từ Session Java đẩy sang (Đã bọc nháy để VS Code hết báo lỗi đỏ)
+    const isLoggedIn = /*[[${session.loggedInUserId != null}]]*/ false;
+    const studentName = /*[[${session.loggedInUser != null ? session.loggedInUser.fullName : ''}]]*/ '';
+    const rollNumber = /*[[${session.loggedInUserId != null ? session.loggedInUserId : ''}]]*/ '';
+
+    // 2. Nếu đã có session đăng nhập, tiến hành hoán đổi giao diện nút Đăng nhập cũ
+    if (isLoggedIn) {
+        window.addEventListener('DOMContentLoaded', () => {
+            // Tìm kiếm tất cả thẻ link hoặc nút bấm trên thanh Header điều hướng
+            const links = document.querySelectorAll('a, button');
+            links.forEach(el => {
+                if (el.textContent.trim() === 'Đăng nhập') {
+                    // Tạo một Hộp thông tin bạn đọc mang thiết kế FPT cực đẹp
+                    const userBox = document.createElement('div');
+                    userBox.className = "flex items-center space-x-3 bg-slate-800/80 border border-slate-700/60 rounded-xl p-1 px-3 text-slate-200 ml-4 shadow-md backdrop-blur-md";
+                    userBox.innerHTML = `
+                        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=${rollNumber}" alt="Avatar" class="w-7 h-7 rounded-lg border border-orange-500 bg-slate-950">
+                        <div class="flex flex-col text-left leading-none justify-center">
+                            <span class="text-[12px] font-bold text-slate-100">${studentName}</span>
+                            <span class="text-[10px] text-slate-400 mt-1">${rollNumber}</span>
+                        </div>
+                        <a href="/logout" class="text-[11px] text-red-400 hover:text-red-300 font-semibold border-l border-slate-700 pl-2.5 ml-1.5 transition-colors">Đăng xuất</a>
+                    `;
+                    // Tiến hành nuốt trọn nút Đăng nhập thô sơ cũ và chèn hộp thông tin mới vào
+                    el.parentNode.replaceChild(userBox, el);
+                }
+            });
+        });
+    }
+</script>
 
 </body>
 </html>

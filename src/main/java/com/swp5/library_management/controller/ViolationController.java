@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Controller
@@ -30,6 +32,10 @@ public class ViolationController {
     private final ViolationService violationService;
     private final FineInvoiceRepository fineInvoiceRepository;
 
+
+    // ---------------------------------------------------------------
+    // Trang: Sách đã trả quá hạn
+    // ---------------------------------------------------------------
     @GetMapping("/overdue")
     public String showOverdueList(
             @RequestParam(defaultValue = "0") int page,
@@ -39,29 +45,29 @@ public class ViolationController {
             @RequestParam(required = false) String borrowerId,
             @RequestParam(required = false) Long minOverdueDays,
             @RequestParam(required = false) Long maxOverdueDays,
-            Model model
-    ) {
-        List<BorrowTicketDetail> overdueDetails = violationService.getOverdueBooks();
+            Model model) {
+        List<BorrowTicketDetail> overdueDetails = violationService.getReturnedOverdueBooks();
         List<OverdueItem> items = new ArrayList<>();
 
         for (BorrowTicketDetail detail : overdueDetails) {
             LocalDate dueDate = detail.getDueDate() != null ? detail.getDueDate().toLocalDate() : null;
-            long overdueDays = violationService.calculateOverdueDays(dueDate);
+            LocalDate returnDate = detail.getReturnDate() != null ? detail.getReturnDate().toLocalDate() : null;
+            long overdueDays = calculateOverdueDays(dueDate, returnDate);
 
             FineInvoice fine = fineInvoiceRepository
                     .findByTicketDetailAndViolationType(detail, "OVERDUE")
                     .orElse(null);
 
-                BigDecimal fineAmount = OVERDUE_DAILY_FINE.multiply(BigDecimal.valueOf(overdueDays));
-                if (fine != null) {
-                    fine.setFineAmount(fineAmount);
-                    if (fine.getPaidStatus() == null || !"PAID".equalsIgnoreCase(fine.getPaidStatus())) {
-                        fine.setRemainingAmount(fineAmount);
-                    }
-                    fineInvoiceRepository.save(fine);
+            BigDecimal fineAmount = OVERDUE_DAILY_FINE.multiply(BigDecimal.valueOf(overdueDays));
+            if (fine != null) {
+                fine.setFineAmount(fineAmount);
+                if (fine.getPaidStatus() == null || !"PAID".equalsIgnoreCase(fine.getPaidStatus())) {
+                    fine.setRemainingAmount(fineAmount);
                 }
+                fineInvoiceRepository.save(fine);
+            }
 
-                String fineStatus = (fine != null && fine.getPaidStatus() != null)
+            String fineStatus = (fine != null && fine.getPaidStatus() != null)
                     ? fine.getPaidStatus().toUpperCase()
                     : (fine != null ? "UNPAID" : "NOT_CREATED");
 
@@ -71,8 +77,12 @@ public class ViolationController {
             }
         }
 
-        List<OverdueItem> pagedItems = paginate(items, page, PAGE_SIZE);
+        // Sắp xếp: Chưa trả (UNPAID/NOT_CREATED) lên trên, Đã trả (PAID) xuống dưới
+        items.sort(Comparator.comparingInt(item ->
+                "PAID".equalsIgnoreCase(item.getFineStatus()) ? 1 : 0));
+
         int totalPages = (int) Math.ceil((double) items.size() / PAGE_SIZE);
+        List<OverdueItem> pagedItems = paginate(items, page, PAGE_SIZE);
 
         model.addAttribute("overdueItems", pagedItems);
         model.addAttribute("currentPage", Math.max(0, Math.min(page, Math.max(totalPages - 1, 0))));
@@ -92,30 +102,16 @@ public class ViolationController {
         return "redirect:/violations/overdue";
     }
 
-    @PostMapping("/create-lost/{id}")
-    public String createLostFine(@PathVariable("id") Integer id) {
-        violationService.createLostBookFine(id);
-        return "redirect:/violations/overdue";
-    }
-
-    @PostMapping("/create-damaged/{id}")
-    public String createDamagedFine(@PathVariable("id") Integer id) {
-        violationService.createDamagedBookFine(id);
-        return "redirect:/violations/overdue";
-    }
-
+    // ---------------------------------------------------------------
+    // Inner class
+    // ---------------------------------------------------------------
     public static class OverdueItem {
         private final BorrowTicketDetail detail;
         private final long overdueDays;
         private final BigDecimal fineAmount;
         private final String fineStatus;
 
-        public OverdueItem(
-                BorrowTicketDetail detail,
-                long overdueDays,
-                BigDecimal fineAmount,
-                String fineStatus
-        ) {
+        public OverdueItem(BorrowTicketDetail detail, long overdueDays, BigDecimal fineAmount, String fineStatus) {
             this.detail = detail;
             this.overdueDays = overdueDays;
             this.fineAmount = fineAmount;
@@ -139,51 +135,47 @@ public class ViolationController {
         }
     }
 
-    private boolean matchesFilter(
-            OverdueItem item,
-            BigDecimal minFine,
-            BigDecimal maxFine,
-            String paidStatus,
-            String borrowerId,
-            Long minOverdueDays,
-            Long maxOverdueDays
-    ) {
-        if (minFine != null && item.getFineAmount().compareTo(minFine) < 0) {
+    // ---------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------
+    private boolean matchesFilter(OverdueItem item, BigDecimal minFine, BigDecimal maxFine,
+            String paidStatus, String borrowerId,
+            Long minOverdueDays, Long maxOverdueDays) {
+        if (minFine != null && item.getFineAmount().compareTo(minFine) < 0)
             return false;
-        }
-        if (maxFine != null && item.getFineAmount().compareTo(maxFine) > 0) {
+        if (maxFine != null && item.getFineAmount().compareTo(maxFine) > 0)
             return false;
-        }
-        if (minOverdueDays != null && item.getOverdueDays() < minOverdueDays) {
+        if (minOverdueDays != null && item.getOverdueDays() < minOverdueDays)
             return false;
-        }
-        if (maxOverdueDays != null && item.getOverdueDays() > maxOverdueDays) {
+        if (maxOverdueDays != null && item.getOverdueDays() > maxOverdueDays)
             return false;
-        }
         if (paidStatus != null && !paidStatus.isBlank() && !"ALL".equalsIgnoreCase(paidStatus)) {
             return paidStatus.equalsIgnoreCase(item.getFineStatus());
         }
         if (borrowerId != null && !borrowerId.isBlank()) {
-            String actualBorrowerId = null;
-            if (item.getDetail().getBorrowTicket() != null
-                    && item.getDetail().getBorrowTicket().getPatron() != null) {
-                actualBorrowerId = item.getDetail().getBorrowTicket().getPatron().getUserId();
+            String actual = null;
+            if (item.getDetail().getBorrowTicket() != null && item.getDetail().getBorrowTicket().getPatron() != null) {
+                actual = item.getDetail().getBorrowTicket().getPatron().getUserId();
             }
-            if (actualBorrowerId == null || !actualBorrowerId.equalsIgnoreCase(borrowerId.trim())) {
+            if (actual == null || !actual.equalsIgnoreCase(borrowerId.trim()))
                 return false;
-            }
         }
         return true;
     }
 
-    private List<OverdueItem> paginate(List<OverdueItem> items, int page, int size) {
-        if (items.isEmpty()) {
+    private <T> List<T> paginate(List<T> items, int page, int size) {
+        if (items.isEmpty())
             return items;
-        }
         int totalPages = (int) Math.ceil((double) items.size() / size);
         int safePage = Math.max(0, Math.min(page, Math.max(totalPages - 1, 0)));
-        int fromIndex = safePage * size;
-        int toIndex = Math.min(fromIndex + size, items.size());
-        return items.subList(fromIndex, toIndex);
+        int from = safePage * size;
+        int to = Math.min(from + size, items.size());
+        return items.subList(from, to);
+    }
+
+    private long calculateOverdueDays(LocalDate dueDate, LocalDate endDate) {
+        if (dueDate == null || endDate == null)
+            return 0L;
+        return Math.max(ChronoUnit.DAYS.between(dueDate, endDate), 0L);
     }
 }
