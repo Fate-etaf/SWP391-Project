@@ -28,12 +28,12 @@
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-between relative overflow-x-hidden">
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between relative overflow-x-hidden">
 
     <!-- Ambient Background Glows -->
     <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
-        <div class="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-[100px]"></div>
     </div>
 
     <div class="relative z-10">
@@ -48,11 +48,11 @@
         <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-wider text-fpt-orange">Quản lý vi phạm</p>
-                <h2 class="text-3xl font-extrabold text-slate-100 tracking-tight mb-1">Danh sách sách quá hạn</h2>
-                <p class="text-sm text-slate-400 mt-1">Lọc và xử lý phiếu phạt theo mức tiền, trạng thái và số ngày quá hạn.</p>
+                <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight mb-1">Danh sách sách quá hạn</h2>
+                <p class="text-sm text-slate-500 mt-1">Lọc và xử lý phiếu phạt theo mức tiền, trạng thái và số ngày quá hạn.</p>
             </div>
-            <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl px-4 py-3 shadow-sm">
-                <div class="flex items-center gap-3 text-xs text-slate-400">
+            <div class="bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm">
+                <div class="flex items-center gap-3 text-xs text-slate-500">
                     <span class="inline-flex items-center gap-1">
                         <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Đã trả
                     </span>
@@ -60,18 +60,18 @@
                         <span class="w-2 h-2 rounded-full bg-amber-500"></span> Chưa trả
                     </span>
                     <span class="inline-flex items-center gap-1">
-                        <span class="w-2 h-2 rounded-full bg-slate-600"></span> Chưa tạo
+                        <span class="w-2 h-2 rounded-full bg-slate-300"></span> Chưa tạo
                     </span>
                 </div>
             </div>
         </div>
 
-        <section class="bg-slate-950/40 border border-slate-800 rounded-2xl p-6 mb-8 shadow-inner">
+        <section class="bg-white border border-slate-200 rounded-2xl p-6 mb-8 shadow-md">
             <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" method="get" th:action="@{/violations/overdue}">
                 <div class="lg:col-span-2">
                     <label for="paidStatus" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Trạng thái thanh toán</label>
                     <select id="paidStatus" name="paidStatus"
-                            class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors">
+                            class="w-full bg-slate-50 border border-slate-300 text-slate-800 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors">
                         <option value="ALL" th:selected="${paidStatus} == null or ${paidStatus} == 'ALL'">Tất cả</option>
                         <option value="PAID" th:selected="${paidStatus} == 'PAID'">Đã trả</option>
                         <option value="UNPAID" th:selected="${paidStatus} == 'UNPAID'">Chưa trả</option>
@@ -81,21 +81,21 @@
                 <div class="lg:col-span-1">
                     <label for="borrowerId" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mã sinh viên</label>
                     <input id="borrowerId" name="borrowerId" type="text" th:value="${borrowerId}"
-                           class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors" />
+                           class="w-full bg-slate-50 border border-slate-300 text-slate-800 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors" />
                 </div>
                 <div class="lg:col-span-4 flex items-center gap-3 pt-2">
                     <button class="bg-fpt-orange hover:bg-fpt-orangeHover text-white py-2.5 px-6 rounded-xl font-bold transition-all text-sm shadow-lg shadow-fpt-orange/20 active:scale-[0.98]" type="submit">
                         Lọc dữ liệu
                     </button>
-                    <a href="/violations/overdue" class="text-sm font-semibold text-slate-400 hover:text-slate-200">Xóa bộ lọc</a>
+                    <a href="/violations/overdue" class="text-sm font-semibold text-slate-500 hover:text-slate-800">Xóa bộ lọc</a>
                 </div>
             </form>
         </section>
 
-        <section class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden">
+        <section class="bg-white border border-slate-200 rounded-2xl shadow-md overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-sm text-slate-300">
-                    <thead class="bg-slate-950/50 text-slate-400 border-b border-slate-800">
+                <table class="w-full text-sm text-slate-600">
+                    <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
                     <tr>
                         <th class="text-left px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Người mượn</th>
                         <th class="text-left px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Mã SV</th>
@@ -109,19 +109,19 @@
                         <th class="text-left px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Thao tác</th>
                     </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-800/50">
-                    <tr th:each="item : ${overdueItems}" class="hover:bg-slate-800/30 transition-colors">
-                        <td class="px-6 py-4 text-slate-200" th:text="${item.detail.borrowTicket.patron.fullName}">Người mượn</td>
-                        <td class="px-6 py-4 text-slate-400 font-mono text-xs" th:text="${item.detail.borrowTicket.patron.userId}">ID</td>
-                        <td class="px-6 py-4 font-semibold text-slate-100" th:text="${item.detail.bookCopy.book.title}">Tên sách</td>
-                        <td class="px-6 py-4 text-slate-400 font-mono text-xs" th:text="${item.detail.bookCopy.copyId}">Copy ID</td>
-                        <td class="px-6 py-4 text-slate-400" th:text="${item.detail.borrowTicket.createdAt != null ? #temporals.format(item.detail.borrowTicket.createdAt, 'dd-MM-yyyy') : ''}">Borrow Date</td>
-                        <td class="px-6 py-4 text-slate-400" th:text="${item.detail.dueDate != null ? #temporals.format(item.detail.dueDate, 'dd-MM-yyyy') : ''}">Due Date</td>
-                        <td class="px-6 py-4 text-rose-400 font-bold" th:text="${item.overdueDays}">0</td>
+                    <tbody class="divide-y divide-slate-200">
+                    <tr th:each="item : ${overdueItems}" class="hover:bg-slate-50/80 transition-colors">
+                        <td class="px-6 py-4 text-slate-800" th:text="${item.detail.borrowTicket.patron.fullName}">Người mượn</td>
+                        <td class="px-6 py-4 text-slate-500 font-mono text-xs" th:text="${item.detail.borrowTicket.patron.userId}">ID</td>
+                        <td class="px-6 py-4 font-semibold text-slate-850" th:text="${item.detail.bookCopy.book.title}">Tên sách</td>
+                        <td class="px-6 py-4 text-slate-500 font-mono text-xs" th:text="${item.detail.bookCopy.copyId}">Copy ID</td>
+                        <td class="px-6 py-4 text-slate-550" th:text="${item.detail.borrowTicket.createdAt != null ? #temporals.format(item.detail.borrowTicket.createdAt, 'dd-MM-yyyy') : ''}">Borrow Date</td>
+                        <td class="px-6 py-4 text-slate-550" th:text="${item.detail.dueDate != null ? #temporals.format(item.detail.dueDate, 'dd-MM-yyyy') : ''}">Due Date</td>
+                        <td class="px-6 py-4 text-rose-600 font-bold" th:text="${item.overdueDays}">0</td>
                         <td class="px-6 py-4 text-fpt-orange font-bold" th:text="${item.fineAmount}">0</td>
                         <td class="px-6 py-4">
                             <span class="inline-flex items-center gap-2 text-xs font-semibold px-2.5 py-1 rounded-full border"
-                                  th:classappend="${item.fineStatus} == 'PAID' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : (${item.fineStatus} == 'UNPAID' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-slate-800 text-slate-400 border-slate-700')"
+                                  th:classappend="${item.fineStatus} == 'PAID' ? 'bg-emerald-50 text-emerald-800 border-emerald-250' : (${item.fineStatus} == 'UNPAID' ? 'bg-amber-50 text-amber-800 border-amber-250' : 'bg-slate-100 text-slate-600 border-slate-200')"
                                   th:text="${item.fineStatus == 'PAID' ? 'Đã trả' : (item.fineStatus == 'UNPAID' ? 'Chưa trả' : 'Chưa tạo')}">
                                 Trạng thái
                             </span>
@@ -129,7 +129,7 @@
                         <td class="px-6 py-4">
                             <div class="flex flex-wrap gap-2">
                                 <button type="button"
-                                        class="bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
+                                        class="bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
                                         th:attr="data-action=@{'/violations/create-overdue/' + ${item.detail.ticketDetailId}},
                                                  data-book-title=${item.detail.bookCopy.book.title},
                                                  data-copy-id=${item.detail.bookCopy.copyId},
@@ -143,13 +143,13 @@
                                     Tạo phiếu phạt
                                 </button>
                                 <button type="button"
-                                        class="bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
+                                        class="bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
                                         th:attr="data-action=@{'/violations/create-lost/' + ${item.detail.ticketDetailId}}"
                                         onclick="openConfirmModal(this, 'Xác nhận đánh dấu sách bị mất?', 'Thao tác này sẽ cập nhật trạng thái bản sao và tạo phiếu phạt.');">
                                     Mất sách
                                 </button>
                                 <button type="button"
-                                        class="bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
+                                        class="bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
                                         th:attr="data-action=@{'/violations/create-damaged/' + ${item.detail.ticketDetailId}}"
                                         onclick="openConfirmModal(this, 'Xác nhận đánh dấu sách bị hỏng?', 'Thao tác này sẽ cập nhật trạng thái bản sao và tạo phiếu phạt.');">
                                     Hỏng sách
@@ -160,28 +160,28 @@
                     </tbody>
                 </table>
             </div>
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-6 py-4 border-t border-slate-800 bg-slate-900/40">
-                <div class="text-sm text-slate-400">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+                <div class="text-sm text-slate-550">
                     <span th:text="${totalPages == 0 ? 'Trang 0 / 0' : 'Trang ' + (currentPage + 1) + ' / ' + totalPages}">Trang 1 / 1</span>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    <a class="px-3 py-1.5 rounded-lg border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800"
+                    <a class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-650 hover:bg-slate-100"
                        th:if="${currentPage > 0}"
                              th:href="@{/violations/overdue(page=${currentPage - 1}, paidStatus=${paidStatus}, borrowerId=${borrowerId})}">Trước</a>
-                    <span class="px-3 py-1.5 rounded-lg border border-slate-800 text-sm text-slate-600 bg-slate-900"
+                    <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400 bg-slate-50"
                           th:if="${currentPage == 0}">Trước</span>
 
                          <a th:if="${totalPages > 0}"
                              th:each="p : ${#numbers.sequence(0, totalPages - 1)}"
                              class="px-3 py-1.5 rounded-lg border text-sm font-semibold transition-colors"
-                             th:classappend="${p == currentPage} ? ' border-fpt-orange text-fpt-orange bg-fpt-orange/10' : ' border-slate-700 text-slate-300 hover:bg-slate-800'"
+                             th:classappend="${p == currentPage} ? ' border-fpt-orange text-fpt-orange bg-fpt-orange/10' : ' border-slate-300 text-slate-600 hover:bg-slate-100'"
                              th:text="${p + 1}"
                              th:href="@{/violations/overdue(page=${p}, paidStatus=${paidStatus}, borrowerId=${borrowerId})}">1</a>
 
-                    <a class="px-3 py-1.5 rounded-lg border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800"
+                    <a class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-650 hover:bg-slate-100"
                        th:if="${currentPage + 1 < totalPages}"
                              th:href="@{/violations/overdue(page=${currentPage + 1}, paidStatus=${paidStatus}, borrowerId=${borrowerId})}">Sau</a>
-                    <span class="px-3 py-1.5 rounded-lg border border-slate-800 text-sm text-slate-600 bg-slate-900"
+                    <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400 bg-slate-50"
                           th:if="${currentPage + 1 >= totalPages}">Sau</span>
                 </div>
             </div>
@@ -189,12 +189,12 @@
     </div>
 </main>
 
-<div id="confirmModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center z-50 transition-all">
-    <div class="bg-slate-900 w-full max-w-md rounded-2xl border border-slate-700 shadow-2xl p-6">
-        <h3 id="confirmTitle" class="text-xl font-extrabold text-slate-100">Xác nhận</h3>
-        <p id="confirmMessage" class="text-sm text-slate-400 mt-2">Thông báo</p>
+<div id="confirmModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 transition-all">
+    <div class="bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-xl p-6">
+        <h3 id="confirmTitle" class="text-xl font-extrabold text-slate-800">Xác nhận</h3>
+        <p id="confirmMessage" class="text-sm text-slate-500 mt-2">Thông báo</p>
         <div class="flex items-center justify-end gap-3 mt-6">
-            <button type="button" class="px-4 py-2 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-colors" onclick="closeConfirmModal()">
+            <button type="button" class="px-4 py-2 rounded-xl border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors" onclick="closeConfirmModal()">
                 Hủy
             </button>
             <form id="confirmForm" method="post">
@@ -206,53 +206,53 @@
     </div>
 </div>
 
-<div id="fineModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center z-50 transition-all">
-    <div class="bg-slate-900 w-full max-w-2xl rounded-2xl border border-slate-700 shadow-2xl p-6">
+<div id="fineModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center z-50 transition-all">
+    <div class="bg-white w-full max-w-2xl rounded-2xl border border-slate-200 shadow-xl p-6">
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-bold uppercase tracking-wider text-fpt-orange mb-1">Tạo phiếu phạt</p>
-                <h3 class="text-2xl font-extrabold text-slate-100">Thông tin phạt quá hạn</h3>
+                <h3 class="text-2xl font-extrabold text-slate-800">Thông tin phạt quá hạn</h3>
             </div>
-            <button type="button" class="text-slate-500 hover:text-slate-300 transition-colors bg-slate-800 rounded-full p-2" onclick="closeFineModal()">
+            <button type="button" class="text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 rounded-full p-2" onclick="closeFineModal()">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 p-6 bg-slate-950/50 rounded-xl border border-slate-800 text-sm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 p-6 bg-slate-50 rounded-xl border border-slate-200 text-sm">
             <div>
                 <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tên sách</p>
-                <p id="fineBookTitle" class="font-semibold text-slate-200 mt-1">-</p>
+                <p id="fineBookTitle" class="font-semibold text-slate-850 mt-1">-</p>
             </div>
             <div>
                 <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Mã bản sao</p>
-                <p id="fineCopyId" class="font-mono text-slate-300 mt-1">-</p>
+                <p id="fineCopyId" class="font-mono text-slate-700 mt-1">-</p>
             </div>
             <div>
                 <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Người mượn</p>
-                <p id="fineBorrowerName" class="font-semibold text-slate-200 mt-1">-</p>
+                <p id="fineBorrowerName" class="font-semibold text-slate-850 mt-1">-</p>
             </div>
             <div>
                 <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Mã sinh viên</p>
-                <p id="fineBorrowerId" class="font-mono text-slate-300 mt-1">-</p>
+                <p id="fineBorrowerId" class="font-mono text-slate-700 mt-1">-</p>
             </div>
             <div>
                 <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ngày mượn</p>
-                <p id="fineBorrowDate" class="text-slate-300 mt-1">-</p>
+                <p id="fineBorrowDate" class="text-slate-700 mt-1">-</p>
             </div>
             <div>
                 <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Hạn trả</p>
-                <p id="fineDueDate" class="text-slate-300 mt-1">-</p>
+                <p id="fineDueDate" class="text-slate-700 mt-1">-</p>
             </div>
-            <div class="bg-rose-500/10 border border-rose-500/20 p-3 rounded-lg">
-                <p class="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Số ngày quá hạn</p>
-                <p id="fineOverdueDays" class="text-xl font-extrabold text-rose-400 mt-1">-</p>
+            <div class="bg-rose-50 border border-rose-200 p-3 rounded-lg">
+                <p class="text-[10px] font-bold text-rose-700 uppercase tracking-wider">Số ngày quá hạn</p>
+                <p id="fineOverdueDays" class="text-xl font-extrabold text-rose-600 mt-1">-</p>
             </div>
-            <div class="bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg">
-                <p class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Tiền phạt (VND)</p>
-                <p id="fineAmount" class="text-xl font-extrabold text-amber-400 mt-1">-</p>
+            <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg">
+                <p class="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Tiền phạt (VND)</p>
+                <p id="fineAmount" class="text-xl font-extrabold text-amber-600 mt-1">-</p>
             </div>
         </div>
         <div class="flex items-center justify-end gap-3 mt-6">
-            <button type="button" class="px-5 py-2.5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-colors" onclick="closeFineModal()">
+            <button type="button" class="px-5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-650 hover:bg-slate-100 transition-colors" onclick="closeFineModal()">
                 Hủy
             </button>
             <form id="fineForm" method="post">

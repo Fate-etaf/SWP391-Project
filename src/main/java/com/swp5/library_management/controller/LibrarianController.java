@@ -4,6 +4,7 @@ import com.swp5.library_management.entity.*;
 import com.swp5.library_management.repository.*;
 import com.swp5.library_management.service.EmailService;
 import com.swp5.library_management.service.SystemConfigService;
+import com.swp5.library_management.service.MaterialRequestService;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class LibrarianController {
     private final SystemConfigService systemConfigService;
     private final ReservationRepository reservationRepository;
     private final EmailService emailService;
+    private final MaterialRequestService materialRequestService;
 
     private boolean isNotLibrarian(HttpSession session) {
         Boolean isLibrarian = (Boolean) session.getAttribute("isLibrarian");
@@ -187,34 +189,94 @@ public class LibrarianController {
         redirectAttrs.addFlashAttribute("successMsg", "Tạo đơn mượn sách thành công! Bạn đọc " + patron.getFullName() + " đã mượn bản sao " + copyId + " (Hạn trả: " + detail.getDueDate().toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ").");
         return "redirect:/librarian/create-loan";
     }
-    // ── 4. ACquisition dashboard ──
+    // ── 4. ACQUISITION DASHBOARD ──
     @GetMapping("/acquisition/dashboard")
     public String dashboard(@RequestParam(required = false) String status,
                             @RequestParam(required = false) String search,
-                            Model model) {
-        
-        long pendingCount = materialRequestRepository.countByStatus("Pending");
-        long approvedCount = materialRequestRepository.countByStatus("Approved");
-        long rejectedCount = materialRequestRepository.countByStatus("Rejected");
-        long orderedCount = materialRequestRepository.countByStatus("Ordered");
-        long arrivedCount = materialRequestRepository.countByStatus("Arrived");
-        
+                            HttpSession session,
+                            Model model,
+                            RedirectAttributes redirectAttrs) {
+        if (isNotLibrarian(session)) {
+            redirectAttrs.addFlashAttribute("errorMsg", "Quyền truy cập bị từ chối.");
+            return "redirect:/login";
+        }
+
+        String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+        User librarian = (loggedInUserId != null)
+                ? userRepository.findById(loggedInUserId).orElse(null)
+                : null;
+        Integer librarianCampusId = (librarian != null) ? librarian.getCampusId() : null;
+
+        // Stats scoped to this librarian's campus
+        long pendingCount  = (librarianCampusId != null)
+                ? materialRequestRepository.countByStatusAndPatronCampusId("Pending",  librarianCampusId)
+                : materialRequestRepository.countByStatus("Pending");
+        long approvedCount = (librarianCampusId != null)
+                ? materialRequestRepository.countByStatusAndPatronCampusId("Approved", librarianCampusId)
+                : materialRequestRepository.countByStatus("Approved");
+        long rejectedCount = (librarianCampusId != null)
+                ? materialRequestRepository.countByStatusAndPatronCampusId("Rejected", librarianCampusId)
+                : materialRequestRepository.countByStatus("Rejected");
+        long orderedCount  = (librarianCampusId != null)
+                ? materialRequestRepository.countByStatusAndPatronCampusId("Ordered",  librarianCampusId)
+                : materialRequestRepository.countByStatus("Ordered");
+        long arrivedCount  = (librarianCampusId != null)
+                ? materialRequestRepository.countByStatusAndPatronCampusId("Arrived",  librarianCampusId)
+                : materialRequestRepository.countByStatus("Arrived");
+
         long availableBooksCount = bookCopyRepository.countByCopyStatus("Available");
 
-        List<MaterialRequest> requests;
-        requests = materialRequestRepository.findByStatusAndSearchTerm(status, search);
+        // Request list scoped to this librarian's campus
+        List<MaterialRequest> requests = (librarianCampusId != null)
+                ? materialRequestRepository.findByStatusAndSearchTermAndCampusId(status, search, librarianCampusId)
+                : materialRequestRepository.findByStatusAndSearchTerm(status, search);
 
-        model.addAttribute("pendingCount", pendingCount);
-        model.addAttribute("approvedCount", approvedCount);
-        model.addAttribute("rejectedCount", rejectedCount);
-        model.addAttribute("orderedCount", orderedCount);
-        model.addAttribute("arrivedCount", arrivedCount);
-        model.addAttribute("availableBooksCount", availableBooksCount);
-        
-        model.addAttribute("requests", requests);
-        model.addAttribute("currentStatus", status);
-        model.addAttribute("currentSearch", search);
+        model.addAttribute("pendingCount",       pendingCount);
+        model.addAttribute("approvedCount",      approvedCount);
+        model.addAttribute("rejectedCount",      rejectedCount);
+        model.addAttribute("orderedCount",       orderedCount);
+        model.addAttribute("arrivedCount",       arrivedCount);
+        model.addAttribute("availableBooksCount",availableBooksCount);
+        model.addAttribute("requests",           requests);
+        model.addAttribute("currentStatus",      status);
+        model.addAttribute("currentSearch",      search);
+        model.addAttribute("librarianCampusId",  librarianCampusId);
 
         return "acquisition/dashboard";
+    }
+
+    @PostMapping("/acquisition/approve/{id}")
+    public String approveRequest(@PathVariable("id") Integer requestId, HttpSession session, RedirectAttributes redirectAttrs) {
+        if (isNotLibrarian(session)) {
+            redirectAttrs.addFlashAttribute("errorMsg", "Quyền truy cập bị từ chối.");
+            return "redirect:/login";
+        }
+        
+        String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+        try {
+            materialRequestService.approveRequest(requestId, loggedInUserId);
+            redirectAttrs.addFlashAttribute("successMsg", "Yêu cầu đề nghị tài liệu (REQ" + String.format("%03d", requestId) + ") đã được duyệt thành công!");
+        } catch (Exception e) {
+            redirectAttrs.addFlashAttribute("errorMsg", "Có lỗi xảy ra: " + e.getMessage());
+        }
+        
+        return "redirect:/librarian/acquisition/dashboard";
+    }
+
+    @GetMapping("/acquisition/view/{id}")
+    public String viewRequestDetail(@PathVariable("id") Integer requestId, HttpSession session, Model model, RedirectAttributes redirectAttrs) {
+        if (isNotLibrarian(session)) {
+            redirectAttrs.addFlashAttribute("errorMsg", "Quyền truy cập bị từ chối.");
+            return "redirect:/login";
+        }
+        
+        MaterialRequest request = materialRequestRepository.findById(requestId).orElse(null);
+        if (request == null) {
+            redirectAttrs.addFlashAttribute("errorMsg", "Không tìm thấy yêu cầu.");
+            return "redirect:/librarian/acquisition/dashboard";
+        }
+        
+        model.addAttribute("req", request);
+        return "services/request-material";
     }
 }

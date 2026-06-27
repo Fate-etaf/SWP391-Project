@@ -20,38 +20,38 @@
     <style>
         /* ─── Design Tokens ─────────────────────────────────────────────────── */
         :root {
-            --bg-base:       #080d17;
-            --bg-surface:    #0e1625;
-            --bg-card:       #131c2e;
-            --bg-card-hover: #1a2540;
-            --border:        rgba(99, 149, 255, 0.12);
-            --border-hover:  rgba(99, 149, 255, 0.35);
+            --bg-base:       #f8fafc;
+            --bg-surface:    #ffffff;
+            --bg-card:       #ffffff;
+            --bg-card-hover: #fff7ed;
+            --border:        #e2e8f0;
+            --border-hover:  #ffedd5;
 
-            --accent:        #4f8cff;
-            --accent-glow:   rgba(79, 140, 255, 0.18);
+            --accent:        #f97316;
+            --accent-glow:   #ffedd5;
             --gold:          #f5a623;
-            --gold-soft:     rgba(245, 166, 35, 0.15);
-            --emerald:       #34d399;
-            --emerald-soft:  rgba(52, 211, 153, 0.15);
-            --rose:          #fb7185;
-            --rose-soft:     rgba(251, 113, 133, 0.15);
-            --violet:        #a78bfa;
-            --teal:          #2dd4bf;
+            --gold-soft:     #fef3c7;
+            --emerald:       #10b981;
+            --emerald-soft:  #d1fae5;
+            --rose:          #ef4444;
+            --rose-soft:     #fee2e2;
+            --violet:        #8b5cf6;
+            --teal:          #14b8a6;
 
-            --text-primary:   #e8f0ff;
-            --text-secondary: #7a8fb5;
-            --text-muted:     #4a5a7a;
+            --text-primary:   #0f172a;
+            --text-secondary: #475569;
+            --text-muted:     #64748b;
 
             --radius-card:  16px;
             --radius-tag:   6px;
-            --shadow-card:  0 4px 24px rgba(0,0,0,0.4);
-            --shadow-hover: 0 8px 40px rgba(79, 140, 255, 0.2);
+            --shadow-card:  0 4px 24px rgb(241, 105, 14);
+            --shadow-hover: 0 8px 40px rgba(249, 116, 22, 0.568);
 
             --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* ─── Reset & Base ───────────────────────────────────────────────────── */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *, *::before, *::after { box-sizing: border-box;}
 
         html { scroll-behavior: smooth; }
 
@@ -182,7 +182,7 @@
             position: relative;
             aspect-ratio: 3 / 4;
             overflow: hidden;
-            background: linear-gradient(135deg, #1a2540, #0e1625);
+            background: linear-gradient(135deg, #ffedd5, #fed7aa);
         }
 
         .book-cover img {
@@ -205,11 +205,11 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            color: rgba(255, 255, 255, 0.4);
+            color: #ea580c;
             background: linear-gradient(145deg,
-                hsl(220, 40%, 14%) 0%,
-                hsl(240, 35%, 18%) 50%,
-                hsl(260, 30%, 14%) 100%);
+                #fff7ed 0%,
+                #ffedd5 50%,
+                #fed7aa 100%);
         }
 
         /* Fix missing preflight styles for new tailwind blocks */
@@ -289,7 +289,7 @@
             border-radius: 5px;
             font-size: 0.65rem;
             font-weight: 500;
-            background: rgba(8,13,23,0.75);
+            background: rgba(244, 86, 6, 0.75);
             color: var(--text-secondary);
             border: 1px solid var(--border);
             backdrop-filter: blur(6px);
@@ -385,7 +385,7 @@
         }
 
         .tag-subject {
-            background: rgba(167, 139, 250, 0.12);
+            background: rgba(237, 117, 11, 0.12);
             color: var(--violet);
             border: 1px solid rgba(167, 139, 250, 0.25);
         }
@@ -468,6 +468,10 @@
 
         .book-card {
             animation: fadeUp 0.4s ease both;
+        }
+        aside a {
+            text-decoration: none;
+            color: inherit;
         }
 
         /* stagger via nth-child (up to 20 cards) */

@@ -15,11 +15,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-between relative overflow-x-hidden">
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between relative overflow-x-hidden">
 
     <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
-        <div class="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-[100px]"></div>
     </div>
 
     <div class="relative z-50">
@@ -32,9 +32,9 @@
         <div class="flex-grow min-w-0">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <div>
-                    <span class="bg-fpt-orange/20 text-orange-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase mb-3 inline-block">Transfers</span>
-                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Quản lý Luân chuyển Sách</h2>
-                    <p class="text-sm text-slate-400 mt-1">Điều phối và xác nhận nhập/xuất sách giữa các cơ sở.</p>
+                    <span class="bg-fpt-orange/10 text-fpt-orange px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase mb-3 inline-block">Transfers</span>
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Quản lý Luân chuyển Sách</h2>
+                    <p class="text-sm text-slate-500 mt-1">Điều phối và xác nhận nhập/xuất sách giữa các cơ sở.</p>
                 </div>
 
                 <a href="/librarian/inventory/transfers/create" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-600/20 border border-emerald-500 flex items-center space-x-2">
@@ -43,19 +43,19 @@
                 </a>
             </div>
 
-            <div th:if="${successMsg}" class="mb-6 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-4 py-3 rounded-xl flex items-center space-x-3">
-                <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+            <div th:if="${successMsg}" class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl flex items-center space-x-3">
+                <svg class="w-5 h-5 text-emerald-650 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
                 <span class="text-sm font-medium" th:text="${successMsg}"></span>
             </div>
-            <div th:if="${errorMsg}" class="mb-6 bg-rose-500/10 border border-rose-500/30 text-rose-300 px-4 py-3 rounded-xl flex items-center space-x-3">
-                <svg class="w-5 h-5 text-rose-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <div th:if="${errorMsg}" class="mb-6 bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-xl flex items-center space-x-3">
+                <svg class="w-5 h-5 text-rose-650 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
                 <span class="text-sm font-medium" th:text="${errorMsg}"></span>
             </div>
 
-            <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-md overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-800">
-                        <thead class="bg-slate-950/50">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
                             <tr>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Mã Lệnh</th>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Lộ trình</th>
@@ -64,62 +64,62 @@
                                 <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Thao tác</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-800/80">
+                        <tbody class="divide-y divide-slate-200">
                             <tr th:if="${transfers == null or transfers.isEmpty()}">
-                                <td colspan="5" class="px-6 py-12 text-center text-slate-400">
+                                <td colspan="5" class="px-6 py-12 text-center text-slate-500">
                                     Không có lệnh luân chuyển nào trong hệ thống.
                                 </td>
                             </tr>
 
-                            <tr th:each="req : ${transfers}" class="hover:bg-slate-800/40 transition-colors">
+                            <tr th:each="req : ${transfers}" class="hover:bg-slate-50/80 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-bold text-slate-100" th:text="'#TR-' + ${req.transferId}"></div>
+                                    <div class="text-sm font-bold text-slate-800" th:text="'#TR-' + ${req.transferId}"></div>
                                     <div class="text-xs text-slate-500 mt-0.5" th:text="${req.details != null ? req.details.size() : 0} + ' cuốn sách'"></div>
                                 </td>
 
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center space-x-2">
-                                        <span class="text-sm font-medium text-slate-300" th:text="${req.fromCampus.campusName}"></span>
-                                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                        <span class="text-sm font-medium text-slate-700" th:text="${req.fromCampus.campusName}"></span>
+                                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                                         <span class="text-sm font-bold text-fpt-orange" th:text="${req.toCampus.campusName}"></span>
                                     </div>
-                                    <div class="text-xs text-slate-500 mt-1" th:if="${req.note != null}" th:text="${req.note}"></div>
+                                    <div class="text-xs text-slate-600 mt-1" th:if="${req.note != null}" th:text="${req.note}"></div>
                                 </td>
 
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-550">
                                     <div th:if="${req.requestedAt != null}">
-                                        Tạo: <span class="font-medium text-slate-200" th:text="${#temporals.format(req.requestedAt, 'dd/MM/yyyy HH:mm')}"></span>
+                                        Tạo: <span class="font-medium text-slate-800" th:text="${#temporals.format(req.requestedAt, 'dd/MM/yyyy HH:mm')}"></span>
                                     </div>
-                                    <div th:if="${req.receivedAt != null}" class="mt-1 text-emerald-400">
+                                    <div th:if="${req.receivedAt != null}" class="mt-1 text-emerald-600 font-medium">
                                         Nhận: <span th:text="${#temporals.format(req.receivedAt, 'dd/MM/yyyy HH:mm')}"></span>
                                     </div>
                                 </td>
 
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <span th:if="${req.status == 'InTransit'}" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">Đang giao</span>
-                                    <span th:if="${req.status == 'Received'}" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">Đã nhận</span>
-                                    <span th:if="${req.status == 'Pending'}" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-300 border border-blue-500/30">Chờ xử lý</span>
-                                    <span th:if="${req.status == 'Cancelled'}" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-700/70 text-slate-300 border border-slate-600">Đã hủy</span>
+                                    <span th:if="${req.status == 'InTransit'}" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">Đang giao</span>
+                                    <span th:if="${req.status == 'Received'}" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">Đã nhận</span>
+                                    <span th:if="${req.status == 'Pending'}" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200">Chờ xử lý</span>
+                                    <span th:if="${req.status == 'Cancelled'}" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">Đã hủy</span>
                                 </td>
 
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex flex-wrap items-center justify-end gap-2">
-                                        <a th:href="@{/librarian/inventory/transfers/{id}(id=${req.transferId})}" class="text-fpt-orange hover:text-orange-300 bg-fpt-orange/10 border border-fpt-orange/20 px-3 py-1.5 rounded-lg transition-colors inline-block">Chi tiết</a>
+                                        <a th:href="@{/librarian/inventory/transfers/{id}(id=${req.transferId})}" class="text-fpt-orange hover:text-white bg-fpt-orange/10 hover:bg-fpt-orange border border-fpt-orange/20 px-3 py-1.5 rounded-lg transition-colors inline-block">Chi tiết</a>
 
                                         <form th:if="${req.status == 'Pending'}" th:action="@{/librarian/inventory/transfers/{id}/cancel(id=${req.transferId})}" method="post" class="inline">
-                                            <button type="submit" onclick="return confirm('Bạn có chắc chắn muốn hủy lệnh này? Sách sẽ được trả về kho tự động.')" class="text-rose-300 hover:text-rose-200 bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 rounded-lg transition-colors">
+                                            <button type="submit" onclick="return confirm('Bạn có chắc chắn muốn hủy lệnh này? Sách sẽ được trả về kho tự động.')" class="text-rose-600 hover:text-white hover:bg-rose-500 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg transition-colors">
                                                 Hủy lệnh
                                             </button>
                                         </form>
 
                                         <form th:if="${req.status == 'Pending'}" th:action="@{/librarian/inventory/transfers/{id}/ship(id=${req.transferId})}" method="post" class="inline">
-                                            <button type="submit" class="text-blue-300 hover:text-blue-200 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-lg transition-colors font-bold">
+                                            <button type="submit" class="text-blue-600 hover:text-white hover:bg-blue-500 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg transition-colors font-bold">
                                                 Xuất kho đi
                                             </button>
                                         </form>
 
                                         <form th:if="${req.status == 'InTransit'}" th:action="@{/librarian/inventory/transfers/{id}/confirm(id=${req.transferId})}" method="post" class="inline">
-                                            <button type="submit" onclick="return confirm('Xác nhận lô sách này đã về tới cơ sở của bạn?')" class="text-emerald-300 hover:text-emerald-200 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg transition-colors font-bold">
+                                            <button type="submit" onclick="return confirm('Xác nhận lô sách này đã về tới cơ sở của bạn?')" class="text-emerald-600 hover:text-white hover:bg-emerald-500 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg transition-colors font-bold">
                                                 Xác nhận nhập kho
                                             </button>
                                         </form>

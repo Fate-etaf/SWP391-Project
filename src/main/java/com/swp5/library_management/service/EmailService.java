@@ -69,4 +69,14 @@ public interface EmailService {
      * @param priority     Độ ưu tiên (Low, Medium, High)
      */
     void sendMaterialRequestConfirmation(String toEmail, String patronName, String bookTitle, String author, String priority);
+
+    /**
+     * Gửi email xác nhận yêu cầu đề nghị tài liệu đã được duyệt.
+     *
+     * @param toEmail      Địa chỉ email của bạn đọc
+     * @param patronName   Tên bạn đọc
+     * @param bookTitle    Tên sách đề nghị
+     * @param author       Tác giả sách đề nghị
+     */
+    void sendMaterialRequestApproval(String toEmail, String patronName, String bookTitle, String author);
 }
