@@ -223,6 +223,7 @@ public class LibrarianController {
     @GetMapping("/acquisition/dashboard")
     public String dashboard(@RequestParam(required = false) String status,
                             @RequestParam(required = false) String search,
+                            @RequestParam(required = false) String patronRole,
                             HttpSession session,
                             Model model,
                             RedirectAttributes redirectAttrs) {
@@ -261,6 +262,21 @@ public class LibrarianController {
                 ? materialRequestRepository.findByStatusAndSearchTermAndCampusId(status, search, librarianCampusId)
                 : materialRequestRepository.findByStatusAndSearchTerm(status, search);
 
+        // Filter by Patron Role (Student / Lecturer)
+        if (patronRole != null && !patronRole.isEmpty()) {
+            if ("Student".equalsIgnoreCase(patronRole)) {
+                requests = requests.stream()
+                        .filter(r -> r.getPatron() != null && 
+                                (r.getPatron().getRole() == null || Integer.valueOf(1).equals(r.getPatron().getRole().getRoleId())))
+                        .toList();
+            } else if ("Lecturer".equalsIgnoreCase(patronRole)) {
+                requests = requests.stream()
+                        .filter(r -> r.getPatron() != null && 
+                                r.getPatron().getRole() != null && Integer.valueOf(2).equals(r.getPatron().getRole().getRoleId()))
+                        .toList();
+            }
+        }
+
         model.addAttribute("pendingCount",       pendingCount);
         model.addAttribute("approvedCount",      approvedCount);
         model.addAttribute("rejectedCount",      rejectedCount);
@@ -270,6 +286,7 @@ public class LibrarianController {
         model.addAttribute("requests",           requests);
         model.addAttribute("currentStatus",      status);
         model.addAttribute("currentSearch",      search);
+        model.addAttribute("currentPatronRole",  patronRole);
         model.addAttribute("librarianCampusId",  librarianCampusId);
 
         return "acquisition/dashboard";
@@ -290,6 +307,69 @@ public class LibrarianController {
             redirectAttrs.addFlashAttribute("errorMsg", "Có lỗi xảy ra: " + e.getMessage());
         }
         
+        return "redirect:/librarian/acquisition/dashboard";
+    }
+
+    @PostMapping("/acquisition/reject/{id}")
+    public String rejectRequest(@PathVariable("id") Integer requestId, HttpSession session, RedirectAttributes redirectAttrs) {
+        if (isNotLibrarian(session)) {
+            redirectAttrs.addFlashAttribute("errorMsg", "Quyền truy cập bị từ chối.");
+            return "redirect:/login";
+        }
+        
+        String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+        try {
+            materialRequestService.rejectRequest(requestId, loggedInUserId);
+            redirectAttrs.addFlashAttribute("successMsg", "Yêu cầu đề nghị tài liệu (REQ" + String.format("%03d", requestId) + ") đã bị từ chối thành công!");
+        } catch (Exception e) {
+            redirectAttrs.addFlashAttribute("errorMsg", "Có lỗi xảy ra: " + e.getMessage());
+        }
+        
+        return "redirect:/librarian/acquisition/dashboard";
+    }
+
+    @PostMapping("/acquisition/batch-action")
+    public String batchAction(@RequestParam(value = "requestIds", required = false) List<Integer> requestIds,
+                               @RequestParam(value = "action", required = false) String action,
+                               HttpSession session,
+                               RedirectAttributes redirectAttrs) {
+        if (isNotLibrarian(session)) {
+            redirectAttrs.addFlashAttribute("errorMsg", "Quyền truy cập bị từ chối.");
+            return "redirect:/login";
+        }
+
+        if (requestIds == null || requestIds.isEmpty()) {
+            redirectAttrs.addFlashAttribute("errorMsg", "Vui lòng chọn ít nhất một yêu cầu.");
+            return "redirect:/librarian/acquisition/dashboard";
+        }
+
+        String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+        int successCount = 0;
+        int failCount = 0;
+        StringBuilder errorMsgBuilder = new StringBuilder();
+
+        for (Integer id : requestIds) {
+            try {
+                if ("approve".equalsIgnoreCase(action)) {
+                    materialRequestService.approveRequest(id, loggedInUserId);
+                    successCount++;
+                } else if ("reject".equalsIgnoreCase(action)) {
+                    materialRequestService.rejectRequest(id, loggedInUserId);
+                    successCount++;
+                }
+            } catch (Exception e) {
+                failCount++;
+                errorMsgBuilder.append("REQ").append(String.format("%03d", id)).append(": ").append(e.getMessage()).append("; ");
+            }
+        }
+
+        if (failCount == 0) {
+            redirectAttrs.addFlashAttribute("successMsg", "Đã xử lý thành công " + successCount + " yêu cầu.");
+        } else {
+            redirectAttrs.addFlashAttribute("successMsg", "Đã xử lý thành công " + successCount + " yêu cầu.");
+            redirectAttrs.addFlashAttribute("errorMsg", "Thất bại " + failCount + " yêu cầu. Chi tiết: " + errorMsgBuilder.toString());
+        }
+
         return "redirect:/librarian/acquisition/dashboard";
     }
 

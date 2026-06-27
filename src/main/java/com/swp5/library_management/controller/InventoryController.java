@@ -2,10 +2,8 @@ package com.swp5.library_management.controller;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,19 +14,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.swp5.library_management.dto.AddBookForm;
 import com.swp5.library_management.dto.BookDetailDTO;
-import com.swp5.library_management.dto.BookSearchResultDTO;
 import com.swp5.library_management.dto.InventoryOverviewDTO;
 import com.swp5.library_management.entity.Campus;
 import com.swp5.library_management.entity.Category;
 import com.swp5.library_management.entity.MaterialRequest;
 import com.swp5.library_management.entity.User;
-import com.swp5.library_management.repository.CampusRepository;
-import com.swp5.library_management.repository.CategoryRepository;
-import com.swp5.library_management.repository.MajorRepository;
-import com.swp5.library_management.repository.MaterialRequestRepository;
-import com.swp5.library_management.repository.ShelfRepository;
-import com.swp5.library_management.repository.SubjectRepository;
-import com.swp5.library_management.repository.UserRepository;
+import com.swp5.library_management.repository.*;
 import com.swp5.library_management.service.BookService;
 import com.swp5.library_management.service.HomeService;
 import com.swp5.library_management.service.InventoryService;
@@ -43,8 +34,6 @@ public class InventoryController {
     private final CategoryRepository categoryRepository;
     private final ShelfRepository shelfRepository;
     private final BookService      bookService;
-    private final SubjectRepository subjectRepository;
-    private final MajorRepository majorRepository;
     private final HomeService homeService;
     private final MaterialRequestRepository materialRequestRepository;
     private final UserRepository userRepository;
@@ -54,8 +43,6 @@ public class InventoryController {
                                CategoryRepository categoryRepository,
                                ShelfRepository shelfRepository,
                                BookService bookService,
-                               SubjectRepository subjectRepository,
-                               MajorRepository majorRepository,
                                HomeService homeService,
                                MaterialRequestRepository materialRequestRepository,
                                UserRepository userRepository) {
@@ -64,57 +51,14 @@ public class InventoryController {
         this.categoryRepository = categoryRepository;
         this.shelfRepository = shelfRepository;
         this.bookService = bookService;
-        this.subjectRepository = subjectRepository;
-        this.majorRepository = majorRepository;
         this.homeService = homeService;
         this.materialRequestRepository = materialRequestRepository;
         this.userRepository = userRepository;
     }
 
     @GetMapping("/inventory/list")
-    public String listBooks(
-            @RequestParam(required = false) String  keyword,
-            @RequestParam(required = false) String  subjectCode,
-            @RequestParam(required = false) Integer categoryId,
-            @RequestParam(required = false) Integer majorId,
-            @RequestParam(required = false) Integer campusId,
-            @RequestParam(defaultValue = "0") int page,
-            Model model) {
-
-        boolean hasSearch = StringUtils.hasText(keyword)
-                         || StringUtils.hasText(subjectCode)
-                         || categoryId != null
-                         || majorId != null
-                         || campusId != null;
-
-        if (hasSearch) {
-            Page<BookSearchResultDTO> resultPage = bookService.searchBooks(keyword, subjectCode, categoryId, majorId, campusId, page, 12);
-            model.addAttribute("results", resultPage.getContent());
-            model.addAttribute("totalPages", resultPage.getTotalPages());
-            model.addAttribute("totalElements", resultPage.getTotalElements());
-            model.addAttribute("currentPage", page);
-            model.addAttribute("noResults", resultPage.isEmpty());
-            
-            if (resultPage.isEmpty()) {
-                model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
-            }
-        } else {
-            model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
-        }
-
-        model.addAttribute("campuses",    campusRepository.findAll());
-        model.addAttribute("subjects",    subjectRepository.findAll());
-        model.addAttribute("categories",  categoryRepository.findAll());
-        model.addAttribute("majors",      majorRepository.findAll());
-
-        model.addAttribute("keyword",            keyword);
-        model.addAttribute("selectedCampusId",   campusId);
-        model.addAttribute("selectedSubjectCode", subjectCode);
-        model.addAttribute("selectedCategoryId", categoryId);
-        model.addAttribute("selectedMajorId",    majorId);
-        model.addAttribute("hasSearch",          hasSearch);
-        model.addAttribute("searchAction",       "/librarian/inventory/list");
-
+    public String listBooks(Model model) {
+        model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
         return "inventory/list";
     }
 

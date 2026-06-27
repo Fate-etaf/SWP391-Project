@@ -301,25 +301,9 @@
 <div class="orb orb-1" aria-hidden="true"></div>
 <div class="orb orb-2" aria-hidden="true"></div>
 
-<!-- ═══ NAVBAR ══════════════════════════════════════════════════════════════ -->
-<nav class="navbar">
-    <a href="/librarian/inventory" class="navbar-brand">
-        <div class="brand-icon">📚</div>
-        <div>
-            <span class="brand-text">FPT Library</span>
-            <span class="brand-sub">Librarian Management</span>
-        </div>
-    </a>
-    <ul class="nav-links">
-        <li><a href="/" id="nav-home">Home</a></li>
-        <li><a href="/librarian/inventory" id="nav-books" class="active">Books</a></li>
-        <li><a href="/librarian/inventory/add" id="nav-add">Add Book</a></li>
-    </ul>
-</nav>
-
 <!-- ═══ BREADCRUMB ══════════════════════════════════════════════════════════ -->
 <div class="breadcrumb">
-    <a href="/librarian/inventory">Book Catalog</a>
+    <a href="/librarian/inventory/list">Book Catalog</a>
     <span class="sep">›</span>
     <span class="current" th:text="${book.title}">Book Title</span>
 </div>
@@ -328,7 +312,7 @@
 <div class="page-wrap">
 
     <!-- Back button -->
-    <a href="/librarian/inventory" class="back-btn">
+    <a href="/librarian/inventory/list" class="back-btn">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>

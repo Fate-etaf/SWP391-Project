@@ -79,6 +79,16 @@ public interface EmailService {
      * @param author       Tác giả sách đề nghị
      */
     void sendMaterialRequestApproval(String toEmail, String patronName, String bookTitle, String author);
+
+    /**
+     * Gửi email từ chối yêu cầu đề nghị tài liệu.
+     *
+     * @param toEmail      Địa chỉ email của bạn đọc
+     * @param patronName   Tên bạn đọc
+     * @param bookTitle    Tên sách đề nghị
+     * @param author       Tác giả sách đề nghị
+     */
+    void sendMaterialRequestRejection(String toEmail, String patronName, String bookTitle, String author);
         /**
      * Gửi email thông báo mã OTP kích hoạt hoặc đặt lại mật khẩu tài khoản.
      *
