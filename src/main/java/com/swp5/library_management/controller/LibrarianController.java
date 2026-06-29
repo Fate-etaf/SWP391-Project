@@ -237,7 +237,7 @@ public class LibrarianController {
                 ? userRepository.findById(loggedInUserId).orElse(null)
                 : null;
         Integer librarianCampusId = (librarian != null) ? librarian.getCampusId() : null;
-
+        
         // Stats scoped to this librarian's campus
         long pendingCount  = (librarianCampusId != null)
                 ? materialRequestRepository.countByStatusAndPatronCampusId("Pending",  librarianCampusId)
@@ -254,8 +254,6 @@ public class LibrarianController {
         long arrivedCount  = (librarianCampusId != null)
                 ? materialRequestRepository.countByStatusAndPatronCampusId("Arrived",  librarianCampusId)
                 : materialRequestRepository.countByStatus("Arrived");
-
-        long availableBooksCount = bookCopyRepository.countByCopyStatus("Available");
 
         // Request list scoped to this librarian's campus
         List<MaterialRequest> requests = (librarianCampusId != null)
@@ -276,13 +274,13 @@ public class LibrarianController {
                         .toList();
             }
         }
+        
 
         model.addAttribute("pendingCount",       pendingCount);
         model.addAttribute("approvedCount",      approvedCount);
         model.addAttribute("rejectedCount",      rejectedCount);
         model.addAttribute("orderedCount",       orderedCount);
         model.addAttribute("arrivedCount",       arrivedCount);
-        model.addAttribute("availableBooksCount",availableBooksCount);
         model.addAttribute("requests",           requests);
         model.addAttribute("currentStatus",      status);
         model.addAttribute("currentSearch",      search);
@@ -385,8 +383,15 @@ public class LibrarianController {
             redirectAttrs.addFlashAttribute("errorMsg", "Không tìm thấy yêu cầu.");
             return "redirect:/librarian/acquisition/dashboard";
         }
+
+        String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+        User librarian = (loggedInUserId != null)
+                ? userRepository.findById(loggedInUserId).orElse(null)
+                : null;
+        Integer librarianCampusId = (librarian != null) ? librarian.getCampusId() : null;
         
         model.addAttribute("req", request);
+        model.addAttribute("librarianCampusId", librarianCampusId);
         return "services/request-material";
     }
 }

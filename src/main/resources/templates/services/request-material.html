@@ -351,7 +351,11 @@
                        th:readonly="${req != null}"
                        placeholder="Nhập phản hồi nếu có..." autocomplete="off">
             </div>
-
+        </div>
+        
+        <div class="form-actions" th:if="${req != null}">
+            <button type="submit" class="btn btn-primary" th:formaction="@{/librarian/acquisition/approve/{id}(id=${req.requestId})}" >Approve</button>
+            <button type="submit" class="btn btn-primary" th:formaction="@{/librarian/acquisition/reject/{id}(id=${req.requestId})}" >Reject</button>
         </div>
 
         <div class="form-actions" th:if="${req == null}">

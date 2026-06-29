@@ -69,10 +69,6 @@
                     <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Arrived</h3>
                     <div class="text-2xl font-extrabold text-purple-500" th:text="${arrivedCount}">0</div>
                 </div>
-                <div class="bg-orange-50 border border-orange-100 rounded-2xl p-4 shadow-sm flex flex-col items-center text-center">
-                    <h3 class="text-[10px] font-bold text-orange-600 uppercase tracking-wider mb-2">Available</h3>
-                    <div class="text-2xl font-extrabold text-orange-700" th:text="${availableBooksCount}">0</div>
-                </div>
             </div>
 
             <!-- Filters & Search -->
@@ -144,7 +140,7 @@
                                         <div class="text-xs text-slate-500" th:text="${req.author}">Robert C. Martin</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-slate-600" th:text="${req.patron.isLibrarian() ? 'School' : 'Reader'}">Reader</div>
+                                        <div class="text-sm font-medium text-slate-600" th:text="${req.patron.isStudent() ? 'Student' : 'Lecturer'}">Reader</div>
                                         <div class="text-xs text-slate-400"
                                              th:text="${req.patron.campusId != null} ? 'Campus #' + ${req.patron.campusId} : ''"></div>
                                     </td>

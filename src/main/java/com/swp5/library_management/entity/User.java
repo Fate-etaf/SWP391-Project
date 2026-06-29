@@ -83,6 +83,16 @@ public class User {
         return false;
     }
 
+    public boolean isStudent() {
+        if (this.role != null && (this.role.getRoleId() == 1 || "Student".equalsIgnoreCase(this.role.getRoleName()))) {
+            return true;
+        }
+        if (this.roles != null && !this.roles.isEmpty()) {
+            return this.roles.stream().anyMatch(role -> "Student".equalsIgnoreCase(role.getRoleName()) || role.getRoleId() == 1);
+        }
+        return false;
+    }
+
     // Thêm thủ công Getter cho userId để IDE không báo lỗi
     public String getUserId() {
         return this.userId;
