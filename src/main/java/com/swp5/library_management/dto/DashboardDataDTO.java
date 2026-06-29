@@ -40,6 +40,7 @@ public class DashboardDataDTO {
         private String title;
         private String isbn;
         private long waitingCount;
+        private long currentCampusStock; // Số lượng sách có sẵn tại cơ sở hiện tại
         private String crossCampusStockInfo; // Chuỗi hiển thị (VD: "Đà Nẵng: 2 cuốn, Cần Thơ: 1 cuốn")
         private boolean canRequestTransfer;  // Cờ báo hiệu UI hiện nút [Xin Luân chuyển] hay [Đề xuất Mua]
 

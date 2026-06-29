@@ -121,19 +121,27 @@ public class InventoryServiceImpl implements InventoryService {
         List<DashboardDataDTO.WaitlistHotspotDTO> hotspots = waitlistRepository.findTopWaitlistHotspots(campusId,
                 PageRequest.of(0, 5));
         for (DashboardDataDTO.WaitlistHotspotDTO hotspot : hotspots) {
-            List<Object[]> crossCampusStock = bookCopyRepository.countAvailableCrossCampus(hotspot.getBookId(),
-                    campusId);
+            long localStock = bookCopyRepository.countAvailableByBookAndCampus(hotspot.getBookId(), campusId);
+            hotspot.setCurrentCampusStock(localStock);
 
-            if (crossCampusStock == null || crossCampusStock.isEmpty()) {
-                hotspot.setCrossCampusStockInfo("Hết sách toàn hệ thống");
-                hotspot.setCanRequestTransfer(false); // Báo UI hiện nút [Đề xuất Mua Mới]
+            if (localStock >= hotspot.getWaitingCount()) {
+                hotspot.setCrossCampusStockInfo("Đã đủ sách tại thư viện (" + localStock + " cuốn)");
+                hotspot.setCanRequestTransfer(false); // Không cần xin luân chuyển
             } else {
-                // Format thành chuỗi: "Đà Nẵng: 2 cuốn, Cần Thơ: 1 cuốn"
-                String stockInfo = crossCampusStock.stream()
-                        .map(row -> row[0] + ": " + row[1] + " cuốn")
-                        .collect(Collectors.joining(", "));
-                hotspot.setCrossCampusStockInfo(stockInfo);
-                hotspot.setCanRequestTransfer(true); // Báo UI hiện nút [Xin Luân Chuyển]
+                List<Object[]> crossCampusStock = bookCopyRepository.countAvailableCrossCampus(hotspot.getBookId(),
+                        campusId);
+
+                if (crossCampusStock == null || crossCampusStock.isEmpty()) {
+                    hotspot.setCrossCampusStockInfo("Hết sách toàn hệ thống");
+                    hotspot.setCanRequestTransfer(false); // Báo UI hiện nút [Đề xuất Mua Mới]
+                } else {
+                    // Format thành chuỗi: "Đà Nẵng: 2 cuốn, Cần Thơ: 1 cuốn"
+                    String stockInfo = crossCampusStock.stream()
+                            .map(row -> row[0] + ": " + row[1] + " cuốn")
+                            .collect(Collectors.joining(", "));
+                    hotspot.setCrossCampusStockInfo(stockInfo);
+                    hotspot.setCanRequestTransfer(true); // Báo UI hiện nút [Xin Luân Chuyển]
+                }
             }
         }
         dto.setWaitlistHotspots(hotspots);
