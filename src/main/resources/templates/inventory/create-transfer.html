@@ -37,11 +37,21 @@
                 <div>
                     <span class="bg-fpt-orange/20 text-orange-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase mb-3 inline-block">New Transfer</span>
                     <h2 class="text-3xl font-extrabold text-white tracking-tight">Tạo lệnh luân chuyển mới</h2>
-                    <p class="text-sm text-slate-400 mt-1">Lệnh sẽ chuyển trạng thái các sách này sang "Đang giao hàng" (In Transit).</p>
+                    <p class="text-sm text-slate-400 mt-1">Lệnh xin sách sẽ được chuyển đến cơ sở giữ sách để chờ duyệt (Pending).</p>
                 </div>
             </div>
 
             <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 sm:p-8 shadow-2xl">
+                <!-- THÔNG BÁO LỖI / THÀNH CÔNG -->
+                <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-start">
+                    <svg class="w-5 h-5 text-rose-400 mt-0.5 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div class="text-sm text-rose-300 font-medium" th:text="${errorMsg}"></div>
+                </div>
+                <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-start">
+                    <svg class="w-5 h-5 text-emerald-400 mt-0.5 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div class="text-sm text-emerald-300 font-medium" th:text="${successMsg}"></div>
+                </div>
+
                 <form action="/librarian/inventory/transfers/create" method="post" class="space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
@@ -51,7 +61,7 @@
                                 <option th:each="campus : ${campuses}"
                                         th:value="${campus.campusId}"
                                         th:text="${campus.campusName}"
-                                        th:selected="${(param.fromCampusId != null and param.fromCampusId[0] == campus.campusId.toString()) or (param.fromCampusId == null and session.loggedInUser.campusId == campus.campusId)}"></option>
+                                        th:selected="${param.fromCampusId != null and param.fromCampusId[0] == campus.campusId.toString()}"></option>
                             </select>
                         </div>
 
@@ -62,7 +72,7 @@
                                 <option th:each="campus : ${campuses}"
                                         th:value="${campus.campusId}"
                                         th:text="${campus.campusName}"
-                                        th:selected="${param.targetCampusId != null and param.targetCampusId[0] == campus.campusId.toString()}"></option>
+                                        th:selected="${(param.targetCampusId != null and param.targetCampusId[0] == campus.campusId.toString()) or (param.targetCampusId == null and session.loggedInUser.campusId == campus.campusId)}"></option>
                             </select>
                         </div>
                     </div>

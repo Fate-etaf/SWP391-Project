@@ -42,21 +42,103 @@ public class TransferController {
         this.bookCopyRepository = bookCopyRepository;
     }
 
-    // Hiển thị giao diện danh sách luân chuyển
+    // 1. Hiển thị Giao diện Kanban Board (Nơi xử lý chính)
     @GetMapping
-    public String listTransfers(Model model, HttpSession session) {
+    public String viewKanbanBoard(Model model, HttpSession session) {
         User user = (User) session.getAttribute("loggedInUser");
         if (user == null || !user.isLibrarian())
             return "redirect:/login";
 
-        model.addAttribute("transfers", transferService.getAllTransfers());
+        Integer campusId = user.getCampusId();
         
-        // Lấy Top 5 sách đang được Waitlist nhiều nhất từ các cơ sở khác
-        List<WaitlistHotspotDTO> hotspots = waitlistRepository.findSuggestedTransfers(user.getCampusId())
+        // Outbound: Yêu cầu từ cơ sở khác xin sách của mình (Pending, Accepted, Rejected)
+        List<com.swp5.library_management.entity.TransferRequest> outbound = transferService.getWorkingOutboundRequests(campusId);
+        model.addAttribute("outboundRequests", outbound);
+        
+        // Inbound: Lô hàng đang trên đường giao đến cơ sở mình (InTransit)
+        List<com.swp5.library_management.entity.TransferRequest> inbound = transferService.getWorkingInboundRequests(campusId);
+        // Gom lô hàng (Batching) theo mốc thời gian xuất kho
+        Map<java.time.LocalDateTime, List<com.swp5.library_management.entity.TransferRequest>> inboundGroups = inbound.stream()
+                .filter(t -> t.getShippedAt() != null)
+                .collect(Collectors.groupingBy(com.swp5.library_management.entity.TransferRequest::getShippedAt));
+        model.addAttribute("inboundGroups", inboundGroups);
+        
+        // My Sent Requests: Yêu cầu xin sách từ cơ sở khác mà mình gửi đi (Đang chờ cơ sở kia duyệt)
+        List<com.swp5.library_management.entity.TransferRequest> mySentRequests = transferService.getMyPendingRequestsToOtherCampuses(campusId);
+        model.addAttribute("mySentRequests", mySentRequests);
+        
+        // Waitlist logic (giữ nguyên để support tạo lệnh mới)
+        List<WaitlistHotspotDTO> hotspots = waitlistRepository.findSuggestedTransfers(campusId)
                 .stream().limit(5).collect(Collectors.toList());
         model.addAttribute("waitlistHotspots", hotspots);
 
         return "inventory/transfers";
+    }
+
+    // 2. Hiển thị Giao diện Lịch sử (Transfer History)
+    @GetMapping("/history")
+    public String viewHistory(@org.springframework.web.bind.annotation.ModelAttribute("filter") com.swp5.library_management.dto.TransferFilterDTO filter, Model model, HttpSession session) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null || !user.isLibrarian())
+            return "redirect:/login";
+
+        filter.initDefaultDatesIfNull();
+        model.addAttribute("data", transferService.getTransferHistory(filter));
+        model.addAttribute("campuses", campusRepository.findAll());
+        
+        return "inventory/transfer-history";
+    }
+
+    // 3. API Kéo - Thả (Ajax) cập nhật trạng thái đơn (Accept/Reject)
+    @PostMapping("/{id:\\d+}/status")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public org.springframework.http.ResponseEntity<?> updateStatusAjax(
+            @PathVariable("id") Integer transferId,
+            @RequestParam("status") String status,
+            @RequestParam(value = "note", required = false) String note,
+            HttpSession session) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null || !user.isLibrarian()) 
+            return org.springframework.http.ResponseEntity.status(401).body("Unauthorized");
+
+        try {
+            transferService.updateRequestStatus(transferId, status, note, user.getCampusId());
+            return org.springframework.http.ResponseEntity.ok(Map.of("success", true, "message", "Đã cập nhật trạng thái"));
+        } catch (Exception e) {
+            return org.springframework.http.ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    // 4. Batch Ship (Xác nhận xuất kho tất cả các đơn Accepted)
+    @PostMapping("/batch-ship")
+    public String batchShip(HttpSession session, RedirectAttributes redirectAttributes) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user != null && user.isLibrarian()) {
+            try {
+                transferService.confirmBatchShipment(user.getCampusId());
+                redirectAttributes.addFlashAttribute("successMsg", "Đã xuất lô hàng cho đơn vị vận chuyển!");
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
+            }
+        }
+        return "redirect:/librarian/inventory/transfers";
+    }
+
+    // 5. Batch Receive (Xác nhận nhập kho nguyên Lô)
+    @PostMapping("/batch-receive")
+    public String batchReceive(
+            @RequestParam("shippedAt") @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime shippedAt,
+            HttpSession session, RedirectAttributes redirectAttributes) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user != null && user.isLibrarian()) {
+            try {
+                transferService.confirmBatchReceipt(user.getCampusId(), shippedAt, user.getUserId());
+                redirectAttributes.addFlashAttribute("successMsg", "Xác nhận nhập kho lô hàng thành công!");
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
+            }
+        }
+        return "redirect:/librarian/inventory/transfers";
     }
 
     // 1. Hiển thị Form tạo lệnh
@@ -106,11 +188,14 @@ public class TransferController {
                     .collect(Collectors.toList());
 
             transferService.createTransfer(fromCampusId, toCampusId, copyIds, user.getUserId(), note);
-            redirectAttributes.addFlashAttribute("successMsg", "Tạo lệnh xuất kho thành công!");
+            redirectAttributes.addFlashAttribute("successMsg", "Tạo lệnh xin sách thành công!");
+            return "redirect:/librarian/inventory/transfers";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("suggestedCopyIds", copyIdsStr);
+            redirectAttributes.addFlashAttribute("note", note);
+            return "redirect:/librarian/inventory/transfers/create";
         }
-        return "redirect:/librarian/inventory/transfers";
     }
 
     // 3. Xem chi tiết một lệnh luân chuyển
@@ -131,7 +216,7 @@ public class TransferController {
         User user = (User) session.getAttribute("loggedInUser");
         if (user != null && user.isLibrarian()) {
             try {
-                transferService.cancelTransfer(transferId);
+                transferService.cancelTransfer(transferId, user.getCampusId());
                 redirectAttributes.addFlashAttribute("successMsg", "Đã hủy lệnh luân chuyển thành công!");
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("errorMsg", "Lỗi hủy lệnh: " + e.getMessage());

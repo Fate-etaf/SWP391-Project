@@ -79,11 +79,11 @@
                             <p class="font-medium text-slate-200" th:text="${transfer.requestedAt != null ? #temporals.format(transfer.requestedAt, 'dd/MM/yyyy HH:mm') : '--'}"></p>
                         </div>
                         <div>
-                            <p class="text-xs text-slate-500">Xuất kho</p>
+                            <p class="text-xs text-slate-500">Xuất tại</p>
                             <p class="font-medium text-slate-200" th:text="${transfer.shippedAt != null ? #temporals.format(transfer.shippedAt, 'dd/MM/yyyy HH:mm') : '--'}"></p>
                         </div>
                         <div>
-                            <p class="text-xs text-slate-500">Nhập kho</p>
+                            <p class="text-xs text-slate-500">Nhập tại</p>
                             <p class="font-medium text-emerald-400" th:text="${transfer.receivedAt != null ? #temporals.format(transfer.receivedAt, 'dd/MM/yyyy HH:mm') : '--'}"></p>
                             <p class="text-xs text-slate-500 mt-0.5" th:if="${transfer.confirmedBy != null}" th:text="'Bởi: ' + ${transfer.confirmedBy.fullName}"></p>
                         </div>

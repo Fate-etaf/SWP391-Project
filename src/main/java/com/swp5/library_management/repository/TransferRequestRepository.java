@@ -8,7 +8,9 @@ import org.springframework.data.repository.query.Param;
 
 import com.swp5.library_management.entity.TransferRequest;
 
-public interface TransferRequestRepository extends JpaRepository<TransferRequest, Integer> {
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+public interface TransferRequestRepository extends JpaRepository<TransferRequest, Integer>, JpaSpecificationExecutor<TransferRequest> {
     // Lấy tất cả lệnh luân chuyển, sắp xếp mới nhất lên đầu
     @Query("SELECT t FROM TransferRequest t JOIN FETCH t.fromCampus JOIN FETCH t.toCampus ORDER BY t.requestedAt DESC")
     List<TransferRequest> findAllWithCampusesOrderByRequestedAtDesc();
@@ -18,4 +20,13 @@ public interface TransferRequestRepository extends JpaRepository<TransferRequest
      */
     @Query("SELECT COUNT(t) FROM TransferRequest t WHERE t.fromCampus.campusId = :campusId AND t.status = 'Pending'")
     long countPendingOutboundRequests(@Param("campusId") Integer campusId);
+
+    // Working Board: Outbound (Pending, Accepted, Rejected)
+    List<TransferRequest> findByFromCampusCampusIdAndStatusInOrderByRequestedAtDesc(Integer campusId, List<String> statuses);
+
+    // Working Board: Inbound (InTransit)
+    List<TransferRequest> findByToCampusCampusIdAndStatusOrderByShippedAtDesc(Integer campusId, String status);
+
+    // Working Board: My Sent Requests (Pending, Accepted, Rejected)
+    List<TransferRequest> findByToCampusCampusIdAndStatusInOrderByRequestedAtDesc(Integer campusId, List<String> statuses);
 }
