@@ -26,6 +26,10 @@ public class ReportFilterDTO {
     private String userId; // Dùng chung cho PatronID hoặc LibrarianID
     private String status;
 
+    private Integer majorId;
+    private String subjectCode;
+    private String transactionType = "ALL"; // ALL, BORROW, RETURN
+
     // Tham số phân trang (Mặc định trang 0, 50 dòng/trang)
     private int page = 0;
     private int size = 50;

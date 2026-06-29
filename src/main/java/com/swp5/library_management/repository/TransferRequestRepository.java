@@ -14,9 +14,8 @@ public interface TransferRequestRepository extends JpaRepository<TransferRequest
     List<TransferRequest> findAllWithCampusesOrderByRequestedAtDesc();
 
     /**
-     * Dashboard Top Card: Đếm số yêu cầu luân chuyển gửi ĐẾN cơ sở này đang chờ
-     * duyệt
+     * Dashboard Top Card: Đếm số yêu cầu xin sách TỪ cơ sở này đang chờ duyệt (cần xuất kho)
      */
-    @Query("SELECT COUNT(t) FROM TransferRequest t WHERE t.toCampus.campusId = :campusId AND t.status = 'Pending'")
-    long countPendingInboundRequests(@Param("campusId") Integer campusId);
+    @Query("SELECT COUNT(t) FROM TransferRequest t WHERE t.fromCampus.campusId = :campusId AND t.status = 'Pending'")
+    long countPendingOutboundRequests(@Param("campusId") Integer campusId);
 }

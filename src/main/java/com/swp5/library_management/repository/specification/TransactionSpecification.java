@@ -22,12 +22,26 @@ public class TransactionSpecification {
                 predicates.add(cb.equal(root.get("borrowTicket").get("campus").get("campusId"), filter.getCampusId()));
             }
 
-            // 2. Lọc theo Khoảng thời gian (Ngày Mượn)
+            // 2. Lọc theo Khoảng thời gian và Loại giao dịch (Mượn/Trả)
             if (filter.getStartDate() != null && filter.getEndDate() != null) {
-                predicates.add(cb.between(
-                        root.get("borrowTicket").get("createdAt"),
-                        filter.getStartDate().atStartOfDay(),
-                        filter.getEndDate().atTime(23, 59, 59)));
+                if ("RETURN".equalsIgnoreCase(filter.getTransactionType())) {
+                    // Nếu là giao dịch trả: Ngày lọc áp dụng cho returnDate
+                    predicates.add(cb.between(
+                            root.get("returnDate"),
+                            filter.getStartDate().atStartOfDay(),
+                            filter.getEndDate().atTime(23, 59, 59)));
+                    // Ép buộc chỉ lấy các bản ghi đã trả sách
+                    predicates.add(cb.isNotNull(root.get("returnDate")));
+                } else {
+                    // Mặc định (ALL hoặc BORROW): Ngày lọc áp dụng cho createdAt của Ticket
+                    predicates.add(cb.between(
+                            root.get("borrowTicket").get("createdAt"),
+                            filter.getStartDate().atStartOfDay(),
+                            filter.getEndDate().atTime(23, 59, 59)));
+                }
+            } else if ("RETURN".equalsIgnoreCase(filter.getTransactionType())) {
+                // Kể cả không có date filter, nếu chọn trả thì bắt buộc returnDate != null
+                predicates.add(cb.isNotNull(root.get("returnDate")));
             }
 
             // 3. Lọc theo CopyID (Tra cứu đích danh cuốn sách)
@@ -48,6 +62,22 @@ public class TransactionSpecification {
             // 5. Lọc theo Trạng thái (Borrowing, Returned, Overdue...)
             if (StringUtils.hasText(filter.getStatus())) {
                 predicates.add(cb.equal(root.get("status"), filter.getStatus().trim()));
+            }
+
+            // 6. Lọc theo Môn học
+            if (StringUtils.hasText(filter.getSubjectCode())) {
+                predicates.add(cb.equal(root.get("bookCopy").get("book").get("subject").get("subjectCode"), filter.getSubjectCode().trim()));
+            }
+
+            // 7. Lọc theo Chuyên ngành (Sử dụng Subquery để xử lý lỗi Mapping 1 chiều)
+            if (filter.getMajorId() != null) {
+                jakarta.persistence.criteria.Subquery<String> subquery = query.subquery(String.class);
+                jakarta.persistence.criteria.Root<com.swp5.library_management.entity.Major> majorRoot = subquery.from(com.swp5.library_management.entity.Major.class);
+                jakarta.persistence.criteria.Join<com.swp5.library_management.entity.Major, com.swp5.library_management.entity.Subject> subjectsJoin = majorRoot.join("subjects");
+                subquery.select(subjectsJoin.get("subjectCode"))
+                        .where(cb.equal(majorRoot.get("majorId"), filter.getMajorId()));
+                
+                predicates.add(cb.in(root.get("bookCopy").get("book").get("subject").get("subjectCode")).value(subquery));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

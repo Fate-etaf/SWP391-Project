@@ -108,6 +108,33 @@
                         <input type="text" name="copyId" th:value="${filter.copyId}" placeholder="VD: CP-..." class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange placeholder-slate-600">
                     </div>
 
+                    <!-- Filter Loại giao dịch -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Loại giao dịch</label>
+                        <select name="transactionType" class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange">
+                            <option value="ALL" th:selected="${filter.transactionType == 'ALL'}">Tất cả</option>
+                            <option value="BORROW" th:selected="${filter.transactionType == 'BORROW'}">Chỉ Phiếu Mượn</option>
+                            <option value="RETURN" th:selected="${filter.transactionType == 'RETURN'}">Chỉ Phiếu Trả</option>
+                        </select>
+                    </div>
+
+                    <!-- Filter Chuyên ngành -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Chuyên ngành</label>
+                        <select id="majorSelect" name="majorId" onchange="loadSubjectsByMajor(this.value)" class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange">
+                            <option value="">Tất cả</option>
+                            <option th:each="m : ${majors}" th:value="${m.majorId}" th:text="${m.majorName}" th:selected="${m.majorId == filter.majorId}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Filter Môn học -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Môn học</label>
+                        <select id="subjectSelect" name="subjectCode" class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange">
+                            <option value="">Tất cả</option>
+                        </select>
+                    </div>
+
                     <!-- Filter Trạng thái -->
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Trạng thái</label>
@@ -143,7 +170,7 @@
             </div>
 
             <!-- 3. BẢNG DỮ LIỆU CHÍNH (DATA TABLE) -->
-            <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl flex flex-col shadow-2xl overflow-hidden h-full relative z-10">
+            <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl flex flex-col shadow-2xl overflow-hidden relative z-10 mb-8">
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left">
                         <thead class="text-[10px] text-slate-400 uppercase bg-slate-900/50 border-b border-slate-800">
@@ -226,9 +253,35 @@
     </main>
 
     <!-- FOOTER -->
-    <div class="relative z-50">
+    <div class="relative z-50 mt-auto w-full">
         <div th:replace="~{fragments/footer :: footer}"></div>
     </div>
+
+    <!-- SCRIPT TẢI DỮ LIỆU ĐỘNG (CASCADING DROPDOWN) -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const majorSubjectMap = /*[[${majorSubjectMap}]]*/ {};
+        const safeSelectedSubject = /*[[${filter.subjectCode}]]*/ '';
+        /*]]>*/
+
+        function loadSubjectsByMajor(majorId) {
+            const subjectSelect = document.getElementById('subjectSelect');
+            subjectSelect.innerHTML = '<option value="">Tất cả</option>';
+            
+            if (!majorId || !majorSubjectMap[majorId]) return;
+
+            majorSubjectMap[majorId].forEach(subj => {
+                const isSelected = (safeSelectedSubject === subj.subjectCode) ? 'selected' : '';
+                subjectSelect.innerHTML += `<option value="${subj.subjectCode}" ${isSelected}>${subj.subjectCode} - ${subj.subjectName}</option>`;
+            });
+        }
+
+        // Khởi chạy lúc load trang
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialMajorId = document.getElementById('majorSelect').value;
+            if (initialMajorId) loadSubjectsByMajor(initialMajorId);
+        });
+    </script>
 
     <!-- SCRIPT XỬ LÝ GIAO DIỆN -->
     <script>

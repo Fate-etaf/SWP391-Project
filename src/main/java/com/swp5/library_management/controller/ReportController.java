@@ -2,6 +2,11 @@ package com.swp5.library_management.controller;
 
 import java.io.IOException;
 
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.swp5.library_management.dto.ReportDataDTO;
 import com.swp5.library_management.dto.ReportFilterDTO;
 import com.swp5.library_management.entity.User;
+import com.swp5.library_management.entity.Major;
+import com.swp5.library_management.entity.Subject;
 import com.swp5.library_management.repository.CampusRepository;
+import com.swp5.library_management.repository.MajorRepository;
+import com.swp5.library_management.repository.SubjectRepository;
 import com.swp5.library_management.service.ReportService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,10 +32,15 @@ public class ReportController {
 
     private final ReportService reportService;
     private final CampusRepository campusRepository;
+    private final MajorRepository majorRepository;
+    private final SubjectRepository subjectRepository;
 
-    public ReportController(ReportService reportService, CampusRepository campusRepository) {
+    public ReportController(ReportService reportService, CampusRepository campusRepository,
+                            MajorRepository majorRepository, SubjectRepository subjectRepository) {
         this.reportService = reportService;
         this.campusRepository = campusRepository;
+        this.majorRepository = majorRepository;
+        this.subjectRepository = subjectRepository;
     }
 
     // Xử lý toàn bộ logic Load lần đầu & Apply Filter thông qua Form GET
@@ -55,6 +69,16 @@ public class ReportController {
         // 4. Đẩy dữ liệu ra View
         model.addAttribute("data", reportData);
         model.addAttribute("campuses", campusRepository.findAll()); // Dành cho Admin chọn
+
+        // Nạp danh sách Major và Subject cho tính năng Cascading Dropdown
+        List<Major> majors = majorRepository.findAll();
+        model.addAttribute("majors", majors);
+        
+        Map<Integer, List<Subject>> majorSubjectMap = new HashMap<>();
+        for (Major major : majors) {
+            majorSubjectMap.put(major.getMajorId(), new ArrayList<>(major.getSubjects()));
+        }
+        model.addAttribute("majorSubjectMap", majorSubjectMap);
 
         // Trả về giao diện Thymeleaf (sẽ được xây dựng sau)
         return "librarian/reports";

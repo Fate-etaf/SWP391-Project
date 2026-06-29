@@ -114,7 +114,7 @@ public class InventoryServiceImpl implements InventoryService {
         dto.setTotalCopies(bookCopyRepository.countTotalCopiesByCampus(campusId));
         dto.setBorrowedCopies(bookCopyRepository.countByCampusCampusIdAndCopyStatus(campusId, "Borrowed"));
         dto.setOverdueCopies(borrowTicketDetailRepository.countCurrentOverdue(campusId));
-        dto.setPendingInboundTransfers(transferRequestRepository.countPendingInboundRequests(campusId));
+        dto.setPendingInboundTransfers(transferRequestRepository.countPendingOutboundRequests(campusId));
 
         // DATA TABLES
         // Bảng "Điểm nóng Waitlist" & Smart Column Logic (Xuyên cơ sở)
