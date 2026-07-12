@@ -5,13 +5,11 @@ import com.swp5.library_management.dto.BookSearchResultDTO;
 import com.swp5.library_management.repository.CampusRepository;
 import com.swp5.library_management.repository.SubjectRepository;
 import com.swp5.library_management.service.BookService;
-import org.springframework.data.domain.Page;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import com.swp5.library_management.security.CustomUserDetails;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -60,8 +58,6 @@ public class BookController {
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) Integer majorId,
             @RequestParam(required = false) Integer campusId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "false") boolean ajax,
             Model model) {
 
         boolean hasSearch = StringUtils.hasText(keyword)
@@ -71,15 +67,12 @@ public class BookController {
                          || campusId != null;
 
         if (hasSearch) {
-            Page<BookSearchResultDTO> resultPage = bookService.searchBooks(keyword, subjectCode, categoryId, majorId, campusId, page, 12);
-            model.addAttribute("results", resultPage.getContent());
-            model.addAttribute("totalPages", resultPage.getTotalPages());
-            model.addAttribute("totalElements", resultPage.getTotalElements());
-            model.addAttribute("currentPage", page);
-            model.addAttribute("noResults", resultPage.isEmpty());
+            List<BookSearchResultDTO> results = bookService.searchBooks(keyword, subjectCode, categoryId, majorId, campusId);
+            model.addAttribute("results", results);
+            model.addAttribute("noResults", results.isEmpty());
             
             // Nếu không có kết quả, hiển thị lại majorSections
-            if (resultPage.isEmpty()) {
+            if (results.isEmpty()) {
                 model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
             }
         } else {
@@ -101,9 +94,6 @@ public class BookController {
         model.addAttribute("selectedMajorId",    majorId);
         model.addAttribute("hasSearch",          hasSearch);
 
-        if (ajax) {
-            return "books/search :: searchResults";
-        }
         return "books/search";
     }
 
@@ -119,32 +109,13 @@ public class BookController {
     public String viewBookDetail(
             @PathVariable Integer id,
             @RequestParam(required = false) Integer campusId,
-            @RequestParam(required = false, defaultValue = "false") boolean ajax,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            jakarta.servlet.http.HttpSession session,
             Model model) {
-
-        if (campusId == null) {
-            if (userDetails != null && userDetails.getUser() != null && userDetails.getUser().getCampusId() != null) {
-                campusId = userDetails.getUser().getCampusId();
-            } else {
-                Integer loggedInCampusId = (Integer) session.getAttribute("loggedInCampusId");
-                if (loggedInCampusId != null) {
-                    campusId = loggedInCampusId;
-                }
-            }
-        } else if (campusId == 0) {
-            campusId = null; // 0 means all campuses
-        }
 
         try {
             BookDetailDTO book = bookService.getBookDetail(id, campusId);
             model.addAttribute("book",            book);
             model.addAttribute("campuses",        campusRepository.findAll());
             model.addAttribute("selectedCampusId", campusId);
-            if (ajax) {
-                return "books/detail :: copiesSection";
-            }
             return "books/detail";
 
         } catch (NoSuchElementException e) {

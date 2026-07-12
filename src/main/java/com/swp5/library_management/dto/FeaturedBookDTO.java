@@ -37,14 +37,11 @@ public class FeaturedBookDTO {
     private String categoryName;
 
     /**
-     * Số bản sao có trạng thái "Available".
+     * {@code true} nếu có ít nhất 1 bản sao trạng thái "Available".
+     * Tên trường là {@code available} (không phải {@code isAvailable}) để
+     * Thymeleaf có thể truy cập qua {@code book.available} (gọi getter {@code isAvailable()}).
      */
-    private long availableCount;
-
-    /**
-     * Tổng số bản sao (dùng để xác định "Đang bận" hay "Hết sách").
-     */
-    private long totalCount;
+    private boolean available;
 
     /**
      * Chuỗi Tailwind CSS gradient dùng cho bìa sách mockup.

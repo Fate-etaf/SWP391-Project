@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Táº¡o lá»‡nh luĂ¢n chuyá»ƒn - FLMS</title>
+    <title>Tạo lệnh luân chuyển - FLMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body class="bg-[#0b0f19] min-h-screen text-slate-900 flex flex-col justify-between relative overflow-x-hidden">
+<body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-between relative overflow-x-hidden">
 
     <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
@@ -36,28 +36,28 @@
                 </a>
                 <div>
                     <span class="bg-fpt-orange/20 text-orange-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase mb-3 inline-block">New Transfer</span>
-                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Táº¡o lá»‡nh luĂ¢n chuyá»ƒn má»›i</h2>
-                    <p class="text-sm text-slate-500 mt-1">Lá»‡nh xin sĂ¡ch sáº½ Ä‘Æ°á»£c chuyá»ƒn Ä‘áº¿n cÆ¡ sá»Ÿ giá»¯ sĂ¡ch Ä‘á»ƒ chá» duyá»‡t (Pending).</p>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Tạo lệnh luân chuyển mới</h2>
+                    <p class="text-sm text-slate-400 mt-1">Lệnh xin sách sẽ được chuyển đến cơ sở giữ sách để chờ duyệt (Pending).</p>
                 </div>
             </div>
 
-            <div class="bg-white border border-slate-200 backdrop-blur-xl rounded-2xl p-6 sm:p-8 shadow-2xl">
-                <!-- THĂ”NG BĂO Lá»–I / THĂ€NH CĂ”NG -->
+            <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 sm:p-8 shadow-2xl">
+                <!-- THÔNG BÁO LỖI / THÀNH CÔNG -->
                 <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-start">
-                    <svg class="w-5 h-5 text-rose-600 mt-0.5 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <svg class="w-5 h-5 text-rose-400 mt-0.5 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <div class="text-sm text-rose-300 font-medium" th:text="${errorMsg}"></div>
                 </div>
                 <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-start">
-                    <svg class="w-5 h-5 text-emerald-600 mt-0.5 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <svg class="w-5 h-5 text-emerald-400 mt-0.5 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <div class="text-sm text-emerald-300 font-medium" th:text="${successMsg}"></div>
                 </div>
 
                 <form action="/librarian/inventory/transfers/create" method="post" class="space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">CÆ¡ sá»Ÿ xuáº¥t phĂ¡t <span class="text-rose-600">*</span></label>
-                            <select name="fromCampusId" id="fromCampusSelect" required class="w-full bg-[#0e1625] border border-slate-300 text-slate-800 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors">
-                                <option value="">-- Chá»n cÆ¡ sá»Ÿ xuáº¥t --</option>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Cơ sở xuất phát <span class="text-rose-400">*</span></label>
+                            <select name="fromCampusId" id="fromCampusSelect" required class="w-full bg-[#0e1625] border border-slate-700 text-slate-200 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors">
+                                <option value="">-- Chọn cơ sở xuất --</option>
                                 <option th:each="campus : ${campuses}"
                                         th:value="${campus.campusId}"
                                         th:text="${campus.campusName}"
@@ -66,9 +66,9 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">CÆ¡ sá»Ÿ nháº­n sĂ¡ch <span class="text-rose-600">*</span></label>
-                            <select name="toCampusId" id="toCampusSelect" required class="w-full bg-[#0e1625] border border-slate-300 text-slate-800 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors">
-                                <option value="">-- Chá»n cÆ¡ sá»Ÿ nháº­n --</option>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Cơ sở nhận sách <span class="text-rose-400">*</span></label>
+                            <select name="toCampusId" id="toCampusSelect" required class="w-full bg-[#0e1625] border border-slate-700 text-slate-200 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors">
+                                <option value="">-- Chọn cơ sở nhận --</option>
                                 <option th:each="campus : ${campuses}"
                                         th:value="${campus.campusId}"
                                         th:text="${campus.campusName}"
@@ -78,22 +78,22 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">MĂ£ báº£n sao sĂ¡ch <span class="text-rose-600">*</span></label>
-                        <p class="text-xs text-slate-500 mb-2">Nháº­p cĂ¡c mĂ£ Barcode/RFID cá»§a sĂ¡ch, cĂ¡ch nhau báº±ng dáº¥u pháº©y.</p>
-                        <textarea name="copyIds" rows="4" required th:text="${suggestedCopyIds != null ? suggestedCopyIds : ''}" placeholder="VĂ­ dá»¥: CP-CC-HN-001, CP-DB-HN-001" class="w-full bg-[#0e1625] border border-slate-300 text-slate-800 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors placeholder:text-slate-600"></textarea>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mã bản sao sách <span class="text-rose-400">*</span></label>
+                        <p class="text-xs text-slate-500 mb-2">Nhập các mã Barcode/RFID của sách, cách nhau bằng dấu phẩy.</p>
+                        <textarea name="copyIds" rows="4" required th:text="${suggestedCopyIds != null ? suggestedCopyIds : ''}" placeholder="Ví dụ: CP-CC-HN-001, CP-DB-HN-001" class="w-full bg-[#0e1625] border border-slate-700 text-slate-200 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors placeholder:text-slate-600"></textarea>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ghi chĂº</label>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ghi chú</label>
                         <input type="text" name="note" 
-                               th:value="${param.suggestedBookTitle != null ? 'LuĂ¢n chuyá»ƒn sĂ¡ch [' + param.suggestedBookTitle[0] + '] theo yĂªu cáº§u tá»« Waitlist.' : ''}"
-                               placeholder="VĂ­ dá»¥: Chuyá»ƒn gáº¥p theo yĂªu cáº§u sinh viĂªn HE170001..." class="w-full bg-[#0e1625] border border-slate-300 text-slate-800 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors placeholder:text-slate-600">
+                               th:value="${param.suggestedBookTitle != null ? 'Luân chuyển sách [' + param.suggestedBookTitle[0] + '] theo yêu cầu từ Waitlist.' : ''}"
+                               placeholder="Ví dụ: Chuyển gấp theo yêu cầu sinh viên HE170001..." class="w-full bg-[#0e1625] border border-slate-700 text-slate-200 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors placeholder:text-slate-600">
                     </div>
 
-                    <div class="pt-4 flex items-center justify-end space-x-4 border-t border-slate-200">
-                        <a href="/librarian/inventory/transfers" class="text-sm font-semibold text-slate-500 hover:text-slate-800 px-4 py-2 transition-colors">Há»§y bá»</a>
+                    <div class="pt-4 flex items-center justify-end space-x-4 border-t border-slate-800">
+                        <a href="/librarian/inventory/transfers" class="text-sm font-semibold text-slate-400 hover:text-slate-200 px-4 py-2 transition-colors">Hủy bỏ</a>
                         <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-600/20 border border-emerald-500">
-                            XĂ¡c nháº­n luĂ¢n chuyá»ƒn
+                            Xác nhận luân chuyển
                         </button>
                     </div>
                 </form>
@@ -115,18 +115,18 @@
         function updateCopyIds() {
             const selectedCampusId = fromCampusSelect.value;
             if (selectedCampusId && campusCopiesMap && campusCopiesMap[selectedCampusId] && campusCopiesMap[selectedCampusId].length > 0) {
-                // Láº¥y sá»‘ lÆ°á»£ng sinh viĂªn Ä‘ang chá» tá»« URL (máº·c Ä‘á»‹nh lĂ  1 náº¿u khĂ´ng cĂ³)
+                // Lấy số lượng sinh viên đang chờ từ URL (mặc định là 1 nếu không có)
                 const urlParams = new URLSearchParams(window.location.search);
                 const waitCount = parseInt(urlParams.get('waitingCount')) || 1;
                 
-                // TrĂ­ch xuáº¥t sá»‘ lÆ°á»£ng mĂ£ sĂ¡ch tÆ°Æ¡ng á»©ng vá»›i sá»‘ sinh viĂªn chá» (tá»‘i Ä‘a báº±ng sá»‘ lÆ°á»£ng sĂ¡ch hiá»‡n cĂ³)
+                // Trích xuất số lượng mã sách tương ứng với số sinh viên chờ (tối đa bằng số lượng sách hiện có)
                 const maxCopies = Math.min(waitCount, campusCopiesMap[selectedCampusId].length);
                 const selectedCopies = campusCopiesMap[selectedCampusId].slice(0, maxCopies);
                 
-                // Ná»‘i cĂ¡c mĂ£ sĂ¡ch báº±ng dáº¥u pháº©y
+                // Nối các mã sách bằng dấu phẩy
                 copyIdsTextarea.value = selectedCopies.join(', ');
             } else {
-                // Chá»‰ clear náº¿u load tá»« gá»£i Ă½, náº¿u user tá»± nháº­p thĂ¬ khĂ´ng clear
+                // Chỉ clear nếu load từ gợi ý, nếu user tự nhập thì không clear
                 if (campusCopiesMap && Object.keys(campusCopiesMap).length > 0) {
                     copyIdsTextarea.value = '';
                 }
@@ -136,7 +136,7 @@
         fromCampusSelect.addEventListener('change', function() {
             updateCopyIds();
             if (this.value === toCampusSelect.value && this.value !== '') {
-                alert('CÆ¡ sá»Ÿ xuáº¥t phĂ¡t khĂ´ng Ä‘Æ°á»£c trĂ¹ng vá»›i cÆ¡ sá»Ÿ nháº­n!');
+                alert('Cơ sở xuất phát không được trùng với cơ sở nhận!');
                 this.value = '';
                 updateCopyIds();
             }
@@ -144,7 +144,7 @@
 
         toCampusSelect.addEventListener('change', function() {
             if (this.value === fromCampusSelect.value && this.value !== '') {
-                alert('CÆ¡ sá»Ÿ nháº­n khĂ´ng Ä‘Æ°á»£c trĂ¹ng vá»›i cÆ¡ sá»Ÿ xuáº¥t phĂ¡t!');
+                alert('Cơ sở nhận không được trùng với cơ sở xuất phát!');
                 this.value = '';
             }
         });
@@ -152,11 +152,11 @@
         // Trigger on load
         if (campusCopiesMap && Object.keys(campusCopiesMap).length > 0) {
             let currentFrom = fromCampusSelect.value;
-            // Náº¿u CÆ¡ sá»Ÿ xuáº¥t phĂ¡t hiá»‡n táº¡i khĂ´ng cĂ³ sĂ¡ch, tá»± Ä‘á»™ng chá»n cÆ¡ sá»Ÿ khĂ¡c cĂ³ sĂ¡ch
+            // Nếu Cơ sở xuất phát hiện tại không có sách, tự động chọn cơ sở khác có sách
             if (!currentFrom || !campusCopiesMap[currentFrom] || campusCopiesMap[currentFrom].length === 0) {
                 let toCampus = toCampusSelect.value;
                 let availableCampuses = Object.keys(campusCopiesMap);
-                // Æ¯u tiĂªn chá»n cÆ¡ sá»Ÿ cĂ³ sĂ¡ch mĂ  khĂ¡c vá»›i CÆ¡ sá»Ÿ nháº­n
+                // Ưu tiên chọn cơ sở có sách mà khác với Cơ sở nhận
                 let bestCampus = availableCampuses.find(c => c !== toCampus) || availableCampuses[0];
                 fromCampusSelect.value = bestCampus;
             }
@@ -166,9 +166,9 @@
             updateCopyIds();
         }
         
-        // Náº¿u vĂ´ tĂ¬nh from == to (vd ngÆ°á»i dĂ¹ng chá»‰ Ä‘á»‹nh URL lá»—i), cáº£nh bĂ¡o
+        // Nếu vô tình from == to (vd người dùng chỉ định URL lỗi), cảnh báo
         if (fromCampusSelect.value === toCampusSelect.value && fromCampusSelect.value !== '') {
-            alert('CÆ¡ sá»Ÿ xuáº¥t phĂ¡t khĂ´ng Ä‘Æ°á»£c trĂ¹ng vá»›i cÆ¡ sá»Ÿ nháº­n. Vui lĂ²ng chá»n cÆ¡ sá»Ÿ xuáº¥t phĂ¡t khĂ¡c!');
+            alert('Cơ sở xuất phát không được trùng với cơ sở nhận. Vui lòng chọn cơ sở xuất phát khác!');
             fromCampusSelect.value = '';
             updateCopyIds();
         }

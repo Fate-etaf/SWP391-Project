@@ -210,13 +210,10 @@
 <div class="page-header">
     <div class="inner">
         <div class="page-meta">
-            <span class="badge" th:text="${req != null ? 'Chi tiết yêu cầu' : 'Bạn đọc'}">Bạn đọc</span>
+            <span class="badge">Bạn đọc</span>
             <span>📍 Thư viện Đại học FPT</span>
         </div>
-        <h1 th:text="${req != null ? 'Chi tiết đề nghị mua tài liệu mới' : 'Đề nghị mua tài liệu mới'}">Đề nghị mua tài liệu mới</h1>
-        <div th:if="${req != null}" style="margin-top: 10px;">
-            <a href="/librarian/acquisition/dashboard" class="btn btn-secondary" style="padding: 6px 12px; font-size: 13px;">&larr; Quay lại Dashboard</a>
-        </div>
+        <h1>Đề nghị mua tài liệu mới</h1>
     </div>
 </div>
 
@@ -244,30 +241,24 @@
             <div class="form-group">
                 <label for="patronId" class="form-label">Mã sinh viên / Mã nhân viên</label>
                 <input type="text" name="patronId" id="patronId" class="form-input" 
-                       th:value="${req != null ? req.patron.userId : patronId}" 
-                       th:readonly="${req != null}"
-                       placeholder="Ví dụ: HE207002" autocomplete="off">
+                       th:value="${patronId}" placeholder="Ví dụ: HE207002" autocomplete="off">
             </div>
 
             <!-- Title Field -->
             <div class="form-group">
                 <label for="title" class="form-label">
-                    Tên tài liệu / Sách <span th:if="${req == null}" class="required-star">*</span>
+                    Tên tài liệu / Sách <span class="required-star">*</span>
                 </label>
                 <input type="text" name="title" id="title" class="form-input" 
-                       th:value="${req != null ? req.title : ''}"
-                       th:readonly="${req != null}"
                        placeholder="Nhập tên tài liệu chi tiết..." required autocomplete="off">
             </div>
 
             <!-- Author Field -->
             <div class="form-group">
                 <label for="author" class="form-label">
-                    Tác giả <span th:if="${req == null}" class="required-star">*</span>
+                    Tác giả <span class="required-star">*</span>
                 </label>
                 <input type="text" name="author" id="author" class="form-input" 
-                       th:value="${req != null ? req.author : ''}"
-                       th:readonly="${req != null}"
                        placeholder="Tên tác giả hoặc nhóm tác giả..." required autocomplete="off">
             </div>
 
@@ -275,8 +266,6 @@
             <div class="form-group">
                 <label for="isbn" class="form-label">Mã sách (ISBN)</label>
                 <input type="text" name="isbn" id="isbn" class="form-input" 
-                       th:value="${req != null ? req.isbn : ''}"
-                       th:readonly="${req != null}"
                        placeholder="Nhập mã ISBN nếu có (10 hoặc 13 số)..." autocomplete="off">
             </div>
 
@@ -284,20 +273,18 @@
             <div class="form-group">
                 <label for="publisher" class="form-label">Nhà xuất bản</label>
                 <input type="text" name="publisher" id="publisher" class="form-input" 
-                       th:value="${req != null ? req.publisher : ''}"
-                       th:readonly="${req != null}"
                        placeholder="Tên nhà xuất bản..." autocomplete="off">
             </div>
 
             <!-- Priority Field -->
             <div class="form-group">
                 <label for="priority" class="form-label">
-                    Thời gian cần? <span th:if="${req == null}" class="required-star">*</span>
+                    Thời gian cần? <span class="required-star">*</span>
                 </label>
-                <select name="priority" id="priority" class="form-select" required th:disabled="${req != null}">
-                    <option value="Medium" th:selected="${req == null or req.priority == 'Medium'}">25-30 ngày đối với sách Tiếng Việt, 8-12 tuần đổi với sách Ngoại văn</option>
-                    <option value="Low" th:selected="${req != null and req.priority == 'Low'}">Không vội </option>
-                    <option value="High" th:selected="${req != null and req.priority == 'High'}">Gấp (yêu cầu nêu rõ lý do)</option>
+                <select name="priority" id="priority" class="form-select" required>
+                    <option value="Medium" selected>25-30 ngày đối với sách Tiếng Việt, 8-12 tuần đổi với sách Ngoại văn</option>
+                    <option value="Low">Không vội </option>
+                    <option value="High">Gấp (yêu cầu nêu rõ lý do)</option>
                 </select>
             </div>
 
@@ -305,20 +292,16 @@
             <div class="form-group">
                 <label for="language" class="form-label">Ngôn ngữ</label>
                 <input type="text" name="language" id="language" class="form-input" 
-                       th:value="${req != null ? req.language : ''}"
-                       th:readonly="${req != null}"
                        placeholder="Ví dụ: Tiếng Anh, Tiếng Việt..." autocomplete="off">
             </div>
 
             <!-- Email Field -->
             <div class="form-group">
                 <label for="email" class="form-label">
-                    Email nhận phản hồi <span th:if="${req == null}" class="required-star">*</span>
+                    Email nhận phản hồi <span class="required-star">*</span>
                 </label>
                 <input type="email" name="email" id="email" class="form-input" 
-                       th:value="${req != null ? req.email : userEmail}" 
-                       th:readonly="${req != null}"
-                       placeholder="Nhập địa chỉ email của bạn..." required autocomplete="off">
+                       th:value="${userEmail}" placeholder="Nhập địa chỉ email của bạn..." required autocomplete="off">
             </div>
 
             <div class="section-title">2. Chi tiết đề xuất & Liên hệ</div>
@@ -326,11 +309,9 @@
             <!-- Reason Field (Full Width) -->
             <div class="form-group full-width">
                 <label for="reason" class="form-label">
-                    Lý do đề xuất tài liệu <span th:if="${req == null}" class="required-star">*</span>
+                    Lý do đề xuất tài liệu <span class="required-star">*</span>
                 </label>
                 <textarea name="reason" id="reason" class="form-textarea" 
-                          th:text="${req != null ? req.reason : ''}"
-                          th:readonly="${req != null}"
                           placeholder="Mô tả lý do tài liệu này cần thiết cho học tập, nghiên cứu (môn học nào, nhu cầu bản thân ra sao...)..." required></textarea>
             </div>
 
@@ -338,8 +319,6 @@
             <div class="form-group">
                 <label for="bookLink" class="form-label">Liên kết sách</label>
                 <input type="url" name="bookLink" id="bookLink" class="form-input" 
-                       th:value="${req != null ? req.bookLink : ''}"
-                       th:readonly="${req != null}"
                        placeholder="Nhập liên kết đến sách nếu có..." autocomplete="off">
             </div>
 
@@ -347,18 +326,12 @@
             <div class="form-group">
                 <label for="feedback" class="form-label">Góp ý về dịch vụ</label>
                 <input type="text" name="feedback" id="feedback" class="form-input" 
-                       th:value="${req != null ? req.feedback : ''}"
-                       th:readonly="${req != null}"
                        placeholder="Nhập phản hồi nếu có..." autocomplete="off">
             </div>
-        </div>
-        
-        <div class="form-actions" th:if="${req != null}">
-            <button type="submit" class="btn btn-primary" th:formaction="@{/librarian/acquisition/approve/{id}(id=${req.requestId})}" >Approve</button>
-            <button type="submit" class="btn btn-primary" th:formaction="@{/librarian/acquisition/reject/{id}(id=${req.requestId})}" >Reject</button>
+
         </div>
 
-        <div class="form-actions" th:if="${req == null}">
+        <div class="form-actions">
             <button type="reset" class="btn btn-secondary">Nhập lại</button>
             <button type="submit" class="btn btn-primary">Gửi đề nghị mua</button>
         </div>

@@ -93,12 +93,6 @@ public class Book {
                 .count();
     }
 
-    /** Returns the total number of copies. */
-    public long getTotalCount() {
-        if (copies == null) return 0;
-        return copies.size();
-    }
-
     /** Returns comma-separated author names for display. */
     public String getAuthorNames() {
         if (authors == null || authors.isEmpty()) return "Unknown Author";

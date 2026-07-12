@@ -4,7 +4,7 @@ import com.swp5.library_management.dto.AddBookForm;
 import com.swp5.library_management.dto.BookDetailDTO;
 import com.swp5.library_management.dto.BookSearchResultDTO;
 import com.swp5.library_management.entity.Book;
-import org.springframework.data.domain.Page;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -32,7 +32,7 @@ public interface BookService {
      * @param campusId    Campus để lọc số bản sao có sẵn. Null = tất cả campus.
      * @return Danh sách {@link BookSearchResultDTO} sắp xếp theo ngày nhập mới nhất.
      */
-    Page<BookSearchResultDTO> searchBooks(String keyword, String subjectCode, Integer categoryId, Integer majorId, Integer campusId, int page, int size);
+    List<BookSearchResultDTO> searchBooks(String keyword, String subjectCode, Integer categoryId, Integer majorId, Integer campusId);
 
     /**
      * UCG01 – E1 Fallback: Lấy 8 cuốn sách mới nhất khi tìm không ra kết quả.

@@ -3,8 +3,6 @@ package com.swp5.library_management.repository;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -80,13 +78,13 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
           AND (:campusId IS NULL OR
                EXISTS (SELECT bc FROM BookCopy bc
                        WHERE bc.book = b AND bc.campus.campusId = :campusId))
+        ORDER BY b.createdAt DESC
     """)
-    Page<Book> searchBooks(@Param("keyword")     String  keyword,
+    List<Book> searchBooks(@Param("keyword")     String  keyword,
                            @Param("subjectCode") String  subjectCode,
                            @Param("categoryId")  Integer categoryId,
                            @Param("majorId")     Integer majorId,
-                           @Param("campusId")    Integer campusId,
-                           Pageable pageable);
+                           @Param("campusId")    Integer campusId);
 
     // ────────────────────────────────────────────────────────────────────────
     // UCG02 – View Book Detail

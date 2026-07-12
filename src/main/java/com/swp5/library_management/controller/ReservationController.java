@@ -36,18 +36,15 @@ public class ReservationController {
     private final CampusRepository   campusRepository;
     private final BookRepository     bookRepository;
     private final com.swp5.library_management.repository.UserRepository userRepository;
-    private final com.swp5.library_management.repository.BookCopyRepository bookCopyRepository;
 
     public ReservationController(ReservationService reservationService,
                                  CampusRepository campusRepository,
                                  BookRepository bookRepository,
-                                 com.swp5.library_management.repository.UserRepository userRepository,
-                                 com.swp5.library_management.repository.BookCopyRepository bookCopyRepository) {
+                                 com.swp5.library_management.repository.UserRepository userRepository) {
         this.reservationService = reservationService;
         this.campusRepository   = campusRepository;
         this.bookRepository     = bookRepository;
         this.userRepository     = userRepository;
-        this.bookCopyRepository = bookCopyRepository;
     }
 
     // ── Hàm tiện ích: Lấy patronId từ Session, redirect về login nếu chưa đăng nhập ──
@@ -106,33 +103,11 @@ public class ReservationController {
 
         var userOpt = userRepository.findById(patronId);
         if (userOpt.isPresent()) {
-            Integer userCampusId = userOpt.get().getCampusId();
-            model.addAttribute("userCampusId", userCampusId);
-
-            if (userCampusId != null) {
-                long totalAtOwnCampus = bookCopyRepository.countByBookBookIdAndCampusCampusId(bookId, userCampusId);
-                if (totalAtOwnCampus > 0) {
-                    long availableAtOwnCampus = bookCopyRepository.countByBookBookIdAndCampusCampusIdAndCopyStatus(bookId, userCampusId, "Available");
-                    if (availableAtOwnCampus > 0) {
-                        // Sách tồn tại và có bản rảnh: Chỉ hiển thị cơ sở của sinh viên
-                        campusRepository.findById(userCampusId).ifPresent(c -> model.addAttribute("campuses", java.util.List.of(c)));
-                    } else {
-                        // Sách tồn tại nhưng tất cả đang bận: Bật cờ waitlist
-                        campusRepository.findById(userCampusId).ifPresent(c -> model.addAttribute("campuses", java.util.List.of(c)));
-                        model.addAttribute("forceWaitlist", true);
-                    }
-                } else {
-                    // Không có bản sách nào tại cơ sở: Mở mượn liên cơ sở (tất cả cơ sở)
-                    model.addAttribute("campuses", campusRepository.findAll());
-                }
-            } else {
-                model.addAttribute("campuses", campusRepository.findAll());
-            }
-        } else {
-            model.addAttribute("campuses", campusRepository.findAll());
+            model.addAttribute("userCampusId", userOpt.get().getCampusId());
         }
 
         model.addAttribute("book",     bookOpt.get());
+        model.addAttribute("campuses", campusRepository.findAll());
         model.addAttribute("patronId", patronId);
         return "reservation/reserve-book";
     }

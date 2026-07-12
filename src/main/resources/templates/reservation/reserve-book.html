@@ -285,31 +285,19 @@
             </div>
 
             <!-- Form đặt giữ chỗ CHÍNH (khi chưa hiển thị waitlist) -->
-            <div th:unless="${param.showWaitlist != null or forceWaitlist != null}">
+            <div th:unless="${param.showWaitlist}">
                 <form id="reserve-form" th:action="@{/reservations/reserve}" method="post">
                     <input type="hidden" name="bookId" th:value="${book.bookId}" />
 
                     <div class="form-group">
                         <label for="campusSelect">🏫 Chọn cơ sở thư viện muốn đến nhận sách</label>
-                        
-                        <!-- Trường hợp chỉ có 1 cơ sở (đã bị filter) -->
-                        <div th:if="${#lists.size(campuses) == 1}">
-                            <input type="hidden" name="campusId" th:value="${campuses[0].campusId}" />
-                            <select id="campusSelect" required disabled style="background-color: #f5f5f5;">
-                                <option th:value="${campuses[0].campusId}" th:text="${campuses[0].campusName}" selected></option>
-                            </select>
-                        </div>
-                        
-                        <!-- Trường hợp có nhiều cơ sở (Mượn liên cơ sở) -->
-                        <div th:if="${#lists.size(campuses) > 1}">
-                            <select id="campusSelect" name="campusId" required>
-                                <option value="" disabled selected>-- Chọn cơ sở --</option>
-                                <option th:each="campus : ${campuses}"
-                                        th:value="${campus.campusId}"
-                                        th:text="${campus.campusName}">
-                                </option>
-                            </select>
-                        </div>
+                        <select id="campusSelect" name="campusId" required>
+                            <option value="" disabled selected>-- Chọn cơ sở --</option>
+                            <option th:each="campus : ${campuses}"
+                                    th:value="${campus.campusId}"
+                                    th:text="${campus.campusName}">
+                            </option>
+                        </select>
                     </div>
 
                     <div class="btn-group">
@@ -322,15 +310,15 @@
             </div>
 
             <!-- Waitlist box (Exc 3 / Exc 4) -->
-            <div class="waitlist-box" th:if="${param.showWaitlist != null or forceWaitlist != null}">
+            <div class="waitlist-box" th:if="${param.showWaitlist}">
                 <h3>📋 Đăng ký xếp hàng chờ sách</h3>
                 <p>
-                    Sách hiện đã hết bản sẵn sàng tại cơ sở của bạn.
+                    Sách hiện đã hết bản sẵn sàng tại cơ sở bạn chọn.
                     Bạn có muốn đăng ký vào danh sách chờ để nhận thông báo ngay khi có sách không?
                 </p>
                 <form id="waitlist-form" th:action="@{/reservations/waitlist}" method="post">
                     <input type="hidden" name="bookId"   th:value="${book.bookId}" />
-                    <input type="hidden" name="campusId" th:value="${param.campusId != null ? param.campusId : campuses[0].campusId}" />
+                    <input type="hidden" name="campusId" th:value="${param.campusId}" />
                     <div class="btn-group">
                         <button id="btn-waitlist" type="submit" class="btn btn-primary">
                             ✋ Đăng ký xếp hàng chờ

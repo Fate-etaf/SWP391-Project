@@ -140,8 +140,7 @@ public class HomeServiceImpl implements HomeService {
                     .subjectCode(subjectCode)
                     .isbn(book.getIsbn() != null ? book.getIsbn() : "N/A")
                     .categoryName(categoryName)
-                    .availableCount(book.getAvailableCount())
-                    .totalCount(book.getTotalCount())
+                    .available(book.getAvailableCount() > 0)
                     .coverColor(COVER_COLORS[i % COVER_COLORS.length])
                     .coverImageUrl(book.getCoverImageUrl())
                     .build());
@@ -200,8 +199,7 @@ public class HomeServiceImpl implements HomeService {
                     .subjectCode(subjectCode)
                     .isbn(book.getIsbn() != null ? book.getIsbn() : "N/A")
                     .categoryName(categoryName)
-                    .availableCount(book.getAvailableCount())
-                    .totalCount(book.getTotalCount())
+                    .available(book.getAvailableCount() > 0)
                     .coverColor(COVER_COLORS[i % COVER_COLORS.length])
                     .coverImageUrl(book.getCoverImageUrl())
                     .build());

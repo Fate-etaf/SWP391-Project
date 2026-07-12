@@ -1,18 +1,13 @@
 package com.swp5.library_management.repository;
 
-import com.swp5.library_management.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 import java.util.Optional;
+
+import com.swp5.library_management.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
-    
-    Optional<User> findByEmail(String email);
 
     boolean existsByUserId(String userId);
 
@@ -25,18 +20,9 @@ public interface UserRepository extends JpaRepository<User, String> {
      */
     long countByStatus(String status);
     
+    // Tự động sinh câu lệnh SQL: SELECT * FROM Users WHERE UserID = ? AND Email = ? AND CampusID = ?
     Optional<User> findByUserIdAndEmailAndCampusId(String userId, String email, Integer campusId);
 
-    @Query(value = "SELECT r.RoleName FROM Roles r JOIN UserRoles ur ON r.RoleID = ur.RoleID WHERE ur.UserID = :userId", nativeQuery = true)
-    List<String> findRolesByUserId(@Param("userId") String userId);
-
-    // ════════════ CÁC HÀM PHỤC VỤ SEARCH / FILTER SINH VIÊN ════════════
-    @Query("SELECT u FROM User u WHERE u.status = :status")
-    List<User> findByStatus(@Param("status") String status);
-    
-    @Query("SELECT u FROM User u WHERE u.fullName LIKE %:search% OR u.userId LIKE %:search%")
-    List<User> findByFullNameContainingOrUserIdContaining(@Param("search") String search);
-    
-    @Query("SELECT u FROM User u WHERE u.fullName LIKE %:search% AND u.status = :status")
-    List<User> findByFullNameContainingAndStatus(@Param("search") String search, @Param("status") String status);
+    @org.springframework.data.jpa.repository.Query(value = "SELECT r.RoleName FROM Roles r JOIN UserRoles ur ON r.RoleID = ur.RoleID WHERE ur.UserID = :userId", nativeQuery = true)
+    java.util.List<String> findRolesByUserId(@org.springframework.data.repository.query.Param("userId") String userId);
 }

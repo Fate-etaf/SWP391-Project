@@ -14,22 +14,10 @@ public interface MaterialRequestRepository extends JpaRepository<MaterialRequest
 
     long countByStatus(String status);
 
-    long countByStatusAndPatronCampusId(String status, Integer campusId);
-
     @Query("SELECT m FROM MaterialRequest m WHERE " +
            "(:status IS NULL OR :status = '' OR m.status = :status) AND " +
            "(:search IS NULL OR :search = '' OR LOWER(m.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(m.author) LIKE LOWER(CONCAT('%', :search, '%'))) " +
            "ORDER BY m.createdAt DESC")
     List<MaterialRequest> findByStatusAndSearchTerm(@Param("status") String status, @Param("search") String search);
-
-    @Query("SELECT m FROM MaterialRequest m WHERE " +
-           "m.patron.campusId = :campusId AND " +
-           "(:status IS NULL OR :status = '' OR m.status = :status) AND " +
-           "(:search IS NULL OR :search = '' OR LOWER(m.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(m.author) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-           "ORDER BY m.createdAt DESC")
-    List<MaterialRequest> findByStatusAndSearchTermAndCampusId(@Param("status") String status,
-                                                               @Param("search") String search,
-                                                               @Param("campusId") Integer campusId);
 }
