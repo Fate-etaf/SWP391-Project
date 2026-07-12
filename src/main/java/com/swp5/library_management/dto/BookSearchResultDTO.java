@@ -40,6 +40,11 @@ public class BookSearchResultDTO {
      */
     private long availableCount;
 
+    /**
+     * Tổng số bản sao (dùng để xác định "Đang bận" hay "Hết sách").
+     */
+    private long totalCount;
+
     /** URL ảnh bìa thật (từ DB). Null → dùng coverColor gradient. */
     private String coverImageUrl;
 

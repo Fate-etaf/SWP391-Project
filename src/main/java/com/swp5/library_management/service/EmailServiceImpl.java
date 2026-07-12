@@ -3,6 +3,7 @@ package com.swp5.library_management.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -84,6 +85,20 @@ public class EmailServiceImpl implements EmailService {
     public void sendMaterialRequestConfirmation(String toEmail, String patronName, String bookTitle, String author, String priority) {
         String subject = "[Thư viện FPT] Đăng ký đề nghị tài liệu mới thành công";
         String body = buildMaterialRequestConfirmBody(patronName, bookTitle, author, priority);
+        sendHtmlEmail(toEmail, subject, body);
+    }
+
+    @Override
+    public void sendMaterialRequestApproval(String toEmail, String patronName, String bookTitle, String author) {
+        String subject = "[Thư viện FPT] Yêu cầu đề nghị tài liệu mới đã được duyệt";
+        String body = buildMaterialRequestApprovalBody(patronName, bookTitle, author);
+        sendHtmlEmail(toEmail, subject, body);
+    }
+
+    @Override
+    public void sendMaterialRequestRejection(String toEmail, String patronName, String bookTitle, String author) {
+        String subject = "[Thư viện FPT] Yêu cầu đề nghị tài liệu mới không được duyệt";
+        String body = buildMaterialRequestRejectionBody(patronName, bookTitle, author);
         sendHtmlEmail(toEmail, subject, body);
     }
 
@@ -289,5 +304,109 @@ public class EmailServiceImpl implements EmailService {
                   </div>
                 </body></html>
                 """.formatted(patronName, bookTitle, author, priority);
+    }
+private String buildMaterialRequestApprovalBody(String patronName, String bookTitle, String author) {
+    return """
+            <html><body style="font-family: Arial, sans-serif; color: #333;">
+              <div style="max-width:600px; margin:auto; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+                <div style="background:#4caf50; padding:20px; text-align:center;">
+                  <h2 style="color:#fff; margin:0;">📚 Thư viện FPT University</h2>
+                </div>
+                <div style="padding:24px;">
+                  <p>Xin chào <strong>%s</strong>,</p>
+                  <p>Chúng tôi vui mừng thông báo rằng <strong>đề nghị tài liệu mới</strong> của bạn đã được <strong>phê duyệt</strong>.</p>
+
+                  <table style="width:100%%; border-collapse:collapse; margin:16px 0;">
+                    <tr style="background:#f5f5f5;">
+                      <td style="padding:10px; border:1px solid #ddd;"><strong>📖 Tên tài liệu</strong></td>
+                      <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:10px; border:1px solid #ddd;"><strong>✍️ Tác giả</strong></td>
+                      <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                    </tr>
+                    <tr style="background:#f5f5f5;">
+                      <td style="padding:10px; border:1px solid #ddd;"><strong>📌 Trạng thái</strong></td>
+                      <td style="padding:10px; border:1px solid #ddd;">
+                        <strong style="color:#4caf50;">Đã phê duyệt</strong>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <div style="background:#e8f5e9; border-left:4px solid #4caf50; padding:12px; border-radius:4px;">
+                    <p style="margin:0;">
+                      🎉 Cảm ơn bạn đã gửi đề nghị. Thư viện sẽ tiến hành các bước tiếp theo để bổ sung tài liệu vào hệ thống trong thời gian sớm nhất.
+                    </p>
+                  </div>
+
+                  <p style="margin-top:20px;">
+                    Trân trọng,<br>
+                    <strong>Hệ thống Thư viện FPT University</strong>
+                  </p>
+                </div>
+              </div>
+            </body></html>
+            """.formatted(patronName, bookTitle, author);
+}
+
+private String buildMaterialRequestRejectionBody(String patronName, String bookTitle, String author) {
+    return """
+            <html><body style="font-family: Arial, sans-serif; color: #333;">
+              <div style="max-width:600px; margin:auto; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+                <div style="background:#f44336; padding:20px; text-align:center;">
+                  <h2 style="color:#fff; margin:0;">📚 Thư viện FPT University</h2>
+                </div>
+                <div style="padding:24px;">
+                  <p>Xin chào <strong>%s</strong>,</p>
+                  <p>Chúng tôi rất tiếc phải thông báo rằng <strong>đề nghị tài liệu mới</strong> của bạn đã <strong>không được phê duyệt</strong>.</p>
+
+                  <table style="width:100%%; border-collapse:collapse; margin:16px 0;">
+                    <tr style="background:#f5f5f5;">
+                      <td style="padding:10px; border:1px solid #ddd;"><strong>📖 Tên tài liệu</strong></td>
+                      <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:10px; border:1px solid #ddd;"><strong>✍️ Tác giả</strong></td>
+                      <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                    </tr>
+                    <tr style="background:#f5f5f5;">
+                      <td style="padding:10px; border:1px solid #ddd;"><strong>📌 Trạng thái</strong></td>
+                      <td style="padding:10px; border:1px solid #ddd;">
+                        <strong style="color:#f44336;">Không được phê duyệt</strong>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <div style="background:#ffebee; border-left:4px solid #f44336; padding:12px; border-radius:4px;">
+                    <p style="margin:0;">
+                      Thư viện chưa thể bổ sung tài liệu này vào thời điểm hiện tại do giới hạn ngân sách hoặc chính sách phát triển bộ sưu tập. Mong bạn thông cảm.
+                    </p>
+                  </div>
+
+                  <p style="margin-top:20px;">
+                    Trân trọng,<br>
+                    <strong>Hệ thống Thư viện FPT University</strong>
+                  </p>
+                </div>
+              </div>
+            </body></html>
+            """.formatted(patronName, bookTitle, author);
+}
+   @Override
+    public void sendOtpEmail(String toEmail, String subject, String content) {
+        try {
+            // 1. Tạo cấu trúc tin nhắn Mail đơn giản của Spring
+            org.springframework.mail.SimpleMailMessage message = new org.springframework.mail.SimpleMailMessage();
+            message.setTo(toEmail);       // Người nhận (Email sinh viên)
+            message.setSubject(subject);   // Tiêu đề email
+            message.setText(content);     // Nội dung chứa mã OTP
+
+            // 2. Ra lệnh cho bộ gửi mail bắn tin nhắn đi sang Server Google
+            mailSender.send(message);
+            System.out.println("======> ĐÃ GỬI MAIL THÀNH CÔNG TỚI GMAIL THẬT: " + toEmail);
+        } catch (Exception e) {
+            System.out.println("======> LỖI KẾT NỐI SMTP GMAIL: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 }
