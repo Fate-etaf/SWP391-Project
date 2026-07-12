@@ -1,15 +1,17 @@
 package com.swp5.library_management.security;
 
-import com.swp5.library_management.entity.User;
-import lombok.Getter;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import com.swp5.library_management.entity.User;
+
+import lombok.Getter;
 
 @Getter
 public class CustomUserDetails implements UserDetails, OAuth2User {
