@@ -34,4 +34,24 @@ public class BorrowingController {
 
         return "borrowing/history";
     }
+
+    @org.springframework.web.bind.annotation.PostMapping("/renew")
+    public String renewBook(HttpSession session,
+                            @org.springframework.web.bind.annotation.RequestParam("ticketDetailId") Integer ticketDetailId,
+                            RedirectAttributes redirectAttrs) {
+        String patronId = (String) session.getAttribute("loggedInUserId");
+        if (patronId == null) {
+            redirectAttrs.addFlashAttribute("errorMsg", "Vui lòng đăng nhập để thực hiện gia hạn sách.");
+            return "redirect:/login";
+        }
+
+        com.swp5.library_management.dto.ReservationResultDTO result = borrowingService.renewBook(patronId, ticketDetailId);
+        if (result.isSuccess()) {
+            redirectAttrs.addFlashAttribute("successMsg", result.getMessage());
+        } else {
+            redirectAttrs.addFlashAttribute("errorMsg", result.getMessage());
+        }
+
+        return "redirect:/borrowing-history";
+    }
 }

@@ -250,13 +250,27 @@
                     <!-- Bottom Book details link -->
                     <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
                         <span class="text-[10px] text-slate-400">Campus: <strong th:text="${item.copyId != null ? #strings.substring(item.copyId, 0, 2) : 'FPT'}">HN</strong></span>
-                        <a th:if="${item.bookId != null}" th:href="@{/books/{id}(id=${item.bookId})}"
-                           class="text-fpt-orange hover:text-fpt-orangeHover font-semibold transition-colors flex items-center space-x-1">
-                            <span>Chi tiết sách</span>
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
-                            </svg>
-                        </a>
+                        <div class="flex items-center gap-3">
+                            <!-- Nút gia hạn sách -->
+                            <form th:if="${item.status == 'Borrowing'}" th:action="@{/borrowing-history/renew}" method="post" class="inline-block m-0">
+                                <input type="hidden" name="ticketDetailId" th:value="${item.ticketDetailId}">
+                                <button type="submit" 
+                                        th:disabled="${item.renewalCount != null and item.renewalCount >= 4}"
+                                        th:classappend="${item.renewalCount != null and item.renewalCount >= 4 ? 'opacity-50 cursor-not-allowed bg-slate-400' : 'bg-blue-600 hover:bg-blue-700'}"
+                                        class="text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm flex items-center transition-colors">
+                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                    Gia hạn sách
+                                </button>
+                            </form>
+
+                            <a th:if="${item.bookId != null}" th:href="@{/books/{id}(id=${item.bookId})}"
+                               class="text-fpt-orange hover:text-fpt-orangeHover font-semibold transition-colors flex items-center space-x-1">
+                                <span>Chi tiết sách</span>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -296,6 +310,35 @@
     <div th:replace="~{fragments/footer :: footer}"></div>
 
     <!-- ═══════════════════════════════════════════════════════ SCRIPTS ══ -->
+    <!-- SweetAlert2 cho thông báo lỗi/thành công -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            /*[[${successMsg}]]*/
+            let successMsg = /*[[${successMsg}]]*/ null;
+            /*[[${errorMsg}]]*/
+            let errorMsg = /*[[${errorMsg}]]*/ null;
+
+            if (successMsg) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: successMsg,
+                    confirmButtonColor: '#F27125'
+                });
+            }
+
+            if (errorMsg) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: errorMsg,
+                    confirmButtonColor: '#F27125'
+                });
+            }
+        });
+    </script>
+    
     <script>
         let currentFilter = 'All';
 
