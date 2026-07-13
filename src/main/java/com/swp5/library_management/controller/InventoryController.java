@@ -195,8 +195,20 @@ public class InventoryController {
             effectiveCampusId = 1; // Fallback
         }
 
+        List<String> finalSubjectCodes = subjectCodes;
+        if (majorId != null && (finalSubjectCodes == null || finalSubjectCodes.isEmpty())) {
+            com.swp5.library_management.entity.Major major = majorRepository.findById(majorId).orElse(null);
+            if (major != null && major.getSubjects() != null && !major.getSubjects().isEmpty()) {
+                finalSubjectCodes = major.getSubjects().stream()
+                        .map(com.swp5.library_management.entity.Subject::getSubjectCode)
+                        .collect(java.util.stream.Collectors.toList());
+            } else if (major != null) {
+                finalSubjectCodes = java.util.Collections.singletonList("___NONE___");
+            }
+        }
+
         // 2. Lấy toàn bộ dữ liệu Dashboard từ Service
-        DashboardDataDTO data = inventoryService.getDashboardData(effectiveCampusId, subjectCodes, conditions,
+        DashboardDataDTO data = inventoryService.getDashboardData(effectiveCampusId, finalSubjectCodes, conditions,
                 statuses);
 
         // 3. Đẩy dữ liệu vào Model cho Thymeleaf
