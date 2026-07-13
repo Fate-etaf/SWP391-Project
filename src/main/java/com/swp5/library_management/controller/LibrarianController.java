@@ -248,12 +248,10 @@ public class LibrarianController {
         long rejectedCount = (librarianCampusId != null)
                 ? materialRequestRepository.countByStatusAndPatronCampusId("Rejected", librarianCampusId)
                 : materialRequestRepository.countByStatus("Rejected");
-        long orderedCount  = (librarianCampusId != null)
-                ? materialRequestRepository.countByStatusAndPatronCampusId("Ordered",  librarianCampusId)
-                : materialRequestRepository.countByStatus("Ordered");
-        long arrivedCount  = (librarianCampusId != null)
-                ? materialRequestRepository.countByStatusAndPatronCampusId("Arrived",  librarianCampusId)
-                : materialRequestRepository.countByStatus("Arrived");
+        long availableCount = (librarianCampusId != null)
+                ? materialRequestRepository.countByStatusAndPatronCampusId("Available", librarianCampusId)
+                : materialRequestRepository.countByStatus("Available");
+
 
         // Request list scoped to this librarian's campus
         List<MaterialRequest> requests = (librarianCampusId != null)
@@ -279,8 +277,7 @@ public class LibrarianController {
         model.addAttribute("pendingCount",       pendingCount);
         model.addAttribute("approvedCount",      approvedCount);
         model.addAttribute("rejectedCount",      rejectedCount);
-        model.addAttribute("orderedCount",       orderedCount);
-        model.addAttribute("arrivedCount",       arrivedCount);
+        model.addAttribute("availableCount",     availableCount);
         model.addAttribute("requests",           requests);
         model.addAttribute("currentStatus",      status);
         model.addAttribute("currentSearch",      search);

@@ -48,7 +48,7 @@
             </div>
 
             <!-- Statistics Grid -->
-            <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+            <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
                 <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col items-center text-center">
                     <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Pending</h3>
                     <div class="text-2xl font-extrabold text-amber-500" th:text="${pendingCount}">0</div>
@@ -62,12 +62,8 @@
                     <div class="text-2xl font-extrabold text-red-500" th:text="${rejectedCount}">0</div>
                 </div>
                 <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col items-center text-center">
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">On Order</h3>
-                    <div class="text-2xl font-extrabold text-blue-500" th:text="${orderedCount}">0</div>
-                </div>
-                <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col items-center text-center">
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Arrived</h3>
-                    <div class="text-2xl font-extrabold text-purple-500" th:text="${arrivedCount}">0</div>
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Available</h3>
+                    <div class="text-2xl font-extrabold text-blue-500" th:text="${availableCount}">0</div>
                 </div>
             </div>
 
@@ -92,6 +88,9 @@
                         <a th:href="@{/librarian/acquisition/dashboard(status='Approved', search=${currentSearch}, patronRole=${currentPatronRole})}" 
                            th:classappend="${currentStatus == 'Approved'} ? 'bg-fpt-orange text-white border-fpt-orange' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'"
                            class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap">Approved</a>
+                        <a th:href="@{/librarian/acquisition/dashboard(status='Available', search=${currentSearch}, patronRole=${currentPatronRole})}" 
+                           th:classappend="${currentStatus == 'Available'} ? 'bg-fpt-orange text-white border-fpt-orange' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'"
+                           class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap">Available</a>
                     </div>
                     <button type="submit" class="hidden">Search</button>
                 </form>

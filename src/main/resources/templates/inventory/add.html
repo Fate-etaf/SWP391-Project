@@ -159,6 +159,7 @@
                         th:data-isbn="${req.isbn}"
                         th:data-publisher="${req.publisher}"
                         th:data-language="${req.language}"
+                        th:data-requestid="${req.requestId}"
                         onclick="fillForm(this)"
                         style="padding: 0.4rem 0.8rem; font-size: 0.85rem; width: 100%;">Auto-fill Form</button>
             </div>
@@ -173,6 +174,8 @@
     </div>
 
     <form th:action="@{/librarian/inventory/add}" th:object="${bookForm}" method="post">
+        <!-- Hidden field to track which approved request was auto-filled -->
+        <input type="hidden" id="requestId" name="requestId" value=""/>
         
         <div class="form-group">
             <label for="title">Title <span style="color: #fb7185">*</span></label>
@@ -282,11 +285,13 @@
         const isbn = btn.getAttribute('data-isbn');
         const publisher = btn.getAttribute('data-publisher');
         const language = btn.getAttribute('data-language');
+        const requestId = btn.getAttribute('data-requestid');
 
         if (title) document.getElementById('title').value = title;
         if (author) document.getElementById('authorName').value = author;
         if (isbn) document.getElementById('isbn').value = isbn;
         if (publisher) document.getElementById('publisherName').value = publisher;
+        if (requestId) document.getElementById('requestId').value = requestId;
         
         if (language) {
             const langSelect = document.getElementById('language');
@@ -296,6 +301,19 @@
                     break;
                 }
             }
+        }
+
+        // Clear previously selected card highlight
+        document.querySelectorAll('.request-item').forEach(el => {
+            el.style.borderColor = 'var(--border)';
+            el.style.background = 'var(--bg-surface)';
+        });
+
+        // Highlight the selected card
+        const card = btn.closest('.request-item');
+        if (card) {
+            card.style.borderColor = 'var(--accent)';
+            card.style.background = 'rgba(249,115,22,0.06)';
         }
         
         // Highlight form to indicate auto-fill
