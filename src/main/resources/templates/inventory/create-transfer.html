@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tạo lệnh xuất kho - FLMS</title>
+    <title>Táº¡o lá»‡nh luĂ¢n chuyá»ƒn - FLMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -15,11 +15,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between relative overflow-x-hidden">
+<body class="bg-slate-50 min-h-screen text-slate-900 flex flex-col justify-between relative overflow-x-hidden">
 
     <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
-        <div class="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
     </div>
 
     <div class="relative z-50">
@@ -35,40 +35,65 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
                 <div>
-                    <span class="bg-fpt-orange/10 text-fpt-orange px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase mb-3 inline-block">New Transfer</span>
-                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Tạo lệnh xuất kho mới</h2>
-                    <p class="text-sm text-slate-500 mt-1">Lệnh sẽ chuyển trạng thái các sách này sang "Đang giao hàng" (In Transit).</p>
+                    <span class="bg-fpt-orange/20 text-orange-400 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase mb-3 inline-block">New Transfer</span>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Táº¡o lá»‡nh luĂ¢n chuyá»ƒn má»›i</h2>
+                    <p class="text-sm text-slate-500 mt-1">Lá»‡nh xin sĂ¡ch sáº½ Ä‘Æ°á»£c chuyá»ƒn Ä‘áº¿n cÆ¡ sá»Ÿ giá»¯ sĂ¡ch Ä‘á»ƒ chá» duyá»‡t (Pending).</p>
                 </div>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-md">
+            <div class="bg-white border border-slate-200 backdrop-blur-xl rounded-2xl p-6 sm:p-8 shadow-2xl">
+                <!-- THĂ”NG BĂO Lá»–I / THĂ€NH CĂ”NG -->
+                <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-start">
+                    <svg class="w-5 h-5 text-rose-600 mt-0.5 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div class="text-sm text-rose-300 font-medium" th:text="${errorMsg}"></div>
+                </div>
+                <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-start">
+                    <svg class="w-5 h-5 text-emerald-600 mt-0.5 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div class="text-sm text-emerald-300 font-medium" th:text="${successMsg}"></div>
+                </div>
+
                 <form action="/librarian/inventory/transfers/create" method="post" class="space-y-6">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-650 uppercase tracking-wider mb-2">Cơ sở nhận sách <span class="text-rose-500">*</span></label>
-                        <select name="toCampusId" required class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors">
-                            <option value="">-- Chọn cơ sở nhận --</option>
-                            <option th:each="campus : ${campuses}"
-                                    th:if="${campus.campusId != session.loggedInUser.campusId}"
-                                    th:value="${campus.campusId}"
-                                    th:text="${campus.campusName}"></option>
-                        </select>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">CÆ¡ sá»Ÿ xuáº¥t phĂ¡t <span class="text-rose-600">*</span></label>
+                            <select name="fromCampusId" id="fromCampusSelect" required class="w-full bg-[#0e1625] border border-slate-300 text-slate-800 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors">
+                                <option value="">-- Chá»n cÆ¡ sá»Ÿ xuáº¥t --</option>
+                                <option th:each="campus : ${campuses}"
+                                        th:value="${campus.campusId}"
+                                        th:text="${campus.campusName}"
+                                        th:selected="${param.fromCampusId != null and param.fromCampusId[0] == campus.campusId.toString()}"></option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">CÆ¡ sá»Ÿ nháº­n sĂ¡ch <span class="text-rose-600">*</span></label>
+                            <select name="toCampusId" id="toCampusSelect" required class="w-full bg-[#0e1625] border border-slate-300 text-slate-800 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors">
+                                <option value="">-- Chá»n cÆ¡ sá»Ÿ nháº­n --</option>
+                                <option th:each="campus : ${campuses}"
+                                        th:value="${campus.campusId}"
+                                        th:text="${campus.campusName}"
+                                        th:selected="${(param.targetCampusId != null and param.targetCampusId[0] == campus.campusId.toString()) or (param.targetCampusId == null and session.loggedInUser.campusId == campus.campusId)}"></option>
+                            </select>
+                        </div>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-650 uppercase tracking-wider mb-2">Mã bản sao sách <span class="text-rose-500">*</span></label>
-                        <p class="text-xs text-slate-500 mb-2">Nhập các mã Barcode/RFID của sách, cách nhau bằng dấu phẩy.</p>
-                        <textarea name="copyIds" rows="4" required placeholder="Ví dụ: CP-CC-HN-001, CP-DB-HN-001" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors placeholder:text-slate-400"></textarea>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">MĂ£ báº£n sao sĂ¡ch <span class="text-rose-600">*</span></label>
+                        <p class="text-xs text-slate-500 mb-2">Nháº­p cĂ¡c mĂ£ Barcode/RFID cá»§a sĂ¡ch, cĂ¡ch nhau báº±ng dáº¥u pháº©y.</p>
+                        <textarea name="copyIds" rows="4" required th:text="${suggestedCopyIds != null ? suggestedCopyIds : ''}" placeholder="VĂ­ dá»¥: CP-CC-HN-001, CP-DB-HN-001" class="w-full bg-[#0e1625] border border-slate-300 text-slate-800 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors placeholder:text-slate-600"></textarea>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-655 uppercase tracking-wider mb-2">Ghi chú</label>
-                        <input type="text" name="note" placeholder="Ví dụ: Chuyển gấp theo yêu cầu sinh viên HE170001..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors placeholder:text-slate-400">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ghi chĂº</label>
+                        <input type="text" name="note" 
+                               th:value="${param.suggestedBookTitle != null ? 'LuĂ¢n chuyá»ƒn sĂ¡ch [' + param.suggestedBookTitle[0] + '] theo yĂªu cáº§u tá»« Waitlist.' : ''}"
+                               placeholder="VĂ­ dá»¥: Chuyá»ƒn gáº¥p theo yĂªu cáº§u sinh viĂªn HE170001..." class="w-full bg-[#0e1625] border border-slate-300 text-slate-800 text-sm rounded-xl focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 block p-3 transition-colors placeholder:text-slate-600">
                     </div>
 
                     <div class="pt-4 flex items-center justify-end space-x-4 border-t border-slate-200">
-                        <a href="/librarian/inventory/transfers" class="text-sm font-semibold text-slate-500 hover:text-slate-800 px-4 py-2 transition-colors">Hủy bỏ</a>
-                        <button type="submit" class="bg-emerald-650 hover:bg-emerald-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-600/20 border border-emerald-500">
-                            Xác nhận xuất kho
+                        <a href="/librarian/inventory/transfers" class="text-sm font-semibold text-slate-500 hover:text-slate-800 px-4 py-2 transition-colors">Há»§y bá»</a>
+                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-600/20 border border-emerald-500">
+                            XĂ¡c nháº­n luĂ¢n chuyá»ƒn
                         </button>
                     </div>
                 </form>
@@ -79,5 +104,75 @@
     <div class="relative z-10 mt-auto">
         <div th:replace="~{fragments/footer :: footer}"></div>
     </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const campusCopiesMap = /*[[${campusCopiesMap}]]*/ {};
+        const copyIdsTextarea = document.querySelector('textarea[name="copyIds"]');
+        const fromCampusSelect = document.getElementById('fromCampusSelect');
+        const toCampusSelect = document.getElementById('toCampusSelect');
+
+        function updateCopyIds() {
+            const selectedCampusId = fromCampusSelect.value;
+            if (selectedCampusId && campusCopiesMap && campusCopiesMap[selectedCampusId] && campusCopiesMap[selectedCampusId].length > 0) {
+                // Láº¥y sá»‘ lÆ°á»£ng sinh viĂªn Ä‘ang chá» tá»« URL (máº·c Ä‘á»‹nh lĂ  1 náº¿u khĂ´ng cĂ³)
+                const urlParams = new URLSearchParams(window.location.search);
+                const waitCount = parseInt(urlParams.get('waitingCount')) || 1;
+                
+                // TrĂ­ch xuáº¥t sá»‘ lÆ°á»£ng mĂ£ sĂ¡ch tÆ°Æ¡ng á»©ng vá»›i sá»‘ sinh viĂªn chá» (tá»‘i Ä‘a báº±ng sá»‘ lÆ°á»£ng sĂ¡ch hiá»‡n cĂ³)
+                const maxCopies = Math.min(waitCount, campusCopiesMap[selectedCampusId].length);
+                const selectedCopies = campusCopiesMap[selectedCampusId].slice(0, maxCopies);
+                
+                // Ná»‘i cĂ¡c mĂ£ sĂ¡ch báº±ng dáº¥u pháº©y
+                copyIdsTextarea.value = selectedCopies.join(', ');
+            } else {
+                // Chá»‰ clear náº¿u load tá»« gá»£i Ă½, náº¿u user tá»± nháº­p thĂ¬ khĂ´ng clear
+                if (campusCopiesMap && Object.keys(campusCopiesMap).length > 0) {
+                    copyIdsTextarea.value = '';
+                }
+            }
+        }
+
+        fromCampusSelect.addEventListener('change', function() {
+            updateCopyIds();
+            if (this.value === toCampusSelect.value && this.value !== '') {
+                alert('CÆ¡ sá»Ÿ xuáº¥t phĂ¡t khĂ´ng Ä‘Æ°á»£c trĂ¹ng vá»›i cÆ¡ sá»Ÿ nháº­n!');
+                this.value = '';
+                updateCopyIds();
+            }
+        });
+
+        toCampusSelect.addEventListener('change', function() {
+            if (this.value === fromCampusSelect.value && this.value !== '') {
+                alert('CÆ¡ sá»Ÿ nháº­n khĂ´ng Ä‘Æ°á»£c trĂ¹ng vá»›i cÆ¡ sá»Ÿ xuáº¥t phĂ¡t!');
+                this.value = '';
+            }
+        });
+
+        // Trigger on load
+        if (campusCopiesMap && Object.keys(campusCopiesMap).length > 0) {
+            let currentFrom = fromCampusSelect.value;
+            // Náº¿u CÆ¡ sá»Ÿ xuáº¥t phĂ¡t hiá»‡n táº¡i khĂ´ng cĂ³ sĂ¡ch, tá»± Ä‘á»™ng chá»n cÆ¡ sá»Ÿ khĂ¡c cĂ³ sĂ¡ch
+            if (!currentFrom || !campusCopiesMap[currentFrom] || campusCopiesMap[currentFrom].length === 0) {
+                let toCampus = toCampusSelect.value;
+                let availableCampuses = Object.keys(campusCopiesMap);
+                // Æ¯u tiĂªn chá»n cÆ¡ sá»Ÿ cĂ³ sĂ¡ch mĂ  khĂ¡c vá»›i CÆ¡ sá»Ÿ nháº­n
+                let bestCampus = availableCampuses.find(c => c !== toCampus) || availableCampuses[0];
+                fromCampusSelect.value = bestCampus;
+            }
+        }
+
+        if (fromCampusSelect.value) {
+            updateCopyIds();
+        }
+        
+        // Náº¿u vĂ´ tĂ¬nh from == to (vd ngÆ°á»i dĂ¹ng chá»‰ Ä‘á»‹nh URL lá»—i), cáº£nh bĂ¡o
+        if (fromCampusSelect.value === toCampusSelect.value && fromCampusSelect.value !== '') {
+            alert('CÆ¡ sá»Ÿ xuáº¥t phĂ¡t khĂ´ng Ä‘Æ°á»£c trĂ¹ng vá»›i cÆ¡ sá»Ÿ nháº­n. Vui lĂ²ng chá»n cÆ¡ sá»Ÿ xuáº¥t phĂ¡t khĂ¡c!');
+            fromCampusSelect.value = '';
+            updateCopyIds();
+        }
+        /*]]>*/
+    </script>
 </body>
 </html>
