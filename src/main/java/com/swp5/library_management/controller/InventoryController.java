@@ -94,7 +94,19 @@ public class InventoryController {
             campusId = (Integer) session.getAttribute("loggedInCampusId");
         }
         bookService.saveBook(form, campusId);
-        return "redirect:/librarian/inventory";
+
+        // If the form was auto-filled from an approved request, mark it as Available
+        // so its "Auto-fill Form" button no longer shows on the page
+        if (form.getRequestId() != null && !form.getRequestId().trim().isEmpty()) {
+            try {
+                Integer reqId = Integer.parseInt(form.getRequestId().trim());
+                materialRequestRepository.updateStatus(reqId, "Available");
+            } catch (NumberFormatException e) {
+                // Ignore if it's not a valid number
+            }
+        }
+
+        return "redirect:/librarian/inventory/list";
     }
     @GetMapping("/inventory/{id}")
     public String bookDetail(

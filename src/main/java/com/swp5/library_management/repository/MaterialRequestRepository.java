@@ -6,10 +6,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 public interface MaterialRequestRepository extends JpaRepository<MaterialRequest, Integer> {
+    
+    @Modifying
+    @Transactional
+    @Query("UPDATE MaterialRequest m SET m.status = :status WHERE m.requestId = :id")
+    void updateStatus(@Param("id") Integer id, @Param("status") String status);
+
     List<MaterialRequest> findByPatronUserIdOrderByCreatedAtDesc(String patronId);
 
     long countByStatus(String status);
