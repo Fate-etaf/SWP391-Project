@@ -348,13 +348,14 @@
                             <span class="badge badge-waiting"  th:if="${w.status == 'Waiting'}">⏳ Đang đợi sách</span>
                             <span class="badge badge-notified" th:if="${w.status == 'Notified'}">🔔 Đã có sách (Kiểm tra Email)</span>
                             <span class="badge badge-cancelled" th:if="${w.status == 'Cancelled'}">❌ Đã hủy đăng ký</span>
+                            <span class="badge badge-completed" th:if="${w.status == 'Converted'}">✅ Đã chuyển thành đặt chỗ</span>
                         </div>
 
                         <!-- Metadata -->
                         <div class="res-meta">
                             <span>🏫 <span th:text="${w.campus.campusName}">Campus</span></span>
                             <span>📅 Đăng ký lúc: <span th:text="${#temporals.format(w.requestedAt, 'dd/MM/yyyy HH:mm')}"></span></span>
-                            <span th:if="${w.queuePosition != null}" style="color: #0057b8; font-weight: bold; margin-left: 10px;">
+                            <span th:if="${w.queuePosition != null and (w.status == 'Waiting' or w.status == 'Notified')}" style="color: #0057b8; font-weight: bold; margin-left: 10px;">
                                 📋 Vị trí của bạn: #<span th:text="${w.queuePosition}"></span>
                             </span>
                         </div>
