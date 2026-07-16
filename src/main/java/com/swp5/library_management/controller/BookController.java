@@ -66,27 +66,29 @@ public class BookController {
             jakarta.servlet.http.HttpSession session,
             Model model) {
 
-        if (campusId == null) {
-            if (userDetails != null && userDetails.getUser() != null && userDetails.getUser().getCampusId() != null) {
-                campusId = userDetails.getUser().getCampusId();
-            } else {
-                Integer loggedInCampusId = (Integer) session.getAttribute("loggedInCampusId");
-                if (loggedInCampusId != null) {
-                    campusId = loggedInCampusId;
-                }
+        Integer filterCampusId = campusId;
+        if (filterCampusId != null && filterCampusId == 0) {
+            filterCampusId = null;
+        }
+
+        Integer displayCampusId = null;
+        if (userDetails != null && userDetails.getUser() != null && userDetails.getUser().getCampusId() != null) {
+            displayCampusId = userDetails.getUser().getCampusId();
+        } else {
+            Integer loggedInCampusId = (Integer) session.getAttribute("loggedInCampusId");
+            if (loggedInCampusId != null) {
+                displayCampusId = loggedInCampusId;
             }
-        } else if (campusId == 0) {
-            campusId = null; // 0 means all campuses
         }
 
         boolean hasSearch = StringUtils.hasText(keyword)
                          || StringUtils.hasText(subjectCode)
                          || categoryId != null
                          || majorId != null
-                         || campusId != null;
+                         || filterCampusId != null;
 
         if (hasSearch) {
-            Page<BookSearchResultDTO> resultPage = bookService.searchBooks(keyword, subjectCode, categoryId, majorId, campusId, page, 12);
+            Page<BookSearchResultDTO> resultPage = bookService.searchBooks(keyword, subjectCode, categoryId, majorId, filterCampusId, displayCampusId, page, 12);
             model.addAttribute("results", resultPage.getContent());
             model.addAttribute("totalPages", resultPage.getTotalPages());
             model.addAttribute("totalElements", resultPage.getTotalElements());
