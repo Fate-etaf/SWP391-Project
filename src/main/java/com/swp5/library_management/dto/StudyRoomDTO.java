@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,4 +17,5 @@ public class StudyRoomDTO {
     private Integer capacity;
     private String description;
     private String status;
+    private List<BookedSlotDTO> bookedSlots;
 }

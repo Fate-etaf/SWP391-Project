@@ -8,10 +8,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface StudyRoomService {
-    List<StudyRoomDTO> getAvailableRooms(Integer campusId);
+    List<StudyRoomDTO> getAvailableRooms(Integer campusId, java.time.LocalDate date, String patronId);
     RoomBookingResponseDTO bookRoom(RoomBookingRequestDTO request, String patronId);
     void cancelBooking(Integer bookingId, String patronId);
     void checkIn(Integer bookingId, String patronId);
     void checkOut(Integer bookingId, String patronId);
     void librarianCancel(Integer bookingId);
+    void evictBooking(Integer bookingId);
 }

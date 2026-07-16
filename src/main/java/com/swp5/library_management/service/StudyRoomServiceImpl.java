@@ -32,16 +32,29 @@ public class StudyRoomServiceImpl implements StudyRoomService {
     // private final EmailService emailService; // Temporarily omitted to avoid changing too many files unless needed
 
     @Override
-    public List<StudyRoomDTO> getAvailableRooms(Integer campusId) {
+    public List<StudyRoomDTO> getAvailableRooms(Integer campusId, LocalDate date, String patronId) {
         return studyRoomRepository.findByCampus_CampusIdAndStatus(campusId, "Available")
                 .stream()
-                .map(room -> StudyRoomDTO.builder()
-                        .roomId(room.getRoomId())
-                        .roomName(room.getRoomName())
-                        .capacity(room.getCapacity())
-                        .description(room.getDescription())
-                        .status(room.getStatus())
-                        .build())
+                .map(room -> {
+                    // Lấy danh sách khung giờ đã đặt của phòng này
+                    List<RoomBooking> bookings = roomBookingRepository.findActiveBookingsByRoomAndDate(room.getRoomId(), date);
+                    List<com.swp5.library_management.dto.BookedSlotDTO> slots = bookings.stream()
+                            .map(b -> com.swp5.library_management.dto.BookedSlotDTO.builder()
+                                    .startTime(b.getStartTime())
+                                    .endTime(b.getEndTime())
+                                    .isOwnBooking(b.getPatron().getUserId().equals(patronId))
+                                    .build())
+                            .collect(Collectors.toList());
+
+                    return StudyRoomDTO.builder()
+                            .roomId(room.getRoomId())
+                            .roomName(room.getRoomName())
+                            .capacity(room.getCapacity())
+                            .description(room.getDescription())
+                            .status(room.getStatus())
+                            .bookedSlots(slots)
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 
@@ -67,13 +80,20 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         // Validate time
         LocalTime start = request.getStartTime();
         LocalTime end = request.getEndTime();
+        if (request.getBookingDate().isEqual(today) && start.isBefore(LocalTime.now())) {
+            throw new RuntimeException("Không thể đặt phòng cho khoảng thời gian trong quá khứ");
+        }
         if (start.isBefore(LocalTime.of(8, 30)) || end.isAfter(LocalTime.of(17, 0))) {
             throw new RuntimeException("Khung giờ phục vụ là 08:30 - 17:00");
         }
         if (!start.isBefore(end)) {
             throw new RuntimeException("Giờ bắt đầu phải nhỏ hơn giờ kết thúc");
         }
-        if (Duration.between(start, end).toMinutes() > 120) {
+        long durationMinutes = Duration.between(start, end).toMinutes();
+        if (durationMinutes < 30) {
+            throw new RuntimeException("Thời gian book tối thiểu là 30 phút/lần");
+        }
+        if (durationMinutes > 120) {
             throw new RuntimeException("Thời gian book tối đa là 2 giờ/lần");
         }
 
@@ -85,6 +105,9 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         // Validate 1 booking per day
         List<RoomBooking> activeBookings = roomBookingRepository.findActiveBookingsByUserAndDate(patronId, request.getBookingDate());
         if (!activeBookings.isEmpty()) {
+            if ("Evicted".equals(activeBookings.get(0).getStatus())) {
+                throw new RuntimeException("Tài khoản của bạn đã vi phạm nội quy và bị mời ra khỏi phòng trong ngày hôm nay, bạn không thể tiếp tục đặt phòng.");
+            }
             throw new RuntimeException("Mỗi nhóm chỉ được book 1 ca/ngày");
         }
 
@@ -98,6 +121,11 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         // Get Room
         StudyRoom room = studyRoomRepository.findById(request.getRoomId())
                 .orElseThrow(() -> new RuntimeException("Phòng học không tồn tại"));
+                
+        if (!room.getCampus().getCampusId().equals(patron.getCampusId())) {
+            throw new RuntimeException("Bạn chỉ được phép đặt phòng học tại cơ sở của mình");
+        }
+        
         if (request.getParticipantCount() > room.getCapacity()) {
             throw new RuntimeException("Số lượng người vượt quá sức chứa của phòng");
         }
@@ -116,8 +144,9 @@ public class StudyRoomServiceImpl implements StudyRoomService {
                 .build();
         booking = roomBookingRepository.save(booking);
 
-        // Generate QR code
-        String qrContent = booking.getBookingId() + "-" + patron.getUserId();
+        // Generate QR code (Approach 2: URL for Librarian's mobile scan)
+        String baseUrl = "http://localhost:8080"; // Can be replaced with actual domain later
+        String qrContent = baseUrl + "/librarian/study-room-scanner?bookingId=" + booking.getBookingId();
         byte[] qrBytes = qrCodeService.generatePng(qrContent, 300);
         booking.setQrCode(qrBytes);
         roomBookingRepository.save(booking);
@@ -207,10 +236,18 @@ public class StudyRoomServiceImpl implements StudyRoomService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đặt phòng"));
         // Librarian can cancel if rules violated
         booking.setStatus("Cancelled");
-        // Also could lock patron: booking.getPatron().setBorrowingLocked(true)
-        User patron = booking.getPatron();
-        patron.setBorrowingLocked(true);
-        userRepository.save(patron);
+        roomBookingRepository.save(booking);
+    }
+
+    @Override
+    @Transactional
+    public void evictBooking(Integer bookingId) {
+        RoomBooking booking = roomBookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đặt phòng"));
+        if (!"CheckedIn".equals(booking.getStatus())) {
+            throw new RuntimeException("Phòng chưa được Check-in nên không thể mời ra");
+        }
+        booking.setStatus("Evicted");
         roomBookingRepository.save(booking);
     }
 }

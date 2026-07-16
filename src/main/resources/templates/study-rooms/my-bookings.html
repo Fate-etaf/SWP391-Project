@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <th:block th:replace="~{fragments/header :: head('Đơn Đặt Phòng Của Tôi')}"></th:block>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B',
+                            dark: '#0F172A',
+                            orangeHover: '#D95F18'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
+    <!-- Header -->
+    <div th:replace="~{fragments/header :: header('service')}"></div>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        
+        <div class="mb-8">
+            <h1 class="text-3xl font-extrabold text-fpt-navy tracking-tight">Đơn Đặt Phòng Của Tôi</h1>
+            <p class="text-gray-600 mt-2">Quản lý các lịch hẹn sử dụng phòng học nhóm của bạn.</p>
+        </div>
+
+        <div th:if="${param.success}" class="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl flex items-center shadow-sm">
+            <svg class="w-6 h-6 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="font-medium">Đặt phòng thành công! Thủ thư có thể yêu cầu quét mã QR của bạn khi nhận phòng.</span>
+        </div>
+
+        <!-- Bookings List -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div th:if="${bookings.empty}" class="p-12 text-center text-gray-500">
+                <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p class="text-lg mb-4">Bạn chưa có đơn đặt phòng nào.</p>
+                <a href="/study-rooms" class="inline-block bg-fpt-orange hover:bg-fpt-orangeHover text-white font-bold py-2.5 px-6 rounded-xl transition-colors">Đặt phòng ngay</a>
+            </div>
+
+            <div th:unless="${bookings.empty}" class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-700 text-sm uppercase tracking-wider border-b border-gray-100">
+                            <th class="p-4 font-semibold">Phòng</th>
+                            <th class="p-4 font-semibold">Thời gian</th>
+                            <th class="p-4 font-semibold text-center">Số lượng</th>
+                            <th class="p-4 font-semibold text-center">Trạng thái</th>
+                            <th class="p-4 font-semibold text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr th:each="booking : ${bookings}" class="hover:bg-gray-50 transition-colors">
+                            <td class="p-4">
+                                <div class="font-bold text-gray-900" th:text="${booking.roomName}"></div>
+                                <div class="text-xs text-gray-500" th:text="'Mã đơn: #' + ${booking.bookingId}"></div>
+                            </td>
+                            <td class="p-4">
+                                <div class="font-medium text-gray-800" th:text="${#temporals.format(booking.bookingDate, 'dd/MM/yyyy')}"></div>
+                                <div class="text-sm text-fpt-orange font-semibold" th:text="${booking.startTime} + ' - ' + ${booking.endTime}"></div>
+                            </td>
+                            <td class="p-4 text-center font-medium text-gray-700" th:text="${booking.participantCount}"></td>
+                            <td class="p-4 text-center">
+                                <span th:if="${booking.status == 'Confirmed'}" class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full border border-blue-200">Đã xác nhận</span>
+                                <span th:if="${booking.status == 'CheckedIn'}" class="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full border border-yellow-200">Đang sử dụng</span>
+                                <span th:if="${booking.status == 'CheckedOut'}" class="bg-gray-100 text-gray-800 text-xs font-bold px-3 py-1 rounded-full border border-gray-200">Đã hoàn thành</span>
+                                <span th:if="${booking.status == 'Cancelled'}" class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full border border-red-200">Đã hủy</span>
+                                <span th:if="${booking.status == 'NoShow'}" class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full border border-red-200">Vắng mặt (Vi phạm)</span>
+                            </td>
+                            <td class="p-4 text-right space-x-2">
+                                <button th:if="${booking.status == 'Confirmed'}" 
+                                        th:onclick="showQR([[${booking.qrBase64}]], [[${booking.bookingId}]], [[${booking.roomName}]])" 
+                                        class="inline-flex items-center text-sm font-semibold text-fpt-navy bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                                    Mã QR
+                                </button>
+                                <button th:if="${booking.status == 'Confirmed'}" 
+                                        th:onclick="cancelBooking([[${booking.bookingId}]])" 
+                                        class="inline-flex items-center text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors">
+                                    Hủy đơn
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- QR Modal -->
+    <div id="qrModal" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center relative shadow-2xl">
+            <button onclick="closeQR()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 class="text-xl font-bold text-fpt-navy mb-1">Vé Điện Tử</h3>
+            <p id="qrSubtitle" class="text-sm text-gray-500 mb-6"></p>
+            <div class="bg-gray-50 p-4 rounded-xl inline-block border border-gray-100 mb-6">
+                <img id="qrImage" src="" alt="QR Code" class="w-48 h-48 mx-auto mix-blend-multiply">
+            </div>
+            <p class="text-sm text-gray-600">Đưa mã QR này cho Thủ thư hoặc Bảo vệ để quét khi nhận phòng.</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script>
+        function showQR(base64, id, room) {
+            document.getElementById('qrImage').src = 'data:image/png;base64,' + base64;
+            document.getElementById('qrSubtitle').textContent = `Đơn #${id} - ${room}`;
+            document.getElementById('qrModal').classList.remove('hidden');
+        }
+
+        function closeQR() {
+            document.getElementById('qrModal').classList.add('hidden');
+        }
+
+        function cancelBooking(id) {
+            if(confirm('Bạn có chắc chắn muốn hủy đơn đặt phòng này không? Hành động này không thể hoàn tác.')) {
+                fetch(`/api/study-rooms/book/${id}/cancel`, {
+                    method: 'POST'
+                })
+                .then(async res => {
+                    if(!res.ok) {
+                        const text = await res.text();
+                        alert('Lỗi: ' + text);
+                    } else {
+                        alert('Hủy đơn thành công!');
+                        window.location.reload();
+                    }
+                })
+                .catch(err => alert('Lỗi mạng: ' + err));
+            }
+        }
+    </script>
+</body>
+</html>

@@ -18,12 +18,12 @@ public interface RoomBookingRepository extends JpaRepository<RoomBooking, Intege
     List<RoomBooking> findActiveBookingsByUserAndDate(@Param("userId") String userId, @Param("date") LocalDate date);
 
     // Lấy tất cả đơn đặt phòng của 1 phòng trong 1 ngày cụ thể
-    @Query("SELECT rb FROM RoomBooking rb WHERE rb.studyRoom.roomId = :roomId AND rb.bookingDate = :date AND rb.status NOT IN ('Cancelled', 'NoShow')")
+    @Query("SELECT rb FROM RoomBooking rb WHERE rb.studyRoom.roomId = :roomId AND rb.bookingDate = :date AND rb.status NOT IN ('Cancelled', 'NoShow', 'Evicted')")
     List<RoomBooking> findActiveBookingsByRoomAndDate(@Param("roomId") Integer roomId, @Param("date") LocalDate date);
     
     // Kiểm tra xem có đơn đặt phòng nào trùng lặp với thời gian yêu cầu không
     @Query("SELECT CASE WHEN COUNT(rb) > 0 THEN true ELSE false END FROM RoomBooking rb " +
-           "WHERE rb.studyRoom.roomId = :roomId AND rb.bookingDate = :date AND rb.status NOT IN ('Cancelled', 'NoShow') " +
+           "WHERE rb.studyRoom.roomId = :roomId AND rb.bookingDate = :date AND rb.status NOT IN ('Cancelled', 'NoShow', 'Evicted') " +
            "AND (rb.startTime < :endTime AND rb.endTime > :startTime)")
     boolean existsOverlappingBooking(@Param("roomId") Integer roomId, @Param("date") LocalDate date, 
                                      @Param("startTime") LocalTime startTime, @Param("endTime") LocalTime endTime);
