@@ -259,11 +259,14 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setStatus("Cancelled");
         reservationRepository.save(reservation);
 
-        // Alt 1 – Bước 5b: Trả bản sách về trạng thái Available
+        // Alt 1 – Bước 5b: Xử lý bản sách (Gán cho người Waitlist hoặc trả về Available)
         BookCopy copy = reservation.getCopy();
         if (copy != null) {
-            copy.setCopyStatus("Available");
-            bookCopyRepository.save(copy);
+            boolean assignedToWaitlist = processWaitlistForReturnedBook(copy);
+            if (!assignedToWaitlist) {
+                copy.setCopyStatus("Available");
+                bookCopyRepository.save(copy);
+            }
         }
 
         // Alt 1 – Bước 6a: Ghi Notification hủy đơn
