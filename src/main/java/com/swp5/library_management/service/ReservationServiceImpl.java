@@ -520,8 +520,8 @@ public class ReservationServiceImpl implements ReservationService {
                     .build();
             reservationRepository.save(reservation);
 
-            // Cập nhật Waitlist -> Completed
-            waitlist.setStatus("Completed");
+            // Cập nhật Waitlist -> Converted
+            waitlist.setStatus("Converted");
             waitlistRepository.save(waitlist);
 
             // Cập nhật BookCopy -> Reserved
