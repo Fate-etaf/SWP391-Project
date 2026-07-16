@@ -354,6 +354,9 @@
                         <div class="res-meta">
                             <span>🏫 <span th:text="${w.campus.campusName}">Campus</span></span>
                             <span>📅 Đăng ký lúc: <span th:text="${#temporals.format(w.requestedAt, 'dd/MM/yyyy HH:mm')}"></span></span>
+                            <span th:if="${w.queuePosition != null}" style="color: #0057b8; font-weight: bold; margin-left: 10px;">
+                                📋 Vị trí của bạn: #<span th:text="${w.queuePosition}"></span>
+                            </span>
                         </div>
                     </div>
 

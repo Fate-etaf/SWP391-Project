@@ -299,7 +299,14 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public List<Waitlist> getMyWaitlists(String patronId) {
-        return waitlistRepository.findByPatronUserIdOrderByRequestedAtDesc(patronId);
+        List<Waitlist> waitlists = waitlistRepository.findByPatronUserIdOrderByRequestedAtDesc(patronId);
+        for (Waitlist w : waitlists) {
+            if ("Waiting".equals(w.getStatus()) || "Notified".equals(w.getStatus())) {
+                long pos = waitlistRepository.countAheadInQueue(w.getBook().getBookId(), w.getCampus().getCampusId(), w.getWaitlistId()) + 1;
+                w.setQueuePosition(pos);
+            }
+        }
+        return waitlists;
     }
 
     // =========================================================================
