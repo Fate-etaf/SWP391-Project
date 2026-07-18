@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <th:block th:replace="~{fragments/header :: head('Dịch vụ phòng học nhóm - FPTU Library')}"></th:block>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <style>
+        /* ── ARTICLE CONTENT ── */
+        .page-header { background: #f7f7f7; padding: 40px 20px; border-bottom: 1px solid #ddd; }
+        .page-header .inner { max-width: 900px; margin: 0 auto; }
+        .page-header h1 { font-size: 28px; color: #1a1a2e; margin-bottom: 8px; }
+        .page-meta { font-size: 13px; color: #777; display: flex; gap: 16px; }
+        
+        .article-body { max-width: 900px; margin: 40px auto; padding: 0 20px; font-size: 15px; color: #333; }
+        .article-body h2 { font-size: 20px; color: #e87722; margin-top: 32px; margin-bottom: 16px; font-weight: 700; }
+        .article-body h3 { font-size: 17px; color: #1a1a2e; margin-top: 24px; margin-bottom: 12px; font-weight: 600; }
+        .article-body p { margin-bottom: 16px; }
+        .article-body ul { margin-bottom: 16px; padding-left: 20px; }
+        .article-body li { margin-bottom: 8px; }
+        .article-body a { color: #e87722; text-decoration: none; font-weight: 600; }
+        .article-body a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header('service')}"></div>
+
+<div class="page-header">
+    <div class="inner">
+        <h1>Quy định sử dụng phòng học nhóm tại Thư viện FPTU HN</h1>
+        <div class="page-meta">
+            <span>📅 22/09/2023</span>
+            <span>👁️ 11805 lượt xem</span>
+        </div>
+    </div>
+</div>
+
+<main class="article-body">
+    <p>Phòng học nhóm trong Thư viện được thiết kế nhằm phục vụ hoạt động học tập, nghiên cứu theo nhóm. Phòng được thiết kế cách âm, có sức chứa tối đa 8 người/phòng.</p>
+    <p>Bạn đọc truy cập link dưới bài viết để xem giờ trống và đăng ký sử dụng tại quầy Thủ thư.</p>
+
+    <h2>1. Đối tượng sử dụng:</h2>
+    <p>Là bạn đọc của Thư viện FPTU Hà Nội.</p>
+
+    <h2>2. Thời gian sử dụng:</h2>
+    <p>Tối đa là 2 giờ/1 lần đăng ký.</p>
+
+    <h2>3. Điều kiện sử dụng:</h2>
+    <ul>
+        <li>Bạn đọc chỉ được phép book trước 1 ngày;</li>
+        <li>Mỗi nhóm chỉ book duy nhất 1 ca/ngày;</li>
+        <li><strong>MỖI NHÓM CHỈ MỘT THÀNH VIÊN DUY NHẤT BOOK;</strong></li>
+        <li>Sau 15 phút kể từ thời gian book, nếu nhóm không sử dụng phòng, đơn book sẽ bị hủy;</li>
+        <li>Số lượng thành viên trong nhóm tối thiểu là 4 người, tối đa 8 người (nếu không đủ số lượng thành viên sau 15 phút, ca book sẽ bị hủy).</li>
+        <li>Giữ gìn tài sản, không xê dịch, thay đổi, làm hư hỏng đồ dùng trong phòng;</li>
+        <li>Giữ gìn vệ sinh chung, không mang đồ ăn, thức uống, đồ dễ cháy nổ vào phòng;</li>
+        <li>Bạn đọc tự bảo quản tài sản cá nhân khi sử dụng phòng.</li>
+        <li>Chỉ book trong khoảng thời gian từ 08:30 - 17:00 từ thứ Hai tới thứ Sáu.</li>
+    </ul>
+
+    <h2>4. Xử lý vi phạm:</h2>
+    <ul>
+        <li>Bạn đọc vi phạm nội quy tại mục 3 sẽ bị hủy quyền book phòng lần sau;</li>
+        <li>Nếu làm hư hỏng đồ dùng, bạn đọc sẽ phải đền theo giá trị tài sản;</li>
+        <li>Bạn đọc sử dụng không đúng mục đích sẽ bị thu hồi.</li>
+    </ul>
+
+    <div style="background: #eef2ff; border-left: 4px solid #4f46e5; padding: 16px; margin: 24px 0; border-radius: 4px; color: #1e1b4b;">
+        <strong>HƯỚNG DẪN:</strong> Trước khi book phòng, Bạn đọc nên xem danh sách các nhóm đã book để không bị trùng khung giờ sử dụng.<br>
+        Link xem thời gian rảnh: <a href="#" style="color:#4f46e5;">TẠI ĐÂY</a><br>
+        <strong>Đăng ký sử dụng:</strong> Tại quầy Thủ thư
+    </div>
+
+    <hr style="margin: 32px 0; border: none; border-top: 1px solid #ddd;">
+
+    <p>
+        Trân trọng!<br>
+        <strong>Phòng Thông tin - Thư viện</strong><br>
+        Office tel: 02466.805.912 (gọi trong giờ hành chính)<br>
+        Fanpage: <a href="https://www.facebook.com/thuvienfu">https://www.facebook.com/thuvienfu</a><br>
+        Email: thuvien_fu_hoalac@fpt.edu.vn
+    </p>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <th:block th:replace="~{fragments/header :: head('Welcome to FPTU Library')}"></th:block>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B',
+                            dark: '#0F172A',
+                            orangeHover: '#D95F18'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ── HERO ── */
+        .hero {
+            position: relative;
+            height: 380px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 70%, #1a4a6e 100%);
+        }
+        /* FPT campus photo overlay via CSS background-image if the image exists */
+        .hero-photo {
+            position: absolute;
+            inset: 0;
+            background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/FPT_University_Hanoi.jpg/1280px-FPT_University_Hanoi.jpg') center center/cover no-repeat;
+            opacity: 0.35;
+        }
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(26,26,46,0.55) 0%, rgba(26,26,46,0.75) 100%);
+        }
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 860px;
+            padding: 0 20px;
+            text-align: center;
+        }
+        .hero-title {
+            font-size: 36px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 6px;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+        }
+        .hero-title span { color: #e87722; }
+        .hero-subtitle {
+            font-size: 13px;
+            color: #e0e0e0;
+            margin-bottom: 24px;
+            letter-spacing: 0.3px;
+        }
+
+        /* Quick links */
+        .quick-links {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .quick-links a {
+            color: #e0e0e0;
+            font-size: 12.5px;
+            text-decoration: none;
+            background: rgba(255,255,255,0.12);
+            padding: 5px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: background 0.2s, color 0.2s;
+            backdrop-filter: blur(4px);
+        }
+        .quick-links a:hover { background: #e87722; color: #fff; border-color: #e87722; }
+
+        /* ── HOW TO USE ── */
+        .how-to {
+            background: #f7f7f7;
+            padding: 48px 20px;
+            text-align: center;
+        }
+        .how-to h2 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 32px;
+        }
+        .how-to-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .how-card {
+            background: #e87722;
+            color: #fff;
+            border-radius: 8px;
+            padding: 28px 16px 24px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            display: block;
+        }
+        .how-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(232,119,34,0.35); }
+        .how-card .icon { font-size: 36px; margin-bottom: 12px; }
+        .how-card .label { font-size: 14px; font-weight: 700; line-height: 1.3; }
+        .how-card.alt { background: #1a1a2e; }
+        .how-card.alt:hover { box-shadow: 0 12px 32px rgba(26,26,46,0.35); }
+
+        /* ── STATS BAND ── */
+        .stats-band {
+            background: #1a1a2e;
+            padding: 28px 20px;
+        }
+        .stats-band .inner {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 12px 8px;
+            border-right: 1px solid #333;
+        }
+        .stat-item:last-child { border-right: none; }
+        .stat-num {
+            font-size: 30px;
+            font-weight: 800;
+            color: #e87722;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+        /* ── CATEGORY BOOKS SECTION ── */
+        .category-section {
+            padding: 40px 20px 20px;
+            background: #fff;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .category-section:nth-child(even) {
+            background: #fafafa;
+        }
+        .category-section .inner { max-width: 1200px; margin: 0 auto; }
+        .category-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .section-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+        .see-all {
+            color: #e87722;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .see-all:hover { text-decoration: underline; }
+        
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+            gap: 18px;
+        }
+        .book-card {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: box-shadow 0.2s, transform 0.2s;
+            background: #fff;
+        }
+        .book-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.12); transform: translateY(-3px); }
+        .book-cover {
+            height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 12px;
+            color: #fff;
+            font-size: 11px;
+        }
+        .book-cover .code-badge {
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-weight: 700;
+            display: inline-block;
+            backdrop-filter: blur(4px);
+            font-size: 10px;
+        }
+        .book-cover .book-title-cover {
+            font-weight: 800;
+            font-size: 12px;
+            line-height: 1.3;
+            -webkit-line-clamp: 3;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        /* Book Cover Colors */
+        .cover-blue { background: linear-gradient(135deg, #1e3a8a, #3b82f6); }
+        .cover-green { background: linear-gradient(135deg, #14532d, #22c55e); }
+        .cover-red { background: linear-gradient(135deg, #7f1d1d, #ef4444); }
+        .cover-orange { background: linear-gradient(135deg, #7c2d12, #f97316); }
+        .cover-purple { background: linear-gradient(135deg, #4c1d95, #8b5cf6); }
+
+        .book-body { padding: 12px; }
+        .book-cat { font-size: 10px; font-weight: 700; color: #e87722; text-transform: uppercase; }
+        .book-name { font-size: 13px; font-weight: 700; color: #1a1a2e; margin: 4px 0 2px; line-height: 1.3;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .book-author { font-size: 11px; color: #888; }
+        .book-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px 12px;
+        }
+        .status-dot {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #555;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .dot.avail { background: #22c55e; }
+        .dot.unavail { background: #ef4444; }
+        .btn-borrow {
+            background: #1a1a2e;
+            color: #fff;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .btn-borrow:hover { background: #e87722; }
+        .btn-waitlist {
+            background: #e87722;
+            color: #fff;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .btn-waitlist:hover { background: #c96210; }
+
+        /* ── SERVICES ── */
+        .services-section {
+            background: #f7f7f7;
+            padding: 48px 20px;
+        }
+        .services-section .inner { max-width: 1200px; margin: 0 auto; }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .service-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 24px;
+            display: flex;
+            gap: 16px;
+            border: 1px solid #eee;
+            transition: box-shadow 0.2s;
+        }
+        .service-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.09); }
+        .service-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            font-size: 22px;
+        }
+        .service-card h4 { font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+        .service-card p { font-size: 12.5px; color: #666; line-height: 1.6; }
+        .service-card a { font-size: 12px; font-weight: 600; margin-top: 10px; display: inline-block; text-decoration: none; }
+
+        @media (max-width: 768px) {
+            .hero-title { font-size: 24px; }
+            .stats-band .inner { grid-template-columns: repeat(2,1fr); }
+            .filter-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header('home')}"></div>
+
+<section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-photo"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Welcome to <span>FPTU Library</span></h1>
+        <p class="hero-subtitle">Tra cứu tài nguyên học thuật – Đặt giữ chỗ – Mượn sách tại tất cả các cơ sở FPT</p>
+
+        <div th:replace="~{fragments/search-bar :: search-form}"></div>
+    </br>
+    </br>
+    <div>
+        <div class="quick-links">
+            <a href="#">💬 Chatbot</a>
+            <a href="#">📋 Request material</a>
+            <a href="#">📚 New material</a>
+            <a href="#">📖 Read a lot</a>
+        </div>
+    </div>
+</section>
+
+<section class="how-to">
+    <h2>How to use FPTU Library</h2>
+    <div class="how-to-grid">
+        <a href="/books" class="how-card">
+            <div class="icon">📚</div>
+            <div class="label">Tra cứu &amp; Đặt sách</div>
+        </a>
+        <a href="#" class="how-card alt">
+            <div class="icon">🔄</div>
+            <div class="label">Gia hạn tài liệu</div>
+        </a>
+        <a href="#" class="how-card">
+            <div class="icon">🏠</div>
+            <div class="label">Phòng học nhóm</div>
+        </a>
+        <a href="#" class="how-card alt">
+            <div class="icon">💰</div>
+            <div class="label">Tra cứu Phí &amp; Vi phạm</div>
+        </a>
+    </div>
+</section>
+
+<section class="stats-band">
+    <div class="inner">
+        <div class="stat-item">
+            <div class="stat-num" th:text="${#numbers.formatInteger(stats.totalBooks, 0, 'COMMA')}">0</div>
+            <div class="stat-label">Tổng đầu sách</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num" th:text="${#numbers.formatInteger(stats.availableCopies, 0, 'COMMA')}">0</div>
+            <div class="stat-label">Bản sao sẵn sàng</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num" th:text="${#numbers.formatInteger(stats.activeReaders, 0, 'COMMA')}">0</div>
+            <div class="stat-label">Bạn đọc tích cực</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num" th:text="${stats.totalCampuses}">0</div>
+            <div class="stat-label">Cơ sở kết nối</div>
+        </div>
+    </div>
+</section>
+
+
+<section class="services-section">
+    <div class="inner">
+        <div style="text-align:center; margin-bottom:32px;">
+            <div class="section-title">Các dịch vụ Thư viện nổi bật</div>
+            <div class="section-sub">Dành riêng cho Bạn đọc thực hiện đầy đủ các luồng hoạt động nghiệp vụ</div>
+        </div>
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon" style="background:#fff3e6; color:#e87722;">📚</div>
+                <div>
+                    <h4>Đăng ký mượn sách online</h4>
+                    <p>Đăng ký giữ sách trực tuyến trong vòng 24h trước khi đến quầy Thủ thư để nhận sách vật lý.</p>
+                    <a href="/books" style="color:#e87722;">Đăng ký ngay →</a>
+                </div>
+            </div>
+            <div class="service-card">
+                <div class="service-icon" style="background:#fef2f2; color:#ef4444;">⚠️</div>
+                <div>
+                    <h4>Tra cứu phí &amp; Vi phạm quá hạn</h4>
+                    <p>Theo dõi chi tiết số ngày mượn quá hạn, phiếu phạt vi phạm và thực hiện nghĩa vụ hoàn trả.</p>
+                    <a href="#" style="color:#ef4444;">Xem chi tiết →</a>
+                </div>
+            </div>
+            <div class="service-card">
+                <div class="service-icon" style="background:#eff6ff; color:#3b82f6;">🚚</div>
+                <div>
+                    <h4>Theo dõi Vận chuyển Liên cơ sở</h4>
+                    <p>Khi mượn sách ở cơ sở khác, kiểm tra trạng thái lô sách đang được vận chuyển dễ dàng.</p>
+                    <a href="#" style="color:#3b82f6;">Kiểm tra lộ trình →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script th:inline="javascript">
+    // 1. Nhận trạng thái từ Session Java đẩy sang
+   // 1. Nhận trạng thái từ Session Java đẩy sang (Đã bọc nháy để VS Code hết báo lỗi đỏ)
+    const isLoggedIn = /*[[${session.loggedInUserId != null}]]*/ false;
+    const studentName = /*[[${session.loggedInUser != null ? session.loggedInUser.fullName : ''}]]*/ '';
+    const rollNumber = /*[[${session.loggedInUserId != null ? session.loggedInUserId : ''}]]*/ '';
+
+    // 2. Nếu đã có session đăng nhập, tiến hành hoán đổi giao diện nút Đăng nhập cũ
+    if (isLoggedIn) {
+        window.addEventListener('DOMContentLoaded', () => {
+            // Tìm kiếm tất cả thẻ link hoặc nút bấm trên thanh Header điều hướng
+            const links = document.querySelectorAll('a, button');
+            links.forEach(el => {
+                if (el.textContent.trim() === 'Đăng nhập') {
+                    // Tạo một Hộp thông tin bạn đọc mang thiết kế FPT cực đẹp
+                    const userBox = document.createElement('div');
+                    userBox.className = "flex items-center space-x-3 bg-slate-800/80 border border-slate-700/60 rounded-xl p-1 px-3 text-slate-200 ml-4 shadow-md backdrop-blur-md";
+                    userBox.innerHTML = `
+                        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=${rollNumber}" alt="Avatar" class="w-7 h-7 rounded-lg border border-orange-500 bg-slate-950">
+                        <div class="flex flex-col text-left leading-none justify-center">
+                            <span class="text-[12px] font-bold text-slate-100">${studentName}</span>
+                            <span class="text-[10px] text-slate-400 mt-1">${rollNumber}</span>
+                        </div>
+                        <a href="/logout" class="text-[11px] text-red-400 hover:text-red-300 font-semibold border-l border-slate-700 pl-2.5 ml-1.5 transition-colors">Đăng xuất</a>
+                    `;
+                    // Tiến hành nuốt trọn nút Đăng nhập thô sơ cũ và chèn hộp thông tin mới vào
+                    el.parentNode.replaceChild(userBox, el);
+                }
+            });
+        });
+    }
+</script>
+
+</body>
+</html>

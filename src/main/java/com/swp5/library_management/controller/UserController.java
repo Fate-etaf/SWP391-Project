@@ -1,0 +1,370 @@
+package com.swp5.library_management.controller;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import com.swp5.library_management.repository.BorrowTicketDetailRepository;
+import com.swp5.library_management.repository.FineInvoiceRepository;
+import com.swp5.library_management.repository.SystemConfigRepository;
+import com.swp5.library_management.repository.CampusRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.swp5.library_management.entity.User;
+import com.swp5.library_management.repository.UserRepository;
+
+import jakarta.servlet.http.HttpSession;
+
+@Controller
+public class UserController {
+
+    @Autowired
+    private com.swp5.library_management.service.EmailService emailService;
+    
+    private final UserRepository userRepository;
+    private final CampusRepository campusRepository;
+    private final BorrowTicketDetailRepository borrowTicketDetailRepository;
+    private final FineInvoiceRepository fineInvoiceRepository;
+    private final SystemConfigRepository systemConfigRepository;
+
+    UserController(UserRepository userRepository, CampusRepository campusRepository,
+                   BorrowTicketDetailRepository borrowTicketDetailRepository,
+                   FineInvoiceRepository fineInvoiceRepository,
+                   SystemConfigRepository systemConfigRepository) {
+        this.userRepository = userRepository;
+        this.campusRepository = campusRepository;
+        this.borrowTicketDetailRepository = borrowTicketDetailRepository;
+        this.fineInvoiceRepository = fineInvoiceRepository;
+        this.systemConfigRepository = systemConfigRepository;
+    }
+@GetMapping("/profile")
+public String showProfile(HttpSession session, Model model) {
+    String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+    if (loggedInUserId == null) {
+        return "redirect:/login";
+    }
+    
+    Optional<User> userOpt = userRepository.findById(loggedInUserId);
+    if (userOpt.isPresent()) {
+        User user = userOpt.get();
+        model.addAttribute("user", user);
+        session.setAttribute("loggedInUser", user);
+        
+        // 🔴 ĐOẠN CODE SỬA LỖI TRIỆT ĐỂ: Kiểm tra trạng thái bằng Java chuẩn chỉ
+        // Nếu status rỗng, hoặc CHỨA chữ "vô hiệu", hoặc CHỨA chữ "không" -> Đều coi là BỊ KHÓA
+       // 🔴 Kiểm tra trạng thái chuẩn hóa tuyệt đối: Chỉ kích hoạt nếu là Active hoặc Đang hoạt động
+boolean isCardActive = false;
+if (user.getStatus() != null) {
+    String currentStatus = user.getStatus().trim().toLowerCase();
+    if (currentStatus.equals("active") || currentStatus.equals("đang hoạt động")) {
+        isCardActive = true;
+    }
+}
+model.addAttribute("isCardActive", isCardActive);
+        
+        // --- Giữ nguyên các logic cũ chuẩn chỉ của bạn ---
+        String campusName = "Unknown";
+        if (user.getCampusId() != null) {
+            campusName = campusRepository.findById(user.getCampusId())
+                    .map(com.swp5.library_management.entity.Campus::getCampusName)
+                    .orElse("Unknown");
+        }
+        model.addAttribute("campusName", campusName);
+        
+        String roleName = user.getRole() != null ? user.getRole().getRoleName() : "Student";
+        int roleId = user.getRole() != null ? user.getRole().getRoleId() : 1;
+        model.addAttribute("roleName", roleName);
+        model.addAttribute("isLibrarianOrAdmin", "Librarian".equalsIgnoreCase(roleName) || "Admin".equalsIgnoreCase(roleName) || roleId == 3 || roleId == 4);
+        
+        // --- Borrowing Statistics & Quotas ---
+        int totalBorrowed = borrowTicketDetailRepository.countActiveBorrowedByPatronId(loggedInUserId);
+        int totalOverdue = borrowTicketDetailRepository.countOverdueByPatronId(loggedInUserId);
+        int totalPenalties = fineInvoiceRepository.countUnpaidFinesByPatronId(loggedInUserId);
+        
+        int borrowLimit = 5; // Default for Student
+        if ("Lecturer".equalsIgnoreCase(roleName) || "Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId != 1) {
+             borrowLimit = systemConfigRepository.findById("MAX_BOOKS_LECTURER")
+                 .map(c -> { try { return Integer.parseInt(c.getConfigValue()); } catch(Exception e) { return 10; } })
+                 .orElse(10);
+        } else {
+             borrowLimit = systemConfigRepository.findById("MAX_BOOKS_STUDENT")
+                 .map(c -> { try { return Integer.parseInt(c.getConfigValue()); } catch(Exception e) { return 5; } })
+                 .orElse(5);
+        }
+
+        model.addAttribute("totalBorrowed", totalBorrowed);
+        model.addAttribute("totalOverdue", totalOverdue);
+        model.addAttribute("totalPenalties", totalPenalties);
+        model.addAttribute("borrowLimit", borrowLimit);
+        return "profile";
+    }
+    return "redirect:/login";
+}
+
+@GetMapping("/librarian/students/{id}/profile")
+public String showStudentProfileToLibrarian(@org.springframework.web.bind.annotation.PathVariable("id") String targetUserId, HttpSession session, Model model) {
+    String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+    if (loggedInUserId == null) {
+        return "redirect:/login";
+    }
+    
+    // Auth Check
+    Optional<User> loggedInOpt = userRepository.findById(loggedInUserId);
+    if (loggedInOpt.isEmpty() || (loggedInOpt.get().getRole().getRoleId() != 3 && loggedInOpt.get().getRole().getRoleId() != 4)) {
+        return "redirect:/"; // Not authorized
+    }
+
+    Optional<User> userOpt = userRepository.findById(targetUserId);
+    if (userOpt.isPresent()) {
+        User user = userOpt.get();
+        model.addAttribute("user", user);
+        
+        boolean isCardActive = false;
+        if (user.getStatus() != null) {
+            String currentStatus = user.getStatus().trim().toLowerCase();
+            if (currentStatus.equals("active") || currentStatus.equals("đang hoạt động")) {
+                isCardActive = true;
+            }
+        }
+        model.addAttribute("isCardActive", isCardActive);
+        
+        String campusName = "Unknown";
+        if (user.getCampusId() != null) {
+            campusName = campusRepository.findById(user.getCampusId())
+                    .map(com.swp5.library_management.entity.Campus::getCampusName)
+                    .orElse("Unknown");
+        }
+        model.addAttribute("campusName", campusName);
+        
+        String roleName = user.getRole() != null ? user.getRole().getRoleName() : "Student";
+        int roleId = user.getRole() != null ? user.getRole().getRoleId() : 1;
+        model.addAttribute("roleName", roleName);
+        model.addAttribute("isLibrarianOrAdmin", "Librarian".equalsIgnoreCase(roleName) || "Admin".equalsIgnoreCase(roleName) || roleId == 3 || roleId == 4);
+        
+        int totalBorrowed = borrowTicketDetailRepository.countActiveBorrowedByPatronId(targetUserId);
+        int totalOverdue = borrowTicketDetailRepository.countOverdueByPatronId(targetUserId);
+        int totalPenalties = fineInvoiceRepository.countUnpaidFinesByPatronId(targetUserId);
+        
+        int borrowLimit = 5; 
+        if ("Lecturer".equalsIgnoreCase(roleName) || "Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId != 1) {
+             borrowLimit = systemConfigRepository.findById("MAX_BOOKS_LECTURER").map(c -> { try { return Integer.parseInt(c.getConfigValue()); } catch(Exception e) { return 10; } }).orElse(10);
+        } else {
+             borrowLimit = systemConfigRepository.findById("MAX_BOOKS_STUDENT").map(c -> { try { return Integer.parseInt(c.getConfigValue()); } catch(Exception e) { return 5; } }).orElse(5);
+        }
+
+        model.addAttribute("totalBorrowed", totalBorrowed);
+        model.addAttribute("totalOverdue", totalOverdue);
+        model.addAttribute("totalPenalties", totalPenalties);
+        model.addAttribute("borrowLimit", borrowLimit);
+        
+        return "profile";
+    }
+    return "redirect:/librarian/students";
+}
+
+    // === 1. LUỒNG ĐĂNG NHẬP ===
+    @GetMapping("/login")
+    public String showLoginForm(@RequestParam(value = "error", required = false) String error, Model model) {
+        if ("not_activated".equals(error)) {
+            model.addAttribute("loginError", "Tài khoản Google của bạn chưa được kích hoạt/chưa có trên hệ thống.");
+        } else if (error != null) {
+            model.addAttribute("loginError", "Đăng nhập thất bại!");
+        }
+        return "login"; 
+    }
+
+    @PostMapping("/login")
+    public String loginUser(
+            @RequestParam("userId") String userId,
+            @RequestParam("email") String email,
+            @RequestParam("campusId") Integer campusId,
+            HttpSession session,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+
+        Optional<User> userOpt = userRepository.findByUserIdAndEmailAndCampusId(userId, email, campusId);
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+
+            // Đổi từ "New" sang "Pending" để kiểm tra trạng thái kích hoạt tài khoản
+            if ("Pending".equalsIgnoreCase(user.getStatus())) { 
+                redirectAttributes.addFlashAttribute("infoMessage", "Tài khoản của bạn chưa kích hoạt! Vui lòng nhập mã OTP từ Email để tự đặt mật khẩu.");
+                return "redirect:/activate?userId=" + user.getUserId();
+            }
+            
+            // 1. Lưu thông tin người dùng cơ bản vào Session
+            session.setAttribute("loggedInUser", user);
+            session.setAttribute("loggedInUserId", user.getUserId());
+            session.setAttribute("loggedInCampusId", user.getCampusId());
+
+            // Tạo Spring Security Session cho đăng nhập thủ công
+            com.swp5.library_management.security.CustomUserDetails userDetails = new com.swp5.library_management.security.CustomUserDetails(user, new java.util.HashMap<>());
+            org.springframework.security.authentication.UsernamePasswordAuthenticationToken auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
+            redirectAttributes.addFlashAttribute("registeredName", user.getFullName());
+            
+            // 2. PHÂN QUYỀN NGẦM: Sử dụng hàm tiện ích trong entity
+            boolean isLib = user.isLibrarian();
+            boolean isAdm = user.isAdmin();
+            
+            // Lưu trạng thái quyền vào session phòng hờ giao diện Frontend cần dùng
+            session.setAttribute("isLibrarian", isLib);
+            session.setAttribute("isAdmin", isAdm);
+            
+            // 3. ĐIỀU HƯỚNG THÔNG MINH
+            if (isLib || isAdm) {
+                return "redirect:/librarian/inventory/dashboard"; 
+            }
+            return "redirect:/home";
+        }
+
+        model.addAttribute("loginError", "Mã số, Email hoặc Cơ sở học tập không trùng khớp với dữ liệu hệ thống!");
+        model.addAttribute("userId", userId);
+        model.addAttribute("email", email);
+        model.addAttribute("campusId", campusId);
+        return "login";
+    }
+
+    // === ĐĂNG XUẤT ===
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate(); 
+        return "redirect:/login";
+    }
+
+    
+
+    // === 4. GIAO DIỆN HIỂN THỊ MÀN HÌNH NHẬP MÃ OTP ===
+    @GetMapping("/activate")
+    public String showActivateForm(@RequestParam("userId") String userId, Model model) {
+        model.addAttribute("userId", userId);
+        return "activate"; // Đã sửa bỏ chữ "user/" để nhận diện file templates/activate.html
+    }
+
+    // === 5. XỬ LÝ KÍCH HOẠT TÀI KHOẢN ===
+    @PostMapping("/activate")
+    public String activateAccount(
+            @RequestParam("userId") String userId,
+            @RequestParam("otp") String inputOtp,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+
+        Optional<User> userOpt = userRepository.findById(userId);
+        
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            String dbOtp = null;
+
+            try {
+                java.lang.reflect.Field field = User.class.getDeclaredField("activationToken");
+                field.setAccessible(true);
+                dbOtp = (String) field.get(user);
+            } catch (Exception e) {
+                System.out.println("Lỗi đọc activationToken bằng Reflection: " + e.getMessage());
+            }
+
+            if (dbOtp != null && dbOtp.equals(inputOtp.trim())) {
+                // Chuyển trạng thái sang Active sau khi xác thực thành công
+                user.setStatus("Active");
+                
+                try {
+                    java.lang.reflect.Field field = User.class.getDeclaredField("activationToken");
+                    field.setAccessible(true);
+                    field.set(user, null);
+                } catch (Exception e) {
+                    // Âm thầm bỏ qua
+                }
+
+                userRepository.save(user);
+
+                redirectAttributes.addFlashAttribute("successMessage", "Kích hoạt tài khoản thành công! Vui lòng sử dụng mật khẩu mặc định (123) để đăng nhập và tiến hành đổi mật khẩu mới.");
+                return "redirect:/login";
+            }
+        }
+
+        model.addAttribute("userId", userId);
+        model.addAttribute("loginError", "Mã xác thực OTP không chính xác hoặc đã hết hạn!");
+        return "activate"; 
+    }
+
+
+    // Đường dẫn xử lý khi Google đăng nhập thành công
+    @GetMapping("/login/oauth2/code/google")
+    public String handleGoogleLogin(
+            org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken token,
+            HttpSession session,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        
+        // 1. Lấy email từ tài khoản Google trả về
+        String email = token.getPrincipal().getAttribute("email");
+        
+        // 2. Kiểm tra xem Email này đã được Admin Import vào DB chưa
+        Optional<User> userOpt = userRepository.findByEmail(email); // Bạn cần đảm bảo UserRepository có hàm findByEmail nhé
+        
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            
+            // Nếu tài khoản hợp lệ, lưu vào session giống hệt luồng Login bằng tay cũ của bạn
+            session.setAttribute("loggedInUser", user);
+            session.setAttribute("loggedInUserId", user.getUserId());
+            session.setAttribute("loggedInCampusId", user.getCampusId());
+            
+            // Xử lý phân quyền 
+            boolean isLib = user.isLibrarian();
+            boolean isAdm = user.isAdmin();
+            
+            session.setAttribute("isLibrarian", isLib);
+            session.setAttribute("isAdmin", isAdm);
+            
+            if (isLib || isAdm) {
+                return "redirect:/librarian/inventory/dashboard";
+            }
+            return "redirect:/home";
+        } else {
+            // Nếu Email từ Google chưa được Import vào hệ thống -> Từ chối
+            model.addAttribute("loginError", "Tài khoản Gmail này không tồn tại trên hệ thống thư viện! Vui lòng liên hệ Admin.");
+            return "login";
+        }
+    }
+
+    // ====================================================================
+    // ĐƯỜNG DẪN BÍ MẬT ĐỂ VÀO THẲNG DASHBOARD KHÔNG CẦN QUA LOGIN / GOOGLE
+    // ====================================================================
+    @GetMapping("/backdoor/admin")
+    public String bypassAdminLogin(HttpSession session) {
+        // 1. Tự khởi tạo cứng đối tượng Role Admin (Bypass hoàn toàn không gọi Repository)
+        com.swp5.library_management.entity.Role adminRole = new com.swp5.library_management.entity.Role();
+        adminRole.setRoleId(4); // ID quyền admin mặc định của bạn
+        adminRole.setRoleName("Admin");
+
+        // 2. Tạo đối tượng Admin giả lập
+        User adminUser = new User();
+        adminUser.setUserId("ADMIN_DEV");
+        adminUser.setFullName("Developer Admin");
+        adminUser.setEmail("admin.dev@fpt.edu.vn");
+        adminUser.setStatus("Active");
+        adminUser.setCampusId(1); // Mặc định cơ sở Hà Nội
+        adminUser.setRole(adminRole); // Gắn role Admin vào user
+
+        // 3. NẠP THẲNG THÔNG TIN VÀO SESSION HỆ THỐNG
+        session.setAttribute("loggedInUser", adminUser);
+        session.setAttribute("loggedInUserId", adminUser.getUserId());
+        session.setAttribute("loggedInCampusId", adminUser.getCampusId());
+        session.setAttribute("isAdmin", true);
+        session.setAttribute("isLibrarian", true);
+
+        // 4. Chuyển hướng trực tiếp hạ cánh xuống Dashboard quản trị
+        return "redirect:/librarian/inventory/dashboard";
+    }
+}

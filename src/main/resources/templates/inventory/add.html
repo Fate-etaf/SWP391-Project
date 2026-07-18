@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Add Book — FPT University Library</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --bg-base:       #f8fafc;
+            --bg-surface:    #ffffff;
+            --bg-card:       #ffffff;
+            --border:        #e2e8f0;
+            --border-focus:  #f97316;
+            --accent:        #f97316;
+            --accent-hover:  #ea580c;
+            --text-primary:   #0f172a;
+            --text-secondary: #475569;
+            --text-muted:     #64748b;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .form-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 24px rgba(15,23,42,0.06);
+        }
+
+        .form-header {
+            margin-bottom: 2rem;
+        }
+
+        .form-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .form-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.15);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0,0,0,0.03);
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-wrapper" style="display: flex; gap: 2rem; max-width: 1200px; width: 100%;">
+    
+    <!-- Approved Requests List -->
+    <div class="requests-container" style="flex: 1; min-width: 300px; background: var(--bg-card); border-radius: 16px; padding: 2rem; border: 1px solid var(--border); box-shadow: 0 4px 24px rgba(15,23,42,0.06); max-height: 90vh; overflow-y: auto;">
+        <h2 style="font-size: 1.4rem; margin-bottom: 1rem; color: var(--text-primary);">Approved Requests</h2>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">Select an approved material request to auto-fill the book details.</p>
+        
+        <div th:if="${#lists.isEmpty(approvedRequests)}" style="color: var(--text-secondary); padding: 1rem; background: var(--bg-surface); border-radius: 8px; text-align: center;">
+            No approved requests available.
+        </div>
+        
+        <div class="request-list" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div th:each="req : ${approvedRequests}" class="request-item" style="padding: 1rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-surface); transition: all 0.2s ease;">
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.4rem; display: flex; justify-content: space-between;">
+                    <span th:text="${req.reviewedAt != null ? #temporals.format(req.reviewedAt, 'dd/MM/yyyy HH:mm') : 'N/A'}"></span>
+                    <span style="color: var(--accent); font-weight: 600;">REQ<span th:text="${#numbers.formatInteger(req.requestId, 3)}"></span></span>
+                </div>
+                <div style="font-weight: 600; margin-bottom: 0.2rem; color: var(--text-primary);" th:text="${req.title}">Clean Code</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;" th:text="${req.author}">Robert C. Martin</div>
+                
+                <button type="button" class="btn btn-secondary" 
+                        th:data-title="${req.title}"
+                        th:data-author="${req.author}"
+                        th:data-isbn="${req.isbn}"
+                        th:data-publisher="${req.publisher}"
+                        th:data-language="${req.language}"
+                        onclick="fillForm(this)"
+                        style="padding: 0.4rem 0.8rem; font-size: 0.85rem; width: 100%;">Auto-fill Form</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Add Book Form -->
+    <div class="form-container" style="flex: 2; margin: 0;">
+    <div class="form-header">
+        <h1>Add New Book</h1>
+        <p>Fill in the details below to register a new book in the library catalog.</p>
+    </div>
+
+    <form th:action="@{/librarian/inventory/add}" th:object="${bookForm}" method="post">
+        
+        <div class="form-group">
+            <label for="title">Title <span style="color: #fb7185">*</span></label>
+            <input type="text" id="title" th:field="*{title}" class="form-control" required placeholder="E.g., Clean Code"/>
+        </div>
+
+        <div class="form-group">
+            <label for="authorName">Author <span style="color: #fb7185">*</span></label>
+            <input type="text" id="authorName" th:field="*{authorName}" class="form-control" required placeholder="E.g., Robert C. Martin (comma-separate multiple)"/>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="isbn">ISBN <span style="color: #fb7185">*</span></label>
+                <input type="text" id="isbn" th:field="*{isbn}" class="form-control" required placeholder="978-0132350884"/>
+            </div>
+            
+            <div class="form-group">
+                <label for="language">Language <span style="color: #fb7185">*</span></label>
+                <select id="language" th:field="*{language}" class="form-control" required>
+                    <option value="Vietnamese">Vietnamese</option>
+                    <option value="English">English</option>
+                    <option value="Japanese">Japanese</option>
+                    <option value="Korean">Korean</option>
+                    <option value="Chinese">Chinese</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="publisherName">Publisher</label>
+                <input type="text" id="publisherName" th:field="*{publisherName}" class="form-control" placeholder="E.g., O'Reilly Media"/>
+            </div>
+            <div class="form-group">
+                <label for="edition">Edition</label>
+                <input type="text" id="edition" th:field="*{edition}" class="form-control" placeholder="E.g., 3rd Edition"/>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="shelfCode">Shelf Location</label>
+                <select id="shelfCode"
+                        th:field="*{shelfCode}"
+                        class="form-control">
+                    <option value="">-- Select Shelf --</option>
+                    <option th:each="shelf : ${shelves}"
+                            th:value="${shelf.shelfCode}"
+                            th:text="${shelf.shelfCode + ' - ' + shelf.shelfCodeTopic}">
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="subjectCode">Subject Code</label>
+                <input type="text" id="subjectCode" th:field="*{subjectCode}" class="form-control" placeholder="E.g., PRF192"/>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="publishYear">Publish Year</label>
+            <input type="number" id="publishYear" th:field="*{publishYear}" class="form-control" placeholder="2024"/>
+        </div>
+
+        <div class="form-group">
+            <label for="coverImageUrl">Cover Image URL</label>
+            <input type="url" id="coverImageUrl" th:field="*{coverImageUrl}" class="form-control" placeholder="https://example.com/image.jpg"/>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" th:field="*{description}" class="form-control" rows="4" placeholder="Brief summary of the book..."></textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="Copies">Number of Copies</label>
+                <input type="number" id="Copies" th:field="*{copies}" class="form-control" placeholder="Enter the number of copies"/>
+            </div>
+            
+            <div class="form-group">
+                <label for="campusId">Campus</label>
+                <select id="campusId" th:field="*{campusId}" class="form-control" required>
+                    <option value="" disabled selected>Select a campus</option>
+                    <option value="1">Hòa Lạc</option>
+                    <option value="2">Cần Thơ</option>
+                    <option value="3">Đà Nẵng</option>
+                    <option value="4">Tp.Hồ Chí Minh</option>
+                    <option value="5">Quy Nhơn</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <a href="/librarian/books" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Book</button>
+        </div>
+    </form>
+</div>
+
+</div>
+
+<script>
+    function fillForm(btn) {
+        const title = btn.getAttribute('data-title');
+        const author = btn.getAttribute('data-author');
+        const isbn = btn.getAttribute('data-isbn');
+        const publisher = btn.getAttribute('data-publisher');
+        const language = btn.getAttribute('data-language');
+
+        if (title) document.getElementById('title').value = title;
+        if (author) document.getElementById('authorName').value = author;
+        if (isbn) document.getElementById('isbn').value = isbn;
+        if (publisher) document.getElementById('publisherName').value = publisher;
+        
+        if (language) {
+            const langSelect = document.getElementById('language');
+            for (let i = 0; i < langSelect.options.length; i++) {
+                if (langSelect.options[i].value.toLowerCase() === language.toLowerCase()) {
+                    langSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        // Highlight form to indicate auto-fill
+        const formContainer = document.querySelector('.form-container');
+        formContainer.style.boxShadow = '0 0 0 2px var(--accent)';
+        setTimeout(() => {
+            formContainer.style.boxShadow = '0 4px 24px rgba(15,23,42,0.06)';
+        }, 800);
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${book.title + ' – FLMS | Thư viện Đại học FPT'}">Chi tiết sách – FLMS</title>
+    <meta name="description" th:content="${book.description != null ? #strings.abbreviate(book.description, 160) : 'Xem thông tin chi tiết sách tại thư viện Đại học FPT.'}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B',
+                            dark: '#0F172A',
+                            orangeHover: '#D95F18'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style th:replace="~{fragments/header :: header-style}"></style>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+
+        /* Copy status badge colors */
+        .badge-available   { background:#d1fae5; color:#065f46; border:1px solid #a7f3d0; }
+        .badge-borrowed    { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
+        .badge-reserved    { background:#ffedd5; color:#c2410c; border:1px solid #fed7aa; }
+        .badge-maintenance { background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; }
+        .badge-lost        { background:#fdf2f8; color:#86198f; border:1px solid #f5d0fe; }
+
+        /* Condition status badge */
+        .cond-good    { background:#ecfdf5; color:#166534; }
+        .cond-damaged { background:#fef3c7; color:#92400e; }
+        .cond-lost    { background:#fef2f2; color:#991b1b; }
+
+        .reserve-btn {
+            background: linear-gradient(135deg, #F27125, #D95F18);
+            transition: all 0.2s ease;
+        }
+        .reserve-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(242,113,37,0.4);
+        }
+
+        .campus-tab.active {
+            background: #F27125;
+            color: white;
+        }
+        .campus-tab {
+            transition: all 0.15s ease;
+        }
+
+        tr.copy-row:hover td { background: #f8fafc; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col">
+
+<!-- ═══════════════════════════════════════════════════════ NAV BAR ══ -->
+<div th:replace="~{fragments/header :: header('books')}"></div>
+<!-- ═══════════════════════════════════════════════════ BREADCRUMB ══ -->
+<div class="bg-white border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <nav class="flex items-center space-x-2 text-xs text-slate-500">
+            <a href="/home"  class="hover:text-fpt-orange transition-colors">Trang chủ</a>
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            <a href="/books" class="hover:text-fpt-orange transition-colors">Tra cứu sách</a>
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            <span class="text-slate-800 font-semibold line-clamp-1" th:text="${book.title}">Book Title</span>
+        </nav>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ MAIN ══ -->
+<main class="flex-grow">
+
+    <!-- ── Book Header: Cover + Metadata ──────────────────────────────── -->
+    <section class="bg-gradient-to-br from-fpt-navy to-slate-900 text-white py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row gap-8 items-start">
+
+                <!-- Cover Image / Gradient Placeholder -->
+                <div class="shrink-0 w-full md:w-48">
+                    <div th:if="${book.coverImageUrl != null}"
+                         class="rounded-2xl overflow-hidden shadow-2xl w-full aspect-[3/4]">
+                        <img th:src="${book.coverImageUrl}" th:alt="${book.title}"
+                             class="w-full h-full object-cover">
+                    </div>
+                    <div th:unless="${book.coverImageUrl != null}"
+                         class="rounded-2xl shadow-2xl w-full aspect-[3/4] bg-gradient-to-br flex flex-col justify-between p-5 text-white"
+                         th:classappend="${book.coverColor}">
+                        <div>
+                            <span th:if="${book.subjectCode != null}"
+                                  class="text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded-full uppercase"
+                                  th:text="${book.subjectCode}">CODE</span>
+                        </div>
+                        <div>
+                            <p class="font-extrabold text-sm line-clamp-4 mb-2" th:text="${book.title}">Title</p>
+                            <p class="text-[11px] text-slate-300 truncate" th:text="${book.authorNames}">Author</p>
+                        </div>
+                        <span class="text-[10px] font-bold text-orange-300 text-right block">FPTU Library</span>
+                    </div>
+
+                    <!-- Availability & Reserve Button -->
+                    <div class="mt-4 space-y-3">
+                        <!-- Availability badge -->
+                        <div th:if="${book.hasAvailableCopy}"
+                             class="flex items-center justify-center bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 rounded-xl py-2 px-3 text-sm font-semibold">
+                            <span class="w-2 h-2 bg-emerald-400 rounded-full mr-2 animate-pulse"></span>
+                            Còn sách để mượn
+                        </div>
+                        <div th:if="${!book.hasAvailableCopy and !#lists.isEmpty(book.copies)}"
+                             class="flex items-center justify-center bg-orange-500/20 border border-orange-500/40 text-orange-300 rounded-xl py-2 px-3 text-sm font-semibold">
+                            <span class="w-2 h-2 bg-orange-400 rounded-full mr-2"></span>
+                            Sách đang bận
+                        </div>
+                        <div th:if="${#lists.isEmpty(book.copies)}"
+                             class="flex items-center justify-center bg-red-500/20 border border-red-500/40 text-red-300 rounded-xl py-2 px-3 text-sm font-semibold">
+                            <span class="w-2 h-2 bg-red-400 rounded-full mr-2"></span>
+                            Không có sách ở campus này
+                        </div>
+
+                        <!-- UCG02 – A1: Reserve button (hiện khi có bản Available) -->
+                        <a th:if="${book.hasAvailableCopy}"
+                           th:href="@{/reservations/reserve(bookId=${book.bookId})}"
+                           class="reserve-btn block text-center text-white font-bold py-3 px-4 rounded-xl text-sm shadow-lg">
+                            📚 Đặt giữ chỗ ngay
+                        </a>
+                        <a th:unless="${book.hasAvailableCopy}"
+                           th:href="@{/reservations/reserve(bookId=${book.bookId})}"
+                           class="block text-center bg-orange-500/80 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition-all">
+                            ⏳ Đăng ký hàng chờ
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Bibliographic Info -->
+                <div class="flex-1 min-w-0">
+                    <!-- Category tag -->
+                    <span class="inline-block bg-fpt-orange/20 text-orange-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3"
+                          th:text="${book.categoryNames}">Category</span>
+
+                    <!-- Title + Edition -->
+                    <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight mb-1"
+                        th:text="${book.title}">Book Title</h2>
+                    <p th:if="${book.edition != null}"
+                       class="text-orange-300 font-medium text-sm mb-4"
+                       th:text="${book.edition}">Edition</p>
+
+                    <!-- Authors -->
+                    <div class="flex items-start mb-3">
+                        <span class="text-slate-400 text-sm w-24 shrink-0">Tác giả</span>
+                        <span class="text-white font-semibold text-sm" th:text="${book.authorNames}">Author</span>
+                    </div>
+
+                    <!-- Publisher -->
+                    <div class="flex items-start mb-3">
+                        <span class="text-slate-400 text-sm w-24 shrink-0">Nhà XB</span>
+                        <span class="text-slate-200 text-sm" th:text="${book.publisherName}">Publisher</span>
+                    </div>
+
+                    <!-- Publish Year -->
+                    <div th:if="${book.publishYear != null}" class="flex items-start mb-3">
+                        <span class="text-slate-400 text-sm w-24 shrink-0">Năm XB</span>
+                        <span class="text-slate-200 text-sm" th:text="${book.publishYear}">Year</span>
+                    </div>
+
+                    <!-- Language -->
+                    <div class="flex items-start mb-3">
+                        <span class="text-slate-400 text-sm w-24 shrink-0">Ngôn ngữ</span>
+                        <span class="text-slate-200 text-sm" th:text="${book.language}">Language</span>
+                    </div>
+
+                    <!-- ISBN -->
+                    <div th:if="${book.isbn != null}" class="flex items-start mb-3">
+                        <span class="text-slate-400 text-sm w-24 shrink-0">ISBN</span>
+                        <span class="text-slate-300 text-sm font-mono" th:text="${book.isbn}">ISBN</span>
+                    </div>
+
+                    <!-- Subject Code -->
+                    <div th:if="${book.subjectCode != null}" class="flex items-start mb-3">
+                        <span class="text-slate-400 text-sm w-24 shrink-0">Môn học</span>
+                        <div>
+                            <span class="inline-block bg-blue-500/20 text-blue-300 text-xs font-bold px-2 py-0.5 rounded mr-2"
+                                  th:text="${book.subjectCode}">CODE</span>
+                            <span class="text-slate-300 text-sm" th:text="${book.subjectName}">Subject Name</span>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div th:if="${book.description != null and !#strings.isEmpty(book.description)}"
+                         class="mt-5 bg-white/5 border border-white/10 rounded-xl p-4">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Mô tả nội dung</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed" th:text="${book.description}">Description</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Copies Table Section ────────────────────────────────────────── -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" id="copiesSectionContainer">
+        <div th:fragment="copiesSection" class="transition-opacity duration-200 w-full h-full">
+
+        <!-- Campus Filter (tabs) -->
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+            <div>
+                <h3 class="text-lg font-extrabold text-slate-900">Phân bổ bản sao vật lý</h3>
+                <p class="text-sm text-slate-500 mt-0.5">
+                    Hiển thị <span class="font-semibold text-slate-700" th:text="${#lists.size(book.copies)}">0</span> bản sao
+                    <span th:if="${selectedCampusId != null}"> tại cơ sở đã chọn</span>
+                    <span th:unless="${selectedCampusId != null}"> tại tất cả cơ sở</span>
+                </p>
+            </div>
+
+            <!-- Campus filter pills -->
+            <div class="flex flex-wrap gap-2">
+                <a th:href="@{/books/{id}(id=${book.bookId}, campusId=0)}"
+                   class="campus-tab text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200 hover:border-fpt-orange hover:text-fpt-orange transition-all"
+                   th:classappend="${selectedCampusId == null ? 'active' : 'bg-white text-slate-600'}">
+                    Tất cả cơ sở
+                </a>
+                <a th:each="campus : ${campuses}"
+                   th:href="@{/books/{id}(id=${book.bookId}, campusId=${campus.campusId})}"
+                   class="campus-tab text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200 hover:border-fpt-orange hover:text-fpt-orange transition-all"
+                   th:classappend="${campus.campusId == selectedCampusId ? 'active' : 'bg-white text-slate-600'}"
+                   th:text="${campus.campusName}">Campus</a>
+            </div>
+        </div>
+
+        <!-- Copies Summary -->
+        <div th:if="${!#lists.isEmpty(book.copies)}"
+             class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Total Copies -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-slate-500 mb-1">Tổng số bản copy</p>
+                    <h4 class="text-3xl font-extrabold text-slate-900" th:text="${#lists.size(book.copies)}">0</h4>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                </div>
+            </div>
+
+            <!-- Available Copies -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-slate-500 mb-1">Tổng số sách đang rảnh</p>
+                    <h4 class="text-3xl font-extrabold text-emerald-600" th:text="${book.copies.?[copyStatus == 'Available'].size()}">0</h4>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                </div>
+            </div>
+
+            <!-- Busy Copies -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-slate-500 mb-1">Tổng số sách đang bận</p>
+                    <h4 class="text-3xl font-extrabold text-orange-500" th:text="${book.copies.?[copyStatus != 'Available'].size()}">0</h4>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty copies state -->
+        <div th:if="${#lists.isEmpty(book.copies)}"
+             class="bg-white rounded-2xl border border-slate-100 shadow-sm p-10 text-center">
+            <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z"/>
+                </svg>
+            </div>
+            <p class="text-sm font-semibold text-slate-700 mb-1">Không có bản sao tại cơ sở này</p>
+            <p class="text-xs text-slate-400">Thử chọn một cơ sở khác hoặc xem tất cả cơ sở.</p>
+            <a th:href="@{/books/{id}(id=${book.bookId}, campusId=0)}"
+               class="mt-3 inline-block text-xs text-fpt-orange hover:text-fpt-orangeHover font-semibold transition-colors">
+               Xem tất cả cơ sở →
+            </a>
+        </div>
+
+        <!-- Back button -->
+        <div class="mt-8 flex items-center space-x-4">
+            <a th:href="@{/books(campusId=${selectedCampusId})}"
+               class="inline-flex items-center text-sm font-semibold text-slate-600 hover:text-fpt-orange transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Quay lại tìm kiếm
+            </a>
+        </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════ FOOTER ══ -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

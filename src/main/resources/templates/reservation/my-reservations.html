@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Đặt chỗ của tôi – Thư viện FPT</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        /* ── Header ───────────────────────────────────────── */
+        .header {
+            background: linear-gradient(135deg, #003580, #0057b8);
+            color: #fff;
+            padding: 18px 32px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.25);
+        }
+        .header h1 { font-size: 1.3rem; font-weight: 700; }
+        .header a {
+            color: rgba(255,255,255,.75);
+            text-decoration: none;
+            font-size: .9rem;
+        }
+        .header a:hover { color: #fff; }
+
+        /* ── Container & Grid ─────────────────────────────── */
+        .container { max-width: 1200px; margin: 36px auto; padding: 0 16px; }
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+        @media (max-width: 768px) { .grid-layout { grid-template-columns: 1fr; } }
+
+        /* ── Flash banners ────────────────────────────────── */
+        .alert {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: .9rem;
+        }
+        .alert-success { background: #e8f5e9; border: 1px solid #a5d6a7; color: #1b5e20; }
+        .alert-error   { background: #ffeaea; border: 1px solid #f5c6c6; color: #c62828; }
+        .alert-info    { background: #e3f2fd; border: 1px solid #90caf9; color: #0d47a1; }
+        .alert-icon    { font-size: 1.2rem; flex-shrink: 0; }
+
+        /* ── Section title ────────────────────────────────── */
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+        .section-title h2 { font-size: 1.15rem; color: #003580; }
+
+        /* ── Card ─────────────────────────────────────────── */
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        /* ── Reservation item ─────────────────────────────── */
+        .reservation-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            padding: 18px 24px;
+            border-bottom: 1px solid #f0f4f8;
+            gap: 16px;
+        }
+        .reservation-item:last-child { border-bottom: none; }
+        .reservation-item:hover { background: #fafcff; }
+
+        .res-title {
+            font-weight: 700;
+            color: #003580;
+            font-size: .98rem;
+            margin-bottom: 4px;
+        }
+        .res-meta {
+            font-size: .82rem;
+            color: #777;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 4px;
+        }
+        .res-meta span { display: flex; align-items: center; gap: 4px; }
+
+        /* ── Status badge ─────────────────────────────────── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: .78rem;
+            font-weight: 600;
+        }
+        .badge-holding   { background: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
+        .badge-completed { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+        .badge-cancelled { background: #f5f5f5; color: #757575; border: 1px solid #e0e0e0; }
+        .badge-expired   { background: #fce4ec; color: #880e4f; border: 1px solid #f48fb1; }
+        .badge-waiting   { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }
+        .badge-notified  { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+
+        /* ── Countdown ────────────────────────────────────── */
+        .countdown {
+            font-size: .82rem;
+            color: #e53935;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        /* ── Action buttons ───────────────────────────────── */
+        .actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+
+        .btn-cancel {
+            background: none;
+            border: 1px solid #e53935;
+            color: #e53935;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: .82rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all .2s;
+        }
+        .btn-cancel:hover { background: #ffebee; }
+
+        /* ── Empty state ──────────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: #aaa;
+        }
+        .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+        .empty-state p { font-size: .95rem; }
+
+        /* ── Modal overlay ────────────────────────────────── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: #fff;
+            border-radius: 14px;
+            padding: 28px 32px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 8px 40px rgba(0,0,0,.2);
+            animation: modalIn .18s ease;
+        }
+        @keyframes modalIn {
+            from { transform: scale(.94); opacity: 0; }
+            to   { transform: scale(1);   opacity: 1; }
+        }
+        .modal h3 { color: #003580; margin-bottom: 10px; }
+        .modal p  { font-size: .9rem; color: #555; margin-bottom: 20px; }
+        .modal-actions { display: flex; gap: 12px; justify-content: flex-end; }
+
+        .btn-confirm {
+            background: #e53935;
+            color: #fff;
+            border: none;
+            padding: 9px 22px;
+            border-radius: 7px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: .9rem;
+            transition: background .2s;
+        }
+        .btn-confirm:hover { background: #b71c1c; }
+
+        .btn-back {
+            background: #f5f5f5;
+            color: #555;
+            border: none;
+            padding: 9px 22px;
+            border-radius: 7px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: .9rem;
+            transition: background .2s;
+        }
+        .btn-back:hover { background: #e0e0e0; }
+
+        .btn-new {
+            background: linear-gradient(135deg, #003580, #0057b8);
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all .2s;
+        }
+        .btn-new:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,53,128,.25); }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header" style="justify-content: space-between; display: flex; width: 100%;">
+    <div style="display: flex; align-items: center; gap: 14px;">
+        <span style="font-size:1.6rem;">📚</span>
+        <div>
+            <h1>Thư viện FPT University</h1>
+            <a href="/">← Trang chủ</a>
+        </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <a th:if="${session.isLibrarian}" href="/librarian/create-loan" style="color: #fbbf24; text-decoration: none; font-size: .9rem; font-weight: bold;">📖 Tạo đơn mượn</a>
+        <a href="/reservations" style="font-weight: 600; color: #fff; text-decoration: none; font-size: .9rem;">Đặt chỗ của tôi</a>
+        <a href="/borrowing-history" style="color: rgba(255,255,255,.75); text-decoration: none; font-size: .9rem;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.75)'">Lịch sử mượn trả</a>
+    </div>
+</div>
+
+
+<div class="container">
+
+    <!-- Flash: Thành công -->
+    <div class="alert alert-success" th:if="${successMsg}">
+        <span class="alert-icon">✅</span>
+        <div>
+            <strong th:text="${successMsg}"></strong>
+            <div th:if="${expirationDate}" style="margin-top:4px; font-size:.85rem;">
+                ⏰ Thời hạn nhận sách: <strong th:text="${#temporals.format(expirationDate, 'HH:mm dd/MM/yyyy')}"></strong>
+            </div>
+            <div th:if="${waitlistPosition}" style="margin-top:4px; font-size:.85rem;">
+                📋 Số thứ tự hàng chờ của bạn: <strong>#<span th:text="${waitlistPosition}"></span></strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash: Lỗi -->
+    <div class="alert alert-error" th:if="${errorMsg}">
+        <span class="alert-icon">❌</span>
+        <span th:text="${errorMsg}"></span>
+    </div>
+
+    <div class="grid-layout">
+        
+        <!-- Cột 1: Hàng đợi nhận sách (Reservations) -->
+        <div>
+            <!-- Section title -->
+            <div class="section-title">
+                <h2>🔖 Đặt chỗ sách của tôi</h2>
+                <a class="btn-new" href="/books">➕ Đặt sách mới</a>
+            </div>
+
+            <!-- Danh sách reservations -->
+            <div class="card">
+                <!-- Empty state -->
+                <div class="empty-state" th:if="${reservations.empty}">
+                    <div class="empty-icon">📭</div>
+                    <p>Bạn chưa có đơn đặt giữ chỗ nào.<br/>
+                       <a href="/books" style="color:#0057b8;">Tìm sách và đặt ngay →</a>
+                    </p>
+                </div>
+
+                <!-- Danh sách -->
+                <div th:each="r : ${reservations}" class="reservation-item">
+                    <div>
+                        <!-- Tên sách -->
+                        <div class="res-title" th:text="${r.book.title}">Tên sách</div>
+
+                        <!-- Badge trạng thái -->
+                        <div style="margin: 5px 0;">
+                            <span class="badge badge-holding"   th:if="${r.status == 'Holding'}">⏳ Đang giữ chỗ</span>
+                            <span class="badge badge-completed" th:if="${r.status == 'Completed'}">✅ Đã nhận sách</span>
+                            <span class="badge badge-cancelled" th:if="${r.status == 'Cancelled'}">❌ Đã hủy</span>
+                            <span class="badge badge-expired"   th:if="${r.status == 'Expired'}">⌛ Hết hạn</span>
+                        </div>
+
+                        <!-- Metadata -->
+                        <div class="res-meta">
+                            <span>📋 Mã đơn #<span th:text="${r.reservationId}"></span></span>
+                            <span>🏫 <span th:text="${r.pickupCampus.campusName}">Campus</span></span>
+                            <span>📅 Đặt lúc: <span th:text="${#temporals.format(r.reservedAt, 'dd/MM/yyyy HH:mm')}"></span></span>
+                            <span th:if="${r.copy != null}">📦 Bản sách: <span th:text="${r.copy.copyId}"></span></span>
+                        </div>
+
+                        <!-- Countdown chỉ hiện với đơn đang Holding -->
+                        <div class="countdown" th:if="${r.status == 'Holding'}">
+                            ⏰ Thời hạn nhận: <span th:text="${#temporals.format(r.expirationDate, 'HH:mm dd/MM/yyyy')}"></span>
+                            <span th:id="'cd-' + ${r.reservationId}" th:data-expiry="${r.expirationDate}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Nút hủy (chỉ với Holding) -->
+                    <div class="actions" th:if="${r.status == 'Holding'}">
+                        <button class="btn-cancel"
+                                th:data-id="${r.reservationId}"
+                                th:data-title="${r.book.title}"
+                                onclick="openModal(this.getAttribute('data-id'), this.getAttribute('data-title'))">
+                            🗑 Hủy đặt chỗ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột 2: Danh sách chờ (Waitlist) -->
+        <div>
+            <!-- Section title -->
+            <div class="section-title">
+                <h2>📋 Danh sách xếp hàng chờ</h2>
+            </div>
+
+            <div class="card">
+                <!-- Empty state -->
+                <div class="empty-state" th:if="${waitlists.empty}">
+                    <div class="empty-icon">🛋️</div>
+                    <p>Bạn chưa tham gia danh sách chờ nào.</p>
+                </div>
+
+                <!-- Danh sách -->
+                <div th:each="w : ${waitlists}" class="reservation-item">
+                    <div>
+                        <!-- Tên sách -->
+                        <div class="res-title" th:text="${w.book.title}">Tên sách</div>
+
+                        <!-- Badge trạng thái -->
+                        <div style="margin: 5px 0;">
+                            <span class="badge badge-waiting"  th:if="${w.status == 'Waiting'}">⏳ Đang đợi sách</span>
+                            <span class="badge badge-notified" th:if="${w.status == 'Notified'}">🔔 Đã có sách (Kiểm tra Email)</span>
+                            <span class="badge badge-cancelled" th:if="${w.status == 'Cancelled'}">❌ Đã hủy đăng ký</span>
+                        </div>
+
+                        <!-- Metadata -->
+                        <div class="res-meta">
+                            <span>🏫 <span th:text="${w.campus.campusName}">Campus</span></span>
+                            <span>📅 Đăng ký lúc: <span th:text="${#temporals.format(w.requestedAt, 'dd/MM/yyyy HH:mm')}"></span></span>
+                        </div>
+                    </div>
+
+                    <!-- Nút hủy hàng chờ (chỉ với Waiting/Notified) -->
+                    <div class="actions" th:if="${w.status == 'Waiting' or w.status == 'Notified'}">
+                        <button class="btn-cancel"
+                                th:data-id="${w.waitlistId}"
+                                th:data-title="${w.book.title}"
+                                onclick="openWaitlistModal(this.getAttribute('data-id'), this.getAttribute('data-title'))">
+                            🗑 Hủy chờ sách
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<!-- ── Modal xác nhận hủy ─────────────────────────────────── -->
+<div id="cancelModal" class="modal-overlay">
+    <div class="modal">
+        <h3 id="modalTitle">⚠️ Xác nhận hủy đặt chỗ</h3>
+        <p id="modalMsg">Bạn có chắc muốn hủy đơn đặt giữ chỗ cho cuốn sách này không?
+           <br/>Thao tác này không thể hoàn tác.</p>
+        <div class="modal-actions">
+            <button class="btn-back" onclick="closeModal()">Không, giữ lại</button>
+            <form id="cancelForm" method="post" style="display:inline;">
+                <button id="btn-confirm-cancel" type="submit" class="btn-confirm">Đồng ý hủy</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ── Modal logic ─────────────────────────────────────────
+    function openModal(reservationId, bookTitle) {
+        document.getElementById('modalTitle').textContent = '⚠️ Xác nhận hủy đặt chỗ';
+        document.getElementById('modalMsg').innerHTML =
+            'Bạn có chắc muốn hủy đơn đặt giữ chỗ cho cuốn <strong>"' + bookTitle + '"</strong> không?<br/>Thao tác này không thể hoàn tác.';
+        document.getElementById('cancelForm').action = '/reservations/cancel/' + reservationId;
+        document.getElementById('cancelModal').classList.add('active');
+    }
+
+    function openWaitlistModal(waitlistId, bookTitle) {
+        document.getElementById('modalTitle').textContent = '⚠️ Xác nhận hủy chờ sách';
+        document.getElementById('modalMsg').innerHTML =
+            'Bạn có chắc muốn hủy đăng ký chờ sách cho cuốn <strong>"' + bookTitle + '"</strong> không?<br/>Thao tác này không thể hoàn tác.';
+        document.getElementById('cancelForm').action = '/reservations/waitlist/cancel/' + waitlistId;
+        document.getElementById('cancelModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('cancelModal').classList.remove('active');
+    }
+
+    // Đóng modal khi click ra ngoài
+    document.getElementById('cancelModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // ── Countdown timer ─────────────────────────────────────
+    function updateCountdowns() {
+        const spans = document.querySelectorAll('[id^="cd-"]');
+        const now = new Date();
+        spans.forEach(span => {
+            const expiryStr = span.dataset.expiry;
+            if (!expiryStr) return;
+            // Parse LocalDateTime string từ Thymeleaf (format: 2026-06-01T20:00:00)
+            const expiry = new Date(expiryStr);
+            const diff = expiry - now;
+            if (diff <= 0) {
+                span.textContent = ' (Đã hết hạn)';
+                span.style.color = '#999';
+                
+                const itemDiv = span.closest('.reservation-item');
+                if (itemDiv) {
+                    // Ẩn nút hủy
+                    const actionsDiv = itemDiv.querySelector('.actions');
+                    if (actionsDiv) actionsDiv.style.display = 'none';
+                    
+                    // Cập nhật badge từ Đang giữ chỗ -> Hết hạn
+                    const badge = itemDiv.querySelector('.badge-holding');
+                    if (badge) {
+                        badge.textContent = '⌛ Hết hạn';
+                        badge.className = 'badge badge-expired';
+                    }
+                }
+                return;
+            }
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            span.textContent = ' – còn ' + h + 'h ' + m + 'm ' + s + 's';
+        });
+    }
+
+    updateCountdowns();
+    setInterval(updateCountdowns, 1000);
+</script>
+
+</body>
+</html>

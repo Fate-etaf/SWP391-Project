@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Danh sách quá hạn - FLMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B',
+                            dark: '#0F172A',
+                            orangeHover: '#D95F18'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 min-h-screen text-slate-800">
+
+    <header class="bg-fpt-dark text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center space-x-3">
+                    <div
+                        class="bg-fpt-orange text-white p-2.5 rounded-lg font-extrabold text-xl tracking-wider shadow-lg">
+                        FPT</div>
+                    <div>
+                        <h1 class="text-lg font-bold tracking-tight leading-none text-orange-400">FLMS</h1>
+                        <p class="text-xs text-slate-400 font-medium">Library Management System</p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex space-x-8 font-medium text-sm">
+                    <a href="/home"
+                        class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Trang
+                        chủ</a>
+                    <a href="/books"
+                        class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Tra
+                        cứu sách</a>
+                    <a href="/borrowing"
+                        class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Đang
+                        mượn</a>
+                    <a href="/borrowing/return-center"
+                        class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Desk
+                        Return Center</a>
+                    <a href="/violations/overdue"
+                        class="text-fpt-orange hover:text-orange-400 transition-colors py-2 border-b-2 border-fpt-orange">Quá
+                        hạn</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-fpt-orange">Quản lý vi phạm</p>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Sách đã trả quá hạn</h2>
+                <p class="text-sm text-slate-500 mt-1">Danh sách các sách đã được trả nhưng trả trễ hạn. Lọc và xử lý
+                    phiếu phạt theo mức tiền, trạng thái và số ngày quá hạn.</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="/borrowing"
+                    class="inline-flex items-center gap-2 bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 font-semibold text-sm px-4 py-2 rounded-xl shadow-sm transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    Xem đang mượn
+                </a>
+            </div>
+            <div class="bg-white border border-slate-300 rounded-2xl px-4 py-3 shadow-sm">
+                <div class="flex items-center gap-3 text-xs text-slate-500">
+                    <span class="inline-flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Đã trả
+                    </span>
+                    <span class="inline-flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span> Chưa trả
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <section class="bg-white border border-slate-300 rounded-2xl shadow-sm p-5 md:p-6 mb-6">
+            <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" method="get"
+                th:action="@{/violations/overdue}">
+                <div class="lg:col-span-2">
+                    <label for="paidStatus" class="block text-xs font-semibold text-slate-500 mb-1">Trạng thái thanh
+                        toán</label>
+                    <select id="paidStatus" name="paidStatus" onchange="this.form.submit()"
+                        class="w-full rounded-lg border border-slate-400 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-fpt-orange/40">
+                        <option value="ALL" th:selected="${paidStatus} == null or ${paidStatus} == 'ALL'">Tất cả
+                        </option>
+                        <option value="PAID" th:selected="${paidStatus} == 'PAID'">Đã trả</option>
+                        <option value="UNPAID" th:selected="${paidStatus == 'UNPAID' or paidStatus == 'NOT_CREATED'}">Chưa trả</option>
+                    </select>
+                </div>
+                <div class="lg:col-span-1">
+                    <label for="borrowerId" class="block text-xs font-semibold text-slate-500 mb-1">Mã sinh viên</label>
+                    <input id="borrowerId" name="borrowerId" type="text" th:value="${borrowerId}"
+                        oninput="scheduleFilterSubmit(this.form)"
+                        class="w-full rounded-lg border border-slate-400 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange/40" />
+                </div>
+                <div class="lg:col-span-4 flex items-center gap-3 pt-2">
+                    <a href="/violations/overdue" class="text-sm font-semibold text-slate-500 hover:text-slate-700">Xóa
+                        bộ lọc</a>
+                </div>
+            </form>
+        </section>
+
+        <section class="bg-white border border-slate-300 rounded-2xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-slate-50 text-slate-600 border-b border-slate-300">
+                        <tr>
+                            <th class="text-left px-6 py-4 font-semibold">Người mượn</th>
+                            <th class="text-left px-6 py-4 font-semibold">Mã người mượn</th>
+                            <th class="text-left px-6 py-4 font-semibold">Tên sách</th>
+                            <th class="text-left px-6 py-4 font-semibold">Mã bản sao</th>
+                            <th class="text-left px-6 py-4 font-semibold">Ngày mượn</th>
+                            <th class="text-left px-6 py-4 font-semibold">Hạn trả</th>
+                            <th class="text-left px-6 py-4 font-semibold">Ngày trả</th>
+                            <th class="text-left px-6 py-4 font-semibold">Số ngày quá hạn</th>
+                            <th class="text-left px-6 py-4 font-semibold">Tiền phạt</th>
+                            <th class="text-left px-6 py-4 font-semibold">Trạng thái</th>
+                            <th class="text-left px-6 py-4 font-semibold">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-300">
+                        <tr th:each="item : ${overdueItems}" class="hover:bg-slate-50/70">
+                            <td class="px-6 py-4 text-slate-700" th:text="${item.detail.borrowTicket.patron.fullName}">
+                                Nguoi muon</td>
+                            <td class="px-6 py-4 text-slate-600" th:text="${item.detail.borrowTicket.patron.userId}">ID
+                            </td>
+                            <td class="px-6 py-4 font-semibold text-slate-900"
+                                th:text="${item.detail.bookCopy.book.title}">Tên sách</td>
+                            <td class="px-6 py-4 text-slate-600" th:text="${item.detail.bookCopy.copyId}">Copy ID</td>
+                            <td class="px-6 py-4 text-slate-600"
+                                th:text="${item.detail.borrowTicket.createdAt != null ? #temporals.format(item.detail.borrowTicket.createdAt, 'dd-MM-yyyy') : ''}">
+                                Borrow Date</td>
+                            <td class="px-6 py-4 text-slate-600"
+                                th:text="${item.detail.dueDate != null ? #temporals.format(item.detail.dueDate, 'dd-MM-yyyy') : ''}">
+                                Due Date</td>
+                            <td class="px-6 py-4 text-slate-600"
+                                th:text="${item.detail.returnDate != null ? #temporals.format(item.detail.returnDate, 'dd-MM-yyyy') : ''}"
+                                >Return Date</td>
+                            <td class="px-6 py-4 text-slate-700 font-semibold" th:text="${item.overdueDays}">0</td>
+                            <td class="px-6 py-4 text-slate-700 font-semibold" th:text="${item.fineAmount}">0</td>
+                            <td class="px-6 py-4">
+                                <span
+                                    class="inline-flex items-center gap-2 text-xs font-semibold px-2.5 py-1 rounded-full"
+                                    th:classappend="${item.fineStatus == 'PAID'} ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'"
+                                    th:text="${item.fineStatus == 'PAID'} ? 'Đã trả' : 'Chưa trả'">
+                                     Trạng thái
+</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button"
+                                        class="bg-fpt-navy hover:bg-slate-700 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
+                                        th:attr="data-action=@{'/violations/create-overdue/' + ${item.detail.ticketDetailId}},
+                                             data-book-title=${item.detail.bookCopy.book.title},
+                                             data-copy-id=${item.detail.bookCopy.copyId},
+                                             data-borrower-name=${item.detail.borrowTicket.patron.fullName},
+                                             data-borrower-id=${item.detail.borrowTicket.patron.userId},
+                                             data-borrow-date=${item.detail.borrowTicket.createdAt != null ? #temporals.format(item.detail.borrowTicket.createdAt, 'dd-MM-yyyy') : ''},
+                                             data-due-date=${item.detail.dueDate != null ? #temporals.format(item.detail.dueDate, 'dd-MM-yyyy') : ''},
+                                             data-overdue-days=${item.overdueDays},
+                                             data-fine-amount=${item.fineAmount}" onclick="openFineModal(this);">
+                                        Tạo phiếu phạt
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div
+                class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-6 py-4 border-t border-slate-300 bg-white">
+                <div class="text-sm text-slate-500">
+                    <span
+                        th:text="${totalPages == 0 ? 'Trang 0 / 0' : 'Trang ' + (currentPage + 1) + ' / ' + totalPages}">Trang
+                        1 / 1</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <a class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                        th:if="${currentPage > 0}"
+                        th:href="@{/violations/overdue(page=${currentPage - 1}, paidStatus=${paidStatus}, borrowerId=${borrowerId})}">Trước</a>
+                    <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400"
+                        th:if="${currentPage == 0}">Trước</span>
+
+                    <a th:if="${totalPages > 0}" th:each="p : ${#numbers.sequence(0, totalPages - 1)}"
+                        class="px-3 py-1.5 rounded-lg border text-sm font-semibold"
+                        th:classappend="${p == currentPage} ? ' border-fpt-orange text-fpt-orange bg-orange-50' : ' border-slate-300 text-slate-600 hover:bg-slate-50'"
+                        th:text="${p + 1}"
+                        th:href="@{/violations/overdue(page=${p}, paidStatus=${paidStatus}, borrowerId=${borrowerId})}">1</a>
+
+                    <a class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                        th:if="${currentPage + 1 < totalPages}"
+                        th:href="@{/violations/overdue(page=${currentPage + 1}, paidStatus=${paidStatus}, borrowerId=${borrowerId})}">Sau</a>
+                    <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400"
+                        th:if="${currentPage + 1 >= totalPages}">Sau</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50">
+        <div class="bg-white w-full max-w-md rounded-2xl border border-slate-300 shadow-xl p-6">
+            <h3 id="confirmTitle" class="text-lg font-extrabold text-slate-900">Xác nhận</h3>
+            <p id="confirmMessage" class="text-sm text-slate-600 mt-2">Thông báo</p>
+            <div class="flex items-center justify-end gap-3 mt-6">
+                <button type="button"
+                    class="px-4 py-2 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                    onclick="closeConfirmModal()">
+                    Hủy
+                </button>
+                <form id="confirmForm" method="post">
+                    <button type="submit"
+                        class="px-4 py-2 rounded-lg bg-fpt-orange hover:bg-fpt-orangeHover text-white text-sm font-bold">
+                        Xác nhận
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="fineModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50">
+        <div class="bg-white w-full max-w-2xl rounded-2xl border border-slate-300 shadow-xl p-6">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-fpt-orange">Tạo phiếu phạt</p>
+                    <h3 class="text-lg font-extrabold text-slate-900">Thông tin phạt quá hạn</h3>
+                </div>
+                <button type="button" class="text-slate-400 hover:text-slate-600"
+                    onclick="closeFineModal()">&#10005;</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-sm">
+                <div>
+                    <p class="text-xs font-semibold text-slate-500">Tên sách</p>
+                    <p id="fineBookTitle" class="font-semibold text-slate-800">-</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-500">Mã bản sao</p>
+                    <p id="fineCopyId" class="font-semibold text-slate-800">-</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-500">Người mượn</p>
+                    <p id="fineBorrowerName" class="font-semibold text-slate-800">-</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-500">Mã sinh viên</p>
+                    <p id="fineBorrowerId" class="font-semibold text-slate-800">-</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-500">Ngày mượn</p>
+                    <p id="fineBorrowDate" class="font-semibold text-slate-800">-</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-500">Hạn trả</p>
+                    <p id="fineDueDate" class="font-semibold text-slate-800">-</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-500">Số ngày quá hạn</p>
+                    <p id="fineOverdueDays" class="font-semibold text-slate-800">-</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-500">Tiền phạt (VND)</p>
+                    <p id="fineAmount" class="font-semibold text-slate-800">-</p>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-3 mt-6">
+                <button type="button"
+                    class="px-4 py-2 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                    onclick="closeFineModal()">
+                    Hủy
+                </button>
+                <form id="fineForm" method="post">
+                    <button type="submit"
+                        class="px-4 py-2 rounded-lg bg-fpt-orange hover:bg-fpt-orangeHover text-white text-sm font-bold">
+                        Xác nhận tạo phiếu
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let filterSubmitTimer;
+        function scheduleFilterSubmit(form) {
+            clearTimeout(filterSubmitTimer);
+            filterSubmitTimer = setTimeout(() => form.submit(), 400);
+        }
+
+        function openConfirmModal(button, title, message) {
+            var action = button.getAttribute('data-action');
+            var modal = document.getElementById('confirmModal');
+            var form = document.getElementById('confirmForm');
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            form.setAttribute('action', action);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeConfirmModal() {
+            var modal = document.getElementById('confirmModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        document.getElementById('confirmModal').addEventListener('click', function (event) {
+            if (event.target.id === 'confirmModal') {
+                closeConfirmModal();
+            }
+        });
+
+        function openFineModal(button) {
+            var modal = document.getElementById('fineModal');
+            var form = document.getElementById('fineForm');
+            form.setAttribute('action', button.getAttribute('data-action'));
+            document.getElementById('fineBookTitle').textContent = button.getAttribute('data-book-title');
+            document.getElementById('fineCopyId').textContent = button.getAttribute('data-copy-id');
+            document.getElementById('fineBorrowerName').textContent = button.getAttribute('data-borrower-name');
+            document.getElementById('fineBorrowerId').textContent = button.getAttribute('data-borrower-id');
+            document.getElementById('fineBorrowDate').textContent = button.getAttribute('data-borrow-date');
+            document.getElementById('fineDueDate').textContent = button.getAttribute('data-due-date');
+            document.getElementById('fineOverdueDays').textContent = button.getAttribute('data-overdue-days');
+            document.getElementById('fineAmount').textContent = button.getAttribute('data-fine-amount');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeFineModal() {
+            var modal = document.getElementById('fineModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        document.getElementById('fineModal').addEventListener('click', function (event) {
+            if (event.target.id === 'fineModal') {
+                closeFineModal();
+            }
+        });
+    </script>
+
+<div class="relative z-10 mt-auto">
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+</body>
+
+</html>

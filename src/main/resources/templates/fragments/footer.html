@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style th:fragment="footer-style">
+        /* ── FOOTER ── */
+        footer { background: #1a1a2e; color: #aaa; padding: 40px 20px 20px; border-top: 4px solid #e87722; margin-top: 60px; }
+        footer .inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 32px; margin-bottom: 28px; }
+        footer h5 { color: #e0e0e0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
+        footer p, footer li { font-size: 12.5px; line-height: 1.8; }
+        footer ul { list-style: none; padding: 0; margin: 0; }
+        footer a { color: #aaa; text-decoration: none; }
+        footer a:hover { color: #e87722; }
+        .footer-brand { display: inline-block; background: #e87722; color: #fff; padding: 4px 12px; border-radius: 4px; font-weight: 800; font-size: 14px; margin-bottom: 12px; }
+        .footer-bottom { border-top: 1px solid #2e2e44; padding-top: 18px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; flex-wrap: wrap; gap: 8px; }
+        .footer-bottom a { color: #777; }
+        .footer-bottom a:hover { color: #e87722; }
+
+        @media (max-width: 768px) {
+            footer .inner { grid-template-columns: 1fr; gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<footer th:fragment="footer">
+    <div class="inner">
+        <div>
+            <span class="footer-brand">FPT Thư viện</span>
+            <p>Hệ thống FLMS là nền tảng quản lý thư viện hiện đại kết nối 5 cơ sở đào tạo của Đại học FPT trên toàn quốc.</p>
+        </div>
+        <div>
+            <h5>Danh mục</h5>
+            <ul>
+                <li><a href="#">Về FLMS</a></li>
+                <li><a href="/policies/rules">Hướng dẫn nội quy</a></li>
+                <li><a href="#">Khung phạt vi phạm</a></li>
+                <li><a href="#">Tài nguyên số E-book</a></li>
+            </ul>
+        </div>
+        <div>
+            <h5>Liên kết FPT</h5>
+            <ul>
+                <li><a href="https://fap.fpt.edu.vn" target="_blank">Trang học vụ FAP</a></li>
+                <li><a href="#">Hệ thống LMS</a></li>
+                <li><a href="#">Cổng hỗ trợ sinh viên</a></li>
+            </ul>
+        </div>
+        <div>
+            <h5>Cơ sở Hà Nội (Hòa Lạc)</h5>
+            <p>Khu Công nghệ cao Hòa Lạc, Km 29 Đại lộ Thăng Long, Thạch Thất, Hà Nội</p>
+            <p>Điện thoại: (024) 73001866</p>
+            <p>Email: library@fpt.edu.vn</p>
+        </div>
+    </div>
+    <div class="footer-bottom" style="max-width:1200px;margin:0 auto;">
+        <p>© 2026 FPT University Library. Developed by Team SWP391 Group 5.</p>
+        <div>
+            <a href="#">Chính sách bảo mật</a> &nbsp;|&nbsp; <a href="#">Điều khoản sử dụng</a>
+        </div>
+    </div>
+
+    <div class="fixed bottom-6 right-6 z-50">
+    <button id="chatbotToggle" onclick="toggleChatWindow()"
+            class="w-14 h-14 bg-gradient-to-tr from-fpt-orange to-amber-500 text-white rounded-full flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all cursor-pointer group">
+        <svg class="w-7 h-7 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+        </svg>
+    </button>
+
+    <div id="chatWindow" class="hidden absolute bottom-16 right-0 w-80 sm:w-96 h-[480px] bg-slate-900/95 border border-slate-800 backdrop-blur-xl rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all">
+        <div class="p-4 bg-gradient-to-r from-slate-950 to-slate-900 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                <div>
+                    <h3 class="text-sm font-bold text-white tracking-wide">Trợ lý ảo FLMS-Bot</h3>
+                    <p class="text-[10px] text-slate-400">Tư vấn mượn & review sách 24/7</p>
+                </div>
+            </div>
+            <button onclick="toggleChatWindow()" class="text-slate-400 hover:text-white transition-colors">✕</button>
+        </div>
+
+        <div id="chatMessages" class="flex-grow p-4 overflow-y-auto space-y-3 text-xs scrollbar-thin">
+            <div class="flex justify-start">
+                <div class="bg-slate-800 text-slate-200 p-3 rounded-2xl rounded-tl-none max-w-[85%] leading-relaxed border border-slate-700/50">
+                    Xin chào! Mình là trợ lý ảo của thư viện số FPT. Cậu cần mình gợi ý sách ngành gì, hoặc muốn mình review/góp ý cuốn sách nào sắp mượn không?
+                </div>
+            </div>
+        </div>
+
+        <div class="p-3 bg-slate-950 border-t border-slate-800 flex gap-2">
+            <input type="text" id="userInput" placeholder="Nhập câu hỏi của cậu tại đây..." 
+                   onkeypress="if(event.key === 'Enter') sendChatMessage()"
+                   class="flex-grow bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-fpt-orange transition-all"/>
+            <button onclick="sendChatMessage()" class="bg-fpt-orange hover:bg-fpt-orangeHover text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-colors">
+                Gửi
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleChatWindow() {
+        const win = document.getElementById('chatWindow');
+        win.classList.toggle('hidden');
+    }
+
+    async function sendChatMessage() {
+        const input = document.getElementById('userInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const container = document.getElementById('chatMessages');
+
+        // 1. Hiển thị tin nhắn của Người dùng lên màn hình chat
+        container.innerHTML += `
+            <div class="flex justify-end">
+                <div class="bg-fpt-orange text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] font-medium">
+                    ${text}
+                </div>
+            </div>
+        `;
+        input.value = '';
+        container.scrollTop = container.scrollHeight;
+
+        // 2. Tạo hiệu ứng dấu ba chấm chờ AI phản hồi
+        const loadingId = 'loading-' + Date.now();
+        container.innerHTML += `
+            <div class="flex justify-start" id="${loadingId}">
+                <div class="bg-slate-800 text-slate-400 p-3 rounded-2xl rounded-tl-none border border-slate-700/50 italic animate-pulse">
+                    FLMS-Bot đang suy nghĩ...
+                </div>
+            </div>
+        `;
+        container.scrollTop = container.scrollHeight;
+
+        // 3. Tiến hành gọi API AJAX sang Spring Boot Backend
+        try {
+            const response = await fetch('/api/chatbot/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            });
+            const data = await response.json();
+
+            // 4. Xóa hiệu ứng chờ, in câu trả lời thực tế của AI ra màn hình
+            document.getElementById(loadingId).remove();
+            container.innerHTML += `
+                <div class="flex justify-start">
+                    <div class="bg-slate-800 text-slate-200 p-3 rounded-2xl rounded-tl-none max-w-[85%] leading-relaxed border border-slate-700/50">
+                        ${data.reply.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            `;
+        } catch (error) {
+            document.getElementById(loadingId).remove();
+            container.innerHTML += `
+                <div class="flex justify-start text-rose-400 font-medium">
+                    Có lỗi kết nối xảy ra. Vui lòng thử lại!
+                </div>
+            `;
+        }
+        container.scrollTop = container.scrollHeight;
+    }
+</script>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập hệ thống — FLMS FPT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B',
+                            dark: '#0F172A',
+                            orangeHover: '#D95F18'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-center items-center relative overflow-hidden p-4">
+    
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px] pointer-events-none"></div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-orange-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+    
+    <!-- Nút Home -->
+    <a href="/home" class="absolute top-6 left-6 flex items-center text-slate-400 hover:text-fpt-orange transition-colors z-50 group">
+        <div class="bg-slate-800/50 p-2 rounded-full mr-2 group-hover:bg-fpt-orange/20 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+        </div>
+        <span class="font-medium text-sm">Quay lại Trang chủ</span>
+    </a>
+    <div class="flex items-center space-x-3 mb-8 relative z-10">
+        <div class="bg-fpt-orange text-white px-3 py-1.5 rounded-xl font-extrabold text-2xl tracking-wider shadow-lg shadow-fpt-orange/20">
+            FPT
+        </div>
+        <div>
+            <h1 class="text-xl font-extrabold tracking-tight leading-none text-orange-400">FLMS</h1>
+            <p class="text-[11px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">Library Verification</p>
+        </div>
+    </div>
+
+    <div class="w-full max-w-md bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-8 shadow-2xl relative z-10 transition-all hover:border-fpt-orange/30 text-center">
+        
+        <h2 class="text-xl font-bold text-slate-200 mb-2">CỔNG XÁC THỰC HỆ THỐNG</h2>
+        <p class="text-xs text-slate-400 mb-8">Hệ thống Thư viện số dành riêng cho Cán bộ, Giảng viên và Sinh viên FPT University</p>
+
+        <div th:if="${session.loginError != null}" id="error-alert-box" class="mb-6 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-xs font-medium text-left flex items-start gap-2 relative z-20 animate-fade-in">
+            <span>🔒</span>
+            <span th:text="${session.loginError}">Bạn không có quyền truy cập! Tài khoản này chưa được import vào hệ thống.</span>
+        </div>
+
+        <div th:if="${session['SPRING_SECURITY_LAST_EXCEPTION'] != null}" class="mb-6 bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 px-4 py-3 rounded-xl text-xs font-medium text-left flex items-start gap-2 relative z-20 animate-fade-in">
+            <span>⚠️</span>
+            <span th:text="${session['SPRING_SECURITY_LAST_EXCEPTION'].message}">Lỗi chi tiết từ Spring Security</span>
+        </div>
+
+        <div th:if="${loginError != null}" class="mb-6 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-xs font-medium text-left flex items-start gap-2 relative z-20 animate-fade-in">
+            <span>🔒</span>
+            <span th:text="${loginError}">Thông tin xác thực không chính xác hoặc chưa được import!</span>
+        </div>
+
+        <div th:if="${infoMessage != null}" class="mb-6 bg-blue-500/10 border border-blue-500/30 text-blue-400 px-4 py-3 rounded-xl text-xs font-medium text-left flex items-start gap-2 relative z-20 animate-fade-in">
+            <span>ℹ️</span>
+            <span th:text="${infoMessage}">Thông báo</span>
+        </div>
+
+        <form th:action="@{/login}" method="POST" class="space-y-4 mb-6 text-left">
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Mã số (Roll Number / User ID)</label>
+                <div class="relative flex items-center">
+                    <span class="absolute left-4 text-slate-500 text-sm font-bold select-none">#</span>
+                    <input type="text" name="userId" placeholder="Ví dụ: HE180000" required autocomplete="off"
+                           class="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Địa chỉ Email</label>
+                <div class="relative flex items-center">
+                    <svg class="w-4 h-4 text-slate-500 absolute left-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    <input type="email" name="email" placeholder="username@fpt.edu.vn" required autocomplete="off"
+                           class="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Cơ sở học tập (Campus)</label>
+                <div class="relative flex items-center">
+                    <svg class="w-4 h-4 text-slate-500 absolute left-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    </svg>
+                    <select name="campusId" required class="w-full bg-slate-950 border border-slate-800 text-slate-300 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all cursor-pointer appearance-none">
+                        <option value="" disabled selected>-- Chọn cơ sở học tập --</option>
+                        <option value="1">Hà Nội</option>
+                        <option value="2">Đà Nẵng</option>
+                        <option value="3">TP. Hồ Chí Minh</option>
+                        <option value="4">Cần Thơ</option>
+                        <option value="5">Quy Nhơn</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-fpt-orange hover:bg-fpt-orangeHover text-white py-3 rounded-xl font-bold transition-all text-sm shadow-lg shadow-fpt-orange/20 active:scale-[0.99] mt-4">
+                Xác thực đăng nhập
+            </button>
+        </form>
+
+        <div class="flex items-center gap-4 mb-4">
+            <div class="h-px bg-slate-800 flex-grow"></div>
+            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Hoặc đăng nhập nhanh</span>
+            <div class="h-px bg-slate-800 flex-grow"></div>
+        </div>
+
+        <div class="pb-2">
+            <a href="/mock-google-login" 
+               class="w-full flex items-center justify-center gap-3.5 bg-slate-950 hover:bg-fpt-orange text-white border border-slate-800 hover:border-fpt-orange rounded-xl py-3.5 transition-all duration-300 font-semibold text-sm shadow-xl hover:shadow-fpt-orange/20 active:scale-[0.99] group">
+                
+                <div class="bg-white p-2 rounded-lg transition-transform duration-300 group-hover:scale-105 flex items-center justify-center">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+                    </svg>
+                </div>
+                <span>Tiếp tục với tài khoản Google</span>
+            </a>
+        </div>
+
+        <p class="text-[11px] text-slate-500 mt-6 leading-relaxed">
+            Lưu ý: Vui lòng sử dụng tài khoản Email tổ chức do nhà trường cung cấp (<span class="text-slate-400 font-medium">@fpt.edu.vn</span> hoặc <span class="text-slate-400 font-medium">@fe.edu.vn</span>) để thực hiện xác thực đăng nhập.
+        </p>
+    </div>
+
+    <div class="text-center text-[11px] text-slate-600 mt-8 relative z-10">
+        <p>&copy; 2026 FPT University Library System. Developed by Team 5 SWP391.</p>
+    </div>
+
+   <script th:inline="javascript">
+        window.addEventListener('DOMContentLoaded', () => {
+            // Kiểm tra xem hiện tại Thymeleaf có đang sinh ra hộp lỗi hay không
+            const hasError = /*[[${session.loginError != null}]]*/ false;
+            
+            if (hasError) {
+                setTimeout(() => {
+                    const errorBox = document.getElementById('error-alert-box');
+                    if (errorBox) {
+                        // Thêm hiệu ứng mờ dần đẹp mắt trước khi ẩn
+                        errorBox.style.transition = "all 0.5s ease";
+                        errorBox.style.opacity = "0";
+                        setTimeout(() => errorBox.remove(), 500);
+                    }
+                }, 5000); 
+            }
+        });
+    </script>
+
+</body>
+</html>

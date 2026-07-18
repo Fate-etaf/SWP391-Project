@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <th:block th:replace="~{fragments/header :: head('Giờ mở cửa - FPTU Library')}"></th:block>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <style>
+        /* ── ARTICLE CONTENT ── */
+        .page-header { background: #f7f7f7; padding: 40px 20px; border-bottom: 1px solid #ddd; }
+        .page-header .inner { max-width: 900px; margin: 0 auto; }
+        .page-header h1 { font-size: 28px; color: #1a1a2e; margin-bottom: 8px; }
+        .page-meta { font-size: 13px; color: #777; display: flex; gap: 16px; }
+        
+        .article-body { max-width: 900px; margin: 40px auto; padding: 0 20px; font-size: 15px; color: #333; }
+        .article-body h2 { font-size: 20px; color: #e87722; margin-top: 32px; margin-bottom: 16px; font-weight: 700; border-bottom: 2px solid #eee; padding-bottom: 8px;}
+        .article-body h3 { font-size: 17px; color: #1a1a2e; margin-top: 24px; margin-bottom: 12px; font-weight: 600; }
+        .article-body p { margin-bottom: 16px; }
+        .article-body ul { margin-bottom: 16px; padding-left: 20px; }
+        .article-body li { margin-bottom: 8px; }
+        .article-body a { color: #e87722; text-decoration: none; font-weight: 600; }
+        .article-body a:hover { text-decoration: underline; }
+
+        /* Table styles */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 14px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background: #f7f7f7; font-weight: 600; color: #1a1a2e; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header('policy')}"></div>
+
+<div class="page-header">
+    <div class="inner">
+        <h1>Giờ mở cửa</h1>
+        <div class="page-meta">
+            <span>📅 14/05/2021</span>
+            <span>👁️ 11553 lượt xem</span>
+        </div>
+    </div>
+</div>
+
+<main class="article-body">
+    <h2>1. Giờ mở cửa, phục vụ tại Thư viện FPTU HN</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>TT</th>
+                <th>NGÀY</th>
+                <th>THỜI GIAN MỞ CỬA</th>
+                <th>THỜI GIAN PHỤC VỤ MƯỢN – TRẢ SÁCH</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Thứ Hai - Thứ Sáu</td>
+                <td>08:15 – 21:00</td>
+                <td>Sáng: 08:30 - 12:00<br>Chiều: 13:00 - 17:00</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Cuối tuần</td>
+                <td>08:00 – 12:00<br>13:00 – 17:00</td>
+                <td>Không phục vụ</td>
+            </tr>
+        </tbody>
+    </table>
+    <p><strong>Lưu ý:</strong> Ngoài khung giờ phục vụ mượn/trả, Thư viện chỉ phục vụ không gian tự học.</p>
+    <p><strong>Thông tin liên hệ:</strong></p>
+    <ul>
+        <li>Số ĐT: 024 6680 5912 (liên hệ trong giờ hành chính)</li>
+        <li>Email: Thuvien_fu_hoalac@fpt.edu.vn</li>
+        <li>Fanpage: <a href="https://www.facebook.com/thuvienfu">https://www.facebook.com/thuvienfu</a></li>
+    </ul>
+
+    <h2>2. Giờ mở cửa, phục vụ tại Thư viện FPTU HCM</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>TT</th>
+                <th>NGÀY</th>
+                <th>THỜI GIAN MỞ CỬA</th>
+                <th>THỜI GIAN PHỤC VỤ MƯỢN - TRẢ SÁCH</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Thứ Hai - Thứ Sáu</td>
+                <td>07:00 - 19:00</td>
+                <td>Sáng: 08:00 - 12:00<br>Chiều: 13:00 - 17:00</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Thứ Bảy</td>
+                <td>07:00 - 17:00</td>
+                <td>Sáng: 08:00 - 12:00<br>Chiều: Không phục vụ</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Chủ Nhật</td>
+                <td>Không phục vụ</td>
+                <td>Không phục vụ</td>
+            </tr>
+        </tbody>
+    </table>
+    <p><strong>Lưu ý:</strong></p>
+    <ul>
+        <li>Ngoài khung giờ phục vụ mượn/trả, Thư viện chỉ phục vụ không gian tự học.</li>
+        <li>Bạn đọc mượn/trả tại các khu vực tương ứng (theo khung giờ phục vụ mượn/trả).</li>
+    </ul>
+    <p><strong>Thông tin liên hệ:</strong></p>
+    <ul>
+        <li>Email: Lib.fuhcm@fe.edu.vn</li>
+        <li>Fanpage: <a href="https://www.facebook.com/library.fuhcm">https://www.facebook.com/library.fuhcm</a></li>
+    </ul>
+
+    <h2>3. Giờ mở cửa, phục vụ tại Thư viện FPTU CT</h2>
+    <h3>Thư viện Alpha FPTU CT</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>TT</th>
+                <th>NGÀY</th>
+                <th>THỜI GIAN MỞ CỬA</th>
+                <th>THỜI GIAN PHỤC VỤ MƯỢN - TRẢ SÁCH</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Thứ Hai - Thứ Sáu</td>
+                <td>08:00 - 17:30</td>
+                <td>08:00 - 17:30</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Thứ Bảy</td>
+                <td>08:00 - 12:00</td>
+                <td>08:00 - 12:00</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Chủ nhật</td>
+                <td>Không phục vụ</td>
+                <td>Không phục vụ</td>
+            </tr>
+        </tbody>
+    </table>
+    <h3>Thư viện Gamma FPTU CT</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>TT</th>
+                <th>NGÀY</th>
+                <th>THỜI GIAN MỞ CỬA</th>
+                <th>THỜI GIAN PHỤC VỤ MƯỢN - TRẢ SÁCH</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Thứ Hai - Thứ Bảy</td>
+                <td>06:30 - 20:30</td>
+                <td rowspan="2">Thư viện tự học không phục vụ mượn - trả sách</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Chủ nhật</td>
+                <td>06:30 - 18:00</td>
+            </tr>
+        </tbody>
+    </table>
+    <p><strong>Thông tin liên hệ:</strong></p>
+    <ul>
+        <li>Email: lib.ct@fe.edu.vn</li>
+        <li>Fanpage: <a href="https://www.facebook.com/thuviendaihocfpt">https://www.facebook.com/thuviendaihocfpt</a></li>
+    </ul>
+
+    <h2>4. Giờ mở cửa, phục vụ tại Thư viện FPTU ĐN</h2>
+    <h3>Phòng Thư viện 105 FPTU ĐN</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>TT</th>
+                <th>NGÀY</th>
+                <th>THỜI GIAN MỞ CỬA</th>
+                <th>THỜI GIAN PHỤC VỤ MƯỢN - TRẢ SÁCH</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Thứ Hai – thứ Sáu</td>
+                <td>07:00 - 17:30</td>
+                <td>07:00 - 17:30</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Thứ Bảy</td>
+                <td>07:00 - 12:00</td>
+                <td>07:00 - 12:00</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Chủ nhật</td>
+                <td>Không phục vụ</td>
+                <td>Không phục vụ</td>
+            </tr>
+        </tbody>
+    </table>
+    <h3>Phòng tự học 103 FPTU ĐN</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>TT</th>
+                <th>NGÀY</th>
+                <th>THỜI GIAN MỞ CỬA</th>
+                <th>THỜI GIAN PHỤC VỤ MƯỢN - TRẢ SÁCH</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Thứ Hai – thứ Bảy</td>
+                <td>07:00 - 21:00</td>
+                <td>Thư viện tự học không phục vụ mượn - trả sách</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Chủ nhật</td>
+                <td>Không phục vụ</td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+    <p><strong>Lưu ý:</strong> Phòng Thư viện 105 sẽ phục vụ ngoài giờ nếu như Phòng tự học 103 có sự kiện.</p>
+    <p><strong>Thông tin liên hệ:</strong></p>
+    <ul>
+        <li>Email: thuvien_dn@fpt.edu.vn</li>
+        <li>Fanpage: <a href="https://www.facebook.com/LIBRARY.FPTUDN">https://www.facebook.com/LIBRARY.FPTUDN</a></li>
+    </ul>
+
+    <h2>5. Giờ mở cửa, phục vụ tại Thư viện FPTU QN</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>TT</th>
+                <th>NGÀY</th>
+                <th>THỜI GIAN MỞ CỬA</th>
+                <th>THỜI GIAN PHỤC VỤ MƯỢN - TRẢ SÁCH</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Thứ Hai – thứ Bảy</td>
+                <td>07:00 - 19:00</td>
+                <td>07:00 - 19:00</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Chủ nhật</td>
+                <td>Không phục vụ</td>
+                <td>Không phục vụ</td>
+            </tr>
+        </tbody>
+    </table>
+    <p><strong>Thông tin liên hệ:</strong></p>
+    <ul>
+        <li>Email: LIB.FUBD@fe.edu.vn</li>
+        <li>Fanpage: <a href="https://www.facebook.com/LIBRARY.FPTUQN/">https://www.facebook.com/LIBRARY.FPTUQN/</a></li>
+    </ul>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

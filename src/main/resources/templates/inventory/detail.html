@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${book.title + ' — Librarian | FPT Library'}">Book Detail — FPT Library</title>
+    <meta name="description" th:content="${'Librarian view: ' + book.title}"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <style>
+        /* ─── Design Tokens ─────────────────────────────────────────────── */
+        :root {
+            --bg-base:       #f8fafc;
+            --bg-surface:    #ffffff;
+            --bg-card:       #ffffff;
+            --bg-card-hover: #fff7ed;
+            --border:        #e2e8f0;
+            --border-hover:  #ffedd5;
+
+            --accent:        #f97316;
+            --accent-glow:   #ffedd5;
+            --violet:        #8b5cf6;
+            --emerald:       #10b981;
+            --emerald-soft:  #d1fae5;
+            --rose:          #ef4444;
+            --rose-soft:     #fee2e2;
+            --gold:          #f5a623;
+            --gold-soft:     #fef3c7;
+            --teal:          #14b8a6;
+
+            --text-primary:   #0f172a;
+            --text-secondary: #475569;
+            --text-muted:     #64748b;
+
+            --radius:    14px;
+            --shadow:    0 4px 24px rgba(15,23,42,0.06);
+            --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* ─── Navbar ─────────────────────────────────────────────────────── */
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 2rem; height: 64px;
+            background: rgba(248, 250, 252, 0.9);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border);
+        }
+        .navbar-brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+        .brand-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--accent), var(--violet));
+            border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
+        .brand-text { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+        .brand-sub  { font-size: 0.7rem; color: var(--text-secondary); display: block; line-height: 1; }
+        .nav-links  { display: flex; align-items: center; gap: 0.25rem; list-style: none; }
+        .nav-links a {
+            text-decoration: none; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500;
+            padding: 0.4rem 0.9rem; border-radius: 8px;
+            transition: color var(--transition), background var(--transition);
+        }
+        .nav-links a:hover, .nav-links a.active { color: var(--text-primary); background: var(--accent-glow); }
+        .nav-links a.active { color: var(--accent); }
+
+        /* ─── Breadcrumb ─────────────────────────────────────────────────── */
+        .breadcrumb {
+            padding: 0.85rem 2rem;
+            font-size: 0.8rem; color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .breadcrumb a { color: var(--text-secondary); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--accent); }
+        .breadcrumb .sep { opacity: 0.4; }
+        .breadcrumb .current { color: var(--text-primary); font-weight: 500; }
+
+        /* ─── Page wrapper ───────────────────────────────────────────────── */
+        .page-wrap { max-width: 1300px; margin: 0 auto; padding: 2.5rem 2rem 5rem; }
+
+        /* ─── Back button ────────────────────────────────────────────────── */
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            text-decoration: none; color: var(--text-secondary);
+            font-size: 0.85rem; font-weight: 500;
+            padding: 0.45rem 1rem; border-radius: 8px; border: 1px solid var(--border);
+            transition: all var(--transition); margin-bottom: 2rem;
+        }
+        .back-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-glow); }
+
+        /* ─── Hero: Cover + Info side-by-side ───────────────────────────── */
+        .book-hero {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 2.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2.5rem;
+        }
+        @media (max-width: 700px) {
+            .book-hero { grid-template-columns: 1fr; }
+        }
+
+        /* ── Cover column ── */
+        .cover-col { display: flex; flex-direction: column; gap: 1.2rem; }
+
+        .cover-img-wrap {
+            width: 100%; aspect-ratio: 3/4;
+            border-radius: 14px; overflow: hidden;
+            background: linear-gradient(145deg, #ffedd5, #fed7aa);
+            box-shadow: 0 8px 32px rgba(249, 115, 22, 0.08);
+        }
+        .cover-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        .cover-placeholder-lg {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 0.6rem;
+            color: #ea580c;
+            background: linear-gradient(145deg, #fff7ed, #ffedd5, #fed7aa);
+        }
+        .cover-initial-lg {
+            font-size: 5rem; font-weight: 800; line-height: 1;
+            background: linear-gradient(135deg, var(--accent), var(--violet));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .cover-label-lg { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); }
+
+        /* availability pill under cover */
+        .avail-pill {
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+            padding: 0.5rem 1rem; border-radius: 10px;
+            font-size: 0.8rem; font-weight: 600;
+        }
+        .avail-pill.yes { background: var(--emerald-soft); color: var(--emerald); border: 1px solid rgba(52,211,153,0.3); }
+        .avail-pill.no  { background: var(--rose-soft);    color: var(--rose);    border: 1px solid rgba(251,113,133,0.3); }
+        .pulse { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        /* ── Info column ── */
+        .info-col { display: flex; flex-direction: column; gap: 0; }
+
+        .book-category-tag {
+            display: inline-block;
+            background: var(--gold-soft); color: var(--gold);
+            border: 1px solid rgba(245,166,35,0.25);
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+            padding: 0.2rem 0.7rem; border-radius: 20px; margin-bottom: 0.9rem;
+        }
+
+        .book-title-lg {
+            font-size: 1.8rem; font-weight: 800; letter-spacing: -0.4px; line-height: 1.25;
+            color: var(--text-primary); margin-bottom: 0.3rem;
+        }
+        .book-edition { font-size: 0.85rem; color: var(--accent); font-weight: 500; margin-bottom: 1.4rem; }
+
+        .meta-grid {
+            display: grid; grid-template-columns: auto 1fr; row-gap: 0.7rem; column-gap: 1.2rem;
+            align-items: baseline; margin-bottom: 1.6rem;
+        }
+        .meta-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+        .meta-value { font-size: 0.875rem; color: var(--text-secondary); }
+        .meta-value.highlight { color: var(--text-primary); font-weight: 600; }
+        .meta-value .badge-subject {
+            display: inline-block; background: rgba(167,139,250,0.12); color: var(--violet);
+            border: 1px solid rgba(167,139,250,0.25); border-radius: 6px;
+            font-size: 0.72rem; font-weight: 700; padding: 0.15rem 0.55rem; margin-right: 0.4rem;
+        }
+
+        .description-box {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            border-radius: 10px; padding: 1rem 1.2rem;
+            font-size: 0.85rem; color: var(--text-secondary); line-height: 1.75;
+            margin-top: auto;
+        }
+        .description-box .desc-label {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: var(--text-muted); margin-bottom: 0.5rem;
+        }
+
+        /* ─── Section Header ─────────────────────────────────────────────── */
+        .section-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.6rem;
+        }
+        .section-title { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+        .section-count {
+            font-size: 0.8rem; color: var(--text-secondary);
+            background: var(--bg-surface); border: 1px solid var(--border);
+            padding: 0.2rem 0.7rem; border-radius: 20px;
+        }
+
+        /* ─── Campus filter tabs ─────────────────────────────────────────── */
+        .campus-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+        .campus-tab {
+            text-decoration: none; font-size: 0.78rem; font-weight: 600;
+            padding: 0.35rem 0.9rem; border-radius: 20px;
+            border: 1px solid var(--border); color: var(--text-secondary);
+            transition: all var(--transition);
+        }
+        .campus-tab:hover { border-color: var(--accent); color: var(--accent); }
+        .campus-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+        /* ─── Copies Grid ────────────────────────────────────────────────── */
+        .copies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.2rem;
+        }
+
+        /* ─── Copy Card ──────────────────────────────────────────────────── */
+        .copy-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            display: flex; gap: 1.1rem; align-items: flex-start;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+        .copy-card:hover { border-color: var(--border-hover); box-shadow: 0 4px 20px rgba(79,140,255,0.12); }
+
+        /* QR side */
+        .copy-qr {
+            flex-shrink: 0;
+            width: 90px; height: 90px;
+            background: #fff;
+            border-radius: 8px; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .copy-qr img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* Info side */
+        .copy-info { flex: 1; min-width: 0; }
+        .copy-id {
+            font-family: 'Courier New', monospace; font-size: 0.78rem; font-weight: 700;
+            color: var(--accent); margin-bottom: 0.45rem;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .copy-row-item {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.3rem;
+        }
+        .copy-row-item .label { color: var(--text-muted); }
+
+        /* status badges */
+        .badge {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            font-size: 0.68rem; font-weight: 700; padding: 0.2rem 0.55rem;
+            border-radius: 20px; letter-spacing: 0.2px;
+        }
+        .badge-available    { background: var(--emerald-soft); color: var(--emerald); border: 1px solid rgba(52,211,153,0.3); }
+        .badge-borrowed     { background: var(--rose-soft);    color: var(--rose);    border: 1px solid rgba(251,113,133,0.3); }
+        .badge-reserved     { background: var(--gold-soft);    color: var(--gold);    border: 1px solid rgba(245,166,35,0.3); }
+        .badge-maintenance  { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .badge-lost         { background: #f5f3ff; color: var(--violet); border: 1px solid #ddd6fe; }
+        .badge-good         { background: var(--emerald-soft); color: var(--emerald); }
+        .badge-damaged      { background: var(--gold-soft);    color: var(--gold); }
+
+        .shelf-tag {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            font-size: 0.68rem; font-weight: 500;
+            background: #f0fdfa; color: var(--teal);
+            border: 1px solid #ccfbf1; border-radius: 5px;
+            padding: 0.15rem 0.5rem; margin-top: 0.4rem;
+        }
+
+        /* ─── Empty state ────────────────────────────────────────────────── */
+        .empty-copies {
+            text-align: center; padding: 4rem 2rem;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); color: var(--text-secondary);
+        }
+        .empty-copies .icon { font-size: 3rem; margin-bottom: 0.8rem; opacity: 0.5; }
+        .empty-copies p { font-size: 0.9rem; }
+
+        /* ─── Glow orbs ──────────────────────────────────────────────────── */
+        .orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; opacity: 0.3; }
+        .orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(79,140,255,0.4), transparent 70%); top: -150px; left: -150px; }
+        .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(167,139,250,0.3), transparent 70%); bottom: 100px; right: -100px; }
+
+        /* everything above orbs */
+        .navbar, .breadcrumb, .page-wrap { position: relative; z-index: 1; }
+    </style>
+</head>
+<body>
+
+<div class="orb orb-1" aria-hidden="true"></div>
+<div class="orb orb-2" aria-hidden="true"></div>
+
+<!-- ═══ BREADCRUMB ══════════════════════════════════════════════════════════ -->
+<div class="breadcrumb">
+    <a href="/librarian/inventory/list">Book Catalog</a>
+    <span class="sep">›</span>
+    <span class="current" th:text="${book.title}">Book Title</span>
+</div>
+
+<!-- ═══ PAGE CONTENT ════════════════════════════════════════════════════════ -->
+<div class="page-wrap">
+
+    <!-- Back button -->
+    <a href="/librarian/inventory/list" class="back-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Back to Catalog
+    </a>
+
+    <!-- ── HERO: Cover + Info ──────────────────────────────────────────────── -->
+    <div class="book-hero">
+
+        <!-- Cover Column -->
+        <div class="cover-col">
+            <div class="cover-img-wrap">
+                <!-- Real cover image -->
+                <img th:if="${book.coverImageUrl != null and not #strings.isEmpty(book.coverImageUrl)}"
+                     th:src="${book.coverImageUrl}"
+                     th:alt="${book.title}"/>
+                <!-- Placeholder -->
+                <div class="cover-placeholder-lg"
+                     th:unless="${book.coverImageUrl != null and not #strings.isEmpty(book.coverImageUrl)}">
+                    <span class="cover-initial-lg"
+                          th:text="${#strings.substring(book.title, 0, 1).toUpperCase()}">B</span>
+                    <span class="cover-label-lg">No Cover</span>
+                </div>
+            </div>
+
+            <!-- Availability -->
+            <div class="avail-pill yes" th:if="${book.hasAvailableCopy}">
+                <span class="pulse"></span>
+                Copies Available
+            </div>
+            <div class="avail-pill no" th:unless="${book.hasAvailableCopy}">
+                <span class="pulse" style="animation:none;opacity:0.5;"></span>
+                No Copies Available
+            </div>
+        </div>
+
+        <!-- Info Column -->
+        <div class="info-col">
+            <!-- Category -->
+            <span class="book-category-tag" th:text="${book.categoryNames}">Category</span>
+
+            <!-- Title -->
+            <h1 class="book-title-lg" th:text="${book.title}">Book Title</h1>
+            <p class="book-edition" th:if="${book.edition != null}" th:text="${book.edition}">Edition</p>
+
+            <!-- Metadata grid -->
+            <div class="meta-grid">
+
+                <span class="meta-label">Author(s)</span>
+                <span class="meta-value highlight" th:text="${book.authorNames}">Author</span>
+
+                <span class="meta-label">Publisher</span>
+                <span class="meta-value" th:text="${book.publisherName}">Publisher</span>
+
+                <span class="meta-label" th:if="${book.publishYear != null}">Year</span>
+                <span class="meta-value" th:if="${book.publishYear != null}" th:text="${book.publishYear}">2024</span>
+
+                <span class="meta-label">Language</span>
+                <span class="meta-value" th:text="${book.language}">Vietnamese</span>
+
+                <span class="meta-label" th:if="${book.isbn != null}">ISBN</span>
+                <span class="meta-value" th:if="${book.isbn != null}" th:text="${book.isbn}"
+                      style="font-family: monospace;">ISBN</span>
+
+                <span class="meta-label" th:if="${book.subjectCode != null}">Subject</span>
+                <span class="meta-value" th:if="${book.subjectCode != null}">
+                    <span class="badge-subject" th:text="${book.subjectCode}">CODE</span>
+                    <span th:text="${book.subjectName}">Subject Name</span>
+                </span>
+
+                <span class="meta-label">Total Copies</span>
+                <span class="meta-value highlight" th:text="${#lists.size(book.copies)}">0</span>
+            </div>
+
+            <!-- Description -->
+            <div class="description-box"
+                 th:if="${book.description != null and not #strings.isEmpty(book.description)}">
+                <p class="desc-label">Description</p>
+                <p th:text="${book.description}">Description text.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── COPIES SECTION ─────────────────────────────────────────────────── -->
+    <div class="section-header">
+        <h2 class="section-title">Physical Copies &amp; QR Codes</h2>
+        <span class="section-count"
+              th:text="${#lists.size(book.copies) + ' cop' + (#lists.size(book.copies) == 1 ? 'y' : 'ies')}">
+            0 copies
+        </span>
+    </div>
+
+    <!-- Campus filter tabs -->
+    <div class="campus-tabs">
+        <a class="campus-tab"
+           th:href="@{/librarian/inventory/{id}(id=${book.bookId})}"
+           th:classappend="${selectedCampusId == null ? ' active' : ''}">All Campuses</a>
+        <a class="campus-tab"
+           th:each="campus : ${campuses}"
+           th:href="@{/librarian/inventory/{id}(id=${book.bookId}, campusId=${campus.campusId})}"
+           th:classappend="${campus.campusId == selectedCampusId ? ' active' : ''}"
+           th:text="${campus.campusName}">Campus</a>
+    </div>
+
+    <!-- Copies grid -->
+    <div class="copies-grid" th:if="${not #lists.isEmpty(book.copies)}">
+        <div class="copy-card" th:each="copy : ${book.copies}">
+
+            <!-- QR Code (served by GET /api/qr/{copyId}) -->
+            <div class="copy-qr">
+                <img th:src="@{/api/qr/{id}(id=${copy.copyId}, size=180)}"
+                     th:alt="${'QR: ' + copy.copyId}"
+                     loading="lazy"/>
+            </div>
+
+            <!-- Copy Info -->
+            <div class="copy-info">
+                <div class="copy-id" th:text="${copy.copyId}">COPY-ID</div>
+
+                <div class="copy-row-item">
+                    <span class="label">Campus</span>
+                    <span th:text="${copy.campusName}">Campus</span>
+                </div>
+
+                <div class="copy-row-item">
+                    <span class="label">Status</span>
+                    <span class="badge"
+                          th:classappend="${copy.copyStatus == 'Available'   ? 'badge-available'   :
+                                           copy.copyStatus == 'Borrowed'    ? 'badge-borrowed'    :
+                                           copy.copyStatus == 'Reserved'    ? 'badge-reserved'    :
+                                           copy.copyStatus == 'Maintenance' ? 'badge-maintenance' : 'badge-lost'}"
+                          th:text="${copy.copyStatus}">Available</span>
+                </div>
+
+                <div class="copy-row-item">
+                    <span class="label">Condition</span>
+                    <span class="badge"
+                          th:classappend="${copy.conditionStatus == 'Good' ? 'badge-good' :
+                                           copy.conditionStatus == 'Damaged' ? 'badge-damaged' : 'badge-lost'}"
+                          th:text="${copy.conditionStatus}">Good</span>
+                </div>
+
+                <div th:if="${copy.shelfCode != null and copy.shelfCode != '—'}">
+                    <span class="shelf-tag">
+                        <svg width="11" height="11" fill="none" stroke="currentColor"
+                            stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M3 7h18M3 12h18M3 17h18"/>
+                        </svg>
+                        <span th:text="${copy.shelfCode}">SHELF</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty copies state -->
+    <div class="empty-copies" th:if="${#lists.isEmpty(book.copies)}">
+        <div class="icon">📦</div>
+        <p>No copies found
+            <span th:if="${selectedCampusId != null}">at this campus. </span>
+            <a th:if="${selectedCampusId != null}"
+               th:href="@{/librarian/inventory/{id}(id=${book.bookId})}"
+               style="color: var(--accent); text-decoration: none;">View all campuses →</a>
+        </p>
+    </div>
+
+</div><!-- /page-wrap -->
+</body>
+</html>
