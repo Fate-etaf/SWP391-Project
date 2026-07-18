@@ -59,11 +59,12 @@ public class StudentManagementController {
         // 4. Lọc theo Chức vụ (Role) - Đã cải tiến để nhận diện cả dữ liệu cũ bị NULL role
         if (roleId != null) {
             if (roleId == 1) {
-                // Nếu chọn Sinh viên: Lấy những ai có roleId = 1 HOẶC những ai bị khuyết role (mặc định là sinh viên)
-                stream = stream.filter(u -> u.getRole() == null || Integer.valueOf(1).equals(u.getRole().getRoleId()));
+                // Nếu chọn Sinh viên: Lấy những ai có roleId = 1 HOẶC những ai chưa có role nào (mặc định là sinh viên)
+                stream = stream.filter(u -> u.getRoles().isEmpty()
+                        || u.getRoles().stream().anyMatch(r -> Integer.valueOf(1).equals(r.getRoleId())));
             } else {
                 // Nếu chọn Giảng viên: Lấy chính xác những ai có roleId = 2
-                stream = stream.filter(u -> u.getRole() != null && roleId.equals(u.getRole().getRoleId()));
+                stream = stream.filter(u -> u.getRoles().stream().anyMatch(r -> roleId.equals(r.getRoleId())));
             }
         }
         
@@ -160,10 +161,10 @@ public class StudentManagementController {
                     Role targetRole = new Role();
                     if ("LECTURER".equalsIgnoreCase(importType)) {
                         targetRole.setRoleId(2); // Gán quyền Giảng viên ngầm định
-                        account.setRole(targetRole);
+                        account.getRoles().add(targetRole);
                     } else if (!userOpt.isPresent()) {
                         targetRole.setRoleId(1); // Gán quyền Sinh viên cho tài khoản tạo mới
-                        account.setRole(targetRole);
+                        account.getRoles().add(targetRole);
                     }
 
                     if (!userOpt.isPresent()) {

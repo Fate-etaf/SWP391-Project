@@ -60,17 +60,17 @@ public class SecurityConfig {
             session.setAttribute("loggedInUserId", user.getUserId());
             session.setAttribute("loggedInCampusId", user.getCampusId());
             
-            if (user.getRole() != null) {
-                String roleName = user.getRole().getRoleName();
-                int roleId = user.getRole().getRoleId();
+            user.getPrimaryRole().ifPresent(role -> {
+                String roleName = role.getRoleName();
+                int roleId = role.getRoleId();
                 System.out.println("User role: " + roleName + ", " + roleId);
                 session.setAttribute("isLibrarian", "Librarian".equalsIgnoreCase(roleName) || roleId == 3);
                 session.setAttribute("isAdmin", "Admin".equalsIgnoreCase(roleName) || roleId == 4);
-                
-                if ("Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId == 4 || roleId == 3) {
-                    response.sendRedirect("/librarian/inventory/dashboard");
-                    return;
-                }
+            });
+
+            if (user.isLibrarian() || user.isAdmin()) {
+                response.sendRedirect("/librarian/inventory/dashboard");
+                return;
             }
             
             response.sendRedirect("/home");

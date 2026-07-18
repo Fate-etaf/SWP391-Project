@@ -8,8 +8,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Getter
 public class CustomUserDetails implements UserDetails, OAuth2User {
@@ -29,7 +30,12 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        if (user.getRoles() == null || user.getRoles().isEmpty()) {
+            return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        }
+        return user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName().toUpperCase()))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -68,8 +68,8 @@ model.addAttribute("isCardActive", isCardActive);
         }
         model.addAttribute("campusName", campusName);
         
-        String roleName = user.getRole() != null ? user.getRole().getRoleName() : "Student";
-        int roleId = user.getRole() != null ? user.getRole().getRoleId() : 1;
+        String roleName = user.getPrimaryRole().map(r -> r.getRoleName()).orElse("Student");
+        int roleId = user.getPrimaryRole().map(r -> r.getRoleId()).orElse(1);
         model.addAttribute("roleName", roleName);
         model.addAttribute("isLibrarianOrAdmin", "Librarian".equalsIgnoreCase(roleName) || "Admin".equalsIgnoreCase(roleName) || roleId == 3 || roleId == 4);
         
@@ -100,8 +100,16 @@ model.addAttribute("isCardActive", isCardActive);
 
         Optional<User> userOpt = userRepository.findByUserIdAndEmailAndCampusId(userId, email, campusId);
 
+        // ====== DEBUG LOGIN ======
+        System.out.println("[LOGIN] userId=" + userId + " | email=" + email + " | campusId=" + campusId);
+        System.out.println("[LOGIN] User found: " + userOpt.isPresent());
+
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+
+            System.out.println("[LOGIN] User status: " + user.getStatus());
+            System.out.println("[LOGIN] Roles loaded: " + user.getRoles().size() + " → " + user.getRoles());
+            System.out.println("[LOGIN] isLibrarian=" + user.isLibrarian() + " | isAdmin=" + user.isAdmin());
 
             // Đổi từ "New" sang "Pending" để kiểm tra trạng thái kích hoạt tài khoản
             if ("Pending".equalsIgnoreCase(user.getStatus())) { 
@@ -121,19 +129,20 @@ model.addAttribute("isCardActive", isCardActive);
             redirectAttributes.addFlashAttribute("registeredName", user.getFullName());
             
             // 2. PHÂN QUYỀN NGẦM: Bốc trực tiếp ID/Tên từ thực thể Role liên kết
-            if (user.getRole() != null) {
-                String roleName = user.getRole().getRoleName(); 
-                int roleId = user.getRole().getRoleId();
-                
+            user.getPrimaryRole().ifPresent(r -> {
+                String roleName = r.getRoleName();
+                int roleId = r.getRoleId();
                 // Lưu trạng thái quyền vào session phòng hờ giao diện Frontend cần dùng
                 session.setAttribute("isLibrarian", "Librarian".equalsIgnoreCase(roleName) || roleId == 3);
                 session.setAttribute("isAdmin", "Admin".equalsIgnoreCase(roleName) || roleId == 4);
-                
-                // 3. ĐIỀU HƯỚNG THÔNG MINH
-                if ("Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId == 4 || roleId == 3) {
-                    return "redirect:/librarian/inventory/dashboard"; 
-                }
+            });
+
+            // 3. ĐIỀU HƯỚNG THÔNG MINH
+            if (user.isLibrarian() || user.isAdmin()) {
+                System.out.println("[LOGIN] → Redirecting to /librarian/inventory/dashboard");
+                return "redirect:/librarian/inventory/dashboard";
             }
+            System.out.println("[LOGIN] → Redirecting to /home");
             return "redirect:/home";
         }
 
@@ -229,12 +238,9 @@ model.addAttribute("isCardActive", isCardActive);
             session.setAttribute("loggedInUserId", user.getUserId());
             session.setAttribute("loggedInCampusId", user.getCampusId());
             
-            // Xử lý phân quyền (Copy nguyên logic phân quyền từ hàm login cũ của bạn qua đây)
-            if (user.getRole() != null) {
-                String roleName = user.getRole().getRoleName();
-                if ("Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName)) {
-                    return "redirect:/librarian/inventory/dashboard";
-                }
+            // Xử lý phân quyền
+            if (user.isLibrarian() || user.isAdmin()) {
+                return "redirect:/librarian/inventory/dashboard";
             }
             return "redirect:/home";
         } else {
@@ -261,7 +267,7 @@ model.addAttribute("isCardActive", isCardActive);
         adminUser.setEmail("admin.dev@fpt.edu.vn");
         adminUser.setStatus("Active");
         adminUser.setCampusId(1); // Mặc định cơ sở Hà Nội
-        adminUser.setRole(adminRole); // Gắn role Admin vào user
+        adminUser.getRoles().add(adminRole); // Thêm role Admin vào tập hợp roles
 
         // 3. NẠP THẲNG THÔNG TIN VÀO SESSION HỆ THỐNG
         session.setAttribute("loggedInUser", adminUser);
