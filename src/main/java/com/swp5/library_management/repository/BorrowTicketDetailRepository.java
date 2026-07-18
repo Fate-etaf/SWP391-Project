@@ -27,6 +27,9 @@ public interface BorrowTicketDetailRepository extends JpaRepository<BorrowTicket
     @Query("SELECT COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId = :patronId AND d.returnDate IS NULL")
     int countActiveBorrowedByPatronId(@Param("patronId") String patronId);
 
+    @Query("SELECT COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId = :patronId AND d.returnDate IS NULL AND d.dueDate < CURRENT_TIMESTAMP")
+    int countOverdueByPatronId(@Param("patronId") String patronId);
+
     // Đếm số lượng sách MƯỢN tại cơ sở trong khoảng thời gian
     @Query("SELECT COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.campus.campusId = :campusId AND d.borrowTicket.createdAt BETWEEN :startDate AND :endDate")
     long countBorrowedInPeriod(@Param("campusId") Integer campusId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
@@ -80,4 +83,10 @@ public interface BorrowTicketDetailRepository extends JpaRepository<BorrowTicket
                      "AND b.returnDate IS NULL " +
                      "AND (b.status IS NULL OR b.status NOT IN ('Returned', 'Lost', 'Damaged'))")
        List<BorrowTicketDetail> findActiveByCopyId(String copyId);
+
+       @Query("SELECT d.borrowTicket.patron.userId, COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId IN :userIds AND d.returnDate IS NULL AND d.dueDate < :now GROUP BY d.borrowTicket.patron.userId")
+       java.util.List<Object[]> countOverdueByUsers(@Param("userIds") java.util.List<String> userIds, @Param("now") LocalDateTime now);
+
+       @Query("SELECT d.borrowTicket.patron.userId, COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId IN :userIds AND d.returnDate IS NULL GROUP BY d.borrowTicket.patron.userId")
+       java.util.List<Object[]> countActiveBorrowedByUsers(@Param("userIds") java.util.List<String> userIds);
 }

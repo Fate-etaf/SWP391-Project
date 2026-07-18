@@ -106,28 +106,102 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="mt-8 border-t border-slate-800 pt-6">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Tình trạng thẻ thư viện</p>
+                    
+                    <div th:if="${isCardActive}" class="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4 flex items-start space-x-3">
+                        <div class="bg-emerald-500/20 p-2 rounded-lg text-emerald-400 mt-0.5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-emerald-400 font-bold">Đủ điều kiện mượn sách</h4>
+                            <p class="text-emerald-400/80 text-sm mt-0.5">Tài khoản hoàn toàn hợp lệ, không vi phạm chính sách mượn trả.</p>
+                        </div>
+                    </div>
+                    
+                    <div th:unless="${isCardActive}" class="bg-rose-900/20 border border-rose-500/20 rounded-xl p-4 flex items-start space-x-3">
+                        <div class="bg-rose-500/20 p-2 rounded-lg text-rose-400 mt-0.5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-rose-400 font-bold">Không đủ điều kiện mượn sách</h4>
+                            <p class="text-rose-400/80 text-sm mt-0.5">Tài khoản đã bị vô hiệu hóa hoặc bị khóa do vi phạm chính sách mượn trả.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Borrowing Statistics Section -->
+                <div class="mt-8 border-t border-slate-800 pt-6">
+                    <h3 class="text-lg font-bold text-slate-100 tracking-tight mb-4">Thống kê mượn trả</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        
+                        <!-- Borrowing Card -->
+                        <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-5 flex flex-col items-center text-center hover:bg-slate-800/60 transition-colors shadow-inner">
+                            <div class="bg-blue-500/20 p-3 rounded-full text-blue-400 mb-3 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                            </div>
+                            <h4 class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Đang mượn</h4>
+                            <div class="flex items-end justify-center space-x-1">
+                                <span class="text-3xl font-extrabold text-blue-400 drop-shadow-md" th:text="${totalBorrowed}">0</span>
+                                <span class="text-slate-500 text-lg font-medium pb-1">/</span>
+                                <span class="text-slate-400 text-lg font-medium pb-1" th:text="${borrowLimit}">5</span>
+                            </div>
+                        </div>
+
+                        <!-- Overdue Card -->
+                        <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-5 flex flex-col items-center text-center hover:bg-slate-800/60 transition-colors shadow-inner">
+                            <div th:classappend="${totalOverdue > 0 ? 'bg-orange-500/20 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.2)]' : 'bg-slate-700/50 text-slate-500'}" class="p-3 rounded-full mb-3">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <h4 class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Quá hạn</h4>
+                            <span th:classappend="${totalOverdue > 0 ? 'text-orange-400 drop-shadow-md' : 'text-slate-300'}" class="text-3xl font-extrabold" th:text="${totalOverdue}">0</span>
+                        </div>
+
+                        <!-- Penalties Card -->
+                        <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-5 flex flex-col items-center text-center hover:bg-slate-800/60 transition-colors shadow-inner">
+                            <div th:classappend="${totalPenalties > 0 ? 'bg-rose-500/20 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.2)]' : 'bg-slate-700/50 text-slate-500'}" class="p-3 rounded-full mb-3">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            </div>
+                            <h4 class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Chưa nộp phạt</h4>
+                            <span th:classappend="${totalPenalties > 0 ? 'text-rose-400 drop-shadow-md' : 'text-slate-300'}" class="text-3xl font-extrabold" th:text="${totalPenalties}">0</span>
+                        </div>
+                        
+                        <!-- Limit Info Card -->
+                        <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-5 flex flex-col items-center justify-center text-center hover:bg-slate-800/60 transition-colors shadow-inner">
+                            <h4 class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Hạn mức của bạn</h4>
+                            <p class="text-emerald-400 text-sm font-medium">Bạn được mượn tối đa <span th:text="${borrowLimit}" class="font-bold text-lg text-emerald-300"></span> cuốn tài liệu theo quy định.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Borrowing Rules Section -->
+                <div class="mt-8 border-t border-slate-800 pt-6 pb-2">
+                    <h3 class="text-lg font-bold text-slate-100 tracking-tight mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-fpt-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Nội quy & Chính sách mượn trả
+                    </h3>
+                    <div class="bg-slate-800/20 border border-slate-700/50 rounded-xl p-6 text-sm text-slate-300 space-y-4">
+                        <p><strong>5.1.</strong> Sau khi đọc sách, bạn đọc cần trả lại đúng nơi quy định, không tự ý xếp lên kệ.</p>
+                        <p><strong>5.2.</strong> Không được mang bất kỳ tài liệu nào ra khỏi thư viện khi chưa hoàn tất thủ tục mượn.</p>
+                        <p><strong>5.3.</strong> Đối với giáo trình và tài liệu học tập: Mỗi sinh viên được mượn 1 bộ theo danh sách lớp của Phòng Đào tạo trong học kỳ hiện tại. Có thể gia hạn tối đa 1 tuần nếu có lý do chính đáng.</p>
+                        <p><strong>5.4.</strong> Giáo trình mượn dưới dạng tài liệu tham khảo áp dụng thời hạn trả như sách tham khảo thông thường.</p>
+                        <p><strong>5.5.</strong> Đối với tài liệu tham khảo: Thời hạn 1 tuần/tài liệu tiếng Việt, 2 tuần/tài liệu ngoại ngữ, và được phép gia hạn tối đa 4 lần.</p>
+                        <div class="pt-2">
+                            <p class="font-bold text-slate-200 mb-2">5.6. Trách nhiệm của người mượn:</p>
+                            <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                                <li><strong>5.6.1.</strong> Kiểm tra và xác nhận giao dịch với thủ thư tại quầy.</li>
+                                <li><strong>5.6.2.</strong> Kiểm tra tình trạng thực tế của tài liệu trước khi mang ra khỏi thư viện, giữ gìn và bảo quản tài liệu trong thời gian mượn. Trường hợp hư hỏng, người mượn cuối cùng sẽ chịu trách nhiệm bồi thường theo quy định.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
             </div> 
             
         </div> 
     </main>
 
     <div th:replace="~{fragments/footer :: footer}"></div>
-<script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Tìm tất cả các thẻ p hoặc div có chứa chữ "TÌNH TRẠNG THẺ THƯ VIỆN"
-            const elements = document.querySelectorAll("p, div, strong");
-            elements.forEach(el => {
-                if (el.textContent.includes("TÌNH TRẠNG THẺ THƯ VIỆN") || el.textContent.includes("Đủ điều kiện mượn sách")) {
-                    // Tìm lên thẻ cha bọc cụm thông báo này và xóa toàn bộ bộ khung của nó
-                    const container = el.closest('.border-t');
-                    if (container) {
-                        container.remove();
-                    } else {
-                        el.parentElement.remove();
-                    }
-                }
-            });
-        });
-    </script>
 </body>
 </html>

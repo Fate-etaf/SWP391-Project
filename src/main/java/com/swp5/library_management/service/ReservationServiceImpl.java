@@ -47,6 +47,7 @@ public class ReservationServiceImpl implements ReservationService {
     private final com.swp5.library_management.service.SystemConfigService systemConfigService;
     private final TransferRequestRepository transferRequestRepository;
     private final TransferDetailRepository  transferDetailRepository;
+    private final UserStatusService         userStatusService;
 
     public ReservationServiceImpl(UserRepository userRepository,
                                   BookRepository bookRepository,
@@ -58,7 +59,8 @@ public class ReservationServiceImpl implements ReservationService {
                                   EmailService emailService,
                                   com.swp5.library_management.service.SystemConfigService systemConfigService,
                                   TransferRequestRepository transferRequestRepository,
-                                  TransferDetailRepository transferDetailRepository) {
+                                  TransferDetailRepository transferDetailRepository,
+                                  UserStatusService userStatusService) {
         this.userRepository        = userRepository;
         this.bookRepository        = bookRepository;
         this.bookCopyRepository    = bookCopyRepository;
@@ -70,6 +72,7 @@ public class ReservationServiceImpl implements ReservationService {
         this.systemConfigService   = systemConfigService;
         this.transferRequestRepository = transferRequestRepository;
         this.transferDetailRepository = transferDetailRepository;
+        this.userStatusService     = userStatusService;
     }
 
     // =========================================================================
@@ -99,8 +102,37 @@ public class ReservationServiceImpl implements ReservationService {
             return ReservationResultDTO.builder()
                     .success(false)
                     .resultType("ERROR")
-                    .message("Giao dịch thất bại! Tài khoản của bạn đang bị khóa do có khoản phạt " +
-                             "chưa thanh toán. Vui lòng hoàn tất nộp phạt trước khi đặt sách.")
+                    .message("Giao dịch thất bại! Tài khoản của bạn đã bị khóa tính năng mượn/đặt sách do có vi phạm chưa xử lý.")
+                    .build();
+        }
+
+        String granularStatus = userStatusService.calculateSingleStatus(patronId, patron.getStatus());
+        if ("Under Penalty".equals(granularStatus)) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Giao dịch thất bại! Bạn đang có phiếu phạt chưa thanh toán.")
+                    .build();
+        }
+        if ("Overdue".equals(granularStatus)) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Giao dịch thất bại! Bạn đang có sách mượn quá hạn.")
+                    .build();
+        }
+        if ("Limit Reached".equals(granularStatus)) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Giao dịch thất bại! Bạn đã mượn tối đa số lượng sách cho phép.")
+                    .build();
+        }
+        if ("Graduated".equals(granularStatus) || "Inactive".equals(granularStatus)) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Giao dịch thất bại! Tài khoản của bạn không hoạt động hoặc đã tốt nghiệp.")
                     .build();
         }
 
