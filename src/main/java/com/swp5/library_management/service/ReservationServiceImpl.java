@@ -47,6 +47,7 @@ public class ReservationServiceImpl implements ReservationService {
     private final com.swp5.library_management.service.SystemConfigService systemConfigService;
     private final TransferRequestRepository transferRequestRepository;
     private final TransferDetailRepository  transferDetailRepository;
+    private final com.swp5.library_management.repository.BorrowTicketDetailRepository borrowTicketDetailRepository;
 
     public ReservationServiceImpl(UserRepository userRepository,
                                   BookRepository bookRepository,
@@ -58,7 +59,8 @@ public class ReservationServiceImpl implements ReservationService {
                                   EmailService emailService,
                                   com.swp5.library_management.service.SystemConfigService systemConfigService,
                                   TransferRequestRepository transferRequestRepository,
-                                  TransferDetailRepository transferDetailRepository) {
+                                  TransferDetailRepository transferDetailRepository,
+                                  com.swp5.library_management.repository.BorrowTicketDetailRepository borrowTicketDetailRepository) {
         this.userRepository        = userRepository;
         this.bookRepository        = bookRepository;
         this.bookCopyRepository    = bookCopyRepository;
@@ -70,6 +72,7 @@ public class ReservationServiceImpl implements ReservationService {
         this.systemConfigService   = systemConfigService;
         this.transferRequestRepository = transferRequestRepository;
         this.transferDetailRepository = transferDetailRepository;
+        this.borrowTicketDetailRepository = borrowTicketDetailRepository;
     }
 
     // =========================================================================
@@ -83,6 +86,14 @@ public class ReservationServiceImpl implements ReservationService {
         // ── Bước 2: Kiểm tra tài khoản bạn đọc ─────────────────────────────
         User patron = userRepository.findById(patronId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy tài khoản: " + patronId));
+
+        if (!patron.getCampusId().equals(pickupCampusId)) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Bạn chỉ được phép Đặt chỗ và Xếp hàng chờ sách tại cơ sở bạn đang theo học.")
+                    .build();
+        }
 
         if (!"Active".equals(patron.getStatus())) {
             // Exc 1a: Tài khoản không active
@@ -101,6 +112,17 @@ public class ReservationServiceImpl implements ReservationService {
                     .resultType("ERROR")
                     .message("Giao dịch thất bại! Tài khoản của bạn đang bị khóa do có khoản phạt " +
                              "chưa thanh toán. Vui lòng hoàn tất nộp phạt trước khi đặt sách.")
+                    .build();
+        }
+
+        // Kiểm tra quá hạn động
+        int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patronId, java.time.LocalDateTime.now());
+        if (overdueCount > 0) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Giao dịch thất bại! Bạn đang có " + overdueCount + " cuốn sách mượn quá hạn chưa trả. " +
+                             "Vui lòng hoàn tất việc trả sách và nộp phạt trước khi tiếp tục đặt mượn sách mới.")
                     .build();
         }
 
@@ -155,47 +177,6 @@ public class ReservationServiceImpl implements ReservationService {
         // ── Bước 6: Cập nhật trạng thái bản sách → Reserved ────────────────
         copy.setCopyStatus("Reserved");
         bookCopyRepository.save(copy);
-
-        // ── Branch 3: Rẽ nhánh mượn liên cơ sở (Khác Campus) ────────────────
-        if (!patron.getCampusId().equals(pickupCampusId)) {
-            Campus userCampus = campusRepository.findById(patron.getCampusId())
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy cơ sở người dùng: " + patron.getCampusId()));
-
-            TransferRequest transferRequest = TransferRequest.builder()
-                    .requestedBy(patron)
-                    .fromCampus(campus)
-                    .toCampus(userCampus)
-                    .requestedAt(LocalDateTime.now())
-                    .status("Pending")
-                    .build();
-            transferRequest = transferRequestRepository.saveAndFlush(transferRequest);
-
-            TransferDetail detail = TransferDetail.builder()
-                    .id(new TransferDetailId(transferRequest.getTransferId(), copy.getCopyId()))
-                    .transferRequest(transferRequest)
-                    .copy(copy)
-                    .build();
-            transferDetailRepository.save(detail);
-
-            notificationRepository.save(Notification.builder()
-                    .user(patron)
-                    .notificationType("INTER_CAMPUS_REQUESTED")
-                    .title("Yêu cầu mượn liên cơ sở")
-                    .content("Bạn đã yêu cầu mượn cuốn \"" + book.getTitle() + "\" từ " + campus.getCampusName() + ". Yêu cầu đang chờ thủ thư xử lý.")
-                    .status("Pending")
-                    .createdAt(LocalDateTime.now())
-                    .build());
-
-            log.info("[UCR15] Inter-campus request created: Patron={}, Book={}, Copy={}, From={}, To={}", patronId, bookId, copy.getCopyId(), pickupCampusId, patron.getCampusId());
-
-            return ReservationResultDTO.builder()
-                    .success(true)
-                    .resultType("RESERVED")
-                    .message("Sách hiện không có tại cơ sở của bạn. Yêu cầu mượn liên cơ sở đã được gửi đến thủ thư và đang chờ duyệt!")
-                    .build();
-        }
-
-        // ── Bước 7: Tạo đơn Reservation (Branch 1) ──────────────────────────
 
         // ── Bước 7: Tạo đơn Reservation ─────────────────────────────────────
         int holdHours = systemConfigService.getIntConfig("RESERVATION_EXPIRE_HR", 72);
@@ -331,6 +312,43 @@ public class ReservationServiceImpl implements ReservationService {
 
         User patron = userRepository.findById(patronId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy tài khoản: " + patronId));
+
+        if (!patron.getCampusId().equals(campusId)) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Bạn chỉ được phép Đặt chỗ và Xếp hàng chờ sách tại cơ sở bạn đang theo học.")
+                    .build();
+        }
+
+        if (!"Active".equals(patron.getStatus())) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Đăng ký thất bại! Tài khoản của bạn đang ở trạng thái " +
+                             patron.getStatus() + ". Vui lòng liên hệ thủ thư để được hỗ trợ.")
+                    .build();
+        }
+
+        if (Boolean.TRUE.equals(patron.getBorrowingLocked())) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Đăng ký thất bại! Tài khoản của bạn đang bị khóa do nợ phạt. " +
+                             "Vui lòng hoàn tất nộp phạt trước khi đăng ký hàng chờ.")
+                    .build();
+        }
+
+        int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patronId, java.time.LocalDateTime.now());
+        if (overdueCount > 0) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Đăng ký thất bại! Bạn đang có " + overdueCount + " cuốn sách mượn quá hạn chưa trả. " +
+                             "Vui lòng hoàn tất việc trả sách và nộp phạt trước khi xếp hàng chờ sách mới.")
+                    .build();
+        }
+
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sách: " + bookId));
         Campus campus = campusRepository.findById(campusId)
@@ -436,5 +454,105 @@ public class ReservationServiceImpl implements ReservationService {
         );
 
         log.info("[UCR06 Alt2] Waitlist #{} cancelled by Patron={}", waitlistId, patronId);
+    }
+
+    // =========================================================================
+    // AUTO PROCESS WAITLIST WHEN BOOK RETURNED
+    // =========================================================================
+
+    @Override
+    @Transactional
+    public boolean processWaitlistForReturnedBook(com.swp5.library_management.entity.BookCopy returnedCopy) {
+        Integer bookId = returnedCopy.getBook().getBookId();
+        Integer campusId = returnedCopy.getCampus().getCampusId();
+
+        List<Waitlist> waitingQueue = waitlistRepository.findWaitingListByBookAndCampus(bookId, campusId);
+
+        for (Waitlist waitlist : waitingQueue) {
+            User patron = waitlist.getPatron();
+
+            // Lọc người vi phạm
+            boolean isLocked = Boolean.TRUE.equals(patron.getBorrowingLocked());
+            boolean isActive = "Active".equals(patron.getStatus());
+            int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patron.getUserId(), LocalDateTime.now());
+
+            if (!isActive || isLocked || overdueCount > 0) {
+                // Tự động hủy nếu người này vi phạm
+                waitlist.setStatus("Cancelled");
+                waitlistRepository.save(waitlist);
+                log.info("[UCR06] Auto-cancelled waitlist #{} for patron {} due to violations.", waitlist.getWaitlistId(), patron.getUserId());
+                
+                // Gửi thông báo hủy
+                notificationRepository.save(Notification.builder()
+                        .user(patron)
+                        .notificationType("WAITLIST_CANCELLED")
+                        .title("Hủy xếp hàng chờ do vi phạm")
+                        .content("Lượt xếp hàng chờ sách \"" + returnedCopy.getBook().getTitle() + "\" của bạn đã bị hủy do tài khoản bị khóa hoặc có sách quá hạn.")
+                        .status("Pending")
+                        .createdAt(LocalDateTime.now())
+                        .build());
+                continue;
+            }
+
+            // Gán sách cho người hợp lệ này
+            int holdHours = systemConfigService.getIntConfig("RESERVATION_EXPIRE_HR", 72);
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime expiration = now.plusHours(holdHours);
+
+            Reservation reservation = Reservation.builder()
+                    .patron(patron)
+                    .book(returnedCopy.getBook())
+                    .copy(returnedCopy)
+                    .pickupCampus(returnedCopy.getCampus())
+                    .reservedAt(now)
+                    .expirationDate(expiration)
+                    .status("Holding")
+                    .build();
+            reservationRepository.save(reservation);
+
+            // Cập nhật Waitlist -> Completed
+            waitlist.setStatus("Completed");
+            waitlistRepository.save(waitlist);
+
+            // Cập nhật BookCopy -> Reserved
+            returnedCopy.setCopyStatus("Reserved");
+            bookCopyRepository.save(returnedCopy);
+
+            // Ghi Notification
+            String notifContent = String.format(
+                    "Đơn đặt giữ chỗ #%d cho sách \"%s\" tại %s đã tự động được xác nhận từ hàng chờ. " +
+                    "Vui lòng đến nhận sách trước %s.",
+                    reservation.getReservationId(),
+                    returnedCopy.getBook().getTitle(),
+                    returnedCopy.getCampus().getCampusName(),
+                    expiration.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy"))
+            );
+
+            notificationRepository.save(Notification.builder()
+                    .user(patron)
+                    .notificationType("RESERVATION_CONFIRMED")
+                    .title("Sách xếp hàng chờ đã có mặt!")
+                    .content(notifContent)
+                    .status("Pending")
+                    .createdAt(now)
+                    .build());
+
+            // Gửi Email
+            String expiryInfo = "trước " + expiration.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm ngày dd/MM/yyyy"));
+            emailService.sendReservationConfirmation(
+                    patron.getEmail(),
+                    patron.getFullName(),
+                    returnedCopy.getBook().getTitle(),
+                    returnedCopy.getCampus().getCampusName(),
+                    expiryInfo
+            );
+
+            log.info("[UCR06] Auto-processed Waitlist #{} into Reservation #{} for returned copy {}", 
+                    waitlist.getWaitlistId(), reservation.getReservationId(), returnedCopy.getCopyId());
+
+            return true; // Đã tìm được người nhận
+        }
+
+        return false; // Không có ai nhận
     }
 }
