@@ -95,7 +95,8 @@ public class StudentManagementController {
         userRole.setRoleId(roleId); 
         newUser.setRole(userRole);
         
-        newUser.setPasswordHash("123");
+        String tempPassword = "FLMS_" + String.format("%04d", new java.util.Random().nextInt(10000));
+        newUser.setPasswordHash(tempPassword);
         
         if (email != null && !email.trim().isEmpty()) {
             newUser.setEmail(email.trim());
@@ -107,6 +108,7 @@ public class StudentManagementController {
         
         // Gửi email kích hoạt tự động chạy ngầm
         final String finalEmail = newUser.getEmail();
+        final String finalUserId = newUser.getUserId();
         if (finalEmail != null && !finalEmail.isEmpty()) {
             new Thread(() -> {
                 try {
@@ -114,7 +116,7 @@ public class StudentManagementController {
                     message.setFrom("thuvienfpt.test@gmail.com"); 
                     message.setTo(finalEmail);
                     message.setSubject("[FLMS FPT Library] Thông báo kích hoạt tài khoản thư viện số");
-                    message.setText("Xin chào bạn,\n\nTài khoản thư viện số FLMS của bạn trên hệ thống đã được kích hoạt thành công bởi Ban quản trị.\nBây giờ bạn đã có thể truy cập hệ thống và thực hiện mượn trả tài liệu.\n\nTrân trọng,\nBan quản lý thư viện Đại học FPT.");
+                    message.setText("Xin chào bạn,\n\nTài khoản thư viện số FLMS của bạn trên hệ thống đã được kích hoạt thành công bởi Ban quản trị.\n\nThông tin đăng nhập của bạn:\n- Mã số (User ID): " + finalUserId + "\n- Email: " + finalEmail + "\n- Mật khẩu tạm thời: " + tempPassword + "\n\nVui lòng đăng nhập vào hệ thống và truy cập trang Hồ sơ để đổi mật khẩu bảo mật.\n\nTrân trọng,\nBan quản lý thư viện Đại học FPT.");
                     mailSender.send(message);
                 } catch (Exception e) {
                     System.out.println("Lỗi gửi mail đến: " + finalEmail + " -> " + e.getMessage());
@@ -193,8 +195,8 @@ public class StudentManagementController {
             return "redirect:/librarian/students/import";
         }
 
-        List<User> usersToSave = new ArrayList<>();
-        List<String> emailsToNotify = new ArrayList<>(); // Lưu email tài khoản mới phục vụ gửi mail ngầm
+        List<User> usersToSave = new java.util.ArrayList<>();
+        List<User> usersToNotify = new java.util.ArrayList<>(); // Lưu email tài khoản mới phục vụ gửi mail ngầm
         int successCount = 0;
 
         try (InputStream is = file.getInputStream();
@@ -236,7 +238,7 @@ public class StudentManagementController {
                     // Chỉ gửi email thông báo nếu đây là tài khoản mới tinh hoặc đang bị khóa
                     if (!userOpt.isPresent() || "Inactive".equalsIgnoreCase(userOpt.get().getStatus())) {
                         if (email != null && !email.trim().isEmpty()) {
-                            emailsToNotify.add(email.trim());
+                            usersToNotify.add(account);
                         }
                     }
 
@@ -265,7 +267,8 @@ public class StudentManagementController {
                     }
 
                     if (!userOpt.isPresent()) {
-                        account.setPasswordHash("123"); 
+                        String tempPassword = "FLMS_" + String.format("%04d", new java.util.Random().nextInt(10000));
+                        account.setPasswordHash(tempPassword); 
                     }
                     
                     usersToSave.add(account);
@@ -277,18 +280,19 @@ public class StudentManagementController {
                 userRepository.saveAll(usersToSave);
                 
                 // Luồng gửi email kích hoạt tự động chạy ngầm tránh lag trình duyệt
-                if (("NEW".equalsIgnoreCase(importType) || "LECTURER".equalsIgnoreCase(importType)) && !emailsToNotify.isEmpty()) {
+                if (("NEW".equalsIgnoreCase(importType) || "LECTURER".equalsIgnoreCase(importType)) && !usersToNotify.isEmpty()) {
+                    List<User> notifyList = new java.util.ArrayList<>(usersToNotify);
                     new Thread(() -> {
-                        for (String recipientEmail : emailsToNotify) {
+                        for (User u : notifyList) {
                             try {
                                 SimpleMailMessage message = new SimpleMailMessage();
                                 message.setFrom("thuvienfpt.test@gmail.com"); 
-                                message.setTo(recipientEmail);
+                                message.setTo(u.getEmail());
                                 message.setSubject("[FLMS FPT Library] Thông báo kích hoạt tài khoản thư viện số");
-                                message.setText("Xin chào bạn,\n\nTài khoản thư viện số FLMS của bạn trên hệ thống đã được kích hoạt thành công bởi Ban quản trị.\nBây giờ bạn đã có thể truy cập hệ thống và thực hiện mượn trả tài liệu.\n\nTrân trọng,\nBan quản lý thư viện Đại học FPT.");
+                                message.setText("Xin chào bạn,\n\nTài khoản thư viện số FLMS của bạn trên hệ thống đã được kích hoạt thành công bởi Ban quản trị.\n\nThông tin đăng nhập của bạn:\n- Mã số (User ID): " + u.getUserId() + "\n- Email: " + u.getEmail() + "\n- Mật khẩu tạm thời: " + u.getPasswordHash() + "\n\nVui lòng đăng nhập vào hệ thống và truy cập trang Hồ sơ để đổi mật khẩu bảo mật.\n\nTrân trọng,\nBan quản lý thư viện Đại học FPT.");
                                 mailSender.send(message);
                             } catch (Exception e) {
-                                System.out.println("Lỗi gửi mail đến: " + recipientEmail + " -> " + e.getMessage());
+                                System.out.println("Lỗi gửi mail đến: " + u.getEmail() + " -> " + e.getMessage());
                             }
                         }
                     }).start();

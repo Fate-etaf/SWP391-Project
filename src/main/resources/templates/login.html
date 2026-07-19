@@ -50,10 +50,10 @@
         </div>
     </div>
 
-    <div class="w-full max-w-md bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-8 shadow-2xl relative z-10 transition-all hover:border-fpt-orange/30 text-center">
+    <div class="w-full max-w-md bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl relative z-10 transition-all hover:border-fpt-orange/30 text-center">
         
         <h2 class="text-xl font-bold text-slate-200 mb-2">CỔNG XÁC THỰC HỆ THỐNG</h2>
-        <p class="text-xs text-slate-400 mb-8">Hệ thống Thư viện số dành riêng cho Cán bộ, Giảng viên và Sinh viên FPT University</p>
+        <p class="text-xs text-slate-400 mb-4">Hệ thống Thư viện số dành riêng cho Cán bộ, Giảng viên và Sinh viên FPT University</p>
 
         <div th:if="${session.loginError != null}" id="error-alert-box" class="mb-6 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-xs font-medium text-left flex items-start gap-2 relative z-20 animate-fade-in">
             <span>🔒</span>
@@ -75,7 +75,7 @@
             <span th:text="${infoMessage}">Thông báo</span>
         </div>
 
-        <form th:action="@{/login}" method="POST" class="space-y-4 mb-6 text-left">
+        <form th:action="@{/login}" method="POST" class="space-y-3 mb-4 text-left">
             <div>
                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Mã số (Roll Number / User ID)</label>
                 <div class="relative flex items-center">
@@ -93,6 +93,20 @@
                     </svg>
                     <input type="email" name="email" placeholder="username@fpt.edu.vn" required autocomplete="off"
                            class="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Mật khẩu</label>
+                <div class="relative flex items-center">
+                    <svg class="w-4 h-4 text-slate-500 absolute left-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    <input type="password" name="password" placeholder="••••••••" required autocomplete="off"
+                           class="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600">
+                </div>
+                <div class="text-right mt-2">
+                    <a href="/forgot-password" class="text-xs text-fpt-orange hover:text-fpt-orangeHover font-medium transition-colors">Quên mật khẩu?</a>
                 </div>
             </div>
 

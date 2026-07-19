@@ -61,6 +61,12 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
                     <span>Danh mục Sách</span>
                 </a>
+                <a href="/librarian/students" 
+                   class="flex items-center space-x-3 px-4 py-2.5 rounded-xl transition-colors"
+                   th:classappend="${activeItem == 'students'} ? 'bg-orange-50 text-fpt-orange font-semibold' : 'text-slate-500 hover:bg-orange-50 hover:text-fpt-orange'">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <span>Quản Lí Người Dùng</span>
+                </a>
                 <a href="/librarian/inventory/transfers" 
                    class="flex items-center space-x-3 px-4 py-2.5 rounded-xl transition-colors"
                    th:classappend="${activeItem == 'transfers'} ? 'bg-orange-50 text-fpt-orange font-semibold' : 'text-slate-500 hover:bg-orange-50 hover:text-fpt-orange'">

@@ -251,43 +251,6 @@
             await renderOverview(data);
         });
 
-       // ════════════ TỰ ĐỘNG CHÈN MENU AN TOÀN, CHUẨN XÁC 100% ════════════
-        // ════════════ TỰ ĐỘNG CHÈN MENU SINH VIÊN CHUẨN XÁC ════════════
-        window.addEventListener('DOMContentLoaded', () => {
-            // 1. Tìm chính xác nút "Danh mục Sách" để làm mốc chèn
-            const allLinks = document.querySelectorAll('a');
-            let targetButton = null;
-
-            allLinks.forEach(link => {
-                if (link.textContent.includes('Danh mục Sách') || link.getAttribute('href') === '/librarian/books') {
-                    targetButton = link;
-                }
-            });
-
-            // 2. Chèn nút Quản lý Sinh viên ngay phía dưới nút Danh mục Sách
-            if (targetButton && targetButton.parentNode) {
-                const parentNode = targetButton.parentNode;
-                const existingLink = parentNode.querySelector('a[href="/librarian/students"]');
-                
-                if (!existingLink) {
-                    const studentMenu = document.createElement('a');
-                    studentMenu.href = '/librarian/students';
-                    
-                    // Copy nguyên class giao diện thường (màu xám) của nút Danh mục Sách
-                    studentMenu.className = targetButton.className;
-                    
-                    studentMenu.innerHTML = `
-                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                        </svg>
-                        <span class="text-sm font-medium">Quản lý Sinh viên</span>
-                    `;
-                    
-                    // Chèn hậu bối ngay sau nút Danh mục Sách
-                    targetButton.insertAdjacentElement('afterend', studentMenu);
-                }
-            }
-        });
 
         // Init
         loadFilters();

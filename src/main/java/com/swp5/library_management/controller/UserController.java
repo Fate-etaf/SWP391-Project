@@ -186,6 +186,7 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
     public String loginUser(
             @RequestParam("userId") String userId,
             @RequestParam("email") String email,
+            @RequestParam("password") String password,
             @RequestParam("campusId") Integer campusId,
             HttpSession session,
             RedirectAttributes redirectAttributes,
@@ -195,6 +196,15 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+            
+            // Xác minh mật khẩu
+            if (!password.equals(user.getPasswordHash())) {
+                model.addAttribute("loginError", "Mật khẩu không chính xác!");
+                model.addAttribute("userId", userId);
+                model.addAttribute("email", email);
+                model.addAttribute("campusId", campusId);
+                return "login";
+            }
 
             // Đổi từ "New" sang "Pending" để kiểm tra trạng thái kích hoạt tài khoản
             if ("Pending".equalsIgnoreCase(user.getStatus())) { 

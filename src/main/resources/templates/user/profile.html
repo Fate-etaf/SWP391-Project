@@ -52,18 +52,27 @@
 
             <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-8 shadow-2xl relative">
                 
-                <div class="absolute top-8 right-8">
-    <span th:if="${isCardActive}" class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span>Đang hoạt động</span>
-    </span>
-    <span th:unless="${isCardActive}" class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold">
-        <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-        <span>Vô hiệu hóa</span>
-    </span>
-</div>
-
-                <h3 class="text-lg font-bold text-slate-200 border-b border-slate-800 pb-4 mb-6">Thông tin cá nhân</h3>
+                <!-- Header and Actions -->
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+                    <div class="flex items-center gap-4">
+                        <h3 class="text-lg font-bold text-slate-200">Thông tin cá nhân</h3>
+                        <div>
+                            <span th:if="${isCardActive}" class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span>Đang hoạt động</span>
+                            </span>
+                            <span th:unless="${isCardActive}" class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                                <span>Vô hiệu hóa</span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <button onclick="document.getElementById('passwordModal').classList.remove('hidden')" class="bg-fpt-orange/10 hover:bg-fpt-orange/20 text-fpt-orange px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                        Đổi mật khẩu
+                    </button>
+                </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
                     
@@ -130,6 +139,8 @@
                         </div>
                     </div>
                 </div>
+
+
 
                 <!-- Borrowing Statistics Section -->
                 <div class="mt-8 border-t border-slate-800 pt-6">
@@ -203,5 +214,123 @@
     </main>
 
     <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Password Modal -->
+    <div id="passwordModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="document.getElementById('passwordModal').classList.add('hidden')"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 animate-fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-fpt-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    Thay đổi mật khẩu
+                </h3>
+                <button onclick="document.getElementById('passwordModal').classList.add('hidden')" class="text-slate-500 hover:text-slate-300 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div id="password-alert" class="hidden mb-4 px-4 py-3 rounded-xl text-xs font-medium text-left items-start gap-2"></div>
+
+            <form id="password-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mật khẩu mới</label>
+                    <input type="password" id="newPassword" required class="w-full bg-slate-950 border border-slate-800 text-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600" placeholder="••••••••">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Xác nhận mật khẩu mới</label>
+                    <input type="password" id="confirmPassword" required class="w-full bg-slate-950 border border-slate-800 text-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600" placeholder="••••••••">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mã OTP (Gửi về Email)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="otpCode" required class="flex-grow bg-slate-950 border border-slate-800 text-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600" placeholder="Nhập mã 6 số">
+                        <button type="button" id="btn-send-otp" class="whitespace-nowrap bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-3 rounded-xl font-semibold text-sm transition-all border border-slate-700 hover:border-slate-600 disabled:opacity-50">Gửi mã OTP</button>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-fpt-orange hover:bg-fpt-orangeHover text-white px-6 py-3 rounded-xl font-bold transition-all text-sm shadow-lg shadow-fpt-orange/20 mt-2">Cập nhật mật khẩu</button>
+            </form>
+        </div>
+    </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const btnSendOtp = document.getElementById("btn-send-otp");
+    const passwordForm = document.getElementById("password-form");
+    const alertBox = document.getElementById("password-alert");
+
+    function showAlert(msg, isSuccess) {
+        alertBox.innerHTML = `<span>${isSuccess ? '✅' : '❌'}</span><span>${msg}</span>`;
+        alertBox.className = `mb-4 px-4 py-3 rounded-xl text-xs font-medium text-left flex items-start gap-2 animate-fade-in block ${isSuccess ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400' : 'bg-red-500/10 border border-red-500/30 text-red-400'}`;
+    }
+
+    if (btnSendOtp) {
+        btnSendOtp.addEventListener("click", function() {
+            btnSendOtp.disabled = true;
+            btnSendOtp.innerText = "Đang gửi...";
+            fetch("/api/profile/send-otp", {
+                method: "POST"
+            })
+            .then(response => {
+                if (response.ok) return response.text();
+                else return response.text().then(text => { throw new Error(text) });
+            })
+            .then(msg => {
+                showAlert(msg, true);
+                let countdown = 60;
+                const timer = setInterval(() => {
+                    countdown--;
+                    btnSendOtp.innerText = `Thử lại sau ${countdown}s`;
+                    if (countdown <= 0) {
+                        clearInterval(timer);
+                        btnSendOtp.disabled = false;
+                        btnSendOtp.innerText = "Gửi lại OTP";
+                    }
+                }, 1000);
+            })
+            .catch(err => {
+                btnSendOtp.disabled = false;
+                btnSendOtp.innerText = "Gửi mã OTP";
+                showAlert(err.message || "Lỗi kết nối", false);
+            });
+        });
+    }
+
+    if (passwordForm) {
+        passwordForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const newPassword = document.getElementById("newPassword").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+            const otp = document.getElementById("otpCode").value;
+
+            if (newPassword !== confirmPassword) {
+                showAlert("Mật khẩu xác nhận không khớp!", false);
+                return;
+            }
+
+            fetch("/api/profile/change-password", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    newPassword: newPassword,
+                    confirmPassword: confirmPassword,
+                    otp: otp
+                })
+            })
+            .then(async response => {
+                const msg = await response.text();
+                if (response.ok) {
+                    showAlert(msg, true);
+                    passwordForm.reset();
+                } else {
+                    showAlert(msg, false);
+                }
+            })
+            .catch(err => showAlert("Đã xảy ra lỗi kết nối", false));
+        });
+    }
+});
+</script>
 </body>
 </html>

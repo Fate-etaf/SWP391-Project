@@ -31,11 +31,7 @@ public class UserServiceImpl implements UserService {
 
         User user = userOptional.get();
 
-        // 2. Kiểm tra mật khẩu cũ 
-       if (!user.getPasswordHash().equals(dto.getOldPassword())) {
-            return false; // Sai mật khẩu cũ
-        }
-
+        // 2. Không cần kiểm tra mật khẩu cũ, OTP đã được kiểm tra ở Controller
         // 3. Kiểm tra mật khẩu mới và mật khẩu xác nhận có khớp nhau không
         if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
             return false; // Mật khẩu mới không trùng khớp
