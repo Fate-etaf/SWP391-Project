@@ -381,7 +381,7 @@ public class ReservationServiceImpl implements ReservationService {
                     .build();
         }
 
-        int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patronId, java.time.LocalDateTime.now());
+        int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patronId);
         if (overdueCount > 0) {
             return ReservationResultDTO.builder()
                     .success(false)
@@ -516,7 +516,7 @@ public class ReservationServiceImpl implements ReservationService {
             // Lọc người vi phạm
             boolean isLocked = Boolean.TRUE.equals(patron.getBorrowingLocked());
             boolean isActive = "Active".equals(patron.getStatus());
-            int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patron.getUserId(), LocalDateTime.now());
+            int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patron.getUserId());
 
             if (!isActive || isLocked || overdueCount > 0) {
                 // Tự động hủy nếu người này vi phạm
