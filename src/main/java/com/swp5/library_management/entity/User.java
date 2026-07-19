@@ -58,6 +58,18 @@ public class User {
     @Builder.Default
     private Boolean borrowingLocked = false;
 
+    @jakarta.persistence.Transient
+    private String computedStatus;
+
+    @jakarta.persistence.Transient
+    private Long unpaidFinesCount;
+
+    @jakarta.persistence.Transient
+    private Long overdueCount;
+
+    @jakarta.persistence.Transient
+    private Long activeBorrowCount;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "RoleID")
     private Role role;
@@ -89,6 +101,16 @@ public class User {
         }
         if (this.roles != null && !this.roles.isEmpty()) {
             return this.roles.stream().anyMatch(role -> "Student".equalsIgnoreCase(role.getRoleName()) || role.getRoleId() == 1);
+        }
+        return false;
+    }
+
+    public boolean isAdmin() {
+        if (this.role != null && (this.role.getRoleId() == 4 || "Admin".equalsIgnoreCase(this.role.getRoleName()))) {
+            return true;
+        }
+        if (this.roles != null && !this.roles.isEmpty()) {
+            return this.roles.stream().anyMatch(role -> "Admin".equalsIgnoreCase(role.getRoleName()) || role.getRoleId() == 4);
         }
         return false;
     }

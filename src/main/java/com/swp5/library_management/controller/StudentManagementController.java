@@ -3,6 +3,7 @@ package com.swp5.library_management.controller;
 import com.swp5.library_management.entity.User;
 import com.swp5.library_management.entity.Role;
 import com.swp5.library_management.repository.UserRepository;
+import com.swp5.library_management.service.UserStatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -24,59 +25,156 @@ import java.util.Optional;
 public class StudentManagementController {
 
     private final UserRepository userRepository;
-    // Bộ gửi mail của hệ thống Spring
     private final JavaMailSender mailSender;
+    private final UserStatusService userStatusService;
+    private final com.swp5.library_management.repository.BorrowTicketRepository borrowTicketRepository;
 
     @GetMapping("/librarian/students")
     public String manageStudents(
             @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "status", required = false) String status,
-            @RequestParam(value = "campusId", required = false) Integer campusId, // Bộ lọc Campus động
-            @RequestParam(value = "roleId", required = false) Integer roleId,     // Bộ lọc Chức vụ (Sinh viên/Giảng viên)
+            @RequestParam(value = "campusId", required = false) Integer campusId,
+            @RequestParam(value = "tab", defaultValue = "students") String tab,
             Model model) {
         
-        // Truy vấn toàn bộ danh sách, sau đó dùng Stream API để lọc động
         List<User> allUsers = userRepository.findAll();
         java.util.stream.Stream<User> stream = allUsers.stream();
         
-        // 1. Lọc theo chuỗi tìm kiếm (Tên hoặc Mã định danh)
         if (search != null && !search.trim().isEmpty()) {
             String cleanSearch = search.trim().toLowerCase();
             stream = stream.filter(u -> (u.getFullName() != null && u.getFullName().toLowerCase().contains(cleanSearch))
                                      || (u.getUserId() != null && u.getUserId().toLowerCase().contains(cleanSearch)));
         }
         
-        // 2. Lọc theo trạng thái hoạt động
-        if (status != null && !status.isEmpty()) {
-            stream = stream.filter(u -> status.equalsIgnoreCase(u.getStatus()));
-        }
-        
-        // 3. Lọc theo Cơ sở (Campus ID)
         if (campusId != null) {
             stream = stream.filter(u -> campusId.equals(u.getCampusId()));
         }
         
-        // 4. Lọc theo Chức vụ (Role) - Đã cải tiến để nhận diện cả dữ liệu cũ bị NULL role
-        if (roleId != null) {
-            if (roleId == 1) {
-                // Nếu chọn Sinh viên: Lấy những ai có roleId = 1 HOẶC những ai bị khuyết role (mặc định là sinh viên)
-                stream = stream.filter(u -> u.getRole() == null || Integer.valueOf(1).equals(u.getRole().getRoleId()));
-            } else {
-                // Nếu chọn Giảng viên: Lấy chính xác những ai có roleId = 2
-                stream = stream.filter(u -> u.getRole() != null && roleId.equals(u.getRole().getRoleId()));
-            }
+        if ("lecturers".equals(tab)) {
+            stream = stream.filter(u -> u.getRole() != null && Integer.valueOf(2).equals(u.getRole().getRoleId()));
+        } else if ("graduates".equals(tab)) {
+            stream = stream.filter(u -> (u.getRole() == null || Integer.valueOf(1).equals(u.getRole().getRoleId())) && ("Inactive".equalsIgnoreCase(u.getStatus()) || "Graduated".equalsIgnoreCase(u.getStatus())));
+        } else {
+            stream = stream.filter(u -> (u.getRole() == null || Integer.valueOf(1).equals(u.getRole().getRoleId())) && !"Inactive".equalsIgnoreCase(u.getStatus()) && !"Graduated".equalsIgnoreCase(u.getStatus()));
         }
         
         List<User> filteredStudents = stream.collect(java.util.stream.Collectors.toList());
+        userStatusService.enrichStatuses(filteredStudents);
 
-        // Đẩy dữ liệu ngược ra giao diện để giữ nguyên trạng thái các thẻ select
         model.addAttribute("students", filteredStudents);
         model.addAttribute("currentSearch", search);
-        model.addAttribute("currentStatus", status);
         model.addAttribute("currentCampusId", campusId);
-        model.addAttribute("currentRoleId", roleId);
+        model.addAttribute("currentTab", tab);
         
         return "librarian/students";
+    }
+
+    @PostMapping("/librarian/students/add-manual")
+    public String addManualStudent(
+            @RequestParam("userId") String userId,
+            @RequestParam("fullName") String fullName,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam("campusId") Integer campusId,
+            @RequestParam(value = "roleId", defaultValue = "1") Integer roleId,
+            @RequestParam(value = "status", defaultValue = "Active") String status,
+            RedirectAttributes redirectAttributes) {
+        
+        Optional<User> existingUser = userRepository.findById(userId);
+        if (existingUser.isPresent()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Mã người dùng đã tồn tại trong hệ thống!");
+            return "redirect:/librarian/students";
+        }
+        
+        User newUser = new User();
+        newUser.setUserId(userId.trim().toUpperCase());
+        newUser.setFullName(fullName.trim());
+        newUser.setCampusId(campusId);
+        newUser.setStatus(status);
+        newUser.setBorrowingLocked(false);
+        
+        Role userRole = new Role();
+        userRole.setRoleId(roleId); 
+        newUser.setRole(userRole);
+        
+        newUser.setPasswordHash("123");
+        
+        if (email != null && !email.trim().isEmpty()) {
+            newUser.setEmail(email.trim());
+        } else {
+            newUser.setEmail(userId.trim().toLowerCase() + "@fpt.edu.vn"); 
+        }
+        
+        userRepository.save(newUser);
+        
+        // Gửi email kích hoạt tự động chạy ngầm
+        final String finalEmail = newUser.getEmail();
+        if (finalEmail != null && !finalEmail.isEmpty()) {
+            new Thread(() -> {
+                try {
+                    SimpleMailMessage message = new SimpleMailMessage();
+                    message.setFrom("thuvienfpt.test@gmail.com"); 
+                    message.setTo(finalEmail);
+                    message.setSubject("[FLMS FPT Library] Thông báo kích hoạt tài khoản thư viện số");
+                    message.setText("Xin chào bạn,\n\nTài khoản thư viện số FLMS của bạn trên hệ thống đã được kích hoạt thành công bởi Ban quản trị.\nBây giờ bạn đã có thể truy cập hệ thống và thực hiện mượn trả tài liệu.\n\nTrân trọng,\nBan quản lý thư viện Đại học FPT.");
+                    mailSender.send(message);
+                } catch (Exception e) {
+                    System.out.println("Lỗi gửi mail đến: " + finalEmail + " -> " + e.getMessage());
+                }
+            }).start();
+        }
+
+        redirectAttributes.addFlashAttribute("successMessage", "Thêm mới thủ công tài khoản: " + userId.trim().toUpperCase() + " thành công và đã gửi mail thông báo!");
+        
+        return "redirect:/librarian/students";
+    }
+
+    @PostMapping("/librarian/students/edit")
+    public String editStudent(
+            @RequestParam("userId") String userId,
+            @RequestParam("fullName") String fullName,
+            @RequestParam("email") String email,
+            @RequestParam("campusId") Integer campusId,
+            @RequestParam("roleId") Integer roleId,
+            RedirectAttributes redirectAttributes) {
+        
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setFullName(fullName.trim());
+            user.setEmail(email.trim());
+            user.setCampusId(campusId);
+            
+            Role userRole = new Role();
+            userRole.setRoleId(roleId);
+            user.setRole(userRole);
+            
+            userRepository.save(user);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật thông tin tài khoản: " + userId + " thành công!");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy người dùng để cập nhật!");
+        }
+        
+        return "redirect:/librarian/students";
+    }
+
+    @PostMapping("/librarian/students/delete")
+    public String deleteStudent(
+            @RequestParam("userId") String userId,
+            RedirectAttributes redirectAttributes) {
+        
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            int activeBorrowCount = borrowTicketRepository.countByPatronUserId(userId);
+            if (activeBorrowCount > 0) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa! Sinh viên/Giảng viên này đang có lịch sử mượn trả tài liệu. Vui lòng sử dụng tính năng Khóa Thẻ.");
+            } else {
+                userRepository.deleteById(userId);
+                redirectAttributes.addFlashAttribute("successMessage", "Đã xóa hoàn toàn tài khoản: " + userId + " khỏi hệ thống!");
+            }
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy người dùng để xóa!");
+        }
+        
+        return "redirect:/librarian/students";
     }
 
     @GetMapping("/librarian/students/import")
@@ -128,7 +226,7 @@ public class StudentManagementController {
                 if ("GRADUATED".equalsIgnoreCase(importType)) {
                     if (userOpt.isPresent()) {
                         User student = userOpt.get();
-                        student.setStatus("Inactive"); 
+                        student.setStatus("Graduated"); 
                         usersToSave.add(student);
                         successCount++;
                     }

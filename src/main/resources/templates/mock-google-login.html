@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Google Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f9; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <div class="bg-white rounded-3xl p-10 max-w-md w-full shadow-lg border border-gray-100">
+        
+        <div class="text-center mb-8">
+            <svg class="w-12 h-12 mx-auto mb-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+            </svg>
+            <h1 class="text-2xl font-normal text-gray-800">Đăng nhập</h1>
+            <p class="text-sm text-gray-600 mt-2">Sử dụng Tài khoản Google (MOCK)</p>
+        </div>
+
+        <form action="/mock-google-login" method="post" class="space-y-6">
+            <div class="relative">
+                <input type="email" name="email" id="email" required
+                       class="peer w-full border border-gray-300 rounded-lg px-4 py-4 text-base focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder-transparent"
+                       placeholder="Email hoặc số điện thoại"
+                       value="maydenlamcongiai@fpt.edu.vn"> <!-- changed from @gmail to @fpt.edu.vn so it passes validation -->
+                <label for="email" 
+                       class="absolute left-4 top-1/2 -translate-y-1/2 bg-white px-1 text-gray-500 text-base transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:text-blue-600 peer-valid:top-0 peer-valid:-translate-y-1/2 peer-valid:text-xs">
+                    Email hoặc số điện thoại
+                </label>
+            </div>
+            
+            <div class="text-sm text-blue-600 font-medium cursor-pointer mt-1">
+                Bạn quên địa chỉ email?
+            </div>
+
+            <p class="text-xs text-gray-600 mt-8 leading-relaxed">
+                Đây không phải máy tính của bạn? Hãy sử dụng chế độ Khách để đăng nhập một cách riêng tư. 
+                <a href="#" class="text-blue-600 font-medium">Tìm hiểu thêm về cách sử dụng Chế độ khách</a>
+            </p>
+
+            <div class="flex justify-between items-center mt-10">
+                <a href="/login" class="text-blue-600 font-medium text-sm px-2 py-2 hover:bg-blue-50 rounded-md transition-colors">
+                    Hủy
+                </a>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-full transition-colors focus:ring-4 focus:ring-blue-200">
+                    Tiếp theo
+                </button>
+            </div>
+        </form>
+
+    </div>
+    
+    <div class="mt-4 flex justify-between w-full max-w-md px-2 text-xs text-gray-600">
+        <select class="bg-transparent border-none focus:outline-none cursor-pointer">
+            <option>Tiếng Việt</option>
+            <option>English</option>
+        </select>
+        <div class="flex gap-4">
+            <a href="#" class="hover:bg-gray-200 px-2 py-1 rounded">Trợ giúp</a>
+            <a href="#" class="hover:bg-gray-200 px-2 py-1 rounded">Bảo mật</a>
+            <a href="#" class="hover:bg-gray-200 px-2 py-1 rounded">Điều khoản</a>
+        </div>
+    </div>
+
+</body>
+</html>
