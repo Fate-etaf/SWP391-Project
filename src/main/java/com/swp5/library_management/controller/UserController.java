@@ -191,6 +191,7 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
             RedirectAttributes redirectAttributes,
             Model model) {
 
+        System.out.println(">>> loginUser parameters: userId=" + userId + ", email=" + email + ", campusId=" + campusId);
         Optional<User> userOpt = userRepository.findByUserIdAndEmailAndCampusId(userId, email, campusId);
 
         if (userOpt.isPresent()) {
@@ -200,6 +201,12 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
             if ("Pending".equalsIgnoreCase(user.getStatus())) { 
                 redirectAttributes.addFlashAttribute("infoMessage", "Tài khoản của bạn chưa kích hoạt! Vui lòng nhập mã OTP từ Email để tự đặt mật khẩu.");
                 return "redirect:/activate?userId=" + user.getUserId();
+            }
+            
+            // Chặn đăng nhập nếu tài khoản bị Vô hiệu hóa (Inactive)
+            if ("Inactive".equalsIgnoreCase(user.getStatus())) {
+                model.addAttribute("loginError", "Tài khoản của bạn đã bị vô hiệu hóa (Inactive) trên hệ thống!");
+                return "login";
             }
             
             // 1. Lưu thông tin người dùng cơ bản vào Session
@@ -222,7 +229,10 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
             session.setAttribute("isAdmin", isAdm);
             
             // 3. ĐIỀU HƯỚNG THÔNG MINH
-            if (isLib || isAdm) {
+            if (isAdm) {
+                return "redirect:/admin/users";
+            }
+            if (isLib) {
                 return "redirect:/librarian/inventory/dashboard"; 
             }
             return "redirect:/home";

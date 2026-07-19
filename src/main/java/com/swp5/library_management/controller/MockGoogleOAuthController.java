@@ -87,7 +87,11 @@ public class MockGoogleOAuthController {
             // 5. Redirect based on role
             boolean isLib = user.isLibrarian();
             boolean isAdm = user.isAdmin();
-            if (isLib || isAdm) {
+            
+            if (isAdm) {
+                return "redirect:/admin/users";
+            }
+            if (isLib) {
                 return "redirect:/librarian/inventory/dashboard";
             }
             

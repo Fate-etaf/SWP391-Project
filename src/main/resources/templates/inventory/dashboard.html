@@ -9,8 +9,8 @@
             theme: { extend: { colors: { fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A', orangeHover: '#D95F18' } } } }
         }
     </script>
-    <style th:replace="~{fragments/header :: header-style}"></style>
-    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -25,70 +25,70 @@
     </div>
 
     <div class="relative z-50">
-        <div th:replace="~{fragments/header :: header('librarian')}"></div>
+        
     </div>
 
     <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
-        <div th:replace="~{fragments/sidebar :: sidebar('dashboard')}"></div>
+        <div th:replace="~{fragments/librarian_sidebar :: sidebar('dashboard')}"></div>
 
         <div class="flex-grow min-w-0">
             <div class="flex flex-col xl:flex-row justify-between items-start gap-3 mb-8">
                 <div>
-                    <h2 class="text-3xl font-extrabold text-slate-100 tracking-tight mb-1">Inventory Overview</h2>
-                    <p class="text-sm text-slate-400">Real-time stock, borrowed and overdue counts by campus.</p>
+                    <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Inventory Overview</h2>
+                    <p class="text-sm text-slate-500">Real-time stock, borrowed and overdue counts by campus.</p>
                 </div>
                 <div class="text-right mt-2 md:mt-0">
-                    <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 text-xs font-bold">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 text-xs font-bold shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span>Live refresh every 15s</span>
                     </span>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl flex flex-col">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">In stock</p>
-                    <h3 id="summary-stock" class="text-4xl font-extrabold text-slate-100 mb-1">0</h3>
-                    <p class="text-[10px] text-slate-400 mt-auto">Total books available across campuses.</p>
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md flex flex-col">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">In stock</p>
+                    <h3 id="summary-stock" class="text-4xl font-extrabold text-slate-800 mb-1">0</h3>
+                    <p class="text-[10px] text-slate-500 mt-auto">Total books available across campuses.</p>
                 </div>
-                <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl flex flex-col">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Borrowed</p>
-                    <h3 id="summary-borrowed" class="text-4xl font-extrabold text-blue-400 mb-1">0</h3>
-                    <p class="text-[10px] text-slate-400 mt-auto">Books currently checked out.</p>
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md flex flex-col">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Borrowed</p>
+                    <h3 id="summary-borrowed" class="text-4xl font-extrabold text-blue-600 mb-1">0</h3>
+                    <p class="text-[10px] text-slate-500 mt-auto">Books currently checked out.</p>
                 </div>
-                <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl flex flex-col">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Overdue</p>
-                    <h3 id="summary-overdue" class="text-4xl font-extrabold text-rose-400 mb-1">0</h3>
-                    <p class="text-[10px] text-slate-400 mt-auto">Books overdue for return.</p>
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md flex flex-col">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Overdue</p>
+                    <h3 id="summary-overdue" class="text-4xl font-extrabold text-rose-600 mb-1">0</h3>
+                    <p class="text-[10px] text-slate-500 mt-auto">Books overdue for return.</p>
                 </div>
-                <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl flex flex-col">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Campuses</p>
-                    <h3 id="summary-campuses" class="text-4xl font-extrabold text-emerald-400 mb-1">0</h3>
-                    <p class="text-[10px] text-slate-400 mt-auto">Campuses with inventory data.</p>
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md flex flex-col">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Campuses</p>
+                    <h3 id="summary-campuses" class="text-4xl font-extrabold text-emerald-600 mb-1">0</h3>
+                    <p class="text-[10px] text-slate-500 mt-auto">Campuses with inventory data.</p>
                 </div>
             </div>
 
-            <div class="bg-slate-950/40 border border-slate-800 rounded-2xl p-6 mb-8 shadow-inner">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 mb-8 shadow-sm">
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Campus</label>
-                        <select id="filter-campus" class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Campus</label>
+                        <select id="filter-campus" class="w-full bg-white border border-slate-300 text-slate-800 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors">
                             <option value="">All campuses</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Category</label>
-                        <select id="filter-category" class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Category</label>
+                        <select id="filter-category" class="w-full bg-white border border-slate-300 text-slate-800 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors">
                             <option value="">All categories</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">From</label>
-                        <input type="date" id="filter-from" class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors" />
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">From</label>
+                        <input type="date" id="filter-from" class="w-full bg-white border border-slate-300 text-slate-800 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors" />
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">To</label>
-                        <input type="date" id="filter-to" class="w-full bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors" />
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">To</label>
+                        <input type="date" id="filter-to" class="w-full bg-white border border-slate-300 text-slate-800 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-1 focus:ring-fpt-orange/50 transition-colors" />
                     </div>
                     <div class="pt-2">
                         <button id="apply-filters" class="w-full bg-fpt-orange hover:bg-fpt-orangeHover text-white py-2.5 rounded-xl font-bold transition-all text-sm shadow-lg shadow-fpt-orange/20 active:scale-[0.98]">
@@ -99,27 +99,27 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                <div class="lg:col-span-2 bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
+                <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-md">
                     <div class="mb-6">
-                        <h5 class="text-lg font-bold text-slate-100 mb-1">Campus inventory</h5>
-                        <p class="text-xs text-slate-400">Available, borrowed and overdue counts for each campus.</p>
+                        <h5 class="text-lg font-bold text-slate-800 mb-1">Campus inventory</h5>
+                        <p class="text-xs text-slate-500">Available, borrowed and overdue counts for each campus.</p>
                     </div>
                     <div class="relative h-[320px] w-full">
                         <canvas id="inventoryChart"></canvas>
                     </div>
                 </div>
                 
-                <div class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl flex flex-col">
-                    <h5 class="text-lg font-bold text-slate-100 mb-6 border-b border-slate-800 pb-4">Campus details</h5>
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md flex flex-col">
+                    <h5 class="text-lg font-bold text-slate-800 mb-6 border-b border-slate-200 pb-4">Campus details</h5>
                     <div class="flex-grow overflow-auto">
-                        <table class="w-full text-sm text-slate-300">
+                        <table class="w-full text-sm text-slate-700">
                             <thead>
                                 <tr>
-                                    <th class="text-left pb-3 font-semibold text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px]">Campus</th>
-                                    <th class="text-right pb-3 font-semibold text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px]">Total Copies</th>
+                                    <th class="text-left pb-3 font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-wider text-[10px]">Campus</th>
+                                    <th class="text-right pb-3 font-semibold text-slate-500 border-b border-slate-200 uppercase tracking-wider text-[10px]">Total Copies</th>
                                 </tr>
                             </thead>
-                            <tbody id="overview-body" class="divide-y divide-slate-800/50">
+                            <tbody id="overview-body" class="divide-y divide-slate-100">
                             </tbody>
                         </table>
                     </div>
@@ -175,7 +175,7 @@
         let inventoryChart = null;
         function createChart() {
             const ctx = document.getElementById('inventoryChart').getContext('2d');
-            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.color = '#475569';
             Chart.defaults.font.family = "'Inter', sans-serif";
             
             inventoryChart = new Chart(ctx, {
@@ -187,21 +187,21 @@
                     plugins: {
                         legend: { 
                             position: 'bottom', 
-                            labels: { boxWidth: 12, padding: 20, color: '#cbd5e1' } 
+                            labels: { boxWidth: 12, padding: 20, color: '#1e293b' } 
                         },
                         tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                            titleColor: '#f1f5f9',
-                            bodyColor: '#cbd5e1',
-                            borderColor: '#334155',
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#0f172a',
+                            bodyColor: '#334155',
+                            borderColor: '#cbd5e1',
                             borderWidth: 1,
                             padding: 12,
                             boxPadding: 6
                         }
                     },
                     scales: {
-                        x: { stacked: true, grid: { display: false, drawBorder: false }, ticks: { color: '#94a3b8' } },
-                        y: { beginAtZero: true, stacked: true, grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false }, ticks: { precision: 0, color: '#94a3b8' } }
+                        x: { stacked: true, grid: { display: false }, ticks: { color: '#475569' } },
+                        y: { beginAtZero: true, stacked: true, grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { precision: 0, color: '#475569' } }
                     }
                 }
             });
@@ -217,10 +217,10 @@
 
             inventoryChart.data.labels = labels;
             inventoryChart.data.datasets = [
-                { label: 'Available', backgroundColor: '#34d399', data: available, borderRadius: 6, barThickness: 20 },
-                { label: 'Borrowed', backgroundColor: '#60a5fa', data: borrowed, borderRadius: 6, barThickness: 20 },
-                { label: 'Overdue', backgroundColor: '#fb7185', data: overdue, borderRadius: 6, barThickness: 20 },
-                { label: 'Other', backgroundColor: '#64748b', data: other, borderRadius: 6, barThickness: 20 }
+                { label: 'Available', backgroundColor: '#10b981', data: available, borderRadius: 6, barThickness: 20 },
+                { label: 'Borrowed', backgroundColor: '#3b82f6', data: borrowed, borderRadius: 6, barThickness: 20 },
+                { label: 'Overdue', backgroundColor: '#ef4444', data: overdue, borderRadius: 6, barThickness: 20 },
+                { label: 'Other', backgroundColor: '#94a3b8', data: other, borderRadius: 6, barThickness: 20 }
             ];
             inventoryChart.update();
         }
@@ -251,43 +251,6 @@
             await renderOverview(data);
         });
 
-       // ════════════ TỰ ĐỘNG CHÈN MENU AN TOÀN, CHUẨN XÁC 100% ════════════
-        // ════════════ TỰ ĐỘNG CHÈN MENU SINH VIÊN CHUẨN XÁC ════════════
-        window.addEventListener('DOMContentLoaded', () => {
-            // 1. Tìm chính xác nút "Danh mục Sách" để làm mốc chèn
-            const allLinks = document.querySelectorAll('a');
-            let targetButton = null;
-
-            allLinks.forEach(link => {
-                if (link.textContent.includes('Danh mục Sách') || link.getAttribute('href') === '/librarian/books') {
-                    targetButton = link;
-                }
-            });
-
-            // 2. Chèn nút Quản lý Sinh viên ngay phía dưới nút Danh mục Sách
-            if (targetButton && targetButton.parentNode) {
-                const parentNode = targetButton.parentNode;
-                const existingLink = parentNode.querySelector('a[href="/librarian/students"]');
-                
-                if (!existingLink) {
-                    const studentMenu = document.createElement('a');
-                    studentMenu.href = '/librarian/students';
-                    
-                    // Copy nguyên class giao diện thường (màu xám) của nút Danh mục Sách
-                    studentMenu.className = targetButton.className;
-                    
-                    studentMenu.innerHTML = `
-                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                        </svg>
-                        <span class="text-sm font-medium">Quản lý Sinh viên</span>
-                    `;
-                    
-                    // Chèn hậu bối ngay sau nút Danh mục Sách
-                    targetButton.insertAdjacentElement('afterend', studentMenu);
-                }
-            }
-        });
 
         // Init
         loadFilters();
@@ -316,7 +279,7 @@
         }, 15000);
     </script>
     <div class="relative z-10">
-        <div th:replace="~{fragments/footer :: footer}"></div>
+        
     </div>
 </body>
 </html>

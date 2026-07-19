@@ -100,7 +100,7 @@
             <a href="/books" th:classappend="${activeNav == 'collection' ? 'active' : ''}">Bộ sưu tập</a>
             <a href="#" th:classappend="${activeNav == 'news' ? 'active' : ''}">Tin tức</a>
 
-            <th:block th:if="${session.loggedInUser != null and session.loggedInUser.isLibrarian()}">
+            <!-- <th:block th:if="${session.loggedInUser != null and session.loggedInUser.isLibrarian()}">
                 <div class="dropdown">
                     <span class="nav-item" style="color: #e87722; font-weight: 700;">Quản trị Kho ▾</span>
                     <div class="dropdown-menu">
@@ -109,7 +109,7 @@
                         <a href="/librarian/reports">Báo cáo Hoạt động</a>
                     </div>
                 </div>
-            </th:block>
+            </th:block> -->
             
             <!-- NOTIFICATIONS -->
             <div class="dropdown" th:if="${session.loggedInUser != null}" style="margin-left:auto; margin-right: 5px;">

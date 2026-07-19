@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .requestMatchers("/login", "/activate", "/oauth2/**", "/mock-google-login", "/backdoor/**", "/css/**", "/js/**", "/images/**").permitAll()
                 
                 // 🟢 2. MỞ KHÓA TOÀN BỘ ĐƯỜNG DẪN QUẢN LÝ & IMPORT SINH VIÊN (BƯỚC 1)
-                .requestMatchers("/librarian/students/**", "/librarian/students/import/**").permitAll()
+                .requestMatchers("/admin/**").permitAll()
                 
                 // 3. Tất cả các request còn lại tạm thời cho phép truy cập tự do trong chế độ phát triển
                 .anyRequest().permitAll()
@@ -65,6 +65,13 @@ public class SecurityConfig {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             System.out.println("Found user: " + user.getUserId());
+            
+            if ("Inactive".equalsIgnoreCase(user.getStatus())) {
+                jakarta.servlet.http.HttpSession session = request.getSession();
+                session.setAttribute("loginError", "Tài khoản của bạn đã bị vô hiệu hóa (Inactive) trên hệ thống!");
+                response.sendRedirect("/login");
+                return;
+            }
             
             if ("Pending".equalsIgnoreCase(user.getStatus())) {
                 user.setStatus("Active");

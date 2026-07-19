@@ -25,6 +25,12 @@ public class HomeController {
 
     @GetMapping({"/", "/home"})
     public String home(Model model, @AuthenticationPrincipal OAuth2User principal, HttpSession session) {
+        // Nếu là Admin, kiên quyết đẩy về trang Admin Portal
+        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+        if (Boolean.TRUE.equals(isAdmin)) {
+            return "redirect:/admin/users";
+        }
+
         // Lấy dữ liệu thống kê từ hệ thống
         model.addAttribute("stats", homeService.getHomeStats());
         model.addAttribute("campuses", homeService.getCampuses());

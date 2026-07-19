@@ -67,6 +67,9 @@ public class UserStatusServiceImpl implements UserStatusService {
     }
 
     private String determineStatus(String dbStatus, long unpaid, long overdue, long active, Boolean borrowingLocked) {
+        if ("Inactive".equalsIgnoreCase(dbStatus)) {
+            return "Inactive";
+        }
         if ("Graduated".equalsIgnoreCase(dbStatus)) {
             return "Graduated";
         }
@@ -81,9 +84,6 @@ public class UserStatusServiceImpl implements UserStatusService {
         }
         if (active >= MAX_BORROW_LIMIT) {
             return "Limit Reached";
-        }
-        if ("Inactive".equalsIgnoreCase(dbStatus)) {
-            return "Inactive";
         }
         return "Active";
     }

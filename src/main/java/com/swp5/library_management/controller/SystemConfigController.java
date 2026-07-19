@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/librarian/settings")
+@RequestMapping("/admin/settings")
 @RequiredArgsConstructor
 public class SystemConfigController {
 
@@ -41,7 +41,7 @@ public class SystemConfigController {
         model.addAttribute("configs", configs);
         model.addAttribute("activeItem", "settings");
 
-        return "librarian/settings";
+        return "admin/settings";
     }
 
     @PostMapping("/update")
@@ -61,11 +61,11 @@ public class SystemConfigController {
             int value = Integer.parseInt(configValue);
             if (value < 0) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Giá trị cấu hình không được là số âm!");
-                return "redirect:/librarian/settings";
+                return "redirect:/admin/settings";
             }
         } catch (NumberFormatException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Giá trị cấu hình phải là một số nguyên hợp lệ!");
-            return "redirect:/librarian/settings";
+            return "redirect:/admin/settings";
         }
 
         Optional<SystemConfig> configOpt = systemConfigRepository.findById(configKey);
@@ -85,6 +85,6 @@ public class SystemConfigController {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy khóa cấu hình: " + configKey);
         }
 
-        return "redirect:/librarian/settings";
+        return "redirect:/admin/settings";
     }
 }

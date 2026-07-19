@@ -10,8 +10,8 @@
         }
     </script>
     
-    <style th:replace="~{fragments/header :: header-style}"></style>
-    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    
+    
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -26,12 +26,12 @@
     </div>
 
     <div class="relative z-50">
-        <div th:replace="~{fragments/header :: header('librarian')}"></div>
+        
     </div>
 
     <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
         
-        <div th:replace="~{fragments/sidebar :: sidebar('settings')}"></div>
+        <div th:replace="~{fragments/admin_sidebar :: sidebar('settings')}"></div>
 
         <div class="flex-grow min-w-0 bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
             
@@ -93,7 +93,7 @@
 
     <!-- Footer -->
     <div class="relative z-50">
-        <div th:replace="~{fragments/footer :: footer}"></div>
+        
     </div>
 
     <!-- Edit Modal -->
@@ -109,7 +109,7 @@
                 </button>
             </div>
 
-            <form action="/librarian/settings/update" method="POST">
+            <form action="/admin/settings/update" method="POST">
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Khóa cấu hình</label>

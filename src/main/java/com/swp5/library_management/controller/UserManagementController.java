@@ -22,18 +22,18 @@ import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
-public class StudentManagementController {
+public class UserManagementController {
 
     private final UserRepository userRepository;
     private final JavaMailSender mailSender;
     private final UserStatusService userStatusService;
     private final com.swp5.library_management.repository.BorrowTicketRepository borrowTicketRepository;
 
-    @GetMapping("/librarian/students")
+    @GetMapping("/admin/users")
     public String manageStudents(
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "campusId", required = false) Integer campusId,
-            @RequestParam(value = "tab", defaultValue = "students") String tab,
+            @RequestParam(value = "tab", defaultValue = "all") String tab,
             Model model) {
         
         List<User> allUsers = userRepository.findAll();
@@ -42,18 +42,26 @@ public class StudentManagementController {
         if (search != null && !search.trim().isEmpty()) {
             String cleanSearch = search.trim().toLowerCase();
             stream = stream.filter(u -> (u.getFullName() != null && u.getFullName().toLowerCase().contains(cleanSearch))
-                                     || (u.getUserId() != null && u.getUserId().toLowerCase().contains(cleanSearch)));
+                                     || (u.getUserId() != null && u.getUserId().toLowerCase().contains(cleanSearch))
+                                     || (u.getEmail() != null && u.getEmail().toLowerCase().contains(cleanSearch)));
         }
         
         if (campusId != null) {
             stream = stream.filter(u -> campusId.equals(u.getCampusId()));
         }
         
-        if ("lecturers".equals(tab)) {
+        if ("all".equals(tab)) {
+            // Không filter theo role, lấy toàn bộ
+        } else if ("lecturers".equals(tab)) {
             stream = stream.filter(u -> u.getRole() != null && Integer.valueOf(2).equals(u.getRole().getRoleId()));
+        } else if ("librarians".equals(tab)) {
+            stream = stream.filter(u -> u.getRole() != null && Integer.valueOf(3).equals(u.getRole().getRoleId()));
+        } else if ("admins".equals(tab)) {
+            stream = stream.filter(u -> u.getRole() != null && Integer.valueOf(4).equals(u.getRole().getRoleId()));
         } else if ("graduates".equals(tab)) {
             stream = stream.filter(u -> (u.getRole() == null || Integer.valueOf(1).equals(u.getRole().getRoleId())) && ("Inactive".equalsIgnoreCase(u.getStatus()) || "Graduated".equalsIgnoreCase(u.getStatus())));
         } else {
+            // default is "students"
             stream = stream.filter(u -> (u.getRole() == null || Integer.valueOf(1).equals(u.getRole().getRoleId())) && !"Inactive".equalsIgnoreCase(u.getStatus()) && !"Graduated".equalsIgnoreCase(u.getStatus()));
         }
         
@@ -65,10 +73,10 @@ public class StudentManagementController {
         model.addAttribute("currentCampusId", campusId);
         model.addAttribute("currentTab", tab);
         
-        return "librarian/students";
+        return "admin/users";
     }
 
-    @PostMapping("/librarian/students/add-manual")
+    @PostMapping("/admin/users/add-manual")
     public String addManualStudent(
             @RequestParam("userId") String userId,
             @RequestParam("fullName") String fullName,
@@ -81,7 +89,7 @@ public class StudentManagementController {
         Optional<User> existingUser = userRepository.findById(userId);
         if (existingUser.isPresent()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Mã người dùng đã tồn tại trong hệ thống!");
-            return "redirect:/librarian/students";
+            return "redirect:/admin/users";
         }
         
         User newUser = new User();
@@ -124,16 +132,17 @@ public class StudentManagementController {
 
         redirectAttributes.addFlashAttribute("successMessage", "Thêm mới thủ công tài khoản: " + userId.trim().toUpperCase() + " thành công và đã gửi mail thông báo!");
         
-        return "redirect:/librarian/students";
+        return "redirect:/admin/users";
     }
 
-    @PostMapping("/librarian/students/edit")
+    @PostMapping("/admin/users/edit")
     public String editStudent(
             @RequestParam("userId") String userId,
             @RequestParam("fullName") String fullName,
             @RequestParam("email") String email,
             @RequestParam("campusId") Integer campusId,
             @RequestParam("roleId") Integer roleId,
+            @RequestParam("status") String status,
             RedirectAttributes redirectAttributes) {
         
         Optional<User> userOpt = userRepository.findById(userId);
@@ -142,6 +151,7 @@ public class StudentManagementController {
             user.setFullName(fullName.trim());
             user.setEmail(email.trim());
             user.setCampusId(campusId);
+            user.setStatus(status);
             
             Role userRole = new Role();
             userRole.setRoleId(roleId);
@@ -153,10 +163,10 @@ public class StudentManagementController {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy người dùng để cập nhật!");
         }
         
-        return "redirect:/librarian/students";
+        return "redirect:/admin/users";
     }
 
-    @PostMapping("/librarian/students/delete")
+    @PostMapping("/admin/users/delete")
     public String deleteStudent(
             @RequestParam("userId") String userId,
             RedirectAttributes redirectAttributes) {
@@ -174,15 +184,15 @@ public class StudentManagementController {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy người dùng để xóa!");
         }
         
-        return "redirect:/librarian/students";
+        return "redirect:/admin/users";
     }
 
-    @GetMapping("/librarian/students/import")
+    @GetMapping("/admin/users/import")
     public String showImportPage() {
-        return "import-users"; 
+        return "admin/users-import"; 
     }
 
-    @PostMapping("/librarian/students/import/process")
+    @PostMapping("/admin/users/import/process")
     public String processExcelUpload(
             @RequestParam("file") MultipartFile file,
             @RequestParam("importType") String importType,
@@ -190,7 +200,7 @@ public class StudentManagementController {
 
         if (file.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn một file Excel trước khi bấm xử lý!");
-            return "redirect:/librarian/students/import";
+            return "redirect:/admin/users/import";
         }
 
         List<User> usersToSave = new ArrayList<>();
@@ -231,20 +241,20 @@ public class StudentManagementController {
                         successCount++;
                     }
                 } else {
-                    User account = userOpt.orElse(new User());
+                    if (userOpt.isPresent()) {
+                        continue; // Bỏ qua trùng lặp theo đúng chuẩn Use Case E1
+                    }
                     
-                    // Chỉ gửi email thông báo nếu đây là tài khoản mới tinh hoặc đang bị khóa
-                    if (!userOpt.isPresent() || "Inactive".equalsIgnoreCase(userOpt.get().getStatus())) {
-                        if (email != null && !email.trim().isEmpty()) {
-                            emailsToNotify.add(email.trim());
-                        }
+                    User account = new User();
+                    
+                    if (email != null && !email.trim().isEmpty()) {
+                        emailsToNotify.add(email.trim());
                     }
 
                     account.setUserId(userId);
                     
-                    // Tự động gán danh xưng tương ứng nếu file Excel bị trống cột tên
                     if (fullName.isEmpty()) {
-                        account.setFullName("LECTURER".equalsIgnoreCase(importType) ? "Giảng viên FPT" : "Sinh viên FPT");
+                        account.setFullName("LECTURER".equalsIgnoreCase(importType) ? "Giảng viên FPT" : "Người dùng FPT");
                     } else {
                         account.setFullName(fullName);
                     }
@@ -254,24 +264,23 @@ public class StudentManagementController {
                     account.setStatus("Active");
                     account.setBorrowingLocked(false);
                     
-                    // 🟢 TỰ ĐỘNG KHỞI TẠO VÀ GÁN ROLE ID CHO ĐỐI TƯỢNG XỬ LÝ
                     Role targetRole = new Role();
                     if ("LECTURER".equalsIgnoreCase(importType)) {
-                        targetRole.setRoleId(2); // Gán quyền Giảng viên ngầm định
+                        targetRole.setRoleId(2); 
                         account.setRole(targetRole);
-                    } else if (!userOpt.isPresent()) {
-                        targetRole.setRoleId(1); // Gán quyền Sinh viên cho tài khoản tạo mới
+                    } else {
+                        targetRole.setRoleId(1); 
                         account.setRole(targetRole);
                     }
 
-                    if (!userOpt.isPresent()) {
-                        account.setPasswordHash("123"); 
-                    }
+                    account.setPasswordHash("123"); 
                     
                     usersToSave.add(account);
                     successCount++;
                 }
             }
+            
+            int skippedCount = (lastRow) - successCount;
 
             if (!usersToSave.isEmpty()) {
                 userRepository.saveAll(usersToSave);
@@ -296,10 +305,10 @@ public class StudentManagementController {
 
                 // Cấu hình nhãn chuỗi chữ thông báo động hiển thị trên UI
                 String typeText = "LECTURER".equalsIgnoreCase(importType) ? "Giảng viên mới" : 
-                                 ("NEW".equalsIgnoreCase(importType) ? "Sinh viên mới" : "Sinh viên tốt nghiệp");
+                                 ("NEW".equalsIgnoreCase(importType) ? "Người dùng mới" : "Sinh viên tốt nghiệp");
                                  
                 redirectAttributes.addFlashAttribute("successMessage", 
-                    "Thành công! Đã xử lý đợt [" + typeText + "]. Đã cập nhật " + successCount + " tài khoản hệ thống và kích hoạt gửi mail thông báo ngầm.");
+                    "Thành công! Đã xử lý đợt [" + typeText + "]. Tạo mới/Cập nhật " + successCount + " tài khoản, Bỏ qua " + skippedCount + " tài khoản bị trùng lặp.");
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy dữ liệu nào cần cập nhật trong file Excel!");
             }
@@ -309,29 +318,26 @@ public class StudentManagementController {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi cấu trúc hoặc định dạng file: " + e.getMessage());
         }
 
-        return "redirect:/librarian/students";
+        return "redirect:/admin/users";
     }
 
-    @GetMapping("/librarian/students/toggle-status/{id}")
-    public String toggleStudentStatus(
+    @GetMapping("/admin/users/toggle-lock/{id}")
+    public String toggleUserLock(
             @org.springframework.web.bind.annotation.PathVariable("id") String userId, 
             RedirectAttributes redirectAttributes) {
         
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
             User student = userOpt.get();
-            if ("Active".equalsIgnoreCase(student.getStatus())) {
-                student.setStatus("Inactive");
-            } else {
-                student.setStatus("Active");
-            }
+            boolean isLocked = student.getBorrowingLocked() != null ? student.getBorrowingLocked() : false;
+            student.setBorrowingLocked(!isLocked);
             userRepository.save(student);
-            String statusText = "Active".equalsIgnoreCase(student.getStatus()) ? "KÍCH HOẠT" : "KHÓA THẺ";
+            String statusText = isLocked ? "MỞ KHÓA" : "KHÓA THẺ";
             redirectAttributes.addFlashAttribute("successMessage", "Đã " + statusText + " tài khoản mã số: " + userId + " thành công!");
         } else {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy tài khoản người dùng!");
         }
-        return "redirect:/librarian/students";
+        return "redirect:/admin/users";
     }
 
     private String getSafeCellValue(org.apache.poi.ss.usermodel.Row row, int cellIndex) {
