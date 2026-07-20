@@ -9,8 +9,8 @@
             theme: { extend: { colors: { fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A', orangeHover: '#D95F18' } } } }
         }
     </script>
-    <style th:replace="~{fragments/header :: header-style}"></style>
-    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -24,20 +24,20 @@
     </div>
 
     <div class="relative z-50">
-        <div th:replace="~{fragments/header :: header('librarian')}"></div>
+        
     </div>
 
     <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
         
-        <div th:replace="~{fragments/sidebar :: sidebar('students')}"></div>
+        <div th:replace="~{fragments/admin_sidebar :: sidebar('users')}"></div>
 
         <div class="flex-grow min-w-0 bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
             
             <div class="mb-6 pb-4 border-b border-slate-800">
-                <a href="/librarian/students" class="text-sm text-slate-400 hover:text-fpt-orange transition-colors inline-flex items-center gap-2 mb-3">
-                    ← Quay lại danh sách sinh viên
+                <a href="/admin/users" class="text-sm text-slate-400 hover:text-fpt-orange transition-colors inline-flex items-center gap-2 mb-3">
+                    ← Quay lại danh sách người dùng
                 </a>
-                <h1 class="text-xl font-extrabold text-white tracking-tight">IMPORT BẠN ĐỌC TỪ EXCEL</h1>
+                <h1 class="text-xl font-extrabold text-white tracking-tight">IMPORT NGƯỜI DÙNG TỪ EXCEL</h1>
                 <p class="text-xs text-slate-400 mt-1">Chọn file Excel dữ liệu, sau đó bấm chọn nút tính năng tương ứng ở bên dưới để hệ thống phân loại xử lý.</p>
             </div>
 
@@ -45,7 +45,7 @@
                 <span th:text="${errorMessage}"></span>
             </div>
 
-            <form th:action="@{/librarian/students/import/process}" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <form th:action="@{/admin/users/import/process}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 
                 <input type="hidden" id="importTypeInput" name="importType" value="NEW" />
 
@@ -80,7 +80,7 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row sm:justify-end gap-3 pt-4 border-t border-slate-800/60">
-                    <a href="/librarian/students" class="inline-flex items-center justify-center px-5 py-2.5 bg-slate-950 text-slate-400 font-semibold border border-slate-800 rounded-xl text-sm hover:bg-slate-900 transition-colors">
+                    <a href="/admin/users" class="inline-flex items-center justify-center px-5 py-2.5 bg-slate-950 text-slate-400 font-semibold border border-slate-800 rounded-xl text-sm hover:bg-slate-900 transition-colors">
                         Hủy bỏ
                     </a>
                     
@@ -105,7 +105,7 @@
     </main>
 
     <div class="relative z-10">
-        <div th:replace="~{fragments/footer :: footer}"></div>
+        
     </div>
 
 </body>

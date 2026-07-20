@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.swp5.library_management.repository.BorrowTicketDetailRepository;
+import com.swp5.library_management.repository.FineInvoiceRepository;
+import com.swp5.library_management.repository.SystemConfigRepository;
 import com.swp5.library_management.repository.CampusRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +32,19 @@ public class UserController {
     
     private final UserRepository userRepository;
     private final CampusRepository campusRepository;
+    private final BorrowTicketDetailRepository borrowTicketDetailRepository;
+    private final FineInvoiceRepository fineInvoiceRepository;
+    private final SystemConfigRepository systemConfigRepository;
 
-    UserController(UserRepository userRepository, CampusRepository campusRepository) {
+    UserController(UserRepository userRepository, CampusRepository campusRepository,
+                   BorrowTicketDetailRepository borrowTicketDetailRepository,
+                   FineInvoiceRepository fineInvoiceRepository,
+                   SystemConfigRepository systemConfigRepository) {
         this.userRepository = userRepository;
         this.campusRepository = campusRepository;
+        this.borrowTicketDetailRepository = borrowTicketDetailRepository;
+        this.fineInvoiceRepository = fineInvoiceRepository;
+        this.systemConfigRepository = systemConfigRepository;
     }
 @GetMapping("/profile")
 public String showProfile(HttpSession session, Model model) {
@@ -68,14 +80,95 @@ model.addAttribute("isCardActive", isCardActive);
         }
         model.addAttribute("campusName", campusName);
         
-        String roleName = user.getRole() != null ? user.getRole().getRoleName() : "Student";
-        int roleId = user.getRole() != null ? user.getRole().getRoleId() : 1;
+        String roleName = user.getPrimaryRole().map(r -> r.getRoleName()).orElse("Student");
+        int roleId = user.getPrimaryRole().map(r -> r.getRoleId()).orElse(1);
         model.addAttribute("roleName", roleName);
         model.addAttribute("isLibrarianOrAdmin", "Librarian".equalsIgnoreCase(roleName) || "Admin".equalsIgnoreCase(roleName) || roleId == 3 || roleId == 4);
         
+        // --- Borrowing Statistics & Quotas ---
+        int totalBorrowed = borrowTicketDetailRepository.countActiveBorrowedByPatronId(loggedInUserId);
+        int totalOverdue = borrowTicketDetailRepository.countOverdueByPatronId(loggedInUserId);
+        int totalPenalties = fineInvoiceRepository.countUnpaidFinesByPatronId(loggedInUserId);
+        
+        int borrowLimit = 5; // Default for Student
+        if ("Lecturer".equalsIgnoreCase(roleName) || "Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId != 1) {
+             borrowLimit = systemConfigRepository.findById("MAX_BOOKS_LECTURER")
+                 .map(c -> { try { return Integer.parseInt(c.getConfigValue()); } catch(Exception e) { return 10; } })
+                 .orElse(10);
+        } else {
+             borrowLimit = systemConfigRepository.findById("MAX_BOOKS_STUDENT")
+                 .map(c -> { try { return Integer.parseInt(c.getConfigValue()); } catch(Exception e) { return 5; } })
+                 .orElse(5);
+        }
+
+        model.addAttribute("totalBorrowed", totalBorrowed);
+        model.addAttribute("totalOverdue", totalOverdue);
+        model.addAttribute("totalPenalties", totalPenalties);
+        model.addAttribute("borrowLimit", borrowLimit);
         return "profile";
     }
     return "redirect:/login";
+}
+
+@GetMapping("/librarian/students/{id}/profile")
+public String showStudentProfileToLibrarian(@org.springframework.web.bind.annotation.PathVariable("id") String targetUserId, HttpSession session, Model model) {
+    String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+    if (loggedInUserId == null) {
+        return "redirect:/login";
+    }
+    
+    // Auth Check
+    Optional<User> loggedInOpt = userRepository.findById(loggedInUserId);
+    if (loggedInOpt.isEmpty() || (!loggedInOpt.get().isLibrarian() && !loggedInOpt.get().isAdmin())) {
+        return "redirect:/"; // Not authorized
+    }
+
+    Optional<User> userOpt = userRepository.findById(targetUserId);
+    if (userOpt.isPresent()) {
+        User user = userOpt.get();
+        model.addAttribute("user", user);
+        
+        boolean isCardActive = false;
+        if (user.getStatus() != null) {
+            String currentStatus = user.getStatus().trim().toLowerCase();
+            if (currentStatus.equals("active") || currentStatus.equals("đang hoạt động")) {
+                isCardActive = true;
+            }
+        }
+        model.addAttribute("isCardActive", isCardActive);
+        
+        String campusName = "Unknown";
+        if (user.getCampusId() != null) {
+            campusName = campusRepository.findById(user.getCampusId())
+                    .map(com.swp5.library_management.entity.Campus::getCampusName)
+                    .orElse("Unknown");
+        }
+        model.addAttribute("campusName", campusName);
+        
+        String roleName = user.getPrimaryRole().map(r -> r.getRoleName()).orElse("Student");
+        int roleId = user.getPrimaryRole().map(r -> r.getRoleId()).orElse(1);
+        model.addAttribute("roleName", roleName);
+        model.addAttribute("isLibrarianOrAdmin", "Librarian".equalsIgnoreCase(roleName) || "Admin".equalsIgnoreCase(roleName) || roleId == 3 || roleId == 4);
+        
+        int totalBorrowed = borrowTicketDetailRepository.countActiveBorrowedByPatronId(targetUserId);
+        int totalOverdue = borrowTicketDetailRepository.countOverdueByPatronId(targetUserId);
+        int totalPenalties = fineInvoiceRepository.countUnpaidFinesByPatronId(targetUserId);
+        
+        int borrowLimit = 5; 
+        if ("Lecturer".equalsIgnoreCase(roleName) || "Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId != 1) {
+             borrowLimit = systemConfigRepository.findById("MAX_BOOKS_LECTURER").map(c -> { try { return Integer.parseInt(c.getConfigValue()); } catch(Exception e) { return 10; } }).orElse(10);
+        } else {
+             borrowLimit = systemConfigRepository.findById("MAX_BOOKS_STUDENT").map(c -> { try { return Integer.parseInt(c.getConfigValue()); } catch(Exception e) { return 5; } }).orElse(5);
+        }
+
+        model.addAttribute("totalBorrowed", totalBorrowed);
+        model.addAttribute("totalOverdue", totalOverdue);
+        model.addAttribute("totalPenalties", totalPenalties);
+        model.addAttribute("borrowLimit", borrowLimit);
+        
+        return "profile";
+    }
+    return "redirect:/librarian/students";
 }
 
     // === 1. LUỒNG ĐĂNG NHẬP ===
@@ -98,15 +191,30 @@ model.addAttribute("isCardActive", isCardActive);
             RedirectAttributes redirectAttributes,
             Model model) {
 
+        System.out.println(">>> loginUser parameters: userId=" + userId + ", email=" + email + ", campusId=" + campusId);
         Optional<User> userOpt = userRepository.findByUserIdAndEmailAndCampusId(userId, email, campusId);
+
+        // ====== DEBUG LOGIN ======
+        System.out.println("[LOGIN] userId=" + userId + " | email=" + email + " | campusId=" + campusId);
+        System.out.println("[LOGIN] User found: " + userOpt.isPresent());
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+
+            System.out.println("[LOGIN] User status: " + user.getStatus());
+            System.out.println("[LOGIN] Roles loaded: " + user.getRoles().size() + " → " + user.getRoles());
+            System.out.println("[LOGIN] isLibrarian=" + user.isLibrarian() + " | isAdmin=" + user.isAdmin());
 
             // Đổi từ "New" sang "Pending" để kiểm tra trạng thái kích hoạt tài khoản
             if ("Pending".equalsIgnoreCase(user.getStatus())) { 
                 redirectAttributes.addFlashAttribute("infoMessage", "Tài khoản của bạn chưa kích hoạt! Vui lòng nhập mã OTP từ Email để tự đặt mật khẩu.");
                 return "redirect:/activate?userId=" + user.getUserId();
+            }
+            
+            // Chặn đăng nhập nếu tài khoản bị Vô hiệu hóa (Inactive)
+            if ("Inactive".equalsIgnoreCase(user.getStatus())) {
+                model.addAttribute("loginError", "Tài khoản của bạn đã bị vô hiệu hóa (Inactive) trên hệ thống!");
+                return "login";
             }
             
             // 1. Lưu thông tin người dùng cơ bản vào Session
@@ -120,20 +228,23 @@ model.addAttribute("isCardActive", isCardActive);
             org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
             redirectAttributes.addFlashAttribute("registeredName", user.getFullName());
             
-            // 2. PHÂN QUYỀN NGẦM: Bốc trực tiếp ID/Tên từ thực thể Role liên kết
-            if (user.getRole() != null) {
-                String roleName = user.getRole().getRoleName(); 
-                int roleId = user.getRole().getRoleId();
-                
-                // Lưu trạng thái quyền vào session phòng hờ giao diện Frontend cần dùng
-                session.setAttribute("isLibrarian", "Librarian".equalsIgnoreCase(roleName) || roleId == 3);
-                session.setAttribute("isAdmin", "Admin".equalsIgnoreCase(roleName) || roleId == 4);
-                
-                // 3. ĐIỀU HƯỚNG THÔNG MINH
-                if ("Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName) || roleId == 4 || roleId == 3) {
-                    return "redirect:/librarian/inventory/dashboard"; 
-                }
+            // 2. PHÂN QUYỀN NGẦM: Sử dụng hàm tiện ích trong entity
+            boolean isLib = user.isLibrarian();
+            boolean isAdm = user.isAdmin();
+            
+            // Lưu trạng thái quyền vào session phòng hờ giao diện Frontend cần dùng
+            session.setAttribute("isLibrarian", isLib);
+            session.setAttribute("isAdmin", isAdm);
+            
+            // 3. ĐIỀU HƯỚNG THÔNG MINH
+            if (isAdm) {
+                return "redirect:/admin/users";
             }
+            if (isLib) {
+                return "redirect:/librarian/inventory/dashboard"; 
+            }
+
+            System.out.println("[LOGIN] → Redirecting to /home");
             return "redirect:/home";
         }
 
@@ -229,12 +340,18 @@ model.addAttribute("isCardActive", isCardActive);
             session.setAttribute("loggedInUserId", user.getUserId());
             session.setAttribute("loggedInCampusId", user.getCampusId());
             
-            // Xử lý phân quyền (Copy nguyên logic phân quyền từ hàm login cũ của bạn qua đây)
-            if (user.getRole() != null) {
-                String roleName = user.getRole().getRoleName();
-                if ("Admin".equalsIgnoreCase(roleName) || "Librarian".equalsIgnoreCase(roleName)) {
-                    return "redirect:/librarian/inventory/dashboard";
-                }
+            // Xử lý phân quyền 
+            boolean isLib = user.isLibrarian();
+            boolean isAdm = user.isAdmin();
+            
+            session.setAttribute("isLibrarian", isLib);
+            session.setAttribute("isAdmin", isAdm);
+            
+            if (isAdm) {
+                return "redirect:/admin/users";
+            }
+            if (isLib) {
+                return "redirect:/librarian/inventory/dashboard";
             }
             return "redirect:/home";
         } else {
@@ -261,7 +378,7 @@ model.addAttribute("isCardActive", isCardActive);
         adminUser.setEmail("admin.dev@fpt.edu.vn");
         adminUser.setStatus("Active");
         adminUser.setCampusId(1); // Mặc định cơ sở Hà Nội
-        adminUser.setRole(adminRole); // Gắn role Admin vào user
+        adminUser.getRoles().add(adminRole); // Thêm role Admin vào tập hợp roles
 
         // 3. NẠP THẲNG THÔNG TIN VÀO SESSION HỆ THỐNG
         session.setAttribute("loggedInUser", adminUser);

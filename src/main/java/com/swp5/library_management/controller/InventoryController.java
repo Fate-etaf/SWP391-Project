@@ -83,8 +83,10 @@ public class InventoryController {
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) Integer majorId,
             @RequestParam(required = false) Integer campusId,
+            HttpSession session,
             Model model) {
 
+        Integer librarianCampusId = (Integer) session.getAttribute("loggedInCampusId");
         boolean hasSearch = StringUtils.hasText(keyword)
                 || StringUtils.hasText(subjectCode)
                 || categoryId != null
@@ -98,10 +100,10 @@ public class InventoryController {
             model.addAttribute("noResults", results.isEmpty());
 
             if (results.isEmpty()) {
-                model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
+                model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks(librarianCampusId));
             }
         } else {
-            model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
+            model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks(librarianCampusId));
         }
 
         model.addAttribute("campuses", campusRepository.findAll());
@@ -116,7 +118,6 @@ public class InventoryController {
         model.addAttribute("selectedMajorId", majorId);
         model.addAttribute("hasSearch", hasSearch);
         model.addAttribute("searchAction", "/librarian/inventory/list");
-
         return "inventory/list";
     }
 
@@ -152,7 +153,19 @@ public class InventoryController {
             campusId = (Integer) session.getAttribute("loggedInCampusId");
         }
         bookService.saveBook(form, campusId);
-        return "redirect:/librarian/inventory";
+
+        // If the form was auto-filled from an approved request, mark it as Available
+        // so its "Auto-fill Form" button no longer shows on the page
+        if (form.getRequestId() != null && !form.getRequestId().trim().isEmpty()) {
+            try {
+                Integer reqId = Integer.parseInt(form.getRequestId().trim());
+                materialRequestRepository.updateStatus(reqId, "Available");
+            } catch (NumberFormatException e) {
+                // Ignore if it's not a valid number
+            }
+        }
+
+        return "redirect:/librarian/inventory/list";
     }
 
     @GetMapping("/inventory/{id}")

@@ -28,6 +28,7 @@ public class ViolationServiceImpl implements ViolationService {
     private final BorrowTicketDetailRepository borrowTicketDetailRepository;
     private final FineInvoiceRepository fineInvoiceRepository;
     private final BookCopyRepository bookCopyRepository;
+    private final ReservationService reservationService;
 
     @Override
     @Transactional(readOnly = true)
@@ -60,7 +61,10 @@ public class ViolationServiceImpl implements ViolationService {
         borrowTicketDetailRepository.save(detail);
         BookCopy copy = detail.getBookCopy();
         if (copy != null) {
-            markCopyStatus(copy, "Available", copy.getConditionStatus());
+            boolean assigned = reservationService.processWaitlistForReturnedBook(copy);
+            if (!assigned) {
+                markCopyStatus(copy, "Available", copy.getConditionStatus());
+            }
         }
     }
 

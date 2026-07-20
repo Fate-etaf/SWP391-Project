@@ -39,6 +39,8 @@ public interface BorrowTicketDetailRepository
         long countReturnedInPeriod(@Param("campusId") Integer campusId, @Param("startDate") LocalDateTime startDate,
                         @Param("endDate") LocalDateTime endDate);
 
+        @Query("SELECT COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId = :patronId AND d.returnDate IS NULL AND d.dueDate < CURRENT_TIMESTAMP")
+        int countOverdueByPatronId(@Param("patronId") String patronId);
         // Đếm số lượng sách đang QUÁ HẠN (Chưa trả)
         @Query("SELECT COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.campus.campusId = :campusId AND d.status = 'Overdue' AND d.returnDate IS NULL")
         long countCurrentOverdue(@Param("campusId") Integer campusId);
@@ -105,4 +107,9 @@ public interface BorrowTicketDetailRepository
                         "ORDER BY d.dueDate ASC")
         List<com.swp5.library_management.dto.DashboardDataDTO.OverdueActionDTO> findOverdueActionsByCampus(
                         @Param("campusId") Integer campusId, org.springframework.data.domain.Pageable pageable);
-}
+
+       @Query("SELECT d.borrowTicket.patron.userId, COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId IN :userIds AND d.returnDate IS NULL AND d.dueDate < CURRENT_TIMESTAMP GROUP BY d.borrowTicket.patron.userId")
+       java.util.List<Object[]> countOverdueByUsers(@Param("userIds") java.util.List<String> userIds);
+
+       @Query("SELECT d.borrowTicket.patron.userId, COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId IN :userIds AND d.returnDate IS NULL GROUP BY d.borrowTicket.patron.userId")
+       java.util.List<Object[]> countActiveBorrowedByUsers(@Param("userIds") java.util.List<String> userIds);}

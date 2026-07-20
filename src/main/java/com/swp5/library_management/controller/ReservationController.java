@@ -110,20 +110,21 @@ public class ReservationController {
             model.addAttribute("userCampusId", userCampusId);
 
             if (userCampusId != null) {
+                // Theo logic mới: Sinh viên CHỈ ĐƯỢC PHÉP tương tác với cơ sở của mình
+                campusRepository.findById(userCampusId).ifPresent(c -> model.addAttribute("campuses", java.util.List.of(c)));
+
                 long totalAtOwnCampus = bookCopyRepository.countByBookBookIdAndCampusCampusId(bookId, userCampusId);
                 if (totalAtOwnCampus > 0) {
                     long availableAtOwnCampus = bookCopyRepository.countByBookBookIdAndCampusCampusIdAndCopyStatus(bookId, userCampusId, "Available");
                     if (availableAtOwnCampus > 0) {
-                        // Sách tồn tại và có bản rảnh: Chỉ hiển thị cơ sở của sinh viên
-                        campusRepository.findById(userCampusId).ifPresent(c -> model.addAttribute("campuses", java.util.List.of(c)));
+                        // Có bản sách rảnh -> Cho phép đặt chỗ bình thường
                     } else {
-                        // Sách tồn tại nhưng tất cả đang bận: Bật cờ waitlist
-                        campusRepository.findById(userCampusId).ifPresent(c -> model.addAttribute("campuses", java.util.List.of(c)));
+                        // Tất cả các bản đang được mượn -> Ép sang form Waitlist
                         model.addAttribute("forceWaitlist", true);
                     }
                 } else {
-                    // Không có bản sách nào tại cơ sở: Mở mượn liên cơ sở (tất cả cơ sở)
-                    model.addAttribute("campuses", campusRepository.findAll());
+                    // Cơ sở này hoàn toàn không có cuốn sách này (total = 0) -> Vẫn ép sang form Waitlist
+                    model.addAttribute("forceWaitlist", true);
                 }
             } else {
                 model.addAttribute("campuses", campusRepository.findAll());

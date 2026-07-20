@@ -5,6 +5,7 @@ import com.swp5.library_management.repository.*;
 import com.swp5.library_management.service.EmailService;
 import com.swp5.library_management.service.SystemConfigService;
 import com.swp5.library_management.service.MaterialRequestService;
+import com.swp5.library_management.service.UserStatusService;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class LibrarianController {
     private final ReservationRepository reservationRepository;
     private final EmailService emailService;
     private final MaterialRequestService materialRequestService;
+    private final UserStatusService userStatusService;
 
     private boolean isNotLibrarian(HttpSession session) {
         Boolean isLibrarian = (Boolean) session.getAttribute("isLibrarian");
@@ -113,6 +115,26 @@ public class LibrarianController {
         }
         if (patron.getBorrowingLocked() != null && patron.getBorrowingLocked()) {
             model.addAttribute("errorMsg", "Tài khoản bạn đọc hiện đang bị khóa chức năng mượn sách!");
+            model.addAttribute("patronId", patronId);
+            model.addAttribute("copyId", copyId);
+            return "librarian/create-loan";
+        }
+        
+        String granularStatus = userStatusService.calculateSingleStatus(patronId, patron.getStatus());
+        if ("Under Penalty".equals(granularStatus)) {
+            model.addAttribute("errorMsg", "Bạn đọc đang có phiếu phạt chưa nộp, không thể mượn thêm sách!");
+            model.addAttribute("patronId", patronId);
+            model.addAttribute("copyId", copyId);
+            return "librarian/create-loan";
+        }
+        if ("Overdue".equals(granularStatus)) {
+            model.addAttribute("errorMsg", "Bạn đọc đang có sách mượn quá hạn, không thể mượn thêm sách!");
+            model.addAttribute("patronId", patronId);
+            model.addAttribute("copyId", copyId);
+            return "librarian/create-loan";
+        }
+        if ("Graduated".equals(granularStatus) || "Inactive".equals(granularStatus)) {
+            model.addAttribute("errorMsg", "Tài khoản không hoạt động hoặc đã tốt nghiệp, không thể mượn sách!");
             model.addAttribute("patronId", patronId);
             model.addAttribute("copyId", copyId);
             return "librarian/create-loan";
@@ -248,12 +270,10 @@ public class LibrarianController {
         long rejectedCount = (librarianCampusId != null)
                 ? materialRequestRepository.countByStatusAndPatronCampusId("Rejected", librarianCampusId)
                 : materialRequestRepository.countByStatus("Rejected");
-        long orderedCount  = (librarianCampusId != null)
-                ? materialRequestRepository.countByStatusAndPatronCampusId("Ordered",  librarianCampusId)
-                : materialRequestRepository.countByStatus("Ordered");
-        long arrivedCount  = (librarianCampusId != null)
-                ? materialRequestRepository.countByStatusAndPatronCampusId("Arrived",  librarianCampusId)
-                : materialRequestRepository.countByStatus("Arrived");
+        long availableCount = (librarianCampusId != null)
+                ? materialRequestRepository.countByStatusAndPatronCampusId("Available", librarianCampusId)
+                : materialRequestRepository.countByStatus("Available");
+
 
         // Request list scoped to this librarian's campus
         List<MaterialRequest> requests = (librarianCampusId != null)
@@ -264,13 +284,14 @@ public class LibrarianController {
         if (patronRole != null && !patronRole.isEmpty()) {
             if ("Student".equalsIgnoreCase(patronRole)) {
                 requests = requests.stream()
-                        .filter(r -> r.getPatron() != null && 
-                                (r.getPatron().getRole() == null || Integer.valueOf(1).equals(r.getPatron().getRole().getRoleId())))
+                        .filter(r -> r.getPatron() != null &&
+                                (r.getPatron().getRoles().isEmpty()
+                                 || r.getPatron().getRoles().stream().anyMatch(role -> Integer.valueOf(1).equals(role.getRoleId()))))
                         .toList();
             } else if ("Lecturer".equalsIgnoreCase(patronRole)) {
                 requests = requests.stream()
-                        .filter(r -> r.getPatron() != null && 
-                                r.getPatron().getRole() != null && Integer.valueOf(2).equals(r.getPatron().getRole().getRoleId()))
+                        .filter(r -> r.getPatron() != null &&
+                                r.getPatron().getRoles().stream().anyMatch(role -> Integer.valueOf(2).equals(role.getRoleId())))
                         .toList();
             }
         }
@@ -279,8 +300,7 @@ public class LibrarianController {
         model.addAttribute("pendingCount",       pendingCount);
         model.addAttribute("approvedCount",      approvedCount);
         model.addAttribute("rejectedCount",      rejectedCount);
-        model.addAttribute("orderedCount",       orderedCount);
-        model.addAttribute("arrivedCount",       arrivedCount);
+        model.addAttribute("availableCount",     availableCount);
         model.addAttribute("requests",           requests);
         model.addAttribute("currentStatus",      status);
         model.addAttribute("currentSearch",      search);

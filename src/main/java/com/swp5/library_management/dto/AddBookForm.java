@@ -23,6 +23,7 @@ public class AddBookForm {
     private String subjectCode;     // must match an existing Subject.subjectCode
     private Integer copies;         // number of BookCopy records to create on save
     private Integer campusId;       // campus to create the copies in
+    private String requestId;       // optional: the MaterialRequest that was auto-filled (used to mark it Available)
 
     // ── Getters & Setters ──────────────────────────────────────────────────────
 
@@ -64,5 +65,8 @@ public class AddBookForm {
 
     public Integer getCampusId() { return campusId; }
     public void setCampusId(Integer campusId) { this.campusId = campusId; }
+
+    public String getRequestId() { return requestId; }
+    public void setRequestId(String requestId) { this.requestId = requestId; }
 }
 
