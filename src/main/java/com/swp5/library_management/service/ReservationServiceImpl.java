@@ -1,19 +1,34 @@
 package com.swp5.library_management.service;
 
-import com.swp5.library_management.dto.ReservationResultDTO;
-import com.swp5.library_management.entity.*;
-import com.swp5.library_management.repository.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
+import com.swp5.library_management.dto.ReservationResultDTO;
+import com.swp5.library_management.entity.Book;
+import com.swp5.library_management.entity.BookCopy;
+import com.swp5.library_management.entity.Campus;
+import com.swp5.library_management.entity.Notification;
+import com.swp5.library_management.entity.Reservation;
+import com.swp5.library_management.entity.User;
+import com.swp5.library_management.entity.Waitlist;
+import com.swp5.library_management.repository.BookCopyRepository;
+import com.swp5.library_management.repository.BookRepository;
+import com.swp5.library_management.repository.CampusRepository;
+import com.swp5.library_management.repository.NotificationRepository;
+import com.swp5.library_management.repository.ReservationRepository;
+import com.swp5.library_management.repository.TransferDetailRepository;
+import com.swp5.library_management.repository.TransferRequestRepository;
+import com.swp5.library_management.repository.UserRepository;
+import com.swp5.library_management.repository.WaitlistRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * Triển khai đầy đủ Use Case UCR06 – Reserve Book Online.

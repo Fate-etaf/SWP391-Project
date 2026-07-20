@@ -82,7 +82,7 @@ public class ReservationController {
         return "reservation/my-reservations";
     }
 
-    // ── GET /reservations/reserve?bookId=X → Form chọn campus & đặt chỗ ─────
+    // ── GET /reservations/reserve?bookId=X → đặt chỗ ─────
 
     @GetMapping("/reserve")
     public String showReserveForm(@RequestParam(required = false) Integer bookId,
