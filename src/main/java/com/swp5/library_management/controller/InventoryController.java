@@ -57,8 +57,9 @@ public class InventoryController {
     }
 
     @GetMapping("/inventory/list")
-    public String listBooks(Model model) {
-        model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
+    public String listBooks(HttpSession session, Model model) {
+        Integer librarianCampusId = (Integer) session.getAttribute("loggedInCampusId");
+        model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks(librarianCampusId));
         return "inventory/list";
     }
 

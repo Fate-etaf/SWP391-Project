@@ -46,12 +46,14 @@ public interface HomeService {
     /**
      * Lấy danh sách sách mới nhập kho để hiển thị phần Featured Books.
      *
+     * @param campusId ID của cơ sở (để lọc số lượng bản sao có sẵn), null nếu là admin hoặc không xác định.
      * @return Danh sách {@link FeaturedBookDTO} từ 4 cuốn sách mới nhất trong DB.
      */
-    List<FeaturedBookDTO> getFeaturedBooks();
+    List<FeaturedBookDTO> getFeaturedBooks(Integer campusId);
 
     /**
      * Lấy tất cả các chuyên ngành và sách ngoài chuyên ngành, mỗi chuyên ngành kèm theo 5 sách ngẫu nhiên.
+     * @param campusId ID của cơ sở để tính số bản sao.
      */
-    List<com.swp5.library_management.dto.BookSectionDTO> getMajorsWithRandomBooks();
+    List<com.swp5.library_management.dto.BookSectionDTO> getMajorsWithRandomBooks(Integer campusId);
 }

@@ -58,6 +58,19 @@ public class User {
     @Builder.Default
     private Boolean borrowingLocked = false;
 
+    @jakarta.persistence.Transient
+    private String computedStatus;
+
+    @jakarta.persistence.Transient
+    private Long unpaidFinesCount;
+
+    @jakarta.persistence.Transient
+    private Long overdueCount;
+
+    @jakarta.persistence.Transient
+    private Long activeBorrowCount;
+
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "UserRoles",
@@ -92,6 +105,8 @@ public class User {
         return this.roles != null && this.roles.stream()
                 .anyMatch(r -> "Admin".equalsIgnoreCase(r.getRoleName()) || r.getRoleId() == 4);
     }
+
+
 
     // Thêm thủ công Getter cho userId để IDE không báo lỗi
     public String getUserId() {

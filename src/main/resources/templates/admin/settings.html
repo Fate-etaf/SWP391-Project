@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Cấu hình Hệ thống — Cổng Quản Trị</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A', orangeHover: '#D95F18' } } } }
+        }
+    </script>
+    
+    
+    
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-between relative overflow-x-hidden">
+
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
+    </div>
+
+    <div class="relative z-50">
+        
+    </div>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
+        
+        <div th:replace="~{fragments/admin_sidebar :: sidebar('settings')}"></div>
+
+        <div class="flex-grow min-w-0 bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-5 border-b border-slate-800">
+                <div>
+                    <h1 class="text-xl font-extrabold text-white tracking-tight">CẤU HÌNH HỆ THỐNG</h1>
+                    <p class="text-xs text-slate-400 mt-1">Quản lý và điều chỉnh các tham số, quy tắc nghiệp vụ cốt lõi của thư viện.</p>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div th:if="${successMessage}" class="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-start gap-3">
+                <svg class="w-5 h-5 text-emerald-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="text-sm text-emerald-400 font-medium" th:text="${successMessage}"></div>
+            </div>
+            
+            <div th:if="${errorMessage}" class="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-3">
+                <svg class="w-5 h-5 text-rose-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="text-sm text-rose-400 font-medium" th:text="${errorMessage}"></div>
+            </div>
+
+            <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden shadow-inner">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead>
+                            <tr class="bg-slate-800/80 text-slate-300 text-xs uppercase tracking-wider font-semibold border-b border-slate-700">
+                                <th class="px-5 py-4">Khóa cấu hình (Key)</th>
+                                <th class="px-5 py-4">Giá trị (Value)</th>
+                                <th class="px-5 py-4 w-1/2">Mô tả chi tiết</th>
+                                <th class="px-5 py-4 text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700/50 text-sm">
+                            <tr th:each="config : ${configs}" class="hover:bg-slate-700/20 transition-colors group">
+                                <td class="px-5 py-4 font-mono text-emerald-400 font-medium" th:text="${config.configKey}"></td>
+                                <td class="px-5 py-4">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-white font-bold" th:text="${config.configValue}"></span>
+                                </td>
+                                <td class="px-5 py-4 text-slate-400 whitespace-normal" th:text="${config.description}"></td>
+                                <td class="px-5 py-4 text-center">
+                                    <button type="button" 
+                                            th:onclick="openEditModal([[${config.configKey}]], [[${config.configValue}]], [[${config.description}]])"
+                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors"
+                                            title="Sửa giá trị">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(configs)}">
+                                <td colspan="4" class="px-5 py-8 text-center text-slate-500">Không tìm thấy cấu hình nào trong hệ thống.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div class="relative z-50">
+        
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editConfigModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <div class="flex justify-between items-center mb-5 border-b border-slate-800 pb-3">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    Chỉnh sửa Cấu hình
+                </h2>
+                <button type="button" onclick="closeEditModal()" class="text-slate-500 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <form action="/admin/settings/update" method="POST">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Khóa cấu hình</label>
+                        <input type="text" id="editConfigKey" name="configKey" readonly class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2.5 text-emerald-400 font-mono text-sm focus:outline-none opacity-70 cursor-not-allowed">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Mô tả chi tiết</label>
+                        <p id="editConfigDesc" class="text-sm text-slate-300 italic mb-2"></p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Giá trị mới <span class="text-rose-500">*</span></label>
+                        <input type="number" min="0" id="editConfigValue" name="configValue" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder-slate-500">
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-slate-800">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold transition-colors">Hủy</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-blue-600/20">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditModal(key, value, desc) {
+            document.getElementById('editConfigKey').value = key;
+            document.getElementById('editConfigValue').value = value;
+            document.getElementById('editConfigDesc').textContent = desc;
+            
+            const modal = document.getElementById('editConfigModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editConfigModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    </script>
+</body>
+</html>

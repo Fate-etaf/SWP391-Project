@@ -15,18 +15,18 @@
             theme: { extend: { colors: { fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A', orangeHover: '#D95F18' } } } }
         }
     </script>
-    <style th:replace="~{fragments/header :: header-style}"></style>
-    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    
+    
     <link rel="stylesheet" th:href="@{/css/inventory-list.css}">
 </head>
 <body>
-    <div th:replace="~{fragments/header :: header('librarian')}"></div>
+    
 
     <div class="orb orb-1" aria-hidden="true"></div>
     <div class="orb orb-2" aria-hidden="true"></div>
 
     <main class="flex-grow max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
-        <div th:replace="~{fragments/sidebar :: sidebar('list')}"></div>
+        <div th:replace="~{fragments/librarian_sidebar :: sidebar('list')}"></div>
 
         <div class="flex-grow min-w-0">
             <!-- Page header -->
@@ -119,6 +119,6 @@
         </div>
     </th:block>
 
-    <div th:replace="~{fragments/footer :: footer}"></div>
+    
 </body>
 </html>

@@ -62,16 +62,33 @@ public class BookController {
             @RequestParam(required = false) Integer campusId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "false") boolean ajax,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            jakarta.servlet.http.HttpSession session,
             Model model) {
+
+        Integer filterCampusId = campusId;
+        if (filterCampusId != null && filterCampusId == 0) {
+            filterCampusId = null;
+        }
+
+        Integer displayCampusId = null;
+        if (userDetails != null && userDetails.getUser() != null && userDetails.getUser().getCampusId() != null) {
+            displayCampusId = userDetails.getUser().getCampusId();
+        } else {
+            Integer loggedInCampusId = (Integer) session.getAttribute("loggedInCampusId");
+            if (loggedInCampusId != null) {
+                displayCampusId = loggedInCampusId;
+            }
+        }
 
         boolean hasSearch = StringUtils.hasText(keyword)
                          || StringUtils.hasText(subjectCode)
                          || categoryId != null
                          || majorId != null
-                         || campusId != null;
+                         || filterCampusId != null;
 
         if (hasSearch) {
-            Page<BookSearchResultDTO> resultPage = bookService.searchBooks(keyword, subjectCode, categoryId, majorId, campusId, page, 12);
+            Page<BookSearchResultDTO> resultPage = bookService.searchBooks(keyword, subjectCode, categoryId, majorId, filterCampusId, displayCampusId, page, 12);
             model.addAttribute("results", resultPage.getContent());
             model.addAttribute("totalPages", resultPage.getTotalPages());
             model.addAttribute("totalElements", resultPage.getTotalElements());
@@ -80,11 +97,11 @@ public class BookController {
             
             // Nếu không có kết quả, hiển thị lại majorSections
             if (resultPage.isEmpty()) {
-                model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
+                model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks(displayCampusId));
             }
         } else {
             // Hiển thị gợi ý theo chuyên ngành
-            model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
+            model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks(displayCampusId));
         }
 
         // Populate dropdowns

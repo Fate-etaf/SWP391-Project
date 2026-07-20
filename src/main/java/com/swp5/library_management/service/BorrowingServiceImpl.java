@@ -125,7 +125,7 @@ public class BorrowingServiceImpl implements BorrowingService {
                     .success(false).message("Tài khoản của bạn đang bị khóa, không thể gia hạn sách.")
                     .build();
         }
-        int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patronId, LocalDateTime.now());
+        int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patronId);
         if (overdueCount > 0) {
             return com.swp5.library_management.dto.ReservationResultDTO.builder()
                     .success(false).message("Bạn đang có " + overdueCount + " cuốn sách quá hạn chưa trả, không thể gia hạn sách mới.")
