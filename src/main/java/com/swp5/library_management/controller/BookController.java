@@ -97,11 +97,11 @@ public class BookController {
             
             // Nếu không có kết quả, hiển thị lại majorSections
             if (resultPage.isEmpty()) {
-                model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
+                model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks(displayCampusId));
             }
         } else {
             // Hiển thị gợi ý theo chuyên ngành
-            model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks());
+            model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks(displayCampusId));
         }
 
         // Populate dropdowns

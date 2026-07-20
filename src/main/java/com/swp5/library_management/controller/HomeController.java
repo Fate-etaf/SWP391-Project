@@ -63,7 +63,8 @@ public class HomeController {
             model.addAttribute("isLoggedIn", false);
         }
 
-        model.addAttribute("featuredBooks", homeService.getFeaturedBooks());
+        Integer loggedInCampusId = (Integer) session.getAttribute("loggedInCampusId");
+        model.addAttribute("featuredBooks", homeService.getFeaturedBooks(loggedInCampusId));
         return "home";
     }
 }
