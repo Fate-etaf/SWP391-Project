@@ -2,125 +2,312 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Báo cáo hoạt động - FLMS</title>
+    <title>Thống kê Giao dịch - FLMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: { extend: { colors: { fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A', orangeHover: '#D95F18' } } } }
         }
     </script>
-    
-    
+    <style th:replace="~{fragments/header :: header-style}"></style>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Inter', sans-serif; }</style>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(71, 85, 105, 1); }
+    </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-850 flex flex-col justify-between relative overflow-x-hidden">
+<body class="bg-slate-50 min-h-screen text-slate-900 flex flex-col justify-between relative overflow-x-hidden">
 
+    <!-- Ambient Background Glows -->
     <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
-        <div class="absolute top-1/2 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-[100px]"></div>
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 right-0 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
     </div>
 
+    <!-- HEADER -->
     <div class="relative z-50">
-        
+        <div th:replace="~{fragments/header :: header('librarian')}"></div>
     </div>
 
-    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
+    <main class="flex-grow max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col xl:flex-row gap-8">
+        
+        <!-- SIDEBAR -->
         <div th:replace="~{fragments/librarian_sidebar :: sidebar('reports')}"></div>
 
-        <div class="flex-grow min-w-0 flex flex-col gap-8">
-        
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 border-b border-slate-200 pb-6">
-            <div>
-                <span class="bg-fpt-orange/10 text-fpt-orange px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase mb-3 inline-block">Analytics</span>
-                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Báo Cáo & Thống Kê</h1>
-                <p class="text-sm text-slate-500 mt-1">Kết xuất dữ liệu mượn trả và thu tiền phạt tại cơ sở của bạn.</p>
-            </div>
+        <!-- MAIN CONTENT -->
+        <div class="flex-grow min-w-0">
             
-            <form action="/librarian/reports" method="GET" class="flex flex-wrap items-end gap-3 bg-white p-3.5 rounded-xl border border-slate-200 shadow-md w-full lg:w-auto">
+            <!-- TIÊU ĐỀ & NÚT EXPORT -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Từ ngày</label>
-                    <input type="date" name="fromDate" th:value="${fromDate}" required
-                           class="bg-slate-50 border border-slate-300 text-slate-800 px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-fpt-orange transition-colors cursor-pointer">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight mb-1">Kiểm toán & Lịch sử</h2>
+                    <p class="text-sm text-slate-500">Tra cứu chi tiết mọi luồng giao dịch, đối soát tài sản và trích xuất báo cáo.</p>
                 </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Đến ngày</label>
-                    <input type="date" name="toDate" th:value="${toDate}" required
-                           class="bg-slate-50 border border-slate-300 text-slate-800 px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-fpt-orange transition-colors cursor-pointer">
+                <div class="mt-2 sm:mt-0">
+                    <button type="button" onclick="exportExcel()" class="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 border border-emerald-500 text-white text-sm font-bold shadow-lg shadow-emerald-500/20 transition-all active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Export Excel</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TABS ĐIỀU HƯỚNG BÁO CÁO -->
+            <div class="flex space-x-6 border-b border-slate-200 mb-6 overflow-x-auto">
+                <button class="pb-3 text-sm font-bold text-fpt-orange border-b-2 border-fpt-orange whitespace-nowrap">Lịch sử Mượn / Trả</button>
+            </div>
+
+            <!-- WARNING BANNER (HARD LIMIT) -->
+            <div th:if="${data.isHardLimited}" class="mb-6 bg-amber-500/10 border border-amber-500/30 text-amber-600 px-4 py-3 rounded-xl flex items-center space-x-3 shadow-lg">
+                <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <span class="text-sm font-medium">Cảnh báo: Dữ liệu tìm kiếm quá lớn (>1000 kết quả). Hệ thống chỉ hiển thị tối đa 1000 dòng. Vui lòng ấn <b>Export Excel</b> để xem đầy đủ!</span>
+            </div>
+
+            <!-- 1. FORM BỘ LỌC ĐA NHIỆM (DYNAMIC FILTERS) -->
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-8 shadow-inner relative z-30">
+                <form id="filterForm" action="/librarian/reports" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+                    
+                    <!-- Hidden fields lưu cấu hình phân trang -->
+                    <input type="hidden" name="page" id="pageInput" th:value="${filter.page}">
+                    <input type="hidden" name="size" th:value="${filter.size}">
+                    <input type="hidden" name="reportType" th:value="${filter.reportType}">
+
+                    <!-- Filter Mốc thời gian -->
+                    <div class="lg:col-span-2 grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Từ ngày</label>
+                            <input type="date" name="startDate" th:value="${filter.startDate}" class="w-full bg-white border border-slate-300 text-slate-800 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Đến ngày</label>
+                            <input type="date" name="endDate" th:value="${filter.endDate}" class="w-full bg-white border border-slate-300 text-slate-800 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange">
+                        </div>
+                    </div>
+
+                    <!-- Filter Cơ sở (Chỉ Admin) -->
+                    <div th:if="${session.loggedInUser.campusId == null}">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Tại Cơ sở</label>
+                        <select name="campusId" class="w-full bg-white border border-slate-300 text-slate-800 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange">
+                            <option value="">Toàn hệ thống</option>
+                            <option th:each="c : ${campuses}" th:value="${c.campusId}" th:text="${c.campusName}" th:selected="${c.campusId == filter.campusId}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Filter Tìm Sinh viên/Thủ thư -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Mã User (SV/CB)</label>
+                        <input type="text" name="userId" th:value="${filter.userId}" placeholder="VD: HE190001" class="w-full bg-white border border-slate-300 text-slate-800 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange placeholder-slate-600">
+                    </div>
+
+                    <!-- Filter Tìm CopyID sách -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Mã Vạch (Copy ID)</label>
+                        <input type="text" name="copyId" th:value="${filter.copyId}" placeholder="VD: CP-..." class="w-full bg-white border border-slate-300 text-slate-800 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange placeholder-slate-600">
+                    </div>
+
+                    <!-- Filter Loại giao dịch -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Loại giao dịch</label>
+                        <select name="transactionType" class="w-full bg-white border border-slate-300 text-slate-800 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange">
+                            <option value="ALL" th:selected="${filter.transactionType == 'ALL'}">Tất cả</option>
+                            <option value="BORROW" th:selected="${filter.transactionType == 'BORROW'}">Chỉ Phiếu Mượn</option>
+                            <option value="RETURN" th:selected="${filter.transactionType == 'RETURN'}">Chỉ Phiếu Trả</option>
+                        </select>
+                    </div>
+
+                    <!-- Filter Chuyên ngành -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Chuyên ngành</label>
+                        <select id="majorSelect" name="majorId" onchange="loadSubjectsByMajor(this.value)" class="w-full bg-white border border-slate-300 text-slate-800 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange">
+                            <option value="">Tất cả</option>
+                            <option th:each="m : ${majors}" th:value="${m.majorId}" th:text="${m.majorName}" th:selected="${m.majorId == filter.majorId}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Filter Môn học -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Môn học</label>
+                        <select id="subjectSelect" name="subjectCode" class="w-full bg-white border border-slate-300 text-slate-800 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange">
+                            <option value="">Tất cả</option>
+                        </select>
+                    </div>
+
+                    <!-- Filter Trạng thái -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Trạng thái</label>
+                        <select name="status" class="w-full bg-white border border-slate-300 text-slate-800 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange">
+                            <option value="">Tất cả</option>
+                            <option value="Borrowing" th:selected="${filter.status == 'Borrowing'}">Đang mượn</option>
+                            <option value="Returned" th:selected="${filter.status == 'Returned'}">Đã trả</option>
+                            <option value="Overdue" th:selected="${filter.status == 'Overdue'}">Quá hạn</option>
+                            <option value="Lost" th:selected="${filter.status == 'Lost'}">Mất sách</option>
+                        </select>
+                    </div>
+
+                    <!-- Nút Lọc (Chiếm dòng mới trên mobile, thu gọn trên PC) -->
+                    <div class="lg:col-span-6 flex justify-end space-x-3 pt-2 border-t border-slate-200 mt-2">
+                        <button type="button" onclick="resetForm()" class="bg-slate-100 hover:bg-slate-700 text-slate-700 py-2 px-5 rounded-lg font-bold transition-all text-sm">Xóa bộ lọc</button>
+                        <button type="submit" onclick="document.getElementById('pageInput').value = 0;" class="bg-fpt-orange hover:bg-fpt-orangeHover text-white py-2 px-6 rounded-lg font-bold transition-all text-sm shadow-lg shadow-fpt-orange/20">Áp dụng lọc</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 2. SUMMARY INSIGHTS CARDS -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white border border-slate-200 backdrop-blur-xl rounded-2xl p-5 flex items-center space-x-4">
+                    <div class="p-3 bg-blue-500/10 rounded-xl text-blue-600 shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Giao dịch tìm thấy</p>
+                        <h3 class="text-2xl font-black text-slate-900" th:text="${data.totalRecords}">0</h3>
+                    </div>
+                </div>
+                <!-- Có thể bổ sung thêm các Thẻ Tiền Phạt ở đây sau -->
+            </div>
+
+            <!-- 3. BẢNG DỮ LIỆU CHÍNH (DATA TABLE) -->
+            <div class="bg-white border border-slate-200 backdrop-blur-xl rounded-2xl flex flex-col shadow-2xl overflow-hidden relative z-10 mb-8">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-[10px] text-slate-500 uppercase bg-slate-100 border-b border-slate-200">
+                            <tr>
+                                <th class="px-5 py-4 font-semibold tracking-wider">Mã Phiếu</th>
+                                <th class="px-5 py-4 font-semibold tracking-wider">Thông tin Tài sản</th>
+                                <th class="px-5 py-4 font-semibold tracking-wider">Người mượn</th>
+                                <th class="px-5 py-4 font-semibold tracking-wider">Thời gian mượn</th>
+                                <th class="px-5 py-4 font-semibold tracking-wider">Ngày trả thực tế</th>
+                                <th class="px-5 py-4 text-center font-semibold tracking-wider">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/50 text-slate-700">
+                            <!-- Trạng thái trống -->
+                            <tr th:if="${data.tableData == null or data.tableData.isEmpty()}">
+                                <td colspan="6" class="px-5 py-12 text-center text-slate-500">
+                                    <svg class="w-12 h-12 mx-auto text-slate-600 mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path></svg>
+                                    <p class="font-medium">Không tìm thấy dữ liệu giao dịch nào khớp với bộ lọc.</p>
+                                </td>
+                            </tr>
+
+                            <!-- Lặp dữ liệu -->
+                            <tr th:each="record : ${data.tableData.content}" class="hover:bg-slate-50 transition-colors">
+                                <td class="px-5 py-4 font-mono text-xs font-bold text-slate-500" th:text="'#' + ${record.borrowTicket.ticketId}"></td>
+                                
+                                <td class="px-5 py-4">
+                                    <p class="text-[11px] text-fpt-orange font-mono font-bold mb-0.5" th:text="${record.bookCopy.copyId}"></p>
+                                    <p class="text-sm font-semibold text-slate-800 line-clamp-1" th:title="${record.bookCopy.book.title}" th:text="${record.bookCopy.book.title}"></p>
+                                </td>
+                                
+                                <td class="px-5 py-4">
+                                    <p class="text-sm font-bold text-slate-800" th:text="${record.borrowTicket.patron.fullName}"></p>
+                                    <p class="text-[11px] text-slate-500 font-mono mt-0.5" th:text="${record.borrowTicket.patron.userId}"></p>
+                                </td>
+                                
+                                <td class="px-5 py-4 text-xs">
+                                    <p class="text-slate-700" th:text="${#temporals.format(record.borrowTicket.createdAt, 'dd/MM/yyyy HH:mm')}"></p>
+                                    <p class="text-slate-500 mt-0.5" th:text="'Hạn: ' + ${#temporals.format(record.dueDate, 'dd/MM/yyyy')}"></p>
+                                </td>
+
+                                <td class="px-5 py-4 text-xs font-medium text-emerald-600" th:text="${record.returnDate != null ? #temporals.format(record.returnDate, 'dd/MM/yyyy HH:mm') : '--'}"></td>
+                                
+                                <td class="px-5 py-4 text-center">
+                                    <span th:if="${record.status == 'Returned'}" class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-600 border border-emerald-500/20">Đã trả</span>
+                                    <span th:if="${record.status == 'Borrowing'}" class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-blue-500/20 text-blue-600 border border-blue-500/20">Đang mượn</span>
+                                    <span th:if="${record.status == 'Overdue'}" class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-rose-500/20 text-rose-600 border border-rose-500/20">Quá hạn</span>
+                                    <span th:if="${record.status == 'Lost'}" class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-slate-700 text-slate-700 border border-slate-400">Mất sách</span>
+                                    <span th:if="${record.status == 'Damaged'}" class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-amber-500/20 text-amber-500 border border-amber-500/20">Làm hỏng</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 
-                <div class="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                    <button type="submit" class="flex-1 sm:flex-none bg-slate-100 hover:bg-slate-200 text-slate-800 px-5 py-2 rounded-lg text-sm font-bold border border-slate-300 transition-colors">
-                        Lọc dữ liệu
-                    </button>
-                    <a th:href="@{/librarian/reports/export(fromDate=${fromDate}, toDate=${toDate})}" 
-                       class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-lg text-sm font-bold flex justify-center items-center gap-2 shadow-lg shadow-emerald-600/20 transition-all border border-emerald-500">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                        </svg>
-                        Xuất Excel
-                    </a>
+                <!-- BỘ ĐIỀU KHIỂN PHÂN TRANG (PAGINATION) -->
+                <div th:if="${data.tableData != null and data.tableData.totalPages > 1}" class="px-5 py-4 border-t border-slate-200 flex items-center justify-between bg-white/40">
+                    <span class="text-xs text-slate-500">
+                        Hiển thị trang <span class="font-bold text-slate-800" th:text="${data.tableData.number + 1}"></span> trên tổng số <span class="font-bold text-slate-800" th:text="${data.tableData.totalPages}"></span> trang
+                    </span>
+                    <div class="flex space-x-2">
+                        <!-- Nút Trước -->
+                        <button type="button" 
+                                th:onclick="'gotoPage(' + ${data.tableData.number - 1} + ')'" 
+                                th:disabled="${data.tableData.first}"
+                                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all border border-slate-300 text-slate-700 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                            Quay lại
+                        </button>
+                        <!-- Nút Sau -->
+                        <button type="button" 
+                                th:onclick="'gotoPage(' + ${data.tableData.number + 1} + ')'" 
+                                th:disabled="${data.tableData.last}"
+                                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all border border-slate-300 text-slate-700 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                            Trang tiếp
+                        </button>
+                    </div>
                 </div>
-            </form>
-        </div>
-
-        <div th:if="${reportData != null}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md relative overflow-hidden group hover:border-blue-500/50 transition-colors">
-                <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 text-blue-600 transition-opacity">
-                    <svg class="w-24 h-24 -mt-4 -mr-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                </div>
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Lượt Sách Mượn</p>
-                <h3 class="text-5xl font-extrabold text-blue-600 mb-2" th:text="${reportData.totalBorrowed}">0</h3>
-                <p class="text-[11px] text-slate-500 font-medium">Tổng số phiếu mượn được lập trong kỳ</p>
             </div>
-
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md relative overflow-hidden group hover:border-emerald-500/50 transition-colors">
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Lượt Sách Trả</p>
-                <h3 class="text-5xl font-extrabold text-emerald-600 mb-2" th:text="${reportData.totalReturned}">0</h3>
-                <p class="text-[11px] text-slate-500 font-medium">Số phiếu mượn đã hoàn tất đóng</p>
-            </div>
-
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md relative overflow-hidden group hover:border-rose-500/50 transition-colors">
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sách Đang Quá Hạn</p>
-                <h3 class="text-5xl font-extrabold text-rose-600 mb-2" th:text="${reportData.totalOverdue}">0</h3>
-                <p class="text-[11px] text-slate-500 font-medium">Sách trễ hạn chưa được hoàn trả kho</p>
-            </div>
-
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md relative overflow-hidden group hover:border-orange-500/50 transition-colors lg:col-span-2">
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Doanh Thu Tiền Phạt Đã Thu</p>
-                <h3 class="text-5xl font-extrabold text-fpt-orange mb-2 flex items-baseline gap-1">
-                    <span th:text="${#numbers.formatInteger(reportData.totalFinesCollected, 0, 'COMMA')}">0</span>
-                    <span class="text-2xl text-slate-400 font-bold ml-1">VNĐ</span>
-                </h3>
-                <p class="text-[11px] text-slate-500 font-medium">Tổng tiền phạt thực tế đã thu vào ngân sách thư viện</p>
-            </div>
-
-            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md relative overflow-hidden group hover:border-slate-500/50 transition-colors">
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tiền Phạt Chờ Thu</p>
-                <h3 class="text-4xl font-extrabold text-slate-800 mb-2 flex items-baseline gap-1">
-                    <span th:text="${#numbers.formatInteger(reportData.totalFinesPending, 0, 'COMMA')}">0</span>
-                    <span class="text-xl text-slate-400 font-bold ml-1">VNĐ</span>
-                </h3>
-                <p class="text-[11px] text-slate-500 font-medium">Số dư nợ chưa thanh toán từ Bạn đọc</p>
-            </div>
-
-        </div>
-
-        <div th:if="${reportData == null}" class="text-center py-20 bg-white rounded-3xl border border-slate-200 border-dashed shadow-sm">
-            <svg class="w-16 h-16 text-slate-400 mx-auto mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-            </svg>
-            <h3 class="text-xl font-bold text-slate-800">Không thể tải báo cáo</h3>
-            <p class="text-sm text-slate-500 mt-2">Dữ liệu cơ sở của bạn đang gặp vấn đề hoặc bạn không có quyền truy cập.</p>
-        </div>
 
         </div>
     </main>
 
-    <div class="relative z-10 mt-auto">
-        
+    <!-- FOOTER -->
+    <div class="relative z-50 mt-auto w-full">
+        <div th:replace="~{fragments/footer :: footer}"></div>
     </div>
 
+    <!-- SCRIPT TẢI DỮ LIỆU ĐỘNG (CASCADING DROPDOWN) -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const majorSubjectMap = /*[[${majorSubjectMap}]]*/ {};
+        const safeSelectedSubject = /*[[${filter.subjectCode}]]*/ '';
+        /*]]>*/
+
+        function loadSubjectsByMajor(majorId) {
+            const subjectSelect = document.getElementById('subjectSelect');
+            subjectSelect.innerHTML = '<option value="">Tất cả</option>';
+            
+            if (!majorId || !majorSubjectMap[majorId]) return;
+
+            majorSubjectMap[majorId].forEach(subj => {
+                const isSelected = (safeSelectedSubject === subj.subjectCode) ? 'selected' : '';
+                subjectSelect.innerHTML += `<option value="${subj.subjectCode}" ${isSelected}>${subj.subjectCode} - ${subj.subjectName}</option>`;
+            });
+        }
+
+        // Khởi chạy lúc load trang
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialMajorId = document.getElementById('majorSelect').value;
+            if (initialMajorId) loadSubjectsByMajor(initialMajorId);
+        });
+    </script>
+
+    <!-- SCRIPT XỬ LÝ GIAO DIỆN -->
+    <script>
+        // Xử lý chuyển trang (Submit lại form kèm theo số trang mới)
+        function gotoPage(pageNumber) {
+            document.getElementById('pageInput').value = pageNumber;
+            document.getElementById('filterForm').submit();
+        }
+
+        // Xóa bộ lọc: Chuyển hướng thẳng về URL gốc không chứa Parameter
+        function resetForm() {
+            window.location.href = '/librarian/reports';
+        }
+
+        // Xuất Excel: Submit form nhưng gọi vào Endpoint /export
+        function exportExcel() {
+            const form = document.getElementById('filterForm');
+            const originalAction = form.action;
+            
+            // Đổi URL tạm thời sang API export
+            form.action = '/librarian/reports/export';
+            form.submit();
+            
+            // Trả lại URL ban đầu cho lần search tiếp theo
+            setTimeout(() => { form.action = originalAction; }, 100);
+        }
+    </script>
 </body>
 </html>

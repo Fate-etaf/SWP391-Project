@@ -67,9 +67,9 @@ public class MockGoogleOAuthController {
             session.setAttribute("loggedInCampusId", user.getCampusId());
             
             String roleName = "User"; // default
-            if (user.getRole() != null) {
-                roleName = user.getRole().getRoleName();
-                int roleId = user.getRole().getRoleId();
+            if (user.getPrimaryRole().isPresent()) {
+                roleName = user.getPrimaryRole().get().getRoleName();
+                int roleId = user.getPrimaryRole().get().getRoleId();
                 session.setAttribute("isLibrarian", "Librarian".equalsIgnoreCase(roleName) || roleId == 3);
                 session.setAttribute("isAdmin", "Admin".equalsIgnoreCase(roleName) || roleId == 4);
             }

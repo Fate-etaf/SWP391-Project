@@ -53,16 +53,16 @@ public class UserManagementController {
         if ("all".equals(tab)) {
             // Không filter theo role, lấy toàn bộ
         } else if ("lecturers".equals(tab)) {
-            stream = stream.filter(u -> u.getRole() != null && Integer.valueOf(2).equals(u.getRole().getRoleId()));
+            stream = stream.filter(u -> u.getRoles() != null && u.getRoles().stream().anyMatch(r -> r.getRoleId() == 2));
         } else if ("librarians".equals(tab)) {
-            stream = stream.filter(u -> u.getRole() != null && Integer.valueOf(3).equals(u.getRole().getRoleId()));
+            stream = stream.filter(u -> u.getRoles() != null && u.getRoles().stream().anyMatch(r -> r.getRoleId() == 3));
         } else if ("admins".equals(tab)) {
-            stream = stream.filter(u -> u.getRole() != null && Integer.valueOf(4).equals(u.getRole().getRoleId()));
+            stream = stream.filter(u -> u.getRoles() != null && u.getRoles().stream().anyMatch(r -> r.getRoleId() == 4));
         } else if ("graduates".equals(tab)) {
-            stream = stream.filter(u -> (u.getRole() == null || Integer.valueOf(1).equals(u.getRole().getRoleId())) && ("Inactive".equalsIgnoreCase(u.getStatus()) || "Graduated".equalsIgnoreCase(u.getStatus())));
+            stream = stream.filter(u -> (u.getRoles() == null || u.getRoles().isEmpty() || u.getRoles().stream().anyMatch(r -> r.getRoleId() == 1)) && ("Inactive".equalsIgnoreCase(u.getStatus()) || "Graduated".equalsIgnoreCase(u.getStatus())));
         } else {
             // default is "students"
-            stream = stream.filter(u -> (u.getRole() == null || Integer.valueOf(1).equals(u.getRole().getRoleId())) && !"Inactive".equalsIgnoreCase(u.getStatus()) && !"Graduated".equalsIgnoreCase(u.getStatus()));
+            stream = stream.filter(u -> (u.getRoles() == null || u.getRoles().isEmpty() || u.getRoles().stream().anyMatch(r -> r.getRoleId() == 1)) && !"Inactive".equalsIgnoreCase(u.getStatus()) && !"Graduated".equalsIgnoreCase(u.getStatus()));
         }
         
         List<User> filteredStudents = stream.collect(java.util.stream.Collectors.toList());
@@ -101,7 +101,7 @@ public class UserManagementController {
         
         Role userRole = new Role();
         userRole.setRoleId(roleId); 
-        newUser.setRole(userRole);
+        newUser.getRoles().add(userRole);
         
         newUser.setPasswordHash("123");
         
@@ -155,7 +155,8 @@ public class UserManagementController {
             
             Role userRole = new Role();
             userRole.setRoleId(roleId);
-            user.setRole(userRole);
+            user.getRoles().clear();
+            user.getRoles().add(userRole);
             
             userRepository.save(user);
             redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật thông tin tài khoản: " + userId + " thành công!");
@@ -266,12 +267,13 @@ public class UserManagementController {
                     
                     Role targetRole = new Role();
                     if ("LECTURER".equalsIgnoreCase(importType)) {
-                        targetRole.setRoleId(2); 
-                        account.setRole(targetRole);
-                    } else {
-                        targetRole.setRoleId(1); 
-                        account.setRole(targetRole);
+                        targetRole.setRoleId(2); // Gán quyền Giảng viên ngầm định
+                        account.getRoles().add(targetRole);
+                    } else if (!userOpt.isPresent()) {
+                        targetRole.setRoleId(1); // Gán quyền Sinh viên cho tài khoản tạo mới
+                        account.getRoles().add(targetRole);
                     }
+
 
                     account.setPasswordHash("123"); 
                     

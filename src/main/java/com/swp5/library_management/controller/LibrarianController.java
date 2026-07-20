@@ -284,13 +284,14 @@ public class LibrarianController {
         if (patronRole != null && !patronRole.isEmpty()) {
             if ("Student".equalsIgnoreCase(patronRole)) {
                 requests = requests.stream()
-                        .filter(r -> r.getPatron() != null && 
-                                (r.getPatron().getRole() == null || Integer.valueOf(1).equals(r.getPatron().getRole().getRoleId())))
+                        .filter(r -> r.getPatron() != null &&
+                                (r.getPatron().getRoles().isEmpty()
+                                 || r.getPatron().getRoles().stream().anyMatch(role -> Integer.valueOf(1).equals(role.getRoleId()))))
                         .toList();
             } else if ("Lecturer".equalsIgnoreCase(patronRole)) {
                 requests = requests.stream()
-                        .filter(r -> r.getPatron() != null && 
-                                r.getPatron().getRole() != null && Integer.valueOf(2).equals(r.getPatron().getRole().getRoleId()))
+                        .filter(r -> r.getPatron() != null &&
+                                r.getPatron().getRoles().stream().anyMatch(role -> Integer.valueOf(2).equals(role.getRoleId())))
                         .toList();
             }
         }

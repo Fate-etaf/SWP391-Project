@@ -80,8 +80,8 @@ model.addAttribute("isCardActive", isCardActive);
         }
         model.addAttribute("campusName", campusName);
         
-        String roleName = user.getRole() != null ? user.getRole().getRoleName() : "Student";
-        int roleId = user.getRole() != null ? user.getRole().getRoleId() : 1;
+        String roleName = user.getPrimaryRole().map(r -> r.getRoleName()).orElse("Student");
+        int roleId = user.getPrimaryRole().map(r -> r.getRoleId()).orElse(1);
         model.addAttribute("roleName", roleName);
         model.addAttribute("isLibrarianOrAdmin", "Librarian".equalsIgnoreCase(roleName) || "Admin".equalsIgnoreCase(roleName) || roleId == 3 || roleId == 4);
         
@@ -119,7 +119,7 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
     
     // Auth Check
     Optional<User> loggedInOpt = userRepository.findById(loggedInUserId);
-    if (loggedInOpt.isEmpty() || (loggedInOpt.get().getRole().getRoleId() != 3 && loggedInOpt.get().getRole().getRoleId() != 4)) {
+    if (loggedInOpt.isEmpty() || (!loggedInOpt.get().isLibrarian() && !loggedInOpt.get().isAdmin())) {
         return "redirect:/"; // Not authorized
     }
 
@@ -145,8 +145,8 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
         }
         model.addAttribute("campusName", campusName);
         
-        String roleName = user.getRole() != null ? user.getRole().getRoleName() : "Student";
-        int roleId = user.getRole() != null ? user.getRole().getRoleId() : 1;
+        String roleName = user.getPrimaryRole().map(r -> r.getRoleName()).orElse("Student");
+        int roleId = user.getPrimaryRole().map(r -> r.getRoleId()).orElse(1);
         model.addAttribute("roleName", roleName);
         model.addAttribute("isLibrarianOrAdmin", "Librarian".equalsIgnoreCase(roleName) || "Admin".equalsIgnoreCase(roleName) || roleId == 3 || roleId == 4);
         
@@ -194,8 +194,16 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
         System.out.println(">>> loginUser parameters: userId=" + userId + ", email=" + email + ", campusId=" + campusId);
         Optional<User> userOpt = userRepository.findByUserIdAndEmailAndCampusId(userId, email, campusId);
 
+        // ====== DEBUG LOGIN ======
+        System.out.println("[LOGIN] userId=" + userId + " | email=" + email + " | campusId=" + campusId);
+        System.out.println("[LOGIN] User found: " + userOpt.isPresent());
+
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+
+            System.out.println("[LOGIN] User status: " + user.getStatus());
+            System.out.println("[LOGIN] Roles loaded: " + user.getRoles().size() + " → " + user.getRoles());
+            System.out.println("[LOGIN] isLibrarian=" + user.isLibrarian() + " | isAdmin=" + user.isAdmin());
 
             // Đổi từ "New" sang "Pending" để kiểm tra trạng thái kích hoạt tài khoản
             if ("Pending".equalsIgnoreCase(user.getStatus())) { 
@@ -235,6 +243,8 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
             if (isLib) {
                 return "redirect:/librarian/inventory/dashboard"; 
             }
+
+            System.out.println("[LOGIN] → Redirecting to /home");
             return "redirect:/home";
         }
 
@@ -337,7 +347,10 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
             session.setAttribute("isLibrarian", isLib);
             session.setAttribute("isAdmin", isAdm);
             
-            if (isLib || isAdm) {
+            if (isAdm) {
+                return "redirect:/admin/users";
+            }
+            if (isLib) {
                 return "redirect:/librarian/inventory/dashboard";
             }
             return "redirect:/home";
@@ -365,7 +378,7 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
         adminUser.setEmail("admin.dev@fpt.edu.vn");
         adminUser.setStatus("Active");
         adminUser.setCampusId(1); // Mặc định cơ sở Hà Nội
-        adminUser.setRole(adminRole); // Gắn role Admin vào user
+        adminUser.getRoles().add(adminRole); // Thêm role Admin vào tập hợp roles
 
         // 3. NẠP THẲNG THÔNG TIN VÀO SESSION HỆ THỐNG
         session.setAttribute("loggedInUser", adminUser);

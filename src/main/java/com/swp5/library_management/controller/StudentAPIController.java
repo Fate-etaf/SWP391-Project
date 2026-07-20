@@ -59,8 +59,8 @@ public class StudentAPIController {
 
         User targetUser = targetUserOpt.get();
         
-        String roleName = targetUser.getRole() != null ? targetUser.getRole().getRoleName() : "Student";
-        int roleId = targetUser.getRole() != null ? targetUser.getRole().getRoleId() : 1;
+        String roleName = targetUser.getPrimaryRole().map(com.swp5.library_management.entity.Role::getRoleName).orElse("Student");
+        int roleId = targetUser.getPrimaryRole().map(com.swp5.library_management.entity.Role::getRoleId).orElse(1);
         
         int totalBorrowed = borrowTicketDetailRepository.countActiveBorrowedByPatronId(targetUserId);
         int totalOverdue = borrowTicketDetailRepository.countOverdueByPatronId(targetUserId);
