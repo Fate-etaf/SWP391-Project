@@ -30,11 +30,6 @@ public class RoomBookingCleanupJob {
         for (RoomBooking booking : noShows) {
             log.info("Booking {} marked as NoShow", booking.getBookingId());
             booking.setStatus("NoShow");
-            
-            // Xử lý vi phạm: Đánh dấu khóa quyền đặt phòng
-            User patron = booking.getPatron();
-            patron.setBorrowingLocked(true);
-            userRepository.save(patron);
         }
 
         if (!noShows.isEmpty()) {

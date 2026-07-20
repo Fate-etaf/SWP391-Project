@@ -56,7 +56,7 @@ public class ReportController {
 
         // 2. Bảo mật tham số (Role-based Param Injection)
         // Nếu là Thủ thư chi nhánh, ép cứng CampusID. Admin thì được quyền xem và lọc.
-        if (user.getRole() != null && user.getRole().getRoleName().equalsIgnoreCase("LIBRARIAN")) {
+        if (user.getPrimaryRole().isPresent() && user.getPrimaryRole().get().getRoleName().equalsIgnoreCase("LIBRARIAN")) {
             filter.setCampusId(user.getCampusId());
         }
 
@@ -98,7 +98,7 @@ public class ReportController {
         }
 
         // 2. Bảo mật tham số Campus
-        if (user.getRole() != null && user.getRole().getRoleName().equalsIgnoreCase("LIBRARIAN")) {
+        if (user.getPrimaryRole().isPresent() && user.getPrimaryRole().get().getRoleName().equalsIgnoreCase("LIBRARIAN")) {
             filter.setCampusId(user.getCampusId());
         }
 

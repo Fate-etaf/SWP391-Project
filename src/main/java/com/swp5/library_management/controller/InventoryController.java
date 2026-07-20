@@ -95,7 +95,7 @@ public class InventoryController {
 
         if (hasSearch) {
             List<BookSearchResultDTO> results = bookService.searchBooks(keyword, subjectCode, categoryId, majorId,
-                    campusId, 0, 100).getContent();
+                    campusId, librarianCampusId, 0, 100).getContent();
             model.addAttribute("results", results);
             model.addAttribute("noResults", results.isEmpty());
 

@@ -30,7 +30,7 @@ public class UserStatusServiceImpl implements UserStatusService {
         List<String> userIds = users.stream().map(User::getUserId).collect(Collectors.toList());
 
         List<Object[]> unpaidFinesData = fineInvoiceRepository.countUnpaidFinesByUsers(userIds);
-        List<Object[]> overdueData = borrowTicketDetailRepository.countOverdueByUsers(userIds, LocalDateTime.now());
+        List<Object[]> overdueData = borrowTicketDetailRepository.countOverdueByUsers(userIds);
         List<Object[]> activeBorrowData = borrowTicketDetailRepository.countActiveBorrowedByUsers(userIds);
 
         Map<String, Long> unpaidMap = parseCountMap(unpaidFinesData);
@@ -56,7 +56,7 @@ public class UserStatusServiceImpl implements UserStatusService {
     @Transactional(readOnly = true)
     public String calculateSingleStatus(String userId, String dbStatus) {
         List<Object[]> unpaidFinesData = fineInvoiceRepository.countUnpaidFinesByUsers(List.of(userId));
-        List<Object[]> overdueData = borrowTicketDetailRepository.countOverdueByUsers(List.of(userId), LocalDateTime.now());
+        List<Object[]> overdueData = borrowTicketDetailRepository.countOverdueByUsers(List.of(userId));
         List<Object[]> activeBorrowData = borrowTicketDetailRepository.countActiveBorrowedByUsers(List.of(userId));
 
         long unpaid = parseCountMap(unpaidFinesData).getOrDefault(userId, 0L);

@@ -75,7 +75,8 @@
                                 <span th:if="${booking.status == 'CheckedIn'}" class="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full border border-yellow-200">Đang sử dụng</span>
                                 <span th:if="${booking.status == 'CheckedOut'}" class="bg-gray-100 text-gray-800 text-xs font-bold px-3 py-1 rounded-full border border-gray-200">Đã hoàn thành</span>
                                 <span th:if="${booking.status == 'Cancelled'}" class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full border border-red-200">Đã hủy</span>
-                                <span th:if="${booking.status == 'NoShow'}" class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full border border-red-200">Vắng mặt (Vi phạm)</span>
+                                <span th:if="${booking.status == 'NoShow'}" class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full border border-red-200">Vắng mặt</span>
+                                <span th:if="${booking.status == 'Evicted'}" class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full border border-purple-200">Bị mời ra</span>
                             </td>
                             <td class="p-4 text-right space-x-2">
                                 <button th:if="${booking.status == 'Confirmed'}" 
