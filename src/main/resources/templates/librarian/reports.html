@@ -9,8 +9,7 @@
             theme: { extend: { colors: { fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A', orangeHover: '#D95F18' } } } }
         }
     </script>
-    <style th:replace="~{fragments/header :: header-style}"></style>
-    <style th:replace="~{fragments/footer :: footer-style}"></style>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -28,10 +27,7 @@
         <div class="absolute top-1/2 right-0 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
     </div>
 
-    <!-- HEADER -->
-    <div class="relative z-50">
-        <div th:replace="~{fragments/header :: header('librarian')}"></div>
-    </div>
+
 
     <main class="flex-grow max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col xl:flex-row gap-8">
         
@@ -252,10 +248,7 @@
         </div>
     </main>
 
-    <!-- FOOTER -->
-    <div class="relative z-50 mt-auto w-full">
-        <div th:replace="~{fragments/footer :: footer}"></div>
-    </div>
+
 
     <!-- SCRIPT TẢI DỮ LIỆU ĐỘNG (CASCADING DROPDOWN) -->
     <script th:inline="javascript">

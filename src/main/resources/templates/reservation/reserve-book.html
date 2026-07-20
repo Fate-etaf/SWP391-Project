@@ -300,6 +300,17 @@
                             </select>
                         </div>
                         
+                        <!-- Trường hợp có nhiều cơ sở (Mượn liên cơ sở) -->
+                        <div th:if="${#lists.size(campuses) > 1}">
+                            <select id="campusSelect" name="campusId" required>
+                                <option value="" disabled selected>-- Chọn cơ sở --</option>
+                                <option th:each="campus : ${campuses}"
+                                        th:value="${campus.campusId}"
+                                        th:text="${campus.campusName}">
+                                </option>
+                            </select>
+                        </div>
+                        
 
 
                     <div class="btn-group">
@@ -352,10 +363,10 @@
 
     function openConfirmModal() {
         const campusSelect = document.getElementById('campusSelect');
-        // if (campusSelect && !campusSelect.value) {
-        //     alert('Vui lòng chọn cơ sở thư viện muốn đến nhận sách!');
-        //     return;
-        // }
+        if (campusSelect && !campusSelect.value) {
+            alert('Vui lòng chọn cơ sở thư viện muốn đến nhận sách!');
+            return;
+        }
 
         if (userCampusId && campusSelect.value !== userCampusId.toString()) {
             alert('Bạn đọc không có quyền mượn sách ở thư viện này. Vui lòng liên hệ với thủ thư để được trợ giúp!');
