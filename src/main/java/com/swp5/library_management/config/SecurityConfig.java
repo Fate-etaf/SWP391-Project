@@ -8,6 +8,9 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import com.swp5.library_management.repository.UserRepository;
 import com.swp5.library_management.entity.User;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import java.util.List;
 import java.util.Optional;
 
 @Configuration
@@ -22,20 +25,30 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
+        
+        DefaultOAuth2AuthorizationRequestResolver customAuthorizationRequestResolver = 
+            new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
+        customAuthorizationRequestResolver.setAuthorizationRequestCustomizer(
+            customizer -> customizer.additionalParameters(params -> params.put("prompt", "select_account"))
+        );
+
         http
             .authorizeHttpRequests(auth -> auth
                 // 1. Cho phép truy cập tự do vào các trang đăng nhập, kích hoạt và tài nguyên tĩnh
-                .requestMatchers("/login", "/activate", "/oauth2/**", "/backdoor/**", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/login", "/activate", "/oauth2/**", "/mock-google-login", "/backdoor/**", "/css/**", "/js/**", "/images/**").permitAll()
                 
                 // 🟢 2. MỞ KHÓA TOÀN BỘ ĐƯỜNG DẪN QUẢN LÝ & IMPORT SINH VIÊN (BƯỚC 1)
-                .requestMatchers("/librarian/students/**", "/librarian/students/import/**").permitAll()
+                .requestMatchers("/admin/**").permitAll()
                 
                 // 3. Tất cả các request còn lại tạm thời cho phép truy cập tự do trong chế độ phát triển
                 .anyRequest().permitAll()
             )
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/login")
+                .authorizationEndpoint(authEndpoint -> authEndpoint
+                    .authorizationRequestResolver(customAuthorizationRequestResolver)
+                )
                 // --- ĐOẠN XỬ LÝ GÁN SESSION KHI ĐĂNG NHẬP GOOGLE THÀNH CÔNG ---
                .successHandler((request, response, authentication) -> {
     try {
@@ -43,11 +56,22 @@ public class SecurityConfig {
         String email = oAuth2User.getAttribute("email");
         System.out.println("Google email: " + email);
         
-        Optional<User> userOpt = userRepository.findByEmail(email);
+        String cleanEmail = email != null ? email.trim().toLowerCase() : "";
+        List<User> allUsers = userRepository.findAll();
+        Optional<User> userOpt = allUsers.stream()
+                .filter(u -> u.getEmail() != null && u.getEmail().trim().toLowerCase().equals(cleanEmail))
+                .findFirst();
         
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             System.out.println("Found user: " + user.getUserId());
+            
+            if ("Inactive".equalsIgnoreCase(user.getStatus())) {
+                jakarta.servlet.http.HttpSession session = request.getSession();
+                session.setAttribute("loginError", "Tài khoản của bạn đã bị vô hiệu hóa (Inactive) trên hệ thống!");
+                response.sendRedirect("/login");
+                return;
+            }
             
             if ("Pending".equalsIgnoreCase(user.getStatus())) {
                 user.setStatus("Active");
@@ -60,15 +84,17 @@ public class SecurityConfig {
             session.setAttribute("loggedInUserId", user.getUserId());
             session.setAttribute("loggedInCampusId", user.getCampusId());
             
-            user.getPrimaryRole().ifPresent(role -> {
-                String roleName = role.getRoleName();
-                int roleId = role.getRoleId();
-                System.out.println("User role: " + roleName + ", " + roleId);
-                session.setAttribute("isLibrarian", "Librarian".equalsIgnoreCase(roleName) || roleId == 3);
-                session.setAttribute("isAdmin", "Admin".equalsIgnoreCase(roleName) || roleId == 4);
-            });
+            boolean isAdmin = user.isAdmin();
+            boolean isLibrarian = user.isLibrarian();
+            
+            session.setAttribute("isAdmin", isAdmin);
+            session.setAttribute("isLibrarian", isLibrarian);
 
-            if (user.isLibrarian() || user.isAdmin()) {
+            if (isAdmin) {
+                response.sendRedirect("/admin/users");
+                return;
+            }
+            if (isLibrarian) {
                 response.sendRedirect("/librarian/inventory/dashboard");
                 return;
             }

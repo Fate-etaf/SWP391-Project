@@ -1,19 +1,34 @@
 package com.swp5.library_management.service;
 
-import com.swp5.library_management.dto.ReservationResultDTO;
-import com.swp5.library_management.entity.*;
-import com.swp5.library_management.repository.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
+import com.swp5.library_management.dto.ReservationResultDTO;
+import com.swp5.library_management.entity.Book;
+import com.swp5.library_management.entity.BookCopy;
+import com.swp5.library_management.entity.Campus;
+import com.swp5.library_management.entity.Notification;
+import com.swp5.library_management.entity.Reservation;
+import com.swp5.library_management.entity.User;
+import com.swp5.library_management.entity.Waitlist;
+import com.swp5.library_management.repository.BookCopyRepository;
+import com.swp5.library_management.repository.BookRepository;
+import com.swp5.library_management.repository.CampusRepository;
+import com.swp5.library_management.repository.NotificationRepository;
+import com.swp5.library_management.repository.ReservationRepository;
+import com.swp5.library_management.repository.TransferDetailRepository;
+import com.swp5.library_management.repository.TransferRequestRepository;
+import com.swp5.library_management.repository.UserRepository;
+import com.swp5.library_management.repository.WaitlistRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * Triển khai đầy đủ Use Case UCR06 – Reserve Book Online.
@@ -48,6 +63,7 @@ public class ReservationServiceImpl implements ReservationService {
     private final TransferRequestRepository transferRequestRepository;
     private final TransferDetailRepository  transferDetailRepository;
     private final com.swp5.library_management.repository.BorrowTicketDetailRepository borrowTicketDetailRepository;
+    private final UserStatusService         userStatusService;
 
     public ReservationServiceImpl(UserRepository userRepository,
                                   BookRepository bookRepository,
@@ -60,7 +76,8 @@ public class ReservationServiceImpl implements ReservationService {
                                   com.swp5.library_management.service.SystemConfigService systemConfigService,
                                   TransferRequestRepository transferRequestRepository,
                                   TransferDetailRepository transferDetailRepository,
-                                  com.swp5.library_management.repository.BorrowTicketDetailRepository borrowTicketDetailRepository) {
+                                  com.swp5.library_management.repository.BorrowTicketDetailRepository borrowTicketDetailRepository,
+                                  UserStatusService userStatusService) {
         this.userRepository        = userRepository;
         this.bookRepository        = bookRepository;
         this.bookCopyRepository    = bookCopyRepository;
@@ -73,6 +90,7 @@ public class ReservationServiceImpl implements ReservationService {
         this.transferRequestRepository = transferRequestRepository;
         this.transferDetailRepository = transferDetailRepository;
         this.borrowTicketDetailRepository = borrowTicketDetailRepository;
+        this.userStatusService     = userStatusService;
     }
 
     // =========================================================================
@@ -110,13 +128,42 @@ public class ReservationServiceImpl implements ReservationService {
             return ReservationResultDTO.builder()
                     .success(false)
                     .resultType("ERROR")
-                    .message("Giao dịch thất bại! Tài khoản của bạn đang bị khóa do có khoản phạt " +
-                             "chưa thanh toán. Vui lòng hoàn tất nộp phạt trước khi đặt sách.")
+                    .message("Giao dịch thất bại! Tài khoản của bạn đã bị khóa tính năng mượn/đặt sách do có vi phạm chưa xử lý.")
+                    .build();
+        }
+
+        String granularStatus = userStatusService.calculateSingleStatus(patronId, patron.getStatus());
+        if ("Under Penalty".equals(granularStatus)) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Giao dịch thất bại! Bạn đang có phiếu phạt chưa thanh toán.")
+                    .build();
+        }
+        if ("Overdue".equals(granularStatus)) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Giao dịch thất bại! Bạn đang có sách mượn quá hạn.")
+                    .build();
+        }
+        if ("Limit Reached".equals(granularStatus)) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Giao dịch thất bại! Bạn đã mượn tối đa số lượng sách cho phép.")
+                    .build();
+        }
+        if ("Graduated".equals(granularStatus) || "Inactive".equals(granularStatus)) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Giao dịch thất bại! Tài khoản của bạn không hoạt động hoặc đã tốt nghiệp.")
                     .build();
         }
 
         // Kiểm tra quá hạn động
-        int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patronId, java.time.LocalDateTime.now());
+        int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patronId);
         if (overdueCount > 0) {
             return ReservationResultDTO.builder()
                     .success(false)
@@ -259,11 +306,14 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setStatus("Cancelled");
         reservationRepository.save(reservation);
 
-        // Alt 1 – Bước 5b: Trả bản sách về trạng thái Available
+        // Alt 1 – Bước 5b: Xử lý bản sách (Gán cho người Waitlist hoặc trả về Available)
         BookCopy copy = reservation.getCopy();
         if (copy != null) {
-            copy.setCopyStatus("Available");
-            bookCopyRepository.save(copy);
+            boolean assignedToWaitlist = processWaitlistForReturnedBook(copy);
+            if (!assignedToWaitlist) {
+                copy.setCopyStatus("Available");
+                bookCopyRepository.save(copy);
+            }
         }
 
         // Alt 1 – Bước 6a: Ghi Notification hủy đơn
@@ -299,7 +349,14 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public List<Waitlist> getMyWaitlists(String patronId) {
-        return waitlistRepository.findByPatronUserIdOrderByRequestedAtDesc(patronId);
+        List<Waitlist> waitlists = waitlistRepository.findByPatronUserIdOrderByRequestedAtDesc(patronId);
+        for (Waitlist w : waitlists) {
+            if ("Waiting".equals(w.getStatus()) || "Notified".equals(w.getStatus())) {
+                long pos = waitlistRepository.countAheadInQueue(w.getBook().getBookId(), w.getCampus().getCampusId(), w.getWaitlistId()) + 1;
+                w.setQueuePosition(pos);
+            }
+        }
+        return waitlists;
     }
 
     // =========================================================================
@@ -339,7 +396,7 @@ public class ReservationServiceImpl implements ReservationService {
                     .build();
         }
 
-        int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patronId, java.time.LocalDateTime.now());
+        int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patronId);
         if (overdueCount > 0) {
             return ReservationResultDTO.builder()
                     .success(false)
@@ -474,7 +531,7 @@ public class ReservationServiceImpl implements ReservationService {
             // Lọc người vi phạm
             boolean isLocked = Boolean.TRUE.equals(patron.getBorrowingLocked());
             boolean isActive = "Active".equals(patron.getStatus());
-            int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patron.getUserId(), LocalDateTime.now());
+            int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patron.getUserId());
 
             if (!isActive || isLocked || overdueCount > 0) {
                 // Tự động hủy nếu người này vi phạm
@@ -510,8 +567,8 @@ public class ReservationServiceImpl implements ReservationService {
                     .build();
             reservationRepository.save(reservation);
 
-            // Cập nhật Waitlist -> Completed
-            waitlist.setStatus("Completed");
+            // Cập nhật Waitlist -> Converted
+            waitlist.setStatus("Converted");
             waitlistRepository.save(waitlist);
 
             // Cập nhật BookCopy -> Reserved

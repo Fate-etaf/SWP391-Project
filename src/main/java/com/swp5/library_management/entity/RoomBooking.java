@@ -2,29 +2,30 @@ package com.swp5.library_management.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "RoomBookings")
+@Table(name = "RoomBookings", schema = "dbo")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class RoomBooking {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BookingID")
     private Integer bookingId;
 
-    @ManyToOne
-    @JoinColumn(name = "RoomID")
-    private StudyRoom room;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "RoomID", nullable = false)
+    private StudyRoom studyRoom;
 
-    @ManyToOne
-    @JoinColumn(name = "PatronID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PatronID", nullable = false)
     private User patron;
 
     @Column(name = "BookingDate", nullable = false)
@@ -43,12 +44,14 @@ public class RoomBooking {
     private Integer participantCount;
 
     @Column(name = "Status", nullable = false, length = 20)
-    private String status;
+    @Builder.Default
+    private String status = "Confirmed";
 
     @Lob
-    @Column(name = "QRCode")
+    @Column(name = "QRCode", columnDefinition = "image")
     private byte[] qrCode;
 
     @Column(name = "CreatedAt", nullable = false)
-    private LocalDateTime createdAt;
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

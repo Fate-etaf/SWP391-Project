@@ -54,4 +54,8 @@ public class BookSearchResultDTO {
      * Gán xoay vòng trong Service.
      */
     private String coverColor;
+
+    public String getCategoryName() {
+        return this.categoryNames;
+    }
 }

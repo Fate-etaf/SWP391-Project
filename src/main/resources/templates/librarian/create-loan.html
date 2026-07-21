@@ -22,8 +22,8 @@
         }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style th:replace="~{fragments/header :: header-style}"></style>
-    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    
+    
     <style>
         body { font-family: 'Inter', sans-serif; }
     </style>
@@ -31,13 +31,13 @@
 <body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
 
     <!-- ═══════════════════════════════════════════════════════ NAV BAR ══ -->
-    <div th:replace="~{fragments/header :: header('librarian')}"></div>
+    
 
     <!-- ═══════════════════════════════════════════════════ MAIN CONTENT ══ -->
     <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col md:flex-row gap-8">
         
         <!-- SIDEBAR -->
-        <div th:replace="~{fragments/sidebar :: sidebar('create-loan')}"></div>
+        <div th:replace="~{fragments/librarian_sidebar :: sidebar('create-loan')}"></div>
 
         <div class="flex-grow min-w-0 max-w-2xl">
 
@@ -124,7 +124,7 @@
     </main>
 
     <!-- ═══════════════════════════════════════════════════════ FOOTER ══ -->
-    <div th:replace="~{fragments/footer :: footer}"></div>
+    
 
 <script>
     function fetchHoldingReservations() {
@@ -174,7 +174,7 @@
 
     function useCopyId(copyId) {
         document.getElementById('copyId').value = copyId;
-        document.getElementById('copyId').focus();
+        document.querySelector('form').submit();
     }
 </script>
 

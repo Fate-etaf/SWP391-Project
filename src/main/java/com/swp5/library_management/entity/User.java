@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -58,6 +59,23 @@ public class User {
     @Builder.Default
     private Boolean borrowingLocked = false;
 
+    @jakarta.persistence.Transient
+    private String computedStatus;
+
+    @jakarta.persistence.Transient
+    private Long unpaidFinesCount;
+
+    @jakarta.persistence.Transient
+    private Long overdueCount;
+
+    @jakarta.persistence.Transient
+    private Long activeBorrowCount;
+
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "RoleID")
+    private Role role;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "UserRoles",
@@ -73,25 +91,37 @@ public class User {
      * Use this to migrate code that previously called getRole().
      */
     public Optional<Role> getPrimaryRole() {
+        if (this.role != null) return Optional.of(this.role);
         if (this.roles == null || this.roles.isEmpty()) return Optional.empty();
         return this.roles.stream().findFirst();
     }
 
     // Hàm tiện ích để Controller và HTML kiểm tra quyền
     public boolean isLibrarian() {
+        if (this.role != null && (this.role.getRoleId() == 3 || "Librarian".equalsIgnoreCase(this.role.getRoleName()))) {
+            return true;
+        }
         return this.roles != null && this.roles.stream()
                 .anyMatch(r -> "Librarian".equalsIgnoreCase(r.getRoleName()) || r.getRoleId() == 3);
     }
 
     public boolean isStudent() {
+        if (this.role != null && (this.role.getRoleId() == 1 || "Student".equalsIgnoreCase(this.role.getRoleName()))) {
+            return true;
+        }
         return this.roles != null && this.roles.stream()
                 .anyMatch(r -> "Student".equalsIgnoreCase(r.getRoleName()) || r.getRoleId() == 1);
     }
 
     public boolean isAdmin() {
+        if (this.role != null && (this.role.getRoleId() == 4 || "Admin".equalsIgnoreCase(this.role.getRoleName()))) {
+            return true;
+        }
         return this.roles != null && this.roles.stream()
                 .anyMatch(r -> "Admin".equalsIgnoreCase(r.getRoleName()) || r.getRoleId() == 4);
     }
+
+
 
     // Thêm thủ công Getter cho userId để IDE không báo lỗi
     public String getUserId() {

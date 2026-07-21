@@ -113,14 +113,24 @@
                     <!-- Field 5 -->
                     <div class="col-span-1 md:col-span-2 mt-2 pt-6 border-t border-slate-800/60">
                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Tình trạng thẻ Thư viện</p>
-                        <div th:if="${user.borrowingLocked}" class="bg-rose-500/10 border border-rose-500/30 text-rose-400 px-4 py-3 rounded-xl text-sm flex items-start space-x-3">
+                        
+                        <div th:if="${!isCardActive}" class="bg-rose-500/10 border border-rose-500/30 text-rose-400 px-4 py-3 rounded-xl text-sm flex items-start space-x-3">
+                            <span class="text-lg">⛔</span>
+                            <div>
+                                <p class="font-bold">Không đủ điều kiện mượn sách</p>
+                                <p class="text-xs text-rose-400/80 mt-0.5">Tài khoản đã bị vô hiệu hóa. Bạn không thể thực hiện giao dịch mượn sách hoặc đặt trước tài liệu.</p>
+                            </div>
+                        </div>
+
+                        <div th:if="${isCardActive && user.borrowingLocked}" class="bg-rose-500/10 border border-rose-500/30 text-rose-400 px-4 py-3 rounded-xl text-sm flex items-start space-x-3">
                             <span class="text-lg">⚠️</span>
                             <div>
                                 <p class="font-bold">Thẻ đang bị khóa mượn sách!</p>
                                 <p class="text-xs text-rose-400/80 mt-0.5">Tài khoản của bạn hiện không thể tạo đơn mượn mới. Vui lòng liên hệ thủ thư hoặc kiểm tra sách mượn quá hạn.</p>
                             </div>
                         </div>
-                        <div th:unless="${user.borrowingLocked}" class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-xl text-sm flex items-start space-x-3">
+                        
+                        <div th:if="${isCardActive && !user.borrowingLocked}" class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-xl text-sm flex items-start space-x-3">
                             <span class="text-lg">✅</span>
                             <div>
                                 <p class="font-bold">Đủ điều kiện mượn sách</p>

@@ -1,6 +1,5 @@
 package com.swp5.library_management.controller;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
@@ -8,7 +7,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import com.swp5.library_management.service.HomeService;
+
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Controller cho trang chủ (Home Page) — đúng chuẩn MVC và tích hợp Google Login.
@@ -24,6 +25,12 @@ public class HomeController {
 
     @GetMapping({"/", "/home"})
     public String home(Model model, @AuthenticationPrincipal OAuth2User principal, HttpSession session) {
+        // Nếu là Admin, kiên quyết đẩy về trang Admin Portal
+        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+        if (Boolean.TRUE.equals(isAdmin)) {
+            return "redirect:/admin/users";
+        }
+
         // Lấy dữ liệu thống kê từ hệ thống
         model.addAttribute("stats", homeService.getHomeStats());
         model.addAttribute("campuses", homeService.getCampuses());
@@ -56,7 +63,8 @@ public class HomeController {
             model.addAttribute("isLoggedIn", false);
         }
 
-        model.addAttribute("featuredBooks", homeService.getFeaturedBooks());
+        Integer loggedInCampusId = (Integer) session.getAttribute("loggedInCampusId");
+        model.addAttribute("featuredBooks", homeService.getFeaturedBooks(loggedInCampusId));
         return "home";
     }
 }

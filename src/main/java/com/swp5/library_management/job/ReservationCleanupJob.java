@@ -23,6 +23,7 @@ public class ReservationCleanupJob {
     private final ReservationRepository reservationRepository;
     private final BookCopyRepository bookCopyRepository;
     private final NotificationRepository notificationRepository;
+    private final com.swp5.library_management.service.ReservationService reservationService;
 
     /**
      * Chạy tự động vào 0h00 mỗi ngày để dọn dẹp các đơn đặt chỗ quá hạn.
@@ -50,8 +51,11 @@ public class ReservationCleanupJob {
             // Hoàn lại sách
             BookCopy copy = res.getCopy();
             if (copy != null) {
-                copy.setCopyStatus("Available");
-                bookCopyRepository.save(copy);
+                boolean assignedToWaitlist = reservationService.processWaitlistForReturnedBook(copy);
+                if (!assignedToWaitlist) {
+                    copy.setCopyStatus("Available");
+                    bookCopyRepository.save(copy);
+                }
             }
 
             // Ghi thông báo

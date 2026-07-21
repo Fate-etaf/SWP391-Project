@@ -171,15 +171,17 @@ public class BookServiceImpl implements BookService {
      *   4. Map kết quả sang DTO mà không cần truy cập lazy collection.
      */
     @Override
-    public Page<BookSearchResultDTO> searchBooks(String keyword, String subjectCode, Integer categoryId, Integer majorId, Integer campusId, int page, int size) {
+    public Page<BookSearchResultDTO> searchBooks(String keyword, String subjectCode, Integer categoryId, Integer majorId, Integer filterCampusId, Integer displayCampusId, int page, int size) {
         // Sanitize: blank string → null để WHERE clause bỏ qua bộ lọc
         String kw = StringUtils.hasText(keyword)     ? keyword.trim()     : null;
         String sc = StringUtils.hasText(subjectCode) ? subjectCode.trim() : null;
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<Book> bookPage = bookRepository.searchBooks(kw, sc, categoryId, majorId, campusId, pageable);
+        // Lọc DB theo filterCampusId (nếu user chọn dropdown)
+        Page<Book> bookPage = bookRepository.searchBooks(kw, sc, categoryId, majorId, filterCampusId, pageable);
         
-        List<BookSearchResultDTO> dtoList = mapBooksToSearchResults(bookPage.getContent(), campusId);
+        // Tính toán hiển thị số lượng theo displayCampusId (cơ sở của sinh viên)
+        List<BookSearchResultDTO> dtoList = mapBooksToSearchResults(bookPage.getContent(), displayCampusId);
         return new PageImpl<>(dtoList, pageable, bookPage.getTotalElements());
     }
 

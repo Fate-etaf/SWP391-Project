@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Scanner Đặt Phòng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans h-screen flex flex-col items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-2 bg-fpt-orange"></div>
+        <div class="text-center mb-6">
+            <svg class="mx-auto h-12 w-12 text-fpt-navy mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+            <h2 class="text-2xl font-bold text-gray-800">Cổng Quét Mã Phòng Học</h2>
+            <p class="text-sm text-gray-500 mt-1">Dành cho Thủ thư / Bảo vệ</p>
+        </div>
+
+        <form id="scanForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Booking ID</label>
+                <!-- If the QR url has ?bookingId=XX, it will prefill here -->
+                <input type="text" id="bookingId" th:value="${prefillBookingId}" class="w-full text-center text-3xl font-bold py-4 px-4 bg-gray-50 border-2 border-gray-300 rounded-xl focus:border-fpt-orange focus:ring-0" readonly>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mt-6">
+                <button type="button" onclick="processScan('checkin')" class="flex flex-col items-center justify-center p-4 bg-green-100 hover:bg-green-200 border border-green-300 rounded-xl transition-colors">
+                    <svg class="w-8 h-8 text-green-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                    <span class="font-bold text-green-800">Check-In</span>
+                </button>
+                <button type="button" onclick="processScan('checkout')" class="flex flex-col items-center justify-center p-4 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-xl transition-colors">
+                    <svg class="w-8 h-8 text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    <span class="font-bold text-gray-800">Check-Out</span>
+                </button>
+            </div>
+        </form>
+
+        <div id="resultBox" class="mt-6 hidden p-4 rounded-xl border text-center font-semibold">
+            <span id="resultMsg"></span>
+        </div>
+        
+        <div class="mt-8 text-center">
+            <a href="/" class="text-fpt-orange text-sm font-medium hover:underline">Về trang chủ</a>
+        </div>
+    </div>
+
+    <script>
+        function processScan(action) {
+            const bookingId = document.getElementById('bookingId').value;
+            const resultBox = document.getElementById('resultBox');
+            const resultMsg = document.getElementById('resultMsg');
+            
+            if(!bookingId) {
+                resultBox.className = "mt-6 p-4 rounded-xl border text-center font-semibold bg-red-50 text-red-700 border-red-200";
+                resultMsg.textContent = "Không tìm thấy Mã Đơn Đặt Phòng. Hãy quét lại mã QR.";
+                resultBox.classList.remove('hidden');
+                return;
+            }
+
+            // Disable buttons temporarily
+            resultBox.className = "mt-6 p-4 rounded-xl border text-center font-semibold bg-blue-50 text-blue-700 border-blue-200";
+            resultMsg.textContent = "Đang xử lý...";
+            resultBox.classList.remove('hidden');
+
+            fetch(`/api/study-rooms/book/${bookingId}/${action}`, {
+                method: 'POST'
+            })
+            .then(async res => {
+                if(!res.ok) {
+                    const text = await res.text();
+                    throw new Error(text);
+                }
+                return res.text();
+            })
+            .then(data => {
+                resultBox.className = "mt-6 p-4 rounded-xl border text-center font-semibold bg-green-50 text-green-700 border-green-200 shadow-inner";
+                resultMsg.textContent = data;
+            })
+            .catch(err => {
+                resultBox.className = "mt-6 p-4 rounded-xl border text-center font-semibold bg-red-50 text-red-700 border-red-200 shadow-inner";
+                resultMsg.textContent = err.message;
+            });
+        }
+    </script>
+</body>
+</html>

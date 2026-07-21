@@ -1,0 +1,10 @@
+feat: refactor user portal UI and fix availability count logic
+
+UI Improvements:
+- Refactored `profile.html` to a Light Mode theme and fixed the scrollbar issue by removing fixed background elements.
+- Embedded the navigation sidebar into `history.html` and `my-reservations.html` for a consistent single-page feel.
+- Completely rewrote `my-reservations.html` using TailwindCSS to match the new Light Mode design.
+
+Bug Fixes & UX:
+- Fixed an issue where the default book listing ("Tất cả chuyên ngành") displayed global availability counts. `HomeService` now correctly computes available copies filtered by the logged-in user's campus.
+- Updated the "Sử dụng" button in `create-loan.html` to automatically submit the form after populating the Copy ID field.

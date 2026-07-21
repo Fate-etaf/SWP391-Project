@@ -6,5 +6,5 @@ import com.swp5.library_management.entity.BorrowTicket;
 
 
 public interface BorrowTicketRepository extends JpaRepository<BorrowTicket, Integer> {
-    
+    int countByPatronUserId(String patronId);
 }
