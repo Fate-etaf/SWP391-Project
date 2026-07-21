@@ -238,7 +238,7 @@ public class TransferServiceImpl implements TransferService {
             throw new RuntimeException("Bạn không có quyền duyệt yêu cầu này! Chỉ cơ sở xuất sách mới được thao tác.");
         }
 
-        if ("Accepted".equals(status) || "Rejected".equals(status)) {
+        if ("Accepted".equals(status) || "Rejected".equals(status) || "Pending".equals(status)) {
             request.setStatus(status);
         }
 
