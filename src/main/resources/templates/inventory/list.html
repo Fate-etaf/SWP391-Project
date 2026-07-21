@@ -27,7 +27,7 @@
 
     <main class="flex-grow max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
         <div th:replace="~{fragments/librarian_sidebar :: sidebar('list')}"></div>
-
+        
         <div class="flex-grow min-w-0">
             <!-- Page header -->
             <div class="bg-gradient-to-br from-fpt-navy via-slate-800 to-slate-900 rounded-2xl p-8 mb-8 text-white relative overflow-hidden shadow-xl">
@@ -42,20 +42,38 @@
                         <span>Thêm sách mới</span>
                     </a>
                 </div>
+                <div class="relative z-10 mt-8 mb-4 w-full">
+                    <div th:replace="~{fragments/search-bar :: search-form}"></div>
+                </div>
+                
                 <div class="absolute top-0 right-0 w-64 h-64 bg-fpt-orange/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
                 <div class="absolute bottom-0 left-10 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl -mb-10 pointer-events-none"></div>
             </div>
-
-            <!-- Books by major section -->
-            <th:block th:each="section : ${majorSections}">
+            <!-- Search Results Block -->
+            <div th:if="${hasSearch}">
                 <div class="flex items-center justify-between mb-4 mt-8 first:mt-0">
                     <div>
-                        <h3 class="text-xl font-extrabold text-white" th:text="${section.sectionName}">Chuyên ngành</h3>
-                        <p class="text-sm text-slate-400 mt-0.5">Một số tựa sách ngẫu nhiên</p>
+                        <h3 class="text-xl font-extrabold text-black">Kết quả tìm kiếm</h3>
+                        <p class="text-sm text-slate-500 mt-0.5" th:if="${!noResults}">Tìm thấy các tài liệu phù hợp</p>
+                        <p class="text-sm text-rose-500 mt-0.5" th:if="${noResults}">Không tìm thấy tài liệu nào phù hợp với bộ lọc!</p>
                     </div>
                 </div>
-                <div th:replace="~{inventory/list :: book-grid(${section.books})}"></div>
-            </th:block>
+                <!-- Vòng lặp hiển thị kết quả -->
+                <div th:unless="${noResults}" th:replace="~{inventory/list :: book-grid(${results})}"></div>
+            </div>
+
+            <!-- Books by major section (Chỉ hiển thị khi KHÔNG search hoặc khi search KHÔNG có kết quả để làm gợi ý) -->
+            <div th:if="${!hasSearch or noResults}">
+                <th:block th:each="section : ${majorSections}">
+                    <div class="flex items-center justify-between mb-4 mt-8 first:mt-0">
+                        <div>
+                            <h3 class="text-xl font-extrabold text-black" th:text="${section.sectionName}">Chuyên ngành</h3>
+                            <p class="text-sm text-slate-500 mt-0.5">Một số tựa sách ngẫu nhiên</p>
+                        </div>
+                    </div>
+                    <div th:replace="~{inventory/list :: book-grid(${section.books})}"></div>
+                </th:block>
+            </div>
         </div>
     </main>
 
