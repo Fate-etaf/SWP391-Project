@@ -1,8 +1,5 @@
 package com.swp5.library_management.controller;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import com.swp5.library_management.repository.BorrowTicketDetailRepository;
@@ -16,7 +13,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.swp5.library_management.entity.User;
@@ -318,76 +314,4 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
     }
 
 
-    // Đường dẫn xử lý khi Google đăng nhập thành công
-    @GetMapping("/login/oauth2/code/google")
-    public String handleGoogleLogin(
-            org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken token,
-            HttpSession session,
-            RedirectAttributes redirectAttributes,
-            Model model) {
-        
-        // 1. Lấy email từ tài khoản Google trả về
-        String email = token.getPrincipal().getAttribute("email");
-        
-        // 2. Kiểm tra xem Email này đã được Admin Import vào DB chưa
-        Optional<User> userOpt = userRepository.findByEmail(email); // Bạn cần đảm bảo UserRepository có hàm findByEmail nhé
-        
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            
-            // Nếu tài khoản hợp lệ, lưu vào session giống hệt luồng Login bằng tay cũ của bạn
-            session.setAttribute("loggedInUser", user);
-            session.setAttribute("loggedInUserId", user.getUserId());
-            session.setAttribute("loggedInCampusId", user.getCampusId());
-            
-            // Xử lý phân quyền 
-            boolean isLib = user.isLibrarian();
-            boolean isAdm = user.isAdmin();
-            
-            session.setAttribute("isLibrarian", isLib);
-            session.setAttribute("isAdmin", isAdm);
-            
-            if (isAdm) {
-                return "redirect:/admin/users";
-            }
-            if (isLib) {
-                return "redirect:/librarian/inventory/dashboard";
-            }
-            return "redirect:/home";
-        } else {
-            // Nếu Email từ Google chưa được Import vào hệ thống -> Từ chối
-            model.addAttribute("loginError", "Tài khoản Gmail này không tồn tại trên hệ thống thư viện! Vui lòng liên hệ Admin.");
-            return "login";
-        }
-    }
-
-    // ====================================================================
-    // ĐƯỜNG DẪN BÍ MẬT ĐỂ VÀO THẲNG DASHBOARD KHÔNG CẦN QUA LOGIN / GOOGLE
-    // ====================================================================
-    @GetMapping("/backdoor/admin")
-    public String bypassAdminLogin(HttpSession session) {
-        // 1. Tự khởi tạo cứng đối tượng Role Admin (Bypass hoàn toàn không gọi Repository)
-        com.swp5.library_management.entity.Role adminRole = new com.swp5.library_management.entity.Role();
-        adminRole.setRoleId(4); // ID quyền admin mặc định của bạn
-        adminRole.setRoleName("Admin");
-
-        // 2. Tạo đối tượng Admin giả lập
-        User adminUser = new User();
-        adminUser.setUserId("ADMIN_DEV");
-        adminUser.setFullName("Developer Admin");
-        adminUser.setEmail("admin.dev@fpt.edu.vn");
-        adminUser.setStatus("Active");
-        adminUser.setCampusId(1); // Mặc định cơ sở Hà Nội
-        adminUser.getRoles().add(adminRole); // Thêm role Admin vào tập hợp roles
-
-        // 3. NẠP THẲNG THÔNG TIN VÀO SESSION HỆ THỐNG
-        session.setAttribute("loggedInUser", adminUser);
-        session.setAttribute("loggedInUserId", adminUser.getUserId());
-        session.setAttribute("loggedInCampusId", adminUser.getCampusId());
-        session.setAttribute("isAdmin", true);
-        session.setAttribute("isLibrarian", true);
-
-        // 4. Chuyển hướng trực tiếp hạ cánh xuống Dashboard quản trị
-        return "redirect:/librarian/inventory/dashboard";
-    }
 }
