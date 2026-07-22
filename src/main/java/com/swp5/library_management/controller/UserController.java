@@ -42,8 +42,12 @@ public class UserController {
         this.fineInvoiceRepository = fineInvoiceRepository;
         this.systemConfigRepository = systemConfigRepository;
     }
-@GetMapping("/profile")
-public String showProfile(HttpSession session, Model model) {
+    /**
+     * Hiển thị trang Hồ sơ cá nhân của người dùng đang đăng nhập.
+     * Cung cấp thông tin tài khoản, trạng thái mượn trả và hiển thị popup Đổi mật khẩu.
+     */
+    @GetMapping("/profile")
+    public String showProfile(HttpSession session, Model model) {
     String loggedInUserId = (String) session.getAttribute("loggedInUserId");
     if (loggedInUserId == null) {
         return "redirect:/login";
@@ -168,6 +172,10 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
 }
 
     // === 1. LUỒNG ĐĂNG NHẬP ===
+    /**
+     * Hiển thị giao diện Đăng nhập của hệ thống.
+     * Hỗ trợ đăng nhập thủ công và đăng nhập qua Google OAuth2.
+     */
     @GetMapping("/login")
     public String showLoginForm(@RequestParam(value = "error", required = false) String error, Model model) {
         if ("not_activated".equals(error)) {
@@ -178,6 +186,10 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
         return "login"; 
     }
 
+    /**
+     * Xử lý xác thực Đăng nhập thủ công bằng Mã số (User ID), Email, Mật khẩu và Cơ sở.
+     * Kiểm tra trạng thái tài khoản, gán quyền (Role) vào Session và điều hướng đến Dashboard tương ứng.
+     */
     @PostMapping("/login")
     public String loginUser(
             @RequestParam("userId") String userId,
@@ -252,6 +264,10 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
     }
 
     // === ĐĂNG XUẤT ===
+    /**
+     * Xử lý Đăng xuất.
+     * Xóa toàn bộ dữ liệu Session hiện tại và điều hướng người dùng về trang Đăng nhập.
+     */
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate(); 
@@ -261,6 +277,10 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
     
 
     // === 4. GIAO DIỆN HIỂN THỊ MÀN HÌNH NHẬP MÃ OTP ===
+    /**
+     * Hiển thị giao diện Kích hoạt tài khoản lần đầu (Nhập mã OTP).
+     * Áp dụng cho các tài khoản mới được Admin tạo hoặc Import từ Excel.
+     */
     @GetMapping("/activate")
     public String showActivateForm(@RequestParam("userId") String userId, Model model) {
         model.addAttribute("userId", userId);
@@ -268,6 +288,10 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
     }
 
     // === 5. XỬ LÝ KÍCH HOẠT TÀI KHOẢN ===
+    /**
+     * Xử lý xác thực mã OTP để kích hoạt tài khoản.
+     * Chuyển trạng thái tài khoản từ "Pending" sang "Active" và thông báo mật khẩu mặc định.
+     */
     @PostMapping("/activate")
     public String activateAccount(
             @RequestParam("userId") String userId,
