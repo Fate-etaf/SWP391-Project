@@ -101,6 +101,10 @@ public class UserManagementController {
         
         Role userRole = new Role();
         userRole.setRoleId(roleId); 
+        newUser.setRole(userRole);
+        if (newUser.getRoles() == null) {
+            newUser.setRoles(new java.util.HashSet<>());
+        }
         newUser.getRoles().add(userRole);
         
         newUser.setPasswordHash("123");

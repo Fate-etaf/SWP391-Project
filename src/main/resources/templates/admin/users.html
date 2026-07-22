@@ -150,19 +150,19 @@
         
         <td class="p-4">
             <span th:if="${student?.role?.roleId == 1 || student?.role == null}" 
-                  class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap">
+                  class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
                 <span class="w-1 h-1 rounded-full bg-slate-400"></span>Sinh viên
             </span>
             <span th:if="${student?.role?.roleId == 2}" 
-                  class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 whitespace-nowrap">
+                  class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
                 <span class="w-1 h-1 rounded-full bg-blue-400"></span>Giảng viên
             </span>
             <span th:if="${student?.role?.roleId == 3}" 
-                  class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 whitespace-nowrap">
+                  class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <span class="w-1 h-1 rounded-full bg-emerald-400"></span>Thủ thư
             </span>
             <span th:if="${student?.role?.roleId == 4}" 
-                  class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20 whitespace-nowrap">
+                  class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
                 <span class="w-1 h-1 rounded-full bg-rose-400"></span>Admin
             </span>
         </td>
@@ -180,28 +180,28 @@
         <td class="p-4 text-center flex justify-center gap-2">
             <!-- Active -->
             <span th:if="${#strings.equalsIgnoreCase(student.computedStatus, 'Active')}" 
-               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 whitespace-nowrap">
+               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 
                 <span>Active</span>
             </span>
             
             <!-- Inactive -->
             <span th:if="${#strings.equalsIgnoreCase(student.computedStatus, 'Inactive')}" 
-               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20 whitespace-nowrap">
+               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
                 <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> 
                 <span>Không hoạt động</span>
             </span>
             
             <!-- Graduated -->
             <span th:if="${#strings.equalsIgnoreCase(student.computedStatus, 'Graduated')}" 
-               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-400 border border-slate-500/20 whitespace-nowrap">
+               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-400 border border-slate-500/20">
                 <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> 
                 <span>Tốt nghiệp</span>
             </span>
 
             <!-- Under Penalty -->
             <span th:if="${#strings.equalsIgnoreCase(student.computedStatus, 'Under Penalty')}" 
-               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-600/10 text-rose-500 border border-rose-600/20 whitespace-nowrap"
+               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-600/10 text-rose-500 border border-rose-600/20"
                th:title="${'Số phiếu phạt chưa nộp: ' + student.unpaidFinesCount}">
                 <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span> 
                 <span th:text="${'Đang bị phạt (' + student.unpaidFinesCount + ')'}">Đang bị phạt</span>
@@ -209,7 +209,7 @@
 
             <!-- Overdue -->
             <span th:if="${#strings.equalsIgnoreCase(student.computedStatus, 'Overdue')}" 
-               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 whitespace-nowrap"
+               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20"
                th:title="${'Số sách quá hạn: ' + student.overdueCount}">
                 <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> 
                 <span th:text="${'Quá hạn (' + student.overdueCount + ')'}">Quá hạn mượn</span>
@@ -217,7 +217,7 @@
 
             <!-- Limit Reached -->
             <span th:if="${#strings.equalsIgnoreCase(student.computedStatus, 'Limit Reached')}" 
-               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20 whitespace-nowrap"
+               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20"
                th:title="${'Số sách đang mượn: ' + student.activeBorrowCount}">
                 <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span> 
                 <span th:text="${'Giới hạn (' + student.activeBorrowCount + ')'}">Đạt giới hạn</span>
@@ -225,7 +225,7 @@
 
             <!-- Borrowing Locked (Hard lock) -->
             <span th:if="${#strings.equalsIgnoreCase(student.computedStatus, 'Borrowing Locked')}" 
-               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-600/10 text-red-500 border border-red-600/20 whitespace-nowrap">
+               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-600/10 text-red-500 border border-red-600/20">
                 <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> 
                 <span>Khóa thẻ</span>
             </span>
@@ -514,7 +514,7 @@
             document.getElementById('statsContent').classList.add('hidden');
             
             // Fetch stats via AJAX
-            fetch(`/api/admin/users/${userId}/stats`, { credentials: 'same-origin' })
+            fetch(`/api/librarian/students/${userId}/stats`, { credentials: 'same-origin' })
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
