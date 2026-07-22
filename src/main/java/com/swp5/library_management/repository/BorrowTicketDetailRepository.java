@@ -88,7 +88,7 @@ public interface BorrowTicketDetailRepository
                         "WHERE b.bookCopy.copyId = :copyId " +
                         "AND b.returnDate IS NULL " +
                         "AND (b.status IS NULL OR b.status NOT IN ('Returned', 'Lost', 'Damaged'))")
-        List<BorrowTicketDetail> findActiveByCopyId(String copyId);
+        List<BorrowTicketDetail> findActiveByCopyId(@Param("copyId") String copyId);
 
         /**
          * Dashboard: Lấy danh sách Sách quá hạn cần thu hồi (Bảng Actionable)
@@ -112,4 +112,13 @@ public interface BorrowTicketDetailRepository
        java.util.List<Object[]> countOverdueByUsers(@Param("userIds") java.util.List<String> userIds);
 
        @Query("SELECT d.borrowTicket.patron.userId, COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId IN :userIds AND d.returnDate IS NULL GROUP BY d.borrowTicket.patron.userId")
-       java.util.List<Object[]> countActiveBorrowedByUsers(@Param("userIds") java.util.List<String> userIds);}
+       java.util.List<Object[]> countActiveBorrowedByUsers(@Param("userIds") java.util.List<String> userIds);
+       /** Tìm sách đang mượn có lọc theo tiêu đề sách hoặc mã người mượn */
+       @EntityGraph(attributePaths = { "bookCopy", "bookCopy.book", "borrowTicket", "borrowTicket.patron", "borrowTicket.campus" })
+       @Query("SELECT b FROM BorrowTicketDetail b " +
+              "WHERE b.returnDate IS NULL " +
+              "AND (b.status IS NULL OR b.status NOT IN ('Returned', 'Lost', 'Damaged')) " +
+              "AND (:title IS NULL OR LOWER(b.bookCopy.book.title) LIKE LOWER(CONCAT('%', :title, '%'))) " +
+              "AND (:borrowerId IS NULL OR LOWER(b.borrowTicket.patron.userId) LIKE LOWER(CONCAT('%', :borrowerId, '%')))")
+       List<BorrowTicketDetail> searchCurrentlyBorrowing(@Param("title") String title, @Param("borrowerId") String borrowerId);
+}
