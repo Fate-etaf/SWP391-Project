@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 
 import com.swp5.library_management.entity.BorrowTicketDetail;
 
-
 public interface BorrowTicketDetailRepository extends JpaRepository<BorrowTicketDetail, Integer> {
 
     @EntityGraph(attributePaths = {"bookCopy", "bookCopy.book", "borrowTicket", "borrowTicket.patron"})
@@ -79,5 +78,14 @@ public interface BorrowTicketDetailRepository extends JpaRepository<BorrowTicket
                      "WHERE b.bookCopy.copyId = :copyId " +
                      "AND b.returnDate IS NULL " +
                      "AND (b.status IS NULL OR b.status NOT IN ('Returned', 'Lost', 'Damaged'))")
-       List<BorrowTicketDetail> findActiveByCopyId(String copyId);
+       List<BorrowTicketDetail> findActiveByCopyId(@Param("copyId") String copyId);
+
+       /** Tìm sách đang mượn có lọc theo tiêu đề sách hoặc mã người mượn */
+       @EntityGraph(attributePaths = { "bookCopy", "bookCopy.book", "borrowTicket", "borrowTicket.patron", "borrowTicket.campus" })
+       @Query("SELECT b FROM BorrowTicketDetail b " +
+              "WHERE b.returnDate IS NULL " +
+              "AND (b.status IS NULL OR b.status NOT IN ('Returned', 'Lost', 'Damaged')) " +
+              "AND (:title IS NULL OR LOWER(b.bookCopy.book.title) LIKE LOWER(CONCAT('%', :title, '%'))) " +
+              "AND (:borrowerId IS NULL OR LOWER(b.borrowTicket.patron.userId) LIKE LOWER(CONCAT('%', :borrowerId, '%')))")
+       List<BorrowTicketDetail> searchCurrentlyBorrowing(@Param("title") String title, @Param("borrowerId") String borrowerId);
 }

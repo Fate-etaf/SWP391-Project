@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 @Controller
@@ -43,8 +45,17 @@ public class GraduationController {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
 
+    private boolean isNotLibrarian(HttpSession session) {
+        Boolean isLibrarian = (Boolean) session.getAttribute("isLibrarian");
+        return isLibrarian == null || !isLibrarian;
+    }
+
     @GetMapping("/check")
     public String showCheckPage(HttpSession session, Model model) {
+        if (isNotLibrarian(session)) {
+            return "redirect:/login";
+        }
+
         @SuppressWarnings("unchecked")
         List<GraduationCheckDTO> clearedList =
                 (List<GraduationCheckDTO>) session.getAttribute("graduationClearedList");
@@ -58,7 +69,16 @@ public class GraduationController {
             model.addAttribute("notClearedList", notClearedList);
             model.addAttribute("fileName", fileName);
             model.addAttribute("hasResults", true);
+
+            long totalStudentsCount = calculateDistinctStudents(clearedList, notClearedList);
+            long clearedStudentsCount = clearedList.size();
+            long violationStudentsCount = calculateDistinctViolatingStudents(notClearedList);
+
+            model.addAttribute("totalStudentsCount", totalStudentsCount);
+            model.addAttribute("clearedStudentsCount", clearedStudentsCount);
+            model.addAttribute("violationStudentsCount", violationStudentsCount);
         }
+        model.addAttribute("activeItem", "graduationCheck");
         return "graduation/check";
     }
 
@@ -68,6 +88,11 @@ public class GraduationController {
             RedirectAttributes redirectAttributes,
             HttpSession session,
             Model model) {
+
+        if (isNotLibrarian(session)) {
+            return "redirect:/login";
+        }
+        model.addAttribute("activeItem", "graduationCheck");
 
         // Validate file
         if (file.isEmpty()) {
@@ -102,6 +127,14 @@ public class GraduationController {
             model.addAttribute("fileName", originalFilename);
             model.addAttribute("hasResults", true);
 
+            long totalStudentsCount = calculateDistinctStudents(clearedList, notClearedList);
+            long clearedStudentsCount = clearedList.size();
+            long violationStudentsCount = calculateDistinctViolatingStudents(notClearedList);
+
+            model.addAttribute("totalStudentsCount", totalStudentsCount);
+            model.addAttribute("clearedStudentsCount", clearedStudentsCount);
+            model.addAttribute("violationStudentsCount", violationStudentsCount);
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi xử lý file: " + e.getMessage());
             return "redirect:/graduation/check";
@@ -112,6 +145,9 @@ public class GraduationController {
 
     @GetMapping("/clear-results")
     public String clearResults(HttpSession session) {
+        if (isNotLibrarian(session)) {
+            return "redirect:/login";
+        }
         session.removeAttribute("graduationClearedList");
         session.removeAttribute("graduationNotClearedList");
         session.removeAttribute("graduationFileName");
@@ -124,6 +160,10 @@ public class GraduationController {
     public ResponseEntity<?> sendSingleEmail(
             @RequestParam("studentId") String studentId,
             HttpSession session) {
+
+        if (isNotLibrarian(session)) {
+            return ResponseEntity.status(401).body(Map.of("error", "Quyền truy cập bị từ chối."));
+        }
 
         @SuppressWarnings("unchecked")
         List<GraduationCheckDTO> notClearedList =
@@ -156,6 +196,9 @@ public class GraduationController {
     @PostMapping("/send-all-emails")
     @ResponseBody
     public ResponseEntity<?> sendAllEmails(HttpSession session) {
+        if (isNotLibrarian(session)) {
+            return ResponseEntity.status(401).body(Map.of("error", "Quyền truy cập bị từ chối."));
+        }
 
         @SuppressWarnings("unchecked")
         List<GraduationCheckDTO> notClearedList =
@@ -203,6 +246,10 @@ public class GraduationController {
 
     @GetMapping("/export-cleared")
     public void exportCleared(HttpSession session, HttpServletResponse response) throws IOException {
+        if (isNotLibrarian(session)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Quyền truy cập bị từ chối.");
+            return;
+        }
         @SuppressWarnings("unchecked")
         List<GraduationCheckDTO> list = (List<GraduationCheckDTO>) session.getAttribute("graduationClearedList");
         if (list == null) {
@@ -285,6 +332,10 @@ public class GraduationController {
 
     @GetMapping("/export-violations")
     public void exportViolations(HttpSession session, HttpServletResponse response) throws IOException {
+        if (isNotLibrarian(session)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Quyền truy cập bị từ chối.");
+            return;
+        }
         @SuppressWarnings("unchecked")
         List<GraduationCheckDTO> list = (List<GraduationCheckDTO>) session.getAttribute("graduationNotClearedList");
         if (list == null) {
@@ -492,5 +543,36 @@ public class GraduationController {
                   </div>
                 </body></html>
                 """.formatted(errorSection, patronName, studentId, violationRows);
+    }
+
+    private long calculateDistinctStudents(List<GraduationCheckDTO> cleared, List<GraduationCheckDTO> notCleared) {
+        Set<String> studentIds = new HashSet<>();
+        if (cleared != null) {
+            for (GraduationCheckDTO dto : cleared) {
+                if (dto.getStudentId() != null) {
+                    studentIds.add(dto.getStudentId());
+                }
+            }
+        }
+        if (notCleared != null) {
+            for (GraduationCheckDTO dto : notCleared) {
+                if (dto.getStudentId() != null) {
+                    studentIds.add(dto.getStudentId());
+                }
+            }
+        }
+        return studentIds.size();
+    }
+
+    private long calculateDistinctViolatingStudents(List<GraduationCheckDTO> notCleared) {
+        Set<String> studentIds = new HashSet<>();
+        if (notCleared != null) {
+            for (GraduationCheckDTO dto : notCleared) {
+                if (dto.getStudentId() != null) {
+                    studentIds.add(dto.getStudentId());
+                }
+            }
+        }
+        return studentIds.size();
     }
 }
