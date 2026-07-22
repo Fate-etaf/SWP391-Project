@@ -1,11 +1,19 @@
 package com.swp5.library_management.dto;
 
-public class PasswordChangeDTO {
-  private String otp;
+public class ForgotPasswordDTO {
+    private String email;
+    private String otp;
     private String newPassword;
     private String confirmPassword;
 
-    // --- BẮT BUỘC PHẢI CÓ GETTER VÀ SETTER ---
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getOtp() {
         return otp;
     }
