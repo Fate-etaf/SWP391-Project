@@ -107,7 +107,7 @@ public class UserManagementController {
         }
         newUser.getRoles().add(userRole);
         
-        newUser.setPasswordHash("123");
+        newUser.setPasswordHash("12345678");
         
         if (email != null && !email.trim().isEmpty()) {
             newUser.setEmail(email.trim());
@@ -126,7 +126,7 @@ public class UserManagementController {
                     message.setFrom("thuvienfpt.test@gmail.com"); 
                     message.setTo(finalEmail);
                     message.setSubject("[FLMS FPT Library] Thông báo kích hoạt tài khoản thư viện số");
-                    message.setText("Xin chào bạn,\n\nTài khoản thư viện số FLMS của bạn trên hệ thống đã được kích hoạt thành công bởi Ban quản trị.\nBây giờ bạn đã có thể truy cập hệ thống và thực hiện mượn trả tài liệu.\n\nTrân trọng,\nBan quản lý thư viện Đại học FPT.");
+                    message.setText("Xin chào bạn,\n\nTài khoản thư viện số FLMS của bạn trên hệ thống đã được kích hoạt thành công bởi Ban quản trị.\nBây giờ bạn đã có thể truy cập hệ thống và thực hiện mượn trả tài liệu.\n\nMật khẩu đăng nhập tạm thời của bạn là: 12345678\nVui lòng đăng nhập và đổi mật khẩu để bảo mật tài khoản.\n\nTrân trọng,\nBan quản lý thư viện Đại học FPT.");
                     mailSender.send(message);
                 } catch (Exception e) {
                     System.out.println("Lỗi gửi mail đến: " + finalEmail + " -> " + e.getMessage());
@@ -272,14 +272,17 @@ public class UserManagementController {
                     Role targetRole = new Role();
                     if ("LECTURER".equalsIgnoreCase(importType)) {
                         targetRole.setRoleId(2); // Gán quyền Giảng viên ngầm định
+                        account.setRole(targetRole);
+                        if (account.getRoles() == null) account.setRoles(new java.util.HashSet<>());
                         account.getRoles().add(targetRole);
                     } else if (!userOpt.isPresent()) {
                         targetRole.setRoleId(1); // Gán quyền Sinh viên cho tài khoản tạo mới
+                        account.setRole(targetRole);
+                        if (account.getRoles() == null) account.setRoles(new java.util.HashSet<>());
                         account.getRoles().add(targetRole);
                     }
 
-
-                    account.setPasswordHash("123"); 
+                    account.setPasswordHash("12345678");  
                     
                     usersToSave.add(account);
                     successCount++;
@@ -300,7 +303,7 @@ public class UserManagementController {
                                 message.setFrom("thuvienfpt.test@gmail.com"); 
                                 message.setTo(recipientEmail);
                                 message.setSubject("[FLMS FPT Library] Thông báo kích hoạt tài khoản thư viện số");
-                                message.setText("Xin chào bạn,\n\nTài khoản thư viện số FLMS của bạn trên hệ thống đã được kích hoạt thành công bởi Ban quản trị.\nBây giờ bạn đã có thể truy cập hệ thống và thực hiện mượn trả tài liệu.\n\nTrân trọng,\nBan quản lý thư viện Đại học FPT.");
+                                message.setText("Xin chào bạn,\n\nTài khoản thư viện số FLMS của bạn trên hệ thống đã được kích hoạt thành công bởi Ban quản trị.\nBây giờ bạn đã có thể truy cập hệ thống và thực hiện mượn trả tài liệu.\n\nMật khẩu đăng nhập tạm thời của bạn là: 12345678\nVui lòng đăng nhập và đổi mật khẩu để bảo mật tài khoản.\n\nTrân trọng,\nBan quản lý thư viện Đại học FPT.");
                                 mailSender.send(message);
                             } catch (Exception e) {
                                 System.out.println("Lỗi gửi mail đến: " + recipientEmail + " -> " + e.getMessage());
