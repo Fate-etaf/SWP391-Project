@@ -221,19 +221,16 @@
 
             <form id="password-form" class="space-y-4">
                 <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mật khẩu cũ</label>
+                    <input type="password" id="oldPassword" required class="w-full bg-slate-950 border border-slate-800 text-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600" placeholder="••••••••">
+                </div>
+                <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mật khẩu mới</label>
                     <input type="password" id="newPassword" required class="w-full bg-slate-950 border border-slate-800 text-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600" placeholder="••••••••">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Xác nhận mật khẩu mới</label>
                     <input type="password" id="confirmPassword" required class="w-full bg-slate-950 border border-slate-800 text-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600" placeholder="••••••••">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mã OTP (Gửi về Email)</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="otpCode" required class="flex-grow bg-slate-950 border border-slate-800 text-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600" placeholder="Nhập mã 6 số">
-                        <button type="button" id="btn-send-otp" class="whitespace-nowrap bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-3 rounded-xl font-semibold text-sm transition-all border border-slate-700 hover:border-slate-600 disabled:opacity-50">Gửi mã OTP</button>
-                    </div>
                 </div>
                 <button type="submit" class="w-full bg-fpt-orange hover:bg-fpt-orangeHover text-white px-6 py-3 rounded-xl font-bold transition-all text-sm shadow-lg shadow-fpt-orange/20 mt-2">Cập nhật mật khẩu</button>
             </form>
@@ -242,7 +239,6 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const btnSendOtp = document.getElementById("btn-send-otp");
     const passwordForm = document.getElementById("password-form");
     const alertBox = document.getElementById("password-alert");
 
@@ -251,44 +247,12 @@ document.addEventListener("DOMContentLoaded", function() {
         alertBox.className = `mb-4 px-4 py-3 rounded-xl text-xs font-medium text-left flex items-start gap-2 animate-fade-in block ${isSuccess ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400' : 'bg-red-500/10 border border-red-500/30 text-red-400'}`;
     }
 
-    if (btnSendOtp) {
-        btnSendOtp.addEventListener("click", function() {
-            btnSendOtp.disabled = true;
-            btnSendOtp.innerText = "Đang gửi...";
-            fetch("/api/profile/send-otp", {
-                method: "POST"
-            })
-            .then(response => {
-                if (response.ok) return response.text();
-                else return response.text().then(text => { throw new Error(text) });
-            })
-            .then(msg => {
-                showAlert(msg, true);
-                let countdown = 60;
-                const timer = setInterval(() => {
-                    countdown--;
-                    btnSendOtp.innerText = `Thử lại sau ${countdown}s`;
-                    if (countdown <= 0) {
-                        clearInterval(timer);
-                        btnSendOtp.disabled = false;
-                        btnSendOtp.innerText = "Gửi lại OTP";
-                    }
-                }, 1000);
-            })
-            .catch(err => {
-                btnSendOtp.disabled = false;
-                btnSendOtp.innerText = "Gửi mã OTP";
-                showAlert(err.message || "Lỗi kết nối", false);
-            });
-        });
-    }
-
     if (passwordForm) {
         passwordForm.addEventListener("submit", function(e) {
             e.preventDefault();
+            const oldPassword = document.getElementById("oldPassword").value;
             const newPassword = document.getElementById("newPassword").value;
             const confirmPassword = document.getElementById("confirmPassword").value;
-            const otp = document.getElementById("otpCode").value;
 
             if (newPassword !== confirmPassword) {
                 showAlert("Mật khẩu xác nhận không khớp!", false);
@@ -301,9 +265,9 @@ document.addEventListener("DOMContentLoaded", function() {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
+                    oldPassword: oldPassword,
                     newPassword: newPassword,
-                    confirmPassword: confirmPassword,
-                    otp: otp
+                    confirmPassword: confirmPassword
                 })
             })
             .then(async response => {

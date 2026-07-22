@@ -4,7 +4,7 @@ import com.swp5.library_management.entity.SystemConfig;
 import com.swp5.library_management.repository.SystemConfigRepository;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.Optional;
 
 @Service

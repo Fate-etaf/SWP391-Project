@@ -1,17 +1,17 @@
 package com.swp5.library_management.dto;
 
 public class PasswordChangeDTO {
-  private String otp;
+  private String oldPassword;
     private String newPassword;
     private String confirmPassword;
 
     // --- BẮT BUỘC PHẢI CÓ GETTER VÀ SETTER ---
-    public String getOtp() {
-        return otp;
+    public String getOldPassword() {
+        return oldPassword;
     }
 
-    public void setOtp(String otp) {
-        this.otp = otp;
+    public void setOldPassword(String oldPassword) {
+        this.oldPassword = oldPassword;
     }
 
     public String getNewPassword() {
