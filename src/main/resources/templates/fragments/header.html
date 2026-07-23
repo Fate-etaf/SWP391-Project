@@ -62,9 +62,9 @@
             <div class="right-info">
                 <span class="hours">Open: 08:15 - 21:00 Weekday | 08:00 - 12:00 &amp; 13:00 - 17:00 Weekend</span>
                 <div class="lang-switch">
-                    <a href="#">Vietnamese</a>
+                    <!-- <a href="#">Vietnamese</a> -->
                 </div>
-                <span th:if="${session.loggedInUser != null}" class="user-name" th:text="${session.loggedInUser.fullName}">Sinh viên</span>
+                <!-- <span th:if="${session.loggedInUser != null}" class="user-name" th:text="${session.loggedInUser.fullName}">Sinh viên</span> -->
                 <a th:if="${session.loggedInUser != null}" href="/logout" class="btn-logout">Đăng xuất</a>
                 <a th:if="${session.loggedInUser == null}" href="/login" class="btn-logout">Đăng nhập</a>
             </div>
@@ -100,16 +100,18 @@
             <a href="/books" th:classappend="${activeNav == 'collection' ? 'active' : ''}">Bộ sưu tập</a>
             <a href="#" th:classappend="${activeNav == 'news' ? 'active' : ''}">Tin tức</a>
 
-            <th:block th:if="${session.loggedInUser != null and session.loggedInUser.isLibrarian()}">
+            <!-- <th:block th:if="${session.loggedInUser != null and session.loggedInUser.isLibrarian()}">
                 <div class="dropdown">
                     <span class="nav-item" style="color: #e87722; font-weight: 700;">Quản trị Kho ▾</span>
                     <div class="dropdown-menu">
                         <a href="/librarian/inventory/dashboard">Dashboard Kho sách</a>
                         <a href="/librarian/inventory/transfers">Luân chuyển sách</a>
                         <a href="/librarian/reports">Báo cáo Hoạt động</a>
+                        <a href="/librarian/study-rooms/management">Quản lý phòng học nhóm</a>
+                        <a href="/librarian/create-loan">Tạo đơn mượn sách</a>
                     </div>
                 </div>
-            </th:block>
+            </th:block> -->
             
             <!-- NOTIFICATIONS -->
             <div class="dropdown" th:if="${session.loggedInUser != null}" style="margin-left:auto; margin-right: 5px;">

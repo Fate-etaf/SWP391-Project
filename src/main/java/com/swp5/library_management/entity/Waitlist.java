@@ -56,4 +56,7 @@ public class Waitlist {
     @Column(name = "Status", nullable = false, length = 20)
     @Builder.Default
     private String status = "Waiting";
+
+    @Transient
+    private Long queuePosition;
 }

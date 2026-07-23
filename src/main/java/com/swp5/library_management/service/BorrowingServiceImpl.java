@@ -19,6 +19,8 @@ import java.util.List;
 public class BorrowingServiceImpl implements BorrowingService {
 
     private final BorrowTicketDetailRepository borrowTicketDetailRepository;
+    private final com.swp5.library_management.repository.WaitlistRepository waitlistRepository;
+    private final com.swp5.library_management.service.SystemConfigService systemConfigService;
 
     private static final String[] COVER_COLORS = {
         "from-slate-700 to-slate-900",
@@ -80,5 +82,85 @@ public class BorrowingServiceImpl implements BorrowingService {
         }
 
         return list;
+    }
+
+    @Override
+    @Transactional
+    public com.swp5.library_management.dto.ReservationResultDTO renewBook(String patronId, Integer ticketDetailId) {
+        BorrowTicketDetail detail = borrowTicketDetailRepository.findById(ticketDetailId)
+                .orElse(null);
+
+        if (detail == null || !detail.getBorrowTicket().getPatron().getUserId().equals(patronId)) {
+            return com.swp5.library_management.dto.ReservationResultDTO.builder()
+                    .success(false).message("Không tìm thấy thông tin lượt mượn sách hợp lệ.")
+                    .build();
+        }
+
+        // R1: Trạng thái sách
+        if (detail.getReturnDate() != null || (detail.getStatus() != null && !detail.getStatus().equals("Borrowing"))) {
+            return com.swp5.library_management.dto.ReservationResultDTO.builder()
+                    .success(false).message("Sách đã được trả hoặc không ở trạng thái đang mượn.")
+                    .build();
+        }
+
+        if (detail.getDueDate() != null && detail.getDueDate().isBefore(LocalDateTime.now())) {
+            return com.swp5.library_management.dto.ReservationResultDTO.builder()
+                    .success(false).message("Sách đã quá hạn, không thể gia hạn. Vui lòng đến thư viện nộp phạt.")
+                    .build();
+        }
+
+        // R2: Số lần gia hạn tối đa (user requested 4)
+        int maxRenewals = systemConfigService.getIntConfig("MAX_RENEWALS", 4);
+        int currentRenewals = detail.getRenewalCount() != null ? detail.getRenewalCount() : 0;
+        if (currentRenewals >= maxRenewals) {
+            return com.swp5.library_management.dto.ReservationResultDTO.builder()
+                    .success(false).message("Bạn đã đạt giới hạn gia hạn tối đa (" + maxRenewals + " lần) cho cuốn sách này.")
+                    .build();
+        }
+
+        // R3: Trạng thái tài khoản (Account valid and no overdues)
+        var patron = detail.getBorrowTicket().getPatron();
+        if (Boolean.TRUE.equals(patron.getBorrowingLocked())) {
+            return com.swp5.library_management.dto.ReservationResultDTO.builder()
+                    .success(false).message("Tài khoản của bạn đang bị khóa, không thể gia hạn sách.")
+                    .build();
+        }
+        int overdueCount = borrowTicketDetailRepository.countOverdueByPatronId(patronId);
+        if (overdueCount > 0) {
+            return com.swp5.library_management.dto.ReservationResultDTO.builder()
+                    .success(false).message("Bạn đang có " + overdueCount + " cuốn sách quá hạn chưa trả, không thể gia hạn sách mới.")
+                    .build();
+        }
+
+        // R4: Waitlist check
+        Integer bookId = detail.getBookCopy().getBook().getBookId();
+        long waitingCount = waitlistRepository.countByBookBookIdAndStatusIn(bookId, List.of("Waiting", "Notified"));
+        if (waitingCount > 0) {
+            return com.swp5.library_management.dto.ReservationResultDTO.builder()
+                    .success(false).message("Không thể gia hạn vì đang có " + waitingCount + " độc giả khác xếp hàng chờ cuốn sách này.")
+                    .build();
+        }
+
+        // R5: Thời điểm cho phép gia hạn (chỉ khi còn <= 3 ngày)
+        if (detail.getDueDate() != null) {
+            long daysUntilDue = java.time.temporal.ChronoUnit.DAYS.between(LocalDateTime.now(), detail.getDueDate());
+            if (daysUntilDue > 3) {
+                return com.swp5.library_management.dto.ReservationResultDTO.builder()
+                        .success(false).message("Chỉ được phép gia hạn khi thời hạn trả sách còn dưới 3 ngày.")
+                        .build();
+            }
+        }
+
+        // R6: Thực thi
+        int renewalDays = systemConfigService.getIntConfig("RENEWAL_DAYS", 7);
+        detail.setDueDate(detail.getDueDate().plusDays(renewalDays));
+        detail.setRenewalCount(currentRenewals + 1);
+        borrowTicketDetailRepository.save(detail);
+
+        return com.swp5.library_management.dto.ReservationResultDTO.builder()
+                .success(true)
+                .message("Gia hạn thành công! Hạn trả mới của bạn là " + 
+                         detail.getDueDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")))
+                .build();
     }
 }
