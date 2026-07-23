@@ -160,13 +160,20 @@ public class ViolationServiceImpl implements ViolationService {
     private FineInvoice buildFine(BorrowTicketDetail detail, BigDecimal amount, String violationType, String reason) {
         FineInvoice fine = new FineInvoice();
         fine.setTicketDetail(detail);
-        fine.setPatron(detail.getBorrowTicket() != null ? detail.getBorrowTicket().getPatron() : null);
+        User patron = detail.getBorrowTicket() != null ? detail.getBorrowTicket().getPatron() : null;
+        fine.setPatron(patron);
         fine.setFineAmount(amount);
         fine.setRemainingAmount(amount);
         fine.setViolationType(violationType);
         fine.setReason(reason);
         fine.setCreatedAt(LocalDateTime.now());
         fine.setPaidStatus("UNPAID");
+        
+        if (patron != null) {
+            patron.setBorrowingLocked(true);
+            userRepository.save(patron);
+        }
+        
         return fineInvoiceRepository.save(fine);
     }
 
