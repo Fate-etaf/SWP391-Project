@@ -73,6 +73,14 @@ public class BookServiceImpl implements BookService {
     @Transactional
     public Book saveBook(AddBookForm form, Integer campusId) {
 
+        // ── 0. Check ISBN Uniqueness ───────────────────────────────────────────
+        if (StringUtils.hasText(form.getIsbn())) {
+            String cleanIsbn = form.getIsbn().trim();
+            if (bookRepository.existsByIsbn(cleanIsbn)) {
+                throw new IllegalArgumentException("Mã ISBN '" + cleanIsbn + "' đã tồn tại trong hệ thống!");
+            }
+        }
+
         // ── 1. Resolve Author(s) — find or create ──────────────────────────────
         Set<Author> authors = new HashSet<>();
         if (StringUtils.hasText(form.getAuthorName())) {
@@ -233,7 +241,9 @@ public class BookServiceImpl implements BookService {
                 .conditionStatus(c.getConditionStatus())
                 .copyStatus(c.getCopyStatus())
                 .shelfCode(c.getShelf()  != null ? c.getShelf().getShelfCode() : "—")
+                .shelfNumber(c.getShelf() != null ? c.getShelf().getShelfNumber() : null)
                 .shelfName(c.getShelf()  != null ? c.getShelf().getShelfName() : "—")
+                .shelfCodeTopic(c.getShelf() != null ? c.getShelf().getShelfCodeTopic() : "—")
                 .build()
         ).collect(Collectors.toList());
 
@@ -243,6 +253,10 @@ public class BookServiceImpl implements BookService {
         String categoryNames = book.getCategories().stream()
                 .map(Category::getCategoryName)
                 .collect(Collectors.joining(", "));
+
+        // Tra cứu thông tin chi tiết của Kệ sách dựa trên shelfCode của Book
+        com.swp5.library_management.entity.Shelf mainShelf = book.getShelfCode() != null 
+                ? shelfRepository.findById(book.getShelfCode()).orElse(null) : null;
 
         // Chọn màu bìa giả ngẫu nhiên theo bookId (ổn định, không random mỗi lần)
         String coverColor = COVER_COLORS[book.getBookId() % COVER_COLORS.length];
@@ -263,6 +277,10 @@ public class BookServiceImpl implements BookService {
                 .subjectCode(book.getSubject()  != null ? book.getSubject().getSubjectCode() : null)
                 .subjectName(book.getSubject()  != null ? book.getSubject().getSubjectName() : null)
                 .categoryNames(categoryNames.isEmpty() ? "Chưa phân loại" : categoryNames)
+                .shelfCode(book.getShelfCode())
+                .shelfNumber(mainShelf != null ? mainShelf.getShelfNumber() : null)
+                .shelfName(mainShelf != null ? mainShelf.getShelfName() : null)
+                .shelfCodeTopic(mainShelf != null ? mainShelf.getShelfCodeTopic() : null)
                 .copies(copyRows)
                 .hasAvailableCopy(hasAvailableCopy)
                 .build();

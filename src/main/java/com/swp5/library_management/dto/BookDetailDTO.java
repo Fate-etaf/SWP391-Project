@@ -61,6 +61,18 @@ public class BookDetailDTO {
     /** Các thể loại sách, ghép bởi dấu phẩy. */
     private String categoryNames;
 
+    /** Vị trí kệ của sách. */
+    private String shelfCode;
+
+    /** Số thứ tự kệ sách. */
+    private Integer shelfNumber;
+
+    /** Tên kệ sách. */
+    private String shelfName;
+
+    /** Chủ đề kệ sách. */
+    private String shelfCodeTopic;
+
     /**
      * Danh sách bản sao vật lý. Nếu người dùng chọn campus → chỉ chứa bản sao
      * tại campus đó. Nếu không chọn campus → tất cả campus.

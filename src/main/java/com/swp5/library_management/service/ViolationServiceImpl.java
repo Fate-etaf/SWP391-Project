@@ -30,10 +30,10 @@ public class ViolationServiceImpl implements ViolationService {
     private final BorrowTicketDetailRepository borrowTicketDetailRepository;
     private final FineInvoiceRepository fineInvoiceRepository;
     private final BookCopyRepository bookCopyRepository;
-    private final ReservationService reservationService;
-    private final SystemConfigService systemConfigService;
     private final AcquisitionOrderDetailRepository acquisitionOrderDetailRepository;
     private final UserRepository userRepository;
+    private final ReservationService reservationService;
+    private final SystemConfigService systemConfigService;
 
     @Override
     @Transactional(readOnly = true)
