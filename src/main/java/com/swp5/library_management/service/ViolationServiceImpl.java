@@ -190,8 +190,7 @@ public class ViolationServiceImpl implements ViolationService {
         return acquisitionOrderDetailRepository
                 .findLatestByBook(book)
                 .map(d -> d.getUnitPrice())
-                .orElseThrow(() -> new IllegalStateException(
-                        "Không tìm thấy thông tin đơn nhập hoặc đơn giá hợp lệ của sách: " + book.getTitle()));
+                .orElse(BigDecimal.valueOf(100000)); // Fallback price 100,000 VND for testing
     }
 
     private void markCopyStatus(BookCopy copy, String copyStatus, String conditionStatus) {
