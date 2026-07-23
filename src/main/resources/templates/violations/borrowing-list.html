@@ -22,87 +22,118 @@
             }
         }
     </script>
+    <style th:replace="~{fragments/header :: header-style}"></style>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
     </style>
 </head>
 
-<body class="bg-slate-50 min-h-screen text-slate-800">
+<body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-between relative overflow-x-hidden">
 
-    <header class="bg-fpt-dark text-white sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                <div class="flex items-center space-x-3">
-                    <div
-                        class="bg-fpt-orange text-white p-2.5 rounded-lg font-extrabold text-xl tracking-wider shadow-lg">
-                        FPT</div>
-                    <div>
-                        <h1 class="text-lg font-bold tracking-tight leading-none text-orange-400">FLMS</h1>
-                        <p class="text-xs text-slate-400 font-medium">Library Management System</p>
-                    </div>
-                </div>
-                <nav class="hidden md:flex space-x-8 font-medium text-sm">
-                <a href="/home" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Trang chủ</a>
-                <a href="/books" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Tra cứu sách</a>
-                <a href="/borrowing" class="text-fpt-orange hover:text-orange-400 transition-colors py-2 border-b-2 border-fpt-orange">Đang mượn</a>
-                <a href="/borrowing/return-center" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Desk Return Center</a>
-                <a href="/violations/overdue" class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Quá hạn</a>
-            </nav>
-            </div>
+    <!-- Ambient Background Glows -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
+    </div>
+
+    <div class="relative z-50">
+        <div th:replace="~{fragments/header :: header('librarian')}"></div>
+    </div>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
+        <!-- SIDEBAR -->
+        <div th:replace="~{fragments/sidebar :: sidebar('borrowing')}"></div>
+
+        <div class="flex-grow min-w-0">
+        <!-- VietQR Config Inputs -->
+        <input type="hidden" id="vqrBankId" th:value="${vietqrBankId}">
+        <input type="hidden" id="vqrBankName" th:value="${vietqrBankName}">
+        <input type="hidden" id="vqrAccountNo" th:value="${vietqrAccountNo}">
+        <input type="hidden" id="vqrAccountName" th:value="${vietqrAccountName}">
+
+        <!-- Alert Messages -->
+        <div th:if="${successMsg}"
+            class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-250 text-emerald-800 flex items-center gap-2">
+            <span class="text-emerald-500">✅</span>
+            <span th:text="${successMsg}" class="font-medium text-sm">Thông báo thành công</span>
         </div>
-    </header>
+        <div th:if="${errorMsg}"
+            class="mb-6 p-4 rounded-xl bg-red-50 border border-red-250 text-red-800 flex items-center gap-2">
+            <span class="text-red-500">⚠️</span>
+            <span th:text="${errorMsg}" class="font-medium text-sm">Thông báo lỗi</span>
+        </div>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-wider text-fpt-orange">Quản lý mượn sách</p>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Sách đang được mượn</h2>
-                <p class="text-sm text-slate-500 mt-1">Danh sách các cuốn sách hiện đang được mượn và thông tin người
-                    mượn.</p>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-100">Sách đang được mượn</h2>
+                <p class="text-sm text-slate-400 mt-1">Danh sách các cuốn sách hiện đang được mượn và thông tin người mượn.</p>
             </div>
-            <div class="flex gap-3">
-                <a href="/violations/overdue"
-                    class="inline-flex items-center gap-2 bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 font-semibold text-sm px-4 py-2 rounded-xl shadow-sm transition-all">
+            <div class="flex gap-3 animate-fade-in">
+                <button type="button" onclick="openBorrowingQr()"
+                    class="inline-flex items-center gap-2 bg-fpt-orange text-white hover:bg-fpt-orangeHover font-semibold text-sm px-4 py-2 rounded-xl shadow-sm transition-all hover:scale-105">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 17h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                     </svg>
-                    Xem quá hạn
-                </a>
+                    📷 Quét mã sách
+                </button>
             </div>
         </div>
 
         <!-- Bộ lọc -->
-        <section class="bg-white border border-slate-300 rounded-2xl shadow-sm p-5 md:p-6 mb-6">
-        <form class="grid grid-cols-1 sm:grid-cols-2 gap-4" method="get" th:action="@{/borrowing}">
+        <section class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl shadow-2xl p-5 md:p-6 mb-6">
+            <form id="filterForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4" method="get" th:action="@{/borrowing}">
                 <div>
-                    <label for="bookTitle" class="block text-xs font-semibold text-slate-500 mb-1">Tên sách</label>
-                    <input id="bookTitle" name="bookTitle" type="text" th:value="${bookTitle}"
-                        oninput="scheduleFilterSubmit(this.form)" placeholder="Nhập tên sách..."
-                        class="w-full rounded-lg border border-slate-400 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange/40" />
+                    <label for="bookTitle" class="block text-xs font-semibold text-slate-400 mb-1">Tên sách</label>
+                    <input id="bookTitle" name="bookTitle" type="text" th:value="${bookTitle}" oninput="onFilterInput()"
+                        placeholder="Nhập tên sách..."
+                        class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange/40" />
                 </div>
                 <div>
-                    <label for="borrowerId" class="block text-xs font-semibold text-slate-500 mb-1">Mã sinh viên</label>
+                    <label for="borrowerId" class="block text-xs font-semibold text-slate-400 mb-1">Mã sinh viên</label>
                     <input id="borrowerId" name="borrowerId" type="text" th:value="${borrowerId}"
-                        oninput="scheduleFilterSubmit(this.form)" placeholder="Nhập mã sinh viên..."
-                        class="w-full rounded-lg border border-slate-400 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange/40" />
+                        oninput="onFilterInput()" placeholder="Nhập mã sinh viên..."
+                        class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange/40" />
                 </div>
-                <div class="sm:col-span-2 flex items-center gap-3 pt-1">
-                    <a href="/borrowing"
-                        class="text-sm font-semibold text-slate-500 hover:text-slate-700">Xóa bộ lọc</a>
+                <div class="sm:col-span-2 flex items-center justify-between pt-1">
+                    <a href="/borrowing" class="text-sm font-semibold text-slate-400 hover:text-slate-200">Xóa bộ
+                        lọc</a>
+                    <button type="submit"
+                        class="inline-flex items-center gap-2 bg-fpt-orange text-white hover:bg-fpt-orangeHover font-semibold text-sm px-5 py-2 rounded-xl shadow-sm transition-all hover:scale-105">
+                        🔍 Tìm kiếm
+                    </button>
                 </div>
             </form>
         </section>
 
         <!-- Bảng danh sách -->
-        <section class="bg-white border border-slate-300 rounded-2xl shadow-sm overflow-hidden">
+        <section class="bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
-                    <thead class="bg-slate-50 text-slate-600 border-b border-slate-300">
+                    <thead class="bg-slate-950/80 text-slate-300 border-b border-slate-800">
                         <tr>
                             <th class="text-left px-6 py-4 font-semibold">Người mượn</th>
                             <th class="text-left px-6 py-4 font-semibold">Mã sinh viên</th>
@@ -110,59 +141,42 @@
                             <th class="text-left px-6 py-4 font-semibold">Mã bản sao</th>
                             <th class="text-left px-6 py-4 font-semibold">Ngày mượn</th>
                             <th class="text-left px-6 py-4 font-semibold">Hạn trả</th>
-                            <th class="text-left px-6 py-4 font-semibold">Trạng thái hạn</th>
                             <th class="text-left px-6 py-4 font-semibold">Thao tác</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-300">
+                    <tbody id="borrowingTableBody" class="divide-y divide-slate-800/50">
                         <tr th:if="${borrowingItems.isEmpty()}">
-                            <td colspan="8" class="px-6 py-12 text-center text-slate-400 text-sm">Không có sách nào đang
+                            <td colspan="7" class="px-6 py-12 text-center text-slate-500 text-sm bg-slate-900/40">Không có sách nào đang
                                 được mượn.</td>
                         </tr>
-                        <tr th:each="item : ${borrowingItems}" class="hover:bg-slate-50/70">
-                            <td class="px-6 py-4 text-slate-700 font-medium"
+                        <tr th:each="item : ${borrowingItems}" class="hover:bg-slate-800/40">
+                            <td class="px-6 py-4 text-slate-300 font-medium"
                                 th:text="${item.borrowTicket?.patron?.fullName ?: '—'}">—</td>
-                            <td class="px-6 py-4 text-slate-600 font-mono text-xs"
+                            <td class="px-6 py-4 text-slate-400 font-mono text-xs"
                                 th:text="${item.borrowTicket?.patron?.userId ?: '—'}">—</td>
-                            <td class="px-6 py-4 font-semibold text-slate-900"
+                            <td class="px-6 py-4 font-semibold text-slate-200"
                                 th:text="${item.bookCopy?.book?.title ?: '—'}">—</td>
-                            <td class="px-6 py-4 text-slate-600 font-mono text-xs"
+                            <td class="px-6 py-4 text-slate-400 font-mono text-xs"
                                 th:text="${item.bookCopy?.copyId ?: '—'}">—</td>
-                            <td class="px-6 py-4 text-slate-600"
+                            <td class="px-6 py-4 text-slate-400"
                                 th:text="${item.borrowTicket?.createdAt != null ? #temporals.format(item.borrowTicket.createdAt, 'dd-MM-yyyy') : '—'}">
                                 —</td>
-                            <td class="px-6 py-4 text-slate-600"
+                            <td class="px-6 py-4 text-slate-400"
                                 th:text="${item.dueDate != null ? #temporals.format(item.dueDate, 'dd-MM-yyyy') : '—'}">
                                 —</td>
-                            <!-- Trạng thái hạn: quá hạn hay còn hạn -->
-                            <td class="px-6 py-4">
-                                <span
-                                    class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
-                                    th:with="isOverdue=${item.dueDate != null and item.dueDate.toLocalDate().isBefore(T(java.time.LocalDate).now())}"
-                                    th:classappend="${isOverdue} ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'"
-                                    th:text="${isOverdue} ? 'Quá hạn' : 'Còn hạn'">
-                                    Còn hạn
-                                </span>
-                            </td>
                             <td class="px-6 py-4">
                                 <div class="flex flex-wrap gap-2">
                                     <button type="button"
                                         class="bg-emerald-500 hover:bg-emerald-600 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
-                                        th:attr="data-action=@{'/borrowing/return/' + ${item.ticketDetailId}}"
-                                        onclick="openConfirmModal(this, 'Xác nhận trả sách?', 'Sách sẽ được đánh dấu đã trả và trả lại kệ sách.');">
-                                        ✓ Trả sách
-                                    </button>
-                                    <button type="button"
-                                        class="bg-red-500 hover:bg-red-600 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
-                                        th:attr="data-action=@{'/borrowing/create-lost/' + ${item.ticketDetailId}}"
-                                        onclick="openConfirmModal(this, 'Xác nhận đánh dấu sách bị mất?', 'Thao tác này sẽ cập nhật trạng thái bản sao và tạo phiếu phạt.');">
-                                        Mất sách
+                                        th:attr="data-copy-id=${item.bookCopy?.copyId}"
+                                        onclick="triggerCheckReturn(this.getAttribute('data-copy-id'))">
+                                        Trả sách
                                     </button>
                                     <button type="button"
                                         class="bg-amber-500 hover:bg-amber-600 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
-                                        th:attr="data-action=@{'/borrowing/create-damaged/' + ${item.ticketDetailId}}"
-                                        onclick="openConfirmModal(this, 'Xác nhận đánh dấu sách bị hỏng?', 'Thao tác này sẽ cập nhật trạng thái bản sao và tạo phiếu phạt.');">
-                                        Hỏng sách
+                                        th:attr="data-copy-id=${item.bookCopy?.copyId}"
+                                        onclick="triggerDirectIncident(this.getAttribute('data-copy-id'), 'Lost')">
+                                        ⚠️ Báo sự cố
                                     </button>
                                 </div>
                             </td>
@@ -171,51 +185,51 @@
                 </table>
             </div>
 
-            <!-- Phân trang -->
-            <div
-                class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-6 py-4 border-t border-slate-300 bg-white">
-                <div class="text-sm text-slate-500">
+            <div id="paginationContainer"
+                class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-6 py-4 border-t border-slate-800 bg-slate-950/60">
+                <div class="text-sm text-slate-400">
                     <span
                         th:text="${totalPages == 0 ? 'Trang 0 / 0' : 'Trang ' + (currentPage + 1) + ' / ' + totalPages}">Trang
                         1 / 1</span>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    <a class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                    <a class="px-3 py-1.5 rounded-lg border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800/60 transition-colors"
                         th:if="${currentPage > 0}"
                         th:href="@{/borrowing(page=${currentPage - 1}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">Trước</a>
-                    <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400"
+                    <span class="px-3 py-1.5 rounded-lg border border-slate-800/80 text-sm text-slate-650"
                         th:if="${currentPage == 0}">Trước</span>
 
                     <a th:if="${totalPages > 0}" th:each="p : ${#numbers.sequence(0, totalPages - 1)}"
-                        class="px-3 py-1.5 rounded-lg border text-sm font-semibold"
-                        th:classappend="${p == currentPage} ? ' border-fpt-orange text-fpt-orange bg-orange-50' : ' border-slate-300 text-slate-600 hover:bg-slate-50'"
+                        class="px-3 py-1.5 rounded-lg border text-sm font-semibold transition-colors"
+                        th:classappend="${p == currentPage} ? ' border-fpt-orange text-fpt-orange bg-fpt-orange/10' : ' border-slate-700 text-slate-300 hover:bg-slate-800/60'"
                         th:text="${p + 1}"
                         th:href="@{/borrowing(page=${p}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">1</a>
 
-                    <a class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                    <a class="px-3 py-1.5 rounded-lg border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800/60 transition-colors"
                         th:if="${currentPage + 1 < totalPages}"
                         th:href="@{/borrowing(page=${currentPage + 1}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">Sau</a>
-                    <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400"
+                    <span class="px-3 py-1.5 rounded-lg border border-slate-800/80 text-sm text-slate-650"
                         th:if="${currentPage + 1 >= totalPages}">Sau</span>
                 </div>
             </div>
         </section>
+        </div>
     </main>
 
     <!-- Modal Xác nhận -->
-    <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50">
-        <div class="bg-white w-full max-w-md rounded-2xl border border-slate-300 shadow-xl p-6">
-            <h3 id="confirmTitle" class="text-lg font-extrabold text-slate-900">Xác nhận</h3>
-            <p id="confirmMessage" class="text-sm text-slate-600 mt-2">Thông báo</p>
+    <div id="confirmModal" class="fixed inset-0 bg-slate-950/80 hidden items-center justify-center z-50">
+        <div class="bg-slate-900 w-full max-w-md rounded-2xl border border-slate-800 shadow-xl p-6 text-slate-100">
+            <h3 id="confirmTitle" class="text-lg font-extrabold text-slate-100">Xác nhận</h3>
+            <p id="confirmMessage" class="text-sm text-slate-400 mt-2">Thông báo</p>
             <div class="flex items-center justify-end gap-3 mt-6">
                 <button type="button"
-                    class="px-4 py-2 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                    class="px-4 py-2 rounded-lg border border-slate-700 bg-slate-950 text-sm font-semibold text-slate-300 hover:bg-slate-800/80 transition-colors"
                     onclick="closeConfirmModal()">
                     Hủy
                 </button>
                 <form id="confirmForm" method="post">
                     <button type="submit"
-                        class="px-4 py-2 rounded-lg bg-fpt-orange hover:bg-fpt-orangeHover text-white text-sm font-bold">
+                        class="px-4 py-2 rounded-lg bg-fpt-orange hover:bg-fpt-orangeHover text-white text-sm font-bold shadow-lg shadow-fpt-orange/20 active:scale-95 transition-all">
                         Xác nhận
                     </button>
                 </form>
@@ -224,11 +238,70 @@
     </div>
 
     <script>
-        let filterSubmitTimer;
-        function scheduleFilterSubmit(form) {
-            clearTimeout(filterSubmitTimer);
-            filterSubmitTimer = setTimeout(() => form.submit(), 400);
+        let instantSearchTimer;
+        function onFilterInput() {
+            clearTimeout(instantSearchTimer);
+            instantSearchTimer = setTimeout(() => {
+                submitInstantSearch();
+            }, 300);
         }
+
+        async function submitInstantSearch(targetUrl = null) {
+            const form = document.getElementById('filterForm');
+            let url = targetUrl;
+            if (!url) {
+                const bookTitle = document.getElementById('bookTitle').value.trim();
+                const borrowerId = document.getElementById('borrowerId').value.trim();
+                url = `${form.getAttribute('action')}?bookTitle=${encodeURIComponent(bookTitle)}&borrowerId=${encodeURIComponent(borrowerId)}`;
+            }
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) return;
+                const html = await response.text();
+
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                const newTbody = doc.getElementById('borrowingTableBody');
+                const currentTbody = document.getElementById('borrowingTableBody');
+                if (newTbody && currentTbody) {
+                    currentTbody.innerHTML = newTbody.innerHTML;
+                }
+
+                const newPagination = doc.getElementById('paginationContainer');
+                const currentPagination = document.getElementById('paginationContainer');
+                if (newPagination && currentPagination) {
+                    currentPagination.innerHTML = newPagination.innerHTML;
+                }
+
+                window.history.replaceState(null, '', url);
+            } catch (error) {
+                console.error("Instant search error:", error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('filterForm');
+            if (form) {
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    clearTimeout(instantSearchTimer);
+                    submitInstantSearch();
+                });
+            }
+
+            const pagination = document.getElementById('paginationContainer');
+            if (pagination) {
+                pagination.addEventListener('click', function (event) {
+                    const link = event.target.closest('a');
+                    if (link && link.getAttribute('href')) {
+                        event.preventDefault();
+                        submitInstantSearch(link.getAttribute('href'));
+                    }
+                });
+            }
+        });
 
         function openConfirmModal(button, title, message) {
             var action = button.getAttribute('data-action');
@@ -252,6 +325,757 @@
         });
     </script>
 
-</body>
+    <!-- ====== MODAL CAMERA QR (CHUYỂN THÀNH KẾT NỐI APP DI ĐỘNG) ====== -->
+    <div id="qrCameraModal" class="fixed inset-0 bg-slate-950/80 hidden items-center justify-center z-[200] p-4">
+        <div class="bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-slate-800 text-slate-100">
+            <div class="bg-fpt-navy px-6 py-5 flex items-center justify-between border-b border-slate-800">
+                <div>
+                    <p class="text-xs font-bold text-fpt-orange uppercase tracking-widest">Mobile Integration</p>
+                    <h3 class="text-xl font-extrabold text-white">📱 Đang Chờ App Quét QR</h3>
+                </div>
+                <button onclick="closeBorrowingQr()"
+                    class="text-slate-400 hover:text-white text-3xl font-bold transition-colors leading-none">&times;</button>
+            </div>
+            <div class="p-8 flex flex-col items-center">
+                <div class="relative flex items-center justify-center w-24 h-24 mb-6">
+                    <span class="absolute inline-flex h-full w-full rounded-full bg-fpt-orange/20 animate-ping"></span>
+                    <span class="absolute inline-flex h-16 w-16 rounded-full bg-fpt-orange/10 animate-ping"
+                        style="animation-delay: 0.3s;"></span>
+                    <div
+                        class="relative z-10 w-16 h-16 bg-fpt-orange rounded-full flex items-center justify-center shadow-lg">
+                        <svg class="w-8 h-8 text-white animate-pulse" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 17h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                        </svg>
+                    </div>
+                </div>
 
+                <div class="text-center w-full">
+                    <p class="font-bold text-slate-200 text-lg">Đang chờ điện thoại gửi mã quét...</p>
+                    <p class="text-xs text-slate-400 mt-2 font-mono">Thời gian chờ: <span id="scanWaitCounter"
+                            class="text-fpt-orange font-bold">0s</span></p>
+                </div>
+
+                <div class="mt-6 border-t border-slate-800 pt-6 w-full text-left">
+                    <h4 class="text-xs font-bold text-slate-200 mb-2">Hướng dẫn kết nối:</h4>
+                    <ol class="text-xs text-slate-400 space-y-2 list-decimal list-inside">
+                        <li>Kết nối điện thoại vào mạng Wi-Fi hoặc Mobile Hotspot do máy tính này phát.</li>
+                        <li>Sử dụng ứng dụng quét mã di động của bạn để quét mã QR trên sách.</li>
+                        <li>Ứng dụng sẽ gửi mã Copy ID trực tiếp về cổng API và hệ thống sẽ tự động xử lý.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== MODAL 1: TRẢ ĐÚNG HẠN ====== -->
+    <div id="normalReturnModal"
+        class="fixed inset-0 bg-slate-950/80 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div
+            class="bg-slate-900 w-full max-w-md rounded-2xl border border-slate-800 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-100">
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-4 mb-4">
+                <div
+                    class="w-10 h-10 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7">
+                        </path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-100">Trả sách đúng hạn</h3>
+                    <p class="text-xs text-slate-400">Không có hóa đơn phạt phát sinh</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 mb-4 bg-slate-950 border border-slate-800/80 p-4 rounded-xl text-sm text-slate-350">
+                <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-200">...</span></p>
+                <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-400 font-mono font-bold">...</span>
+                </p>
+                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-200">...</span> (<span
+                        class="txt-patron-id">...</span>)</p>
+                <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-300">...</span></p>
+                <p><strong>Hạn trả:</strong> <span class="txt-due-date text-slate-300">...</span></p>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-slate-400 mb-1">📋 Tình trạng sách khi nhận lại</label>
+                <select id="conditionStatusNormal"
+                    class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange">
+                    <option value="New">✨ New — Mới</option>
+                    <option value="Good">👍 Good — Tốt</option>
+                    <option value="Fair">📖 Fair — Bình thường</option>
+                </select>
+                <p class="text-xs text-slate-500 mt-1">⚠️ Chỉ được chọn tình trạng bằng hoặc thấp hơn hiện tại</p>
+            </div>
+
+            <div class="flex justify-between items-center mt-6">
+                <button onclick="switchModalToReport('Lost')" class="text-xs text-red-400 hover:underline">⚠️ Báo mất
+                    sách</button>
+                <div class="flex gap-3">
+                    <button onclick="closeModal('normalReturnModal')"
+                        class="px-4 py-2 border border-slate-750 bg-slate-950 text-slate-300 hover:bg-slate-800 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
+                    <button id="btnConfirmNormal"
+                        class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Xác
+                        nhận trả</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== MODAL 2: TRẢ QUÁ HẠN ====== -->
+    <div id="overdueReturnModal"
+        class="fixed inset-0 bg-slate-950/80 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div
+            class="bg-slate-900 w-full max-w-md rounded-2xl border border-slate-800 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-100">
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-4 mb-4">
+                <div class="w-10 h-10 bg-red-500/10 text-red-400 rounded-full flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                        </path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-100">Trả sách quá hạn</h3>
+                    <p class="text-xs text-red-450 font-semibold txt-overdue-days">Quá hạn: 0 ngày</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 mb-4 bg-slate-950 border border-slate-800/80 p-4 rounded-xl text-sm text-slate-350">
+                <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-200">...</span></p>
+                <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-500 font-mono font-bold">...</span>
+                </p>
+                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-200">...</span></p>
+                <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-300">...</span></p>
+                <p><strong>Hạn trả:</strong> <span class="txt-due-date text-slate-300">...</span></p>
+                <p><strong>Số ngày quá hạn:</strong> <span class="txt-overdue-days-val font-semibold text-red-450">0</span> ngày</p>
+                <p class="border-t border-slate-800 pt-2 text-base font-bold text-red-400">
+                    Tiền phạt quá hạn: <span class="txt-fine-amount">0</span>đ
+                </p>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-slate-400 mb-1">📋 Tình trạng sách khi nhận lại</label>
+                <select id="conditionStatusOverdue"
+                    class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange">
+                    <option value="New">✨ New — Mới</option>
+                    <option value="Good">👍 Good — Tốt</option>
+                    <option value="Fair">📖 Fair — Bình thường</option>
+                </select>
+                <p class="text-xs text-slate-500 mt-1">⚠️ Chỉ được chọn tình trạng bằng hoặc thấp hơn hiện tại</p>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-slate-400 mb-1">Phương thức thanh toán phạt</label>
+                <select id="paymentMethodOverdue"
+                    class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+                    onchange="toggleTxCode()">
+                    <option value="Cash">💵 Tiền mặt tại quầy</option>
+                    <option value="QRCode">📲 QRCode Chuyển khoản</option>
+                </select>
+            </div>
+
+            <div id="txCodeContainer" class="hidden mb-6 animate-fade-in">
+                <label class="block text-xs font-bold text-slate-400 mb-1">Mã giao dịch đối chiếu (Chuyển khoản)</label>
+                <input type="text" id="transactionCodeOverdue"
+                    class="w-full bg-slate-950 border border-slate-750 rounded-lg p-2 text-sm uppercase font-mono text-slate-200 focus:outline-none focus:border-fpt-orange"
+                    placeholder="Nhập mãGD ngân hàng...">
+            </div>
+
+            <!-- QR Code container -->
+            <div id="overdueQrContainer"
+                class="hidden space-y-4 border border-slate-800 rounded-xl p-4 bg-slate-950/80 mt-4 animate-fade-in text-xs text-slate-300">
+                <div class="flex justify-center mb-2">
+                    <img id="overdueQrImage" src="" alt="Mã VietQR"
+                        class="h-44 w-44 rounded-lg shadow-sm border border-slate-750">
+                </div>
+                <div class="space-y-1">
+                    <div class="flex justify-between"><span class="text-slate-500">Ngân hàng:</span> <span
+                            class="font-semibold text-slate-200" th:text="${vietqrBankName}">TPBank</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Số tài khoản:</span> <span
+                            class="font-mono font-semibold text-slate-200"
+                            th:text="${vietqrAccountNo}">00000102719</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">Tên tài khoản:</span> <span
+                            class="font-semibold text-slate-200" th:text="${vietqrAccountName}">NGUYEN QUANG VINH</span>
+                    </div>
+                    <div class="flex justify-between"><span class="text-slate-500">Nội dung:</span> <span
+                            id="overdueQrInfo"
+                            class="font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">...</span></div>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center mt-6">
+                <button type="button" onclick="submitOverdueReturnLater()"
+                    class="text-xs text-amber-500 hover:underline font-bold">💳 Trả sách thanh toán sau</button>
+                <div class="flex gap-3">
+                    <button onclick="closeModal('overdueReturnModal')"
+                        class="px-4 py-2 border border-slate-755 bg-slate-950 text-slate-300 hover:bg-slate-800 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
+                    <button id="btnConfirmOverdue"
+                        class="px-4 py-2 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Thu
+                        tiền &amp; Trả sách</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== MODAL 3: BÁO MẤT / BÁO HỎNG ====== -->
+    <div id="reportIncidentModal"
+        class="fixed inset-0 bg-slate-950/80 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div
+            class="bg-slate-900 w-full max-w-md rounded-2xl border border-slate-800 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-100">
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-4 mb-4">
+                <div
+                    class="w-10 h-10 bg-amber-500/10 text-amber-450 rounded-full flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                        </path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-100" id="reportModalTitle">Báo cáo mất / hỏng sách</h3>
+                    <p class="text-xs text-slate-400">Cập nhật trạng thái sách và lập biên bản xử lý</p>
+                </div>
+            </div>
+
+            <div class="space-y-2 mb-4 bg-slate-950 border border-slate-800/80 p-4 rounded-xl text-sm text-slate-350">
+                <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-200">...</span></p>
+                <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-400 font-mono font-bold">...</span>
+                </p>
+                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-200">...</span></p>
+                <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-300">—</span></p>
+                <p><strong>Hạn trả:</strong> <span class="txt-due-date text-amber-500 font-bold">—</span></p>
+            </div>
+
+            <!-- Combined Fine Warning Banner for Overdue Lost Books -->
+            <div id="combinedFineWarning"
+                class="hidden mb-4 p-3 bg-red-950/60 border border-red-900 rounded-xl text-xs text-red-200">
+                <div class="flex items-start gap-2">
+                    <span class="text-sm">⚠️</span>
+                    <div>
+                        <p class="font-bold">Bản sao này đang quá hạn <span id="combinedOverdueDays"
+                                class="font-extrabold text-red-400">0</span> ngày!</p>
+                        <p class="mt-1">Ngoài tiền đền bù mất sách (<span id="combinedBookPrice" class="font-semibold text-slate-200">0</span>đ), người mượn
+                            vẫn cần đóng thêm tiền phạt quá hạn là <span id="combinedOverdueFine" class="font-semibold text-slate-250">0</span>đ.</p>
+                        <p class="font-bold mt-1 text-red-300 border-t border-red-900/60 pt-1">Tổng tiền phạt/đền bù: <span
+                                id="combinedTotalFine" class="text-red-400 font-extrabold">0</span>đ</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-slate-400 mb-1">Loại sự cố</label>
+                <select id="incidentType"
+                    class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+                    onchange="onSwitchIncidentType()">
+                    <option value="Lost">🚨 Mất sách (Đền bù giá sách)</option>
+                    <option value="Damaged">📘 Hỏng sách (Phạt hư hại)</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-slate-400 mb-1">Ghi chú (Lý do / Tình trạng chi tiết)</label>
+                <textarea id="incidentNotes" rows="2"
+                    class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+                    placeholder="Nhập lý do đền bù hoặc ghi chú tình trạng..."></textarea>
+            </div>
+
+            <div class="mb-4 flex items-center gap-2">
+                <input type="checkbox" id="incidentPayNow" class="rounded border-slate-700 bg-slate-950 text-fpt-orange focus:ring-fpt-orange"
+                    onchange="toggleIncidentPay()" checked>
+                <label for="incidentPayNow" class="text-xs font-bold text-slate-350">Thanh toán tiền phạt đền bù ngay
+                    lúc này</label>
+            </div>
+
+            <div id="incidentPaymentFields">
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-400 mb-1">Phương thức thanh toán</label>
+                    <select id="paymentMethodIncident"
+                        class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+                        onchange="toggleIncidentTxCode()">
+                        <option value="Cash">💵 Tiền mặt tại quầy</option>
+                        <option value="QRCode">📲 QRCode Chuyển khoản</option>
+                    </select>
+                </div>
+
+                <div id="txCodeContainerIncident" class="hidden mb-6">
+                    <label class="block text-xs font-bold text-slate-400 mb-1">Mã giao dịch đối chiếu (Chuyển
+                        khoản)</label>
+                    <input type="text" id="transactionCodeIncident"
+                        class="w-full bg-slate-950 border border-slate-750 rounded-lg p-2 text-sm uppercase font-mono text-slate-200 focus:outline-none focus:border-fpt-orange"
+                        placeholder="Nhập mãGD ngân hàng...">
+                </div>
+
+                <!-- QR Code container for Incident -->
+                <div id="incidentQrContainer"
+                    class="hidden space-y-4 border border-slate-800 rounded-xl p-4 bg-slate-950/80 mt-4 animate-fade-in text-xs text-slate-300">
+                    <div class="flex justify-center mb-2">
+                        <img id="incidentQrImage" src="" alt="Mã VietQR"
+                            class="h-44 w-44 rounded-lg shadow-sm border border-slate-750">
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex justify-between"><span class="text-slate-500">Ngân hàng:</span> <span
+                                class="font-semibold text-slate-200" th:text="${vietqrBankName}">TPBank</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Số tài khoản:</span> <span
+                                class="font-mono font-semibold text-slate-205"
+                                th:text="${vietqrAccountNo}">00000102719</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Tên tài khoản:</span> <span
+                                class="font-semibold text-slate-200" th:text="${vietqrAccountName}">NGUYEN QUANG VINH</span>
+                        </div>
+                        <div class="flex justify-between"><span class="text-slate-500">Nội dung:</span> <span
+                                id="incidentQrInfo"
+                                class="font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">...</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeModal('reportIncidentModal')"
+                    class="px-4 py-2 border border-slate-755 bg-slate-950 text-slate-300 hover:bg-slate-800 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
+                <button id="btnConfirmIncident"
+                    class="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Lập
+                    Biên Bản</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== SYSTEM TOAST ====== -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-[300] space-y-2 pointer-events-none"></div>
+
+    <script th:inline="javascript">
+        let pollInterval = null;
+        let pollSeconds = 0;
+
+        function openBorrowingQr() {
+            const modal = document.getElementById('qrCameraModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            pollSeconds = 0;
+            document.getElementById('scanWaitCounter').textContent = '0s';
+
+            if (pollInterval) {
+                clearInterval(pollInterval);
+            }
+
+            pollInterval = setInterval(async () => {
+                pollSeconds++;
+                document.getElementById('scanWaitCounter').textContent = pollSeconds + 's';
+
+                try {
+                    const res = await fetch('/borrowing/api/poll-scan');
+                    const data = await res.json();
+
+                    if (data.status === 'SCANNED' && data.copyId) {
+                        closeBorrowingQr();
+                        const copyId = data.copyId;
+                        showToast('📷 Đã nhận mã quét: ' + copyId, 'success');
+                        setTimeout(() => triggerCheckReturn(copyId), 400);
+                    }
+                } catch (err) {
+                    console.warn('Network poll error: ', err);
+                }
+
+                if (pollSeconds >= 120) {
+                    closeBorrowingQr();
+                    alert('Đã hết thời gian chờ kết nối từ thiết bị di động (120 giây). Vui lòng thử lại.');
+                }
+            }, 1000);
+        }
+
+        function closeBorrowingQr() {
+            const modal = document.getElementById('qrCameraModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+        }
+
+        document.getElementById('qrCameraModal').addEventListener('click', function (e) {
+            if (e.target.id === 'qrCameraModal') closeBorrowingQr();
+        });
+
+        // =====================================================================
+        // TRUY VẤN KIỂM TRA MÃ QUÉT TRẢ/QUÁ HẠN (AJAX)
+        // =====================================================================
+        let activeScanData = null;
+
+        async function triggerCheckReturn(copyId) {
+            if (!copyId) return;
+
+            try {
+                const response = await fetch('/borrowing/check-scan?copyId=' + encodeURIComponent(copyId));
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showToast('❌ ' + (data.message || 'Lỗi không xác định'), 'error');
+                    return;
+                }
+
+                activeScanData = data;
+                fillModalData(data);
+
+                if (data.isOverdue) {
+                    openModal('overdueReturnModal');
+                } else {
+                    openModal('normalReturnModal');
+                }
+            } catch (error) {
+                showToast('❌ Lỗi kết nối máy chủ', 'error');
+                console.error(error);
+            }
+        }
+
+        async function triggerDirectIncident(copyId, type) {
+            if (!copyId) return;
+
+            try {
+                const response = await fetch('/borrowing/check-scan?copyId=' + encodeURIComponent(copyId));
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showToast('❌ ' + (data.message || 'Lỗi không xác định'), 'error');
+                    return;
+                }
+
+                activeScanData = data;
+                fillModalData(data);
+
+                // Mở trực tiếp Modal 3 với type tương ứng
+                switchModalToReport(type);
+            } catch (error) {
+                showToast('❌ Lỗi kết nối máy chủ', 'error');
+                console.error(error);
+            }
+        }
+
+        // Thứ tự độ ưu tiên tình trạng: chỉ cho phép xuống cấp, không lên cấp
+        const CONDITION_RANK = { 'New': 3, 'Good': 2, 'Fair': 1 };
+
+        function populateConditionSelect(selectId, currentCondition) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            const currentRank = CONDITION_RANK[currentCondition] ?? 1;
+            Array.from(select.options).forEach(opt => {
+                const optRank = CONDITION_RANK[opt.value] ?? 1;
+                // Disable nếu rank cao hơn hiện tại (tức là nâng cấp)
+                opt.disabled = (optRank > currentRank);
+                opt.style.color = opt.disabled ? '#cbd5e1' : '';
+            });
+            // Set giá trị mặc định = tình trạng hiện tại
+            select.value = currentCondition in CONDITION_RANK ? currentCondition : 'Fair';
+        }
+
+        function fillModalData(data) {
+            // Điền tất cả Text
+            document.querySelectorAll('.txt-book-title').forEach(el => el.textContent = data.bookTitle);
+            document.querySelectorAll('.txt-copy-id').forEach(el => el.textContent = data.copyId);
+            document.querySelectorAll('.txt-patron-name').forEach(el => el.textContent = data.patronName);
+            document.querySelectorAll('.txt-patron-id').forEach(el => el.textContent = data.patronId);
+            document.querySelectorAll('.txt-borrow-date').forEach(el => el.textContent = data.borrowDate || '—');
+            document.querySelectorAll('.txt-due-date').forEach(el => el.textContent = data.dueDate);
+            document.querySelectorAll('.txt-overdue-days').forEach(el => el.textContent = 'Quá hạn: ' + data.overdueDays + ' ngày');
+            document.querySelectorAll('.txt-overdue-days-val').forEach(el => el.textContent = data.overdueDays || '0');
+            document.querySelectorAll('.txt-fine-amount').forEach(el => el.textContent = parseFloat(data.fineAmount).toLocaleString('vi-VN'));
+
+            // Populate và giới hạn dropdown tình trạng sách
+            const currentCondition = data.conditionStatus || 'Fair';
+            populateConditionSelect('conditionStatusNormal', currentCondition);
+            populateConditionSelect('conditionStatusOverdue', currentCondition);
+
+            // Cập nhật sự kiện click nút Confirm
+            document.getElementById('btnConfirmNormal').onclick = () => submitNormalReturn(data.ticketDetailId);
+            document.getElementById('btnConfirmOverdue').onclick = () => submitOverdueReturn(data.ticketDetailId);
+            document.getElementById('btnConfirmIncident').onclick = () => submitIncident(data.ticketDetailId);
+        }
+
+        // =====================================================================
+        // CÁC THAO TÁC XỬ LÝ CHÍNH
+        // =====================================================================
+
+        // 1. Trả sách đúng hạn
+        async function submitNormalReturn(ticketDetailId) {
+            const conditionStatus = document.getElementById('conditionStatusNormal').value;
+            try {
+                const res = await fetch(`/borrowing/api/return?ticketDetailId=${ticketDetailId}&conditionStatus=${encodeURIComponent(conditionStatus)}`, { method: 'POST' });
+                const result = await res.json();
+                if (res.ok) {
+                    showToast('✅ Trả sách thành công!', 'success');
+                    closeModal('normalReturnModal');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showToast('❌ Lỗi: ' + result.message, 'error');
+                }
+            } catch (e) {
+                showToast('❌ Không thể kết nối để xử lý trả sách', 'error');
+            }
+        }
+
+        function submitOverdueReturnLater() {
+            if (!activeScanData) return;
+            if (confirm("Xác nhận trả sách quá hạn và ghi nhận nợ phạt (sinh viên sẽ nộp phạt vào hôm khác)?")) {
+                submitOverdueReturn(activeScanData.ticketDetailId, true);
+            }
+        }
+
+        // 2. Trả sách quá hạn có đóng tiền
+        async function submitOverdueReturn(ticketDetailId, payLater = false) {
+            const method = payLater ? 'PayLater' : document.getElementById('paymentMethodOverdue').value;
+            const code = payLater ? '' : document.getElementById('transactionCodeOverdue').value.trim();
+            const conditionStatus = document.getElementById('conditionStatusOverdue').value;
+
+            if (!payLater && method === 'QRCode' && !code) {
+                showToast('⚠️ Vui lòng nhập mã giao dịch ngân hàng đối chiếu!', 'error');
+                return;
+            }
+
+            try {
+                const url = `/borrowing/api/return-overdue?ticketDetailId=${ticketDetailId}&paymentMethod=${method}&transactionCode=${encodeURIComponent(code)}&conditionStatus=${encodeURIComponent(conditionStatus)}`;
+                const res = await fetch(url, { method: 'POST' });
+                const result = await res.json();
+                if (res.ok) {
+                    if (payLater) {
+                        showToast('✅ Đã nhận sách trả & ghi nợ phạt thành công!', 'success');
+                    } else {
+                        showToast('✅ Thu tiền quá hạn & Trả sách thành công!', 'success');
+                    }
+                    closeModal('overdueReturnModal');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showToast('❌ Lỗi: ' + result.message, 'error');
+                }
+            } catch (e) {
+                showToast('❌ Lỗi gửi yêu cầu', 'error');
+            }
+        }
+
+        // 3. Thực hiện báo mất hoặc báo hỏng
+        async function submitIncident(ticketDetailId) {
+            const type = document.getElementById('incidentType').value;
+            const payNow = document.getElementById('incidentPayNow').checked;
+            const method = document.getElementById('paymentMethodIncident').value;
+            const code = document.getElementById('transactionCodeIncident').value.trim();
+            const notes = document.getElementById('incidentNotes').value.trim();
+
+            if (payNow && method === 'QRCode' && !code) {
+                showToast('⚠️ Vui lòng nhập mã giao dịch ngân hàng đối chiếu!', 'error');
+                return;
+            }
+
+            const endpoint = type === 'Lost' ? '/borrowing/api/return-lost' : '/borrowing/api/return-damaged';
+            const params = `ticketDetailId=${ticketDetailId}&payNow=${payNow}&paymentMethod=${method}&transactionCode=${encodeURIComponent(code)}&notes=${encodeURIComponent(notes)}`;
+
+            try {
+                const res = await fetch(`${endpoint}?${params}`, { method: 'POST' });
+                const result = await res.json();
+                if (res.ok) {
+                    showToast(`✅ Đã báo ${type === 'Lost' ? 'mất' : 'hỏng'} sách thành công!`, 'success');
+                    closeModal('reportIncidentModal');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showToast('❌ Lỗi: ' + result.message, 'error');
+                }
+            } catch (e) {
+                showToast('❌ Lỗi ghi nhận sự cố của bản sao', 'error');
+            }
+        }
+
+        // =====================================================================
+        // TRANSITIONS & VIEW HELPERS
+        // =====================================================================
+        function openModal(id) {
+            const m = document.getElementById(id);
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            if (id === 'overdueReturnModal') {
+                document.getElementById('paymentMethodOverdue').value = 'Cash';
+                toggleTxCode();
+            } else if (id === 'reportIncidentModal') {
+                document.getElementById('paymentMethodIncident').value = 'Cash';
+                document.getElementById('incidentPayNow').checked = true;
+                document.getElementById('incidentNotes').value = ''; // Reset notes field
+                toggleIncidentPay();
+            }
+        }
+
+        function closeModal(id) {
+            const m = document.getElementById(id);
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+            if (id === 'overdueReturnModal' || id === 'reportIncidentModal') {
+                stopOverdueReturnStatusPolling();
+            }
+        }
+
+        function switchModalToReport(type) {
+            closeModal('normalReturnModal');
+            closeModal('overdueReturnModal');
+
+            document.getElementById('incidentType').value = type;
+
+            openModal('reportIncidentModal');
+            onSwitchIncidentType();
+        }
+
+        function onSwitchIncidentType() {
+            const type = document.getElementById('incidentType').value;
+            document.getElementById('reportModalTitle').textContent = type === 'Lost' ? '🚨 Báo cáo mất sách' : '📘 Báo cáo hỏng sách';
+
+            const warningEl = document.getElementById('combinedFineWarning');
+            if (activeScanData && activeScanData.isOverdue) {
+                document.getElementById('combinedOverdueDays').textContent = activeScanData.overdueDays;
+                document.getElementById('combinedBookPrice').textContent = parseFloat(activeScanData.bookPrice).toLocaleString('vi-VN');
+                document.getElementById('combinedOverdueFine').textContent = parseFloat(activeScanData.fineAmount).toLocaleString('vi-VN');
+                document.getElementById('combinedTotalFine').textContent = parseFloat(activeScanData.combinedAmount).toLocaleString('vi-VN');
+                warningEl.classList.remove('hidden');
+            } else {
+                warningEl.classList.add('hidden');
+            }
+            toggleIncidentTxCode();
+        }
+
+        function toggleIncidentTxCode() {
+            const method = document.getElementById('paymentMethodIncident').value;
+            const container = document.getElementById('txCodeContainerIncident');
+            const qrContainer = document.getElementById('incidentQrContainer');
+            const payNow = document.getElementById('incidentPayNow').checked;
+
+            if (payNow && method === 'QRCode') {
+                container.classList.remove('hidden');
+                qrContainer.classList.remove('hidden');
+                if (activeScanData) {
+                    const isOverdue = activeScanData.isOverdue;
+                    const amount = isOverdue ? activeScanData.combinedAmount : activeScanData.bookPrice;
+                    const transferDesc = 'MATSAT' + activeScanData.ticketDetailId;
+                    document.getElementById('incidentQrInfo').textContent = transferDesc;
+
+                    const vqrBankId = document.getElementById('vqrBankId').value;
+                    const vqrAccountNo = document.getElementById('vqrAccountNo').value;
+                    const vqrAccountName = document.getElementById('vqrAccountName').value;
+
+                    const qrUrl = 'https://img.vietqr.io/image/' + vqrBankId + '-' + vqrAccountNo + '-compact2.png?amount=' + amount + '&addInfo=' + encodeURIComponent(transferDesc) + '&accountName=' + encodeURIComponent(vqrAccountName);
+                    document.getElementById('incidentQrImage').src = qrUrl;
+
+                    startOverdueReturnStatusPolling(activeScanData.ticketDetailId);
+                }
+            } else {
+                container.classList.add('hidden');
+                qrContainer.classList.add('hidden');
+                if (method !== 'QRCode') {
+                    stopOverdueReturnStatusPolling();
+                }
+            }
+        }
+
+        let returnStatusPollIntervalId = null;
+
+        function startOverdueReturnStatusPolling(ticketDetailId) {
+            if (returnStatusPollIntervalId) {
+                clearInterval(returnStatusPollIntervalId);
+            }
+            returnStatusPollIntervalId = setInterval(async () => {
+                try {
+                    const response = await fetch('/borrowing/api/check-return-status/' + ticketDetailId);
+                    const data = await response.json();
+                    if (data.success && data.returned) {
+                        stopOverdueReturnStatusPolling();
+                        showToast('🎉 Giao dịch chuyển khoản QR thành công!', 'success');
+                        setTimeout(() => {
+                            closeModal('overdueReturnModal');
+                            closeModal('reportIncidentModal');
+                            window.location.reload();
+                        }, 1500);
+                    }
+                } catch (error) {
+                    console.error("Lỗi kiểm tra trạng thái trả sách:", error);
+                }
+            }, 2000);
+        }
+
+        function stopOverdueReturnStatusPolling() {
+            if (returnStatusPollIntervalId) {
+                clearInterval(returnStatusPollIntervalId);
+                returnStatusPollIntervalId = null;
+            }
+        }
+
+        function toggleTxCode() {
+            const method = document.getElementById('paymentMethodOverdue').value;
+            const container = document.getElementById('txCodeContainer');
+            const qrContainer = document.getElementById('overdueQrContainer');
+
+            if (method === 'QRCode') {
+                container.classList.remove('hidden');
+                qrContainer.classList.remove('hidden');
+                if (activeScanData) {
+                    const amount = activeScanData.fineAmount;
+                    const transferDesc = 'TRASACH' + activeScanData.ticketDetailId;
+                    document.getElementById('overdueQrInfo').textContent = transferDesc;
+
+                    const vqrBankId = document.getElementById('vqrBankId').value;
+                    const vqrAccountNo = document.getElementById('vqrAccountNo').value;
+                    const vqrAccountName = document.getElementById('vqrAccountName').value;
+
+                    const qrUrl = 'https://img.vietqr.io/image/' + vqrBankId + '-' + vqrAccountNo + '-compact2.png?amount=' + amount + '&addInfo=' + encodeURIComponent(transferDesc) + '&accountName=' + encodeURIComponent(vqrAccountName);
+                    document.getElementById('overdueQrImage').src = qrUrl;
+
+                    // Bắt đầu khảo sát trạng thái trả sách sau khi quét
+                    startOverdueReturnStatusPolling(activeScanData.ticketDetailId);
+                }
+            } else {
+                container.classList.add('hidden');
+                qrContainer.classList.add('hidden');
+                stopOverdueReturnStatusPolling();
+            }
+        }
+
+        function toggleIncidentPay() {
+            const payNow = document.getElementById('incidentPayNow').checked;
+            const fields = document.getElementById('incidentPaymentFields');
+            if (payNow) {
+                fields.classList.remove('hidden');
+            } else {
+                fields.classList.add('hidden');
+            }
+        }
+
+        // =====================================================================
+        // SYSTEM TOAST CREATOR
+        // =====================================================================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `flex items-center gap-3 px-5 py-3 rounded-xl shadow-lg border text-sm font-bold transition-all transform translate-y-2 pointer-events-auto duration-300 animate-bounce `;
+
+            let colorClasses = '';
+            if (type === 'success') {
+                colorClasses = 'bg-emerald-50 border-emerald-200 text-emerald-800';
+            } else if (type === 'error') {
+                colorClasses = 'bg-red-50 border-red-200 text-red-800';
+            } else {
+                colorClasses = 'bg-blue-50 border-blue-200 text-blue-800';
+            }
+
+            toast.className += colorClasses;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-900 font-extrabold">&times;</button>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 4000);
+        }
+    </script>
+
+    <div class="relative z-10">
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </div>
+</body>
 </html>

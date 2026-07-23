@@ -2,7 +2,7 @@ package com.swp5.library_management.service;
 
 import com.swp5.library_management.entity.BorrowTicketDetail;
 import com.swp5.library_management.entity.FineInvoice;
-
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -17,14 +17,46 @@ public interface ViolationService {
     long calculateOverdueDays(LocalDate dueDate);
 
     /** Xác nhận trả sách */
-    void returnBook(Integer borrowTicketDetailId);
+    void returnBook(Integer borrowTicketDetailId, String conditionStatus);
 
-    FineInvoice createOverdueFine(Integer borrowTicketDetailId);
+    FineInvoice createOverdueFine(Integer borrowTicketDetailId, String conditionStatus);
 
-    FineInvoice createLostBookFine(Integer borrowTicketDetailId);
+    List<FineInvoice> createLostBookFine(Integer borrowTicketDetailId, String notes);
 
-    FineInvoice createDamagedBookFine(Integer borrowTicketDetailId);
+    List<FineInvoice> createDamagedBookFine(Integer borrowTicketDetailId, String notes);
 
     /** Trả sách qua mã Barcode (CopyID) */
     BorrowTicketDetail returnByCopyId(String copyId);
+
+    /**
+     * Lấy danh sách tất cả hóa đơn phạt, có thể lọc theo mã bạn đọc và trạng thái.
+     * 
+     * @param patronId   mã sinh viên (để null nếu không lọc)
+     * @param paidStatus trạng thái ('Paid' / 'Unpaid', null nếu không lọc)
+     */
+    List<FineInvoice> getAllFineInvoices(String patronId, String paidStatus);
+
+    /**
+     * Thủ thư xác nhận thu tiền mặt cho hóa đơn phạt.
+     * Cập nhật trạng thái hóa đơn và tự động mở khóa thẻ mượn nếu sinh viên hết nợ.
+     * 
+     * @param fineId      ID hóa đơn phạt
+     * @param librarianId mã thủ thư đang xử lý
+     */
+    void collectFineCash(Integer fineId, String librarianId);
+
+    /**
+     * Thủ thư xác nhận thu tiền qua QR Code cho hóa đơn phạt.
+     * 
+     * @param fineId          ID hóa đơn phạt
+     * @param librarianId     mã thủ thư đang xử lý
+     * @param transactionCode mã giao dịch đối chiếu
+     */
+    void collectFineQR(Integer fineId, String librarianId, String transactionCode);
+
+    /** Lấy hóa đơn phạt theo ID */
+    FineInvoice getFineInvoiceById(Integer fineId);
+
+    /** Lấy giá gốc của sách theo TicketDetailId */
+    BigDecimal getBookPriceByTicketDetailId(Integer ticketDetailId);
 }

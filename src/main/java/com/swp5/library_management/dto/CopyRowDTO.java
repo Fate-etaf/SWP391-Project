@@ -32,4 +32,10 @@ public class CopyRowDTO {
 
     /** Tên / mô tả kệ, VD: "Khoa học máy tính". Hiển thị "—" nếu chưa xếp kệ. */
     private String shelfName;
+
+    /** Số thứ tự kệ, VD: 1, 2. */
+    private Integer shelfNumber;
+
+    /** Chủ đề của kệ sách, VD: "Công nghệ thông tin". Hiển thị "—" nếu chưa xếp kệ. */
+    private String shelfCodeTopic;
 }

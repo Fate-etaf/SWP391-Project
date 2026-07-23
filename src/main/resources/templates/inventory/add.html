@@ -173,6 +173,11 @@
         <p>Fill in the details below to register a new book in the library catalog.</p>
     </div>
 
+    <!-- Error message alert -->
+    <div th:if="${errorMessage}" style="background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; font-weight: 500;">
+        <span th:text="${errorMessage}">ErrorMessage</span>
+    </div>
+
     <form th:action="@{/librarian/inventory/add}" th:object="${bookForm}" method="post">
         <!-- Hidden field to track which approved request was auto-filled -->
         <input type="hidden" id="requestId" name="requestId" value=""/>

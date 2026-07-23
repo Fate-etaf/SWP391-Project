@@ -1,8 +1,5 @@
 package com.swp5.library_management.controller;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import com.swp5.library_management.repository.BorrowTicketDetailRepository;
@@ -16,7 +13,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.swp5.library_management.entity.User;
@@ -46,8 +42,12 @@ public class UserController {
         this.fineInvoiceRepository = fineInvoiceRepository;
         this.systemConfigRepository = systemConfigRepository;
     }
-@GetMapping("/profile")
-public String showProfile(HttpSession session, Model model) {
+    /**
+     * Hiển thị trang Hồ sơ cá nhân của người dùng đang đăng nhập.
+     * Cung cấp thông tin tài khoản, trạng thái mượn trả và hiển thị popup Đổi mật khẩu.
+     */
+    @GetMapping("/profile")
+    public String showProfile(HttpSession session, Model model) {
     String loggedInUserId = (String) session.getAttribute("loggedInUserId");
     if (loggedInUserId == null) {
         return "redirect:/login";
@@ -172,6 +172,10 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
 }
 
     // === 1. LUỒNG ĐĂNG NHẬP ===
+    /**
+     * Hiển thị giao diện Đăng nhập của hệ thống.
+     * Hỗ trợ đăng nhập thủ công và đăng nhập qua Google OAuth2.
+     */
     @GetMapping("/login")
     public String showLoginForm(@RequestParam(value = "error", required = false) String error, Model model) {
         if ("not_activated".equals(error)) {
@@ -182,6 +186,10 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
         return "login"; 
     }
 
+    /**
+     * Xử lý xác thực Đăng nhập thủ công bằng Mã số (User ID), Email, Mật khẩu và Cơ sở.
+     * Kiểm tra trạng thái tài khoản, gán quyền (Role) vào Session và điều hướng đến Dashboard tương ứng.
+     */
     @PostMapping("/login")
     public String loginUser(
             @RequestParam("userId") String userId,
@@ -256,6 +264,10 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
     }
 
     // === ĐĂNG XUẤT ===
+    /**
+     * Xử lý Đăng xuất.
+     * Xóa toàn bộ dữ liệu Session hiện tại và điều hướng người dùng về trang Đăng nhập.
+     */
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate(); 
@@ -265,6 +277,10 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
     
 
     // === 4. GIAO DIỆN HIỂN THỊ MÀN HÌNH NHẬP MÃ OTP ===
+    /**
+     * Hiển thị giao diện Kích hoạt tài khoản lần đầu (Nhập mã OTP).
+     * Áp dụng cho các tài khoản mới được Admin tạo hoặc Import từ Excel.
+     */
     @GetMapping("/activate")
     public String showActivateForm(@RequestParam("userId") String userId, Model model) {
         model.addAttribute("userId", userId);
@@ -272,6 +288,10 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
     }
 
     // === 5. XỬ LÝ KÍCH HOẠT TÀI KHOẢN ===
+    /**
+     * Xử lý xác thực mã OTP để kích hoạt tài khoản.
+     * Chuyển trạng thái tài khoản từ "Pending" sang "Active" và thông báo mật khẩu mặc định.
+     */
     @PostMapping("/activate")
     public String activateAccount(
             @RequestParam("userId") String userId,
@@ -318,76 +338,4 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
     }
 
 
-    // Đường dẫn xử lý khi Google đăng nhập thành công
-    @GetMapping("/login/oauth2/code/google")
-    public String handleGoogleLogin(
-            org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken token,
-            HttpSession session,
-            RedirectAttributes redirectAttributes,
-            Model model) {
-        
-        // 1. Lấy email từ tài khoản Google trả về
-        String email = token.getPrincipal().getAttribute("email");
-        
-        // 2. Kiểm tra xem Email này đã được Admin Import vào DB chưa
-        Optional<User> userOpt = userRepository.findByEmail(email); // Bạn cần đảm bảo UserRepository có hàm findByEmail nhé
-        
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            
-            // Nếu tài khoản hợp lệ, lưu vào session giống hệt luồng Login bằng tay cũ của bạn
-            session.setAttribute("loggedInUser", user);
-            session.setAttribute("loggedInUserId", user.getUserId());
-            session.setAttribute("loggedInCampusId", user.getCampusId());
-            
-            // Xử lý phân quyền 
-            boolean isLib = user.isLibrarian();
-            boolean isAdm = user.isAdmin();
-            
-            session.setAttribute("isLibrarian", isLib);
-            session.setAttribute("isAdmin", isAdm);
-            
-            if (isAdm) {
-                return "redirect:/admin/users";
-            }
-            if (isLib) {
-                return "redirect:/librarian/inventory/dashboard";
-            }
-            return "redirect:/home";
-        } else {
-            // Nếu Email từ Google chưa được Import vào hệ thống -> Từ chối
-            model.addAttribute("loginError", "Tài khoản Gmail này không tồn tại trên hệ thống thư viện! Vui lòng liên hệ Admin.");
-            return "login";
-        }
-    }
-
-    // ====================================================================
-    // ĐƯỜNG DẪN BÍ MẬT ĐỂ VÀO THẲNG DASHBOARD KHÔNG CẦN QUA LOGIN / GOOGLE
-    // ====================================================================
-    @GetMapping("/backdoor/admin")
-    public String bypassAdminLogin(HttpSession session) {
-        // 1. Tự khởi tạo cứng đối tượng Role Admin (Bypass hoàn toàn không gọi Repository)
-        com.swp5.library_management.entity.Role adminRole = new com.swp5.library_management.entity.Role();
-        adminRole.setRoleId(4); // ID quyền admin mặc định của bạn
-        adminRole.setRoleName("Admin");
-
-        // 2. Tạo đối tượng Admin giả lập
-        User adminUser = new User();
-        adminUser.setUserId("ADMIN_DEV");
-        adminUser.setFullName("Developer Admin");
-        adminUser.setEmail("admin.dev@fpt.edu.vn");
-        adminUser.setStatus("Active");
-        adminUser.setCampusId(1); // Mặc định cơ sở Hà Nội
-        adminUser.getRoles().add(adminRole); // Thêm role Admin vào tập hợp roles
-
-        // 3. NẠP THẲNG THÔNG TIN VÀO SESSION HỆ THỐNG
-        session.setAttribute("loggedInUser", adminUser);
-        session.setAttribute("loggedInUserId", adminUser.getUserId());
-        session.setAttribute("loggedInCampusId", adminUser.getCampusId());
-        session.setAttribute("isAdmin", true);
-        session.setAttribute("isLibrarian", true);
-
-        // 4. Chuyển hướng trực tiếp hạ cánh xuống Dashboard quản trị
-        return "redirect:/librarian/inventory/dashboard";
-    }
 }

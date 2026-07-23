@@ -476,16 +476,16 @@
                         Nội quy & Chính sách mượn trả
                     </h3>
                     <div class="bg-slate-800/20 border border-slate-700/50 rounded-xl p-4 text-xs text-slate-300 space-y-3">
-                        <p><strong>5.1.</strong> Sau khi đọc sách, bạn đọc cần trả lại đúng nơi quy định, không tự ý xếp lên kệ.</p>
-                        <p><strong>5.2.</strong> Không được mang bất kỳ tài liệu nào ra khỏi thư viện khi chưa hoàn tất thủ tục mượn.</p>
-                        <p><strong>5.3.</strong> Đối với giáo trình và tài liệu học tập: Mỗi sinh viên được mượn 1 bộ theo danh sách lớp của Phòng Đào tạo trong học kỳ hiện tại. Có thể gia hạn tối đa 1 tuần nếu có lý do chính đáng.</p>
-                        <p><strong>5.4.</strong> Giáo trình mượn dưới dạng tài liệu tham khảo áp dụng thời hạn trả như sách tham khảo thông thường.</p>
-                        <p><strong>5.5.</strong> Đối với tài liệu tham khảo: Bạn đọc được mượn tối đa <strong>10 cuốn</strong> (Giảng viên) hoặc <strong>5 cuốn</strong> (Sinh viên), thời hạn 1 tuần/tài liệu tiếng Việt, 2 tuần/tài liệu ngoại ngữ, và được phép gia hạn tối đa 4 lần.</p>
+                        <p><strong>1.</strong> Sau khi đọc sách, bạn đọc cần trả lại đúng nơi quy định, không tự ý xếp lên kệ.</p>
+                        <p><strong>2.</strong> Không được mang bất kỳ tài liệu nào ra khỏi thư viện khi chưa hoàn tất thủ tục mượn.</p>
+                        <p><strong>3.</strong> Đối với giáo trình và tài liệu học tập: Mỗi sinh viên được mượn 1 bộ theo danh sách lớp của Phòng Đào tạo trong học kỳ hiện tại. Có thể gia hạn tối đa 1 tuần nếu có lý do chính đáng.</p>
+                        <p><strong>4.</strong> Giáo trình mượn dưới dạng tài liệu tham khảo áp dụng thời hạn trả như sách tham khảo thông thường.</p>
+                        <p><strong>5.</strong> Đối với tài liệu tham khảo: Bạn đọc được mượn tối đa <strong><span th:text="${@systemConfigService.getIntConfig('MAX_BOOKS_LECTURER', 10)}">10</span> cuốn</strong> (Giảng viên) hoặc <strong><span th:text="${@systemConfigService.getIntConfig('MAX_BOOKS_STUDENT', 3)}">5</span> cuốn</strong> (Sinh viên), thời hạn 1 tuần/tài liệu tiếng Việt, 2 tuần/tài liệu ngoại ngữ, và được phép gia hạn tối đa <span th:text="${@systemConfigService.getIntConfig('MAX_RENEWALS_ONLINE', 2)}">4</span> lần.</p>
                         <div class="pt-1">
-                            <p class="font-bold text-slate-200 mb-1">5.6. Trách nhiệm của người mượn:</p>
+                            <p class="font-bold text-slate-200 mb-1">6. Trách nhiệm của người mượn:</p>
                             <ul class="list-disc pl-5 space-y-1 text-slate-400">
-                                <li><strong>5.6.1.</strong> Kiểm tra và xác nhận giao dịch với thủ thư tại quầy.</li>
-                                <li><strong>5.6.2.</strong> Kiểm tra tình trạng thực tế của tài liệu trước khi mang ra khỏi thư viện, giữ gìn và bảo quản tài liệu trong thời gian mượn. Trường hợp hư hỏng, người mượn cuối cùng sẽ chịu trách nhiệm bồi thường theo quy định.</li>
+                                <li><strong>6.1.</strong> Kiểm tra và xác nhận giao dịch với thủ thư tại quầy.</li>
+                                <li><strong>6.2.</strong> Kiểm tra tình trạng thực tế của tài liệu trước khi mang ra khỏi thư viện, giữ gìn và bảo quản tài liệu trong thời gian mượn. Trường hợp hư hỏng, người mượn cuối cùng sẽ chịu trách nhiệm bồi thường theo quy định.</li>
                             </ul>
                         </div>
                     </div>
@@ -514,7 +514,7 @@
             document.getElementById('statsContent').classList.add('hidden');
             
             // Fetch stats via AJAX
-            fetch(`/api/admin/users/${userId}/stats`, { credentials: 'same-origin' })
+            fetch(`/api/librarian/students/${userId}/stats`, { credentials: 'same-origin' })
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
