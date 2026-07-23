@@ -4,7 +4,7 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content="Browse the full book catalog of FPT University Library System."/>
-    <title>Book Catalog — FPT University Library</title>
+    <title>Danh Mục Sách — FPT University Library</title>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
@@ -15,720 +15,128 @@
             theme: { extend: { colors: { fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A', orangeHover: '#D95F18' } } } }
         }
     </script>
-    <style th:replace="~{fragments/header :: header-style}"></style>
-    <style th:replace="~{fragments/footer :: footer-style}"></style>
-    <style>
-        /* ─── Design Tokens ─────────────────────────────────────────────────── */
-        :root {
-            --bg-base:       #080d17;
-            --bg-surface:    #0e1625;
-            --bg-card:       #131c2e;
-            --bg-card-hover: #1a2540;
-            --border:        rgba(99, 149, 255, 0.12);
-            --border-hover:  rgba(99, 149, 255, 0.35);
-
-            --accent:        #4f8cff;
-            --accent-glow:   rgba(79, 140, 255, 0.18);
-            --gold:          #f5a623;
-            --gold-soft:     rgba(245, 166, 35, 0.15);
-            --emerald:       #34d399;
-            --emerald-soft:  rgba(52, 211, 153, 0.15);
-            --rose:          #fb7185;
-            --rose-soft:     rgba(251, 113, 133, 0.15);
-            --violet:        #a78bfa;
-            --teal:          #2dd4bf;
-
-            --text-primary:   #e8f0ff;
-            --text-secondary: #7a8fb5;
-            --text-muted:     #4a5a7a;
-
-            --radius-card:  16px;
-            --radius-tag:   6px;
-            --shadow-card:  0 4px 24px rgba(0,0,0,0.4);
-            --shadow-hover: 0 8px 40px rgba(79, 140, 255, 0.2);
-
-            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* ─── Reset & Base ───────────────────────────────────────────────────── */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        html { scroll-behavior: smooth; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-base);
-            color: var(--text-primary);
-            min-height: 100vh;
-            line-height: 1.6;
-        }
-
-        /* ─── Hero / Page Header ─────────────────────────────────────────────── */
-        .page-hero {
-            padding: 3rem 0 2rem;
-        }
-
-        .hero-title {
-            font-size: 2.25rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, var(--text-primary) 40%, var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-subtitle {
-            margin-top: 0.4rem;
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        /* ─── Toolbar ────────────────────────────────────────────────────────── */
-        .toolbar {
-            padding: 0 0 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .toolbar-left {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .book-count {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .book-count strong {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .search-wrap {
-            position: relative;
-        }
-
-        .search-wrap svg {
-            position: absolute;
-            left: 0.9rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            pointer-events: none;
-        }
-
-        #search-input {
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 0.55rem 1rem 0.55rem 2.6rem;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 0.875rem;
-            width: 280px;
-            transition: border-color var(--transition), box-shadow var(--transition);
-            outline: none;
-        }
-
-        #search-input::placeholder { color: var(--text-muted); }
-
-        #search-input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow);
-        }
-
-        /* ─── Books Grid ─────────────────────────────────────────────────────── */
-        .books-container {
-            padding: 0 0 4rem;
-        }
-
-        .books-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 1.5rem;
-        }
-
-        /* ─── Book Card ──────────────────────────────────────────────────────── */
-        .book-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-card);
-            overflow: hidden;
-            box-shadow: var(--shadow-card);
-            transition: transform var(--transition),
-                        border-color var(--transition),
-                        box-shadow var(--transition),
-                        background var(--transition);
-            display: flex;
-            flex-direction: column;
-            cursor: pointer;
-        }
-
-        .book-card:hover {
-            transform: translateY(-6px);
-            border-color: var(--border-hover);
-            box-shadow: var(--shadow-hover);
-            background: var(--bg-card-hover);
-        }
-
-        /* ── Cover ── */
-        .book-cover {
-            position: relative;
-            aspect-ratio: 3 / 4;
-            overflow: hidden;
-            background: linear-gradient(135deg, #1a2540, #0e1625);
-        }
-
-        .book-cover img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.4s ease;
-        }
-
-        .book-card:hover .book-cover img {
-            transform: scale(1.05);
-        }
-
-        /* placeholder cover when no image */
-        .cover-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            color: rgba(255, 255, 255, 0.4);
-            background: linear-gradient(145deg,
-                hsl(220, 40%, 14%) 0%,
-                hsl(240, 35%, 18%) 50%,
-                hsl(260, 30%, 14%) 100%);
-        }
-
-        /* Fix missing preflight styles for new tailwind blocks */
-        .flex-grow.min-w-0 a {
-            text-decoration: none;
-            color: inherit;
-        }
-        
-        #search-form input, #search-form select {
-            border: none;
-            outline: none;
-            appearance: none;
-            -webkit-appearance: none;
-            box-shadow: none;
-            background: transparent;
-            font-family: inherit;
-        }
-        
-        #search-form input:focus, #search-form select:focus {
-            outline: none;
-        }
-        
-        #search-form select {
-            appearance: auto;
-            -webkit-appearance: auto;
-        }
-
-        .cover-initial {
-            font-size: 4rem;
-            font-weight: 800;
-            letter-spacing: -2px;
-            background: linear-gradient(135deg, var(--accent), var(--violet));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1;
-        }
-
-        .cover-label {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-muted);
-        }
-
-        /* availability badge */
-        .copy-badge {
-            position: absolute;
-            top: 0.6rem;
-            right: 0.6rem;
-            padding: 0.25rem 0.6rem;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            backdrop-filter: blur(8px);
-            letter-spacing: 0.3px;
-        }
-
-        .copy-badge.available {
-            background: var(--emerald-soft);
-            color: var(--emerald);
-            border: 1px solid rgba(52, 211, 153, 0.3);
-        }
-
-        .copy-badge.unavailable {
-            background: var(--rose-soft);
-            color: var(--rose);
-            border: 1px solid rgba(251, 113, 133, 0.3);
-        }
-
-        /* language badge */
-        .lang-badge {
-            position: absolute;
-            bottom: 0.6rem;
-            left: 0.6rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 5px;
-            font-size: 0.65rem;
-            font-weight: 500;
-            background: rgba(8,13,23,0.75);
-            color: var(--text-secondary);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(6px);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* ── Card Body ── */
-        .book-info {
-            padding: 1rem 1rem 1.2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            flex: 1;
-        }
-
-        .book-title {
-            line-clamp: 2;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .book-authors {
-            font-size: 0.78rem;
-            color: var(--accent);
-            font-weight: 500;
-            display: -webkit-box;
-            line-clamp: 1;
-            -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .book-meta {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            flex-wrap: wrap;
-        }
-
-        .meta-publisher {
-            font-size: 0.72rem;
-            color: var(--text-secondary);
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            line-clamp: 1;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .meta-dot {
-            width: 3px;
-            height: 3px;
-            border-radius: 50%;
-            background: var(--text-muted);
-            flex-shrink: 0;
-        }
-
-        .meta-year {
-            font-size: 0.72rem;
-            color: var(--gold);
-            font-weight: 500;
-            flex-shrink: 0;
-        }
-
-        /* tag row */
-        .tag-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.35rem;
-            margin-top: 0.2rem;
-        }
-
-        .tag {
-            display: inline-block;
-            padding: 0.15rem 0.5rem;
-            border-radius: var(--radius-tag);
-            font-size: 0.67rem;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .tag-category {
-            background: var(--gold-soft);
-            color: var(--gold);
-            border: 1px solid rgba(245, 166, 35, 0.25);
-        }
-
-        .tag-subject {
-            background: rgba(167, 139, 250, 0.12);
-            color: var(--violet);
-            border: 1px solid rgba(167, 139, 250, 0.25);
-        }
-
-        /* divider line */
-        .card-divider {
-            height: 1px;
-            background: var(--border);
-            margin: 0 -1rem;
-        }
-
-        /* isbn row */
-        .isbn-row {
-            font-size: 0.67rem;
-            color: var(--text-muted);
-            letter-spacing: 0.3px;
-        }
-
-        /* ─── Empty State ────────────────────────────────────────────────────── */
-        .empty-state {
-            text-align: center;
-            padding: 6rem 2rem;
-            color: var(--text-secondary);
-        }
-
-        .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        .empty-state h2 {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .empty-state p { font-size: 0.9rem; }
-
-        /* ─── Glow Orbs (background decoration) ─────────────────────────────── */
-        .orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.35;
-        }
-
-        .orb-1 {
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(79,140,255,0.4), transparent 70%);
-            top: -150px;
-            left: -150px;
-        }
-
-        .orb-2 {
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(167,139,250,0.3), transparent 70%);
-            bottom: 100px;
-            right: -100px;
-        }
-
-        /* ─── Responsive ─────────────────────────────────────────────────────── */
-        @media (max-width: 640px) {
-            .hero-title   { font-size: 1.6rem; }
-            .books-grid   { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
-            #search-input { width: 200px; }
-            .nav-links    { display: none; }
-        }
-
-        /* ─── Scroll-in animation ────────────────────────────────────────────── */
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .book-card {
-            animation: fadeUp 0.4s ease both;
-        }
-
-        /* stagger via nth-child (up to 20 cards) */
-        .book-card:nth-child(1)  { animation-delay: 0.05s; }
-        .book-card:nth-child(2)  { animation-delay: 0.08s; }
-        .book-card:nth-child(3)  { animation-delay: 0.11s; }
-        .book-card:nth-child(4)  { animation-delay: 0.14s; }
-        .book-card:nth-child(5)  { animation-delay: 0.17s; }
-        .book-card:nth-child(6)  { animation-delay: 0.20s; }
-        .book-card:nth-child(7)  { animation-delay: 0.23s; }
-        .book-card:nth-child(8)  { animation-delay: 0.26s; }
-        .book-card:nth-child(9)  { animation-delay: 0.29s; }
-        .book-card:nth-child(10) { animation-delay: 0.32s; }
-        .book-card:nth-child(11) { animation-delay: 0.35s; }
-        .book-card:nth-child(12) { animation-delay: 0.38s; }
     
-    </style>
-    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <link rel="stylesheet" th:href="@{/css/inventory-list.css}">
 </head>
 <body>
-<!-- ═══ NAVIGATION ══════════════════════════════════════════════════════════ -->
-    <div th:replace="~{fragments/header :: header('librarian')}"></div>
-<!-- background decoration -->
-<div class="orb orb-1" aria-hidden="true"></div>
-<div class="orb orb-2" aria-hidden="true"></div>
+    
 
+    <div class="orb orb-1" aria-hidden="true"></div>
+    <div class="orb orb-2" aria-hidden="true"></div>
 
-
-<main class="flex-grow max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
-    <!-- SIDEBAR -->
-    <div th:replace="~{fragments/sidebar :: sidebar('list')}"></div>
-
-<div class="flex-grow min-w-0">
-        <!-- ═══ PAGE HERO ══════════════════════════════════════════════════════════ -->
-        <div class="page-hero bg-gradient-to-br from-fpt-navy via-slate-800 to-slate-900 rounded-2xl p-8 mb-8 text-white relative overflow-hidden shadow-xl">
-            <div class="flex justify-between items-start relative z-10">
-                <div>
-                    <h1 class="text-3xl font-extrabold mb-2 text-white">Tra cứu sách trong kho</h1>
-                    <p class="text-slate-300 text-sm">Tìm kiếm sách và lọc theo môn học, thể loại, cơ sở.</p>
-                </div>
-                <a href="/librarian/inventory/add" class="bg-fpt-orange hover:bg-fpt-orangeHover text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-orange-500/30 transition-all flex items-center space-x-2">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                    <span>Thêm sách mới</span>
-                </a>
-            </div>
-            
-            <div class="relative z-10 mt-6">
-                <div th:replace="~{fragments/search-bar :: search-form}"></div>
-            </div>
-            
-            <!-- Decorative blobs -->
-            <div class="absolute top-0 right-0 w-64 h-64 bg-fpt-orange/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-            <div class="absolute bottom-0 left-10 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl -mb-10 pointer-events-none"></div>
-        </div>
-
-        <div class="flex flex-col lg:flex-row gap-8">
-            <!-- Khối Kết Quả Tìm Kiếm (Bên Trái) -->
-            <div class="flex-grow lg:w-3/4">
-                <!-- ── UCG01 Normal Flow: Kết quả tìm kiếm ─────────────────────── -->
-                <div th:if="${hasSearch and !noResults}">
-                    <div class="flex items-center justify-between mb-6">
-                        <div>
-                            <h3 class="text-xl font-extrabold text-white">Kết quả tìm kiếm</h3>
-                            <p class="text-sm text-slate-400 mt-0.5">
-                                Tìm thấy <span class="font-bold text-fpt-orange" th:text="${results != null ? #lists.size(results) : 0}">0</span> tài liệu phù hợp
-                            </p>
-                        </div>
-                        <a href="/librarian/inventory/list" class="text-sm text-slate-500 hover:text-fpt-orange transition-colors flex items-center">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                            Xoá tìm kiếm
-                        </a>
+    <main class="flex-grow max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
+        <div th:replace="~{fragments/librarian_sidebar :: sidebar('list')}"></div>
+        
+        <div class="flex-grow min-w-0">
+            <!-- Page header -->
+            <div class="bg-gradient-to-br from-fpt-navy via-slate-800 to-slate-900 rounded-2xl p-8 mb-8 text-white relative overflow-hidden shadow-xl">
+                <div class="flex justify-between items-start relative z-10">
+                    <div>
+                        <h1 class="text-3xl font-extrabold mb-2 text-white">Danh Mục Sách</h1>
+                        <p class="text-slate-300 text-sm">Toàn bộ tài liệu trong kho, phân theo chuyên ngành.</p>
                     </div>
-                    <div th:replace="~{inventory/list :: inventory-book-grid(${results}, ${selectedCampusId})}"></div>
-                </div>
-
-                <!-- ── UCG01 E1: Không tìm thấy kết quả ────────────────────────── -->
-                <div th:if="${hasSearch and noResults}" class="mb-12">
-                    <div class="bg-[#131c2e] border border-[#1e293b] rounded-2xl p-8 text-center mb-10 shadow-sm">
-                        <div class="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-fpt-orange" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-100 mb-2">Không tìm thấy tài liệu phù hợp</h3>
-                        <p class="text-sm text-slate-400 max-w-md mx-auto">
-                            Không có tài liệu nào khớp với bộ lọc.
-                        </p>
-                        <a href="/librarian/inventory/list" class="mt-4 inline-block text-sm font-semibold text-fpt-orange hover:text-fpt-orangeHover transition-colors">
-                            ← Xoá bộ lọc và xem tất cả
-                        </a>
-                    </div>
-                    
-                    <h3 class="text-lg font-bold text-slate-100 mt-8 mb-4">Gợi ý theo chuyên ngành</h3>
-                    <th:block th:each="section : ${majorSections}">
-                        <div class="flex items-center justify-between mt-6 mb-4">
-                            <h4 class="text-lg font-extrabold text-slate-200" th:text="${section.sectionName}">Major</h4>
-                        </div>
-                        <div th:replace="~{inventory/list :: inventory-book-grid(${section.books}, ${selectedCampusId})}"></div>
-                    </th:block>
-                </div>
-
-                <!-- ── Chưa search: hiển thị theo chuyên ngành giống search.html ── -->
-                <div th:if="${!hasSearch}">
-                    <th:block th:each="section : ${majorSections}">
-                        <div class="flex items-center justify-between mb-4 mt-8 first:mt-0">
-                            <div>
-                                <h3 class="text-xl font-extrabold text-white" th:text="${section.sectionName}">Chuyên ngành</h3>
-                                <p class="text-sm text-slate-400 mt-0.5">Một số tựa sách ngẫu nhiên</p>
-                            </div>
-                        </div>
-                        <div th:replace="~{inventory/list :: inventory-book-grid(${section.books}, ${selectedCampusId})}"></div>
-                    </th:block>
-                </div>
-            </div>
-
-            <!-- Cột Sidebar Danh mục (Bên Phải) -->
-            <aside class="w-full lg:w-1/4 flex-shrink-0">
-                <div class="sticky top-24 flex flex-col gap-6 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 pb-6 sidebar-scroll">
-                    <!-- Chuyên ngành -->
-                    <div class="bg-[#131c2e] border border-[#1e293b] rounded-xl overflow-hidden shadow-sm shrink-0">
-                        <div class="bg-fpt-navy text-white px-4 py-3 font-bold text-sm tracking-wide border-b border-[#1e293b]">
-                            CHUYÊN NGÀNH
-                        </div>
-                        <ul class="flex flex-col text-[13px] font-medium text-slate-300 divide-y divide-[#1e293b]">
-                            <li>
-                                <a href="/librarian/inventory/list" class="block px-4 py-2.5 hover:bg-[#1a2540] transition-colors"
-                                   th:classappend="${selectedMajorId == null ? 'text-fpt-orange font-bold bg-fpt-orange/10' : ''}">
-                                    Tất cả chuyên ngành
-                                </a>
-                            </li>
-                            <li>
-                                <a th:href="@{/librarian/inventory/list(majorId=-1)}" class="block px-4 py-2.5 hover:bg-[#1a2540] transition-colors"
-                                   th:classappend="${selectedMajorId != null and selectedMajorId == -1 ? 'text-fpt-orange font-bold bg-fpt-orange/10' : ''}">
-                                    Sách ngoài chuyên ngành
-                                </a>
-                            </li>
-                            <li th:each="major : ${majors}">
-                                <a th:href="@{/librarian/inventory/list(majorId=${major.majorId})}" 
-                                   class="block px-4 py-2.5 hover:bg-[#1a2540] transition-colors truncate"
-                                   th:title="${major.majorName}"
-                                   th:classappend="${selectedMajorId == major.majorId ? 'text-fpt-orange font-bold bg-fpt-orange/10' : ''}"
-                                   th:text="${major.majorName}">Major</a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Môn học -->
-                    <div class="bg-[#131c2e] border border-[#1e293b] rounded-xl overflow-hidden shadow-sm shrink-0">
-                        <div class="bg-fpt-navy text-white px-4 py-3 font-bold text-sm tracking-wide border-b border-[#1e293b]">
-                            MÔN HỌC
-                        </div>
-                        <ul class="flex flex-col text-[13px] font-medium text-slate-300 divide-y divide-[#1e293b] max-h-60 overflow-y-auto">
-                            <li>
-                                <a href="/librarian/inventory/list" class="block px-4 py-2.5 hover:bg-[#1a2540] transition-colors"
-                                   th:classappend="${selectedSubjectCode == null ? 'text-fpt-orange font-bold bg-fpt-orange/10' : ''}">
-                                    Tất cả môn học
-                                </a>
-                            </li>
-                            <li th:each="subj : ${subjects}">
-                                <a th:href="@{/librarian/inventory/list(subjectCode=${subj.subjectCode})}" 
-                                   class="block px-4 py-2.5 hover:bg-[#1a2540] transition-colors truncate"
-                                   th:title="${subj.subjectCode + ' - ' + subj.subjectName}"
-                                   th:classappend="${selectedSubjectCode == subj.subjectCode ? 'text-fpt-orange font-bold bg-fpt-orange/10' : ''}">
-                                    <span class="font-bold text-fpt-orange mr-1.5" th:text="${subj.subjectCode}">CODE</span>
-                                    <span th:text="${subj.subjectName}">Subject Name</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Thể loại -->
-                    <div class="bg-[#131c2e] border border-[#1e293b] rounded-xl overflow-hidden shadow-sm shrink-0">
-                        <div class="bg-fpt-navy text-white px-4 py-3 font-bold text-sm tracking-wide border-b border-[#1e293b]">
-                            DANH MỤC THỂ LOẠI
-                        </div>
-                        <ul class="grid grid-cols-2 text-[13px] font-medium text-slate-300">
-                            <li class="col-span-2 border-b border-[#1e293b]">
-                                <a href="/librarian/inventory/list" class="block px-4 py-2.5 hover:bg-[#1a2540] transition-colors"
-                                   th:classappend="${selectedCategoryId == null ? 'text-fpt-orange font-bold bg-fpt-orange/10' : ''}">
-                                    Tất cả
-                                </a>
-                            </li>
-                            <li th:each="category : ${categories}" class="border-b border-[#1e293b] even:border-l even:border-[#1e293b]">
-                                <a th:href="@{/librarian/inventory/list(categoryId=${category.categoryId})}" 
-                                   class="block px-3 py-2.5 hover:bg-[#1a2540] transition-colors truncate"
-                                   th:title="${category.categoryName}"
-                                   th:classappend="${selectedCategoryId == category.categoryId ? 'text-fpt-orange font-bold bg-fpt-orange/10' : ''}"
-                                   th:text="${category.categoryName}">Category</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </aside>
-        </div>
-    </div>
-</main>
-
-<th:block th:fragment="inventory-book-grid(books, campusId)">
-    <div th:if="${books != null and !#lists.isEmpty(books)}"
-         class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-        <div th:each="book : ${books}" class="bg-[#131c2e] rounded-2xl overflow-hidden shadow-sm card-hover flex flex-col border border-transparent hover:border-[#4f8cff]/30">
-            <!-- Có ảnh bìa -->
-            <div th:if="${book.coverImageUrl != null and not #strings.isEmpty(book.coverImageUrl)}" 
-                 class="h-40 w-full relative group overflow-hidden bg-[#0e1625] flex-shrink-0">
-                <img th:src="${book.coverImageUrl}" th:alt="${book.title}" 
-                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                <div class="absolute top-3 right-3">
-                    <span class="bg-black/50 text-orange-300 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">FPTU</span>
-                </div>
-                <div class="absolute top-3 left-3" th:if="${book.subjectCode != null}">
-                    <span class="bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase backdrop-blur-sm"
-                          th:text="${book.subjectCode}">CODE</span>
-                </div>
-            </div>
-            
-            <!-- Không có ảnh bìa (Fallback) -->
-            <div th:unless="${book.coverImageUrl != null and not #strings.isEmpty(book.coverImageUrl)}"
-                 class="h-40 w-full flex-shrink-0 bg-gradient-to-br flex flex-col justify-between p-4 text-white select-none"
-                 th:classappend="${book.coverColor}">
-                <div class="flex justify-between items-start">
-                    <span th:if="${book.subjectCode != null}"
-                          class="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase backdrop-blur-sm"
-                          th:text="${book.subjectCode}">CODE</span>
-                    <span class="text-[10px] font-bold text-orange-300 ml-auto">FPTU</span>
-                </div>
-                <h4 class="font-extrabold text-xs tracking-tight line-clamp-3 mb-1" th:text="${book.title}">Title</h4>
-                <span class="text-[10px] text-slate-300 truncate" th:text="${book.authorNames}">Author</span>
-            </div>
-            <div class="p-4 flex flex-col flex-grow">
-                <span class="text-[10px] text-fpt-orange font-bold uppercase tracking-wider block mb-1 truncate"
-                      th:text="${book.categoryName}">Category</span>
-                <h5 class="font-bold text-white text-sm line-clamp-2 mb-1 group-hover:text-fpt-orange" th:text="${book.title}">Title</h5>
-                <p class="text-xs text-slate-400 mb-2 truncate" th:text="${'Tác giả: ' + book.authorNames}">Author</p>
-                <p class="text-[11px] text-slate-500 font-mono mb-3" th:text="${'ISBN: ' + book.isbn}">ISBN</p>
-                <div class="mt-auto flex items-center justify-between pt-3 border-t border-[#1e293b]">
-                    <div class="flex items-center space-x-1.5">
-                        <span class="w-2 h-2 rounded-full"
-                              th:classappend="${book.available ? 'bg-emerald-500' : 'bg-red-400'}"></span>
-                        <span class="text-xs font-semibold"
-                              th:classappend="${book.available ? 'text-emerald-700' : 'text-red-600'}"
-                              th:text="${book.available ? 'Còn sách' : 'Hết sách'}">Còn sách</span>
-                    </div>
-                    <!-- Sửa link về librarian inventory -->
-                    <a th:href="@{/librarian/inventory/{id}(id=${book.bookId}, campusId=${campusId})}"
-                       class="bg-[#1a2540] hover:bg-[#233152] text-[#e8f0ff] text-xs font-bold py-1.5 px-3 rounded-lg transition-all border border-[#1e293b]">
-                        Chi tiết
+                    <a href="/librarian/inventory/add"
+                       class="bg-fpt-orange hover:bg-fpt-orangeHover text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-orange-500/30 transition-all flex items-center space-x-2">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                        <span>Thêm sách mới</span>
                     </a>
                 </div>
+                <div class="relative z-10 mt-8 mb-4 w-full">
+                    <div th:replace="~{fragments/search-bar :: search-form}"></div>
+                </div>
+                
+                <div class="absolute top-0 right-0 w-64 h-64 bg-fpt-orange/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+                <div class="absolute bottom-0 left-10 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl -mb-10 pointer-events-none"></div>
+            </div>
+            <!-- Search Results Block -->
+            <div th:if="${hasSearch}">
+                <div class="flex items-center justify-between mb-4 mt-8 first:mt-0">
+                    <div>
+                        <h3 class="text-xl font-extrabold text-black">Kết quả tìm kiếm</h3>
+                        <p class="text-sm text-slate-500 mt-0.5" th:if="${!noResults}">Tìm thấy các tài liệu phù hợp</p>
+                        <p class="text-sm text-rose-500 mt-0.5" th:if="${noResults}">Không tìm thấy tài liệu nào phù hợp với bộ lọc!</p>
+                    </div>
+                </div>
+                <!-- Vòng lặp hiển thị kết quả -->
+                <div th:unless="${noResults}" th:replace="~{inventory/list :: book-grid(${results})}"></div>
+            </div>
+
+            <!-- Books by major section (Chỉ hiển thị khi KHÔNG search hoặc khi search KHÔNG có kết quả để làm gợi ý) -->
+            <div th:if="${!hasSearch or noResults}">
+                <th:block th:each="section : ${majorSections}">
+                    <div class="flex items-center justify-between mb-4 mt-8 first:mt-0">
+                        <div>
+                            <h3 class="text-xl font-extrabold text-black" th:text="${section.sectionName}">Chuyên ngành</h3>
+                            <p class="text-sm text-slate-500 mt-0.5">Một số tựa sách ngẫu nhiên</p>
+                        </div>
+                    </div>
+                    <div th:replace="~{inventory/list :: book-grid(${section.books})}"></div>
+                </th:block>
             </div>
         </div>
-    </div>
-    <div th:if="${books == null or #lists.isEmpty(books)}"
-         class="text-center py-12 text-slate-400">
-        <p class="text-sm">Chưa có sách nào trong hệ thống.</p>
-    </div>
-</th:block>
+    </main>
 
-<div th:replace="~{fragments/footer :: footer}"></div>
+    <!-- ═══ BOOK GRID FRAGMENT ══════════════════════════════════════════════════ -->
+    <th:block th:fragment="book-grid(books)">
+        <div th:if="${books != null and !#lists.isEmpty(books)}"
+             class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-4">
+            <div th:each="book : ${books}"
+                 class="bg-[#131c2e] rounded-2xl overflow-hidden shadow-sm card-hover flex flex-col border border-transparent hover:border-[#4f8cff]/30">
+                <!-- Cover with image -->
+                <div th:if="${book.coverImageUrl != null and not #strings.isEmpty(book.coverImageUrl)}"
+                     class="h-40 w-full relative group overflow-hidden bg-[#0e1625] flex-shrink-0">
+                    <img th:src="${book.coverImageUrl}" th:alt="${book.title}"
+                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"/>
+                    <div class="absolute top-3 right-3">
+                        <span class="bg-black/50 text-orange-300 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">FPTU</span>
+                    </div>
+                    <div class="absolute top-3 left-3" th:if="${book.subjectCode != null}">
+                        <span class="bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase backdrop-blur-sm"
+                              th:text="${book.subjectCode}">CODE</span>
+                    </div>
+                </div>
+                <!-- Cover fallback -->
+                <div th:unless="${book.coverImageUrl != null and not #strings.isEmpty(book.coverImageUrl)}"
+                     class="h-40 w-full flex-shrink-0 bg-gradient-to-br flex flex-col justify-between p-4 text-white select-none"
+                     th:classappend="${book.coverColor}">
+                    <div class="flex justify-between items-start">
+                        <span th:if="${book.subjectCode != null}"
+                              class="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase backdrop-blur-sm"
+                              th:text="${book.subjectCode}">CODE</span>
+                        <span class="text-[10px] font-bold text-orange-300 ml-auto">FPTU</span>
+                    </div>
+                    <h4 class="font-extrabold text-xs tracking-tight line-clamp-3 mb-1" th:text="${book.title}">Title</h4>
+                    <span class="text-[10px] text-slate-300 truncate" th:text="${book.authorNames}">Author</span>
+                </div>
+                <!-- Card body -->
+                <div class="p-4 flex flex-col flex-grow">
+                    <span class="text-[10px] text-fpt-orange font-bold uppercase tracking-wider block mb-1 truncate"
+                          th:text="${book.categoryName != null ? book.categoryName : (book.categoryNames != null ? book.categoryNames : '')}">Category</span>
+                    <h5 class="font-bold text-white text-sm line-clamp-2 mb-1" th:text="${book.title}">Title</h5>
+                    <p class=" text-xs text-white mb-2 truncate" th:text="${'Tác giả: ' + book.authorNames}">Author</p>
+                    <p class="text-[11px] text-white font-mono mb-3" th:text="${'ISBN: ' + book.isbn}">ISBN</p>
+                    <div class="mt-auto flex items-center justify-between pt-3 border-t border-[#1e293b]">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2 h-2 rounded-full"
+                                  th:classappend="${book.availableCount > 0 ? 'bg-emerald-500' : 'bg-red-400'}"></span>
+                            <span class="text-xs font-semibold"
+                                  th:classappend="${book.availableCount > 0 ? 'text-emerald-400' : 'text-red-400'}"
+                                  th:text="${book.availableCount > 0 ? 'Còn sách' : 'Hết sách'}">Còn sách</span>
+                        </div>
+                        <a th:href="@{/librarian/inventory/{id}(id=${book.bookId})}"
+                           class="bg-white hover:bg-gray text-black text-xs font-bold py-1.5 px-3 rounded-lg transition-all border border-[#1e293b]">
+                            Chi tiết
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:if="${books == null or #lists.isEmpty(books)}" class="text-center py-12 text-slate-400">
+            <p class="text-sm">Chưa có sách nào trong hệ thống.</p>
+        </div>
+    </th:block>
+
+    
 </body>
 </html>
-
-

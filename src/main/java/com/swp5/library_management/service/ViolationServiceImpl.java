@@ -32,6 +32,8 @@ public class ViolationServiceImpl implements ViolationService {
     private final BookCopyRepository bookCopyRepository;
     private final AcquisitionOrderDetailRepository acquisitionOrderDetailRepository;
     private final UserRepository userRepository;
+    private final ReservationService reservationService;
+    private final SystemConfigService systemConfigService;
 
     @Override
     @Transactional(readOnly = true)
@@ -142,7 +144,8 @@ public class ViolationServiceImpl implements ViolationService {
             throw new IllegalStateException("Borrow ticket detail is not overdue.");
         }
 
-        BigDecimal amount = OVERDUE_DAILY_FINE.multiply(BigDecimal.valueOf(overdueDays));
+        BigDecimal finePerDay = BigDecimal.valueOf(systemConfigService.getIntConfig("FINE_PER_DAY", 5000));
+        BigDecimal amount = finePerDay.multiply(BigDecimal.valueOf(overdueDays));
         return buildFine(detail, amount, "OVERDUE", "Overdue " + overdueDays + " day(s)");
     }
 

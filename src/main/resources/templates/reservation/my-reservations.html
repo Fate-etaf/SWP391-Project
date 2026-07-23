@@ -1,459 +1,286 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Đặt chỗ của tôi – Thư viện FPT</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #f0f4f8;
-            min-height: 100vh;
-        }
-
-        /* ── Header ───────────────────────────────────────── */
-        .header {
-            background: linear-gradient(135deg, #003580, #0057b8);
-            color: #fff;
-            padding: 18px 32px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.25);
-        }
-        .header h1 { font-size: 1.3rem; font-weight: 700; }
-        .header a {
-            color: rgba(255,255,255,.75);
-            text-decoration: none;
-            font-size: .9rem;
-        }
-        .header a:hover { color: #fff; }
-
-        /* ── Container & Grid ─────────────────────────────── */
-        .container { max-width: 1200px; margin: 36px auto; padding: 0 16px; }
-        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
-        @media (max-width: 768px) { .grid-layout { grid-template-columns: 1fr; } }
-
-        /* ── Flash banners ────────────────────────────────── */
-        .alert {
-            padding: 14px 18px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            font-size: .9rem;
-        }
-        .alert-success { background: #e8f5e9; border: 1px solid #a5d6a7; color: #1b5e20; }
-        .alert-error   { background: #ffeaea; border: 1px solid #f5c6c6; color: #c62828; }
-        .alert-info    { background: #e3f2fd; border: 1px solid #90caf9; color: #0d47a1; }
-        .alert-icon    { font-size: 1.2rem; flex-shrink: 0; }
-
-        /* ── Section title ────────────────────────────────── */
-        .section-title {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 18px;
-        }
-        .section-title h2 { font-size: 1.15rem; color: #003580; }
-
-        /* ── Card ─────────────────────────────────────────── */
-        .card {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,.08);
-            overflow: hidden;
-            margin-bottom: 24px;
-        }
-
-        /* ── Reservation item ─────────────────────────────── */
-        .reservation-item {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            align-items: center;
-            padding: 18px 24px;
-            border-bottom: 1px solid #f0f4f8;
-            gap: 16px;
-        }
-        .reservation-item:last-child { border-bottom: none; }
-        .reservation-item:hover { background: #fafcff; }
-
-        .res-title {
-            font-weight: 700;
-            color: #003580;
-            font-size: .98rem;
-            margin-bottom: 4px;
-        }
-        .res-meta {
-            font-size: .82rem;
-            color: #777;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 4px;
-        }
-        .res-meta span { display: flex; align-items: center; gap: 4px; }
-
-        /* ── Status badge ─────────────────────────────────── */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: .78rem;
-            font-weight: 600;
-        }
-        .badge-holding   { background: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
-        .badge-completed { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
-        .badge-cancelled { background: #f5f5f5; color: #757575; border: 1px solid #e0e0e0; }
-        .badge-expired   { background: #fce4ec; color: #880e4f; border: 1px solid #f48fb1; }
-        .badge-waiting   { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }
-        .badge-notified  { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
-
-        /* ── Countdown ────────────────────────────────────── */
-        .countdown {
-            font-size: .82rem;
-            color: #e53935;
-            font-weight: 600;
-            margin-top: 5px;
-        }
-
-        /* ── Action buttons ───────────────────────────────── */
-        .actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-
-        .btn-cancel {
-            background: none;
-            border: 1px solid #e53935;
-            color: #e53935;
-            padding: 6px 16px;
-            border-radius: 6px;
-            font-size: .82rem;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all .2s;
-        }
-        .btn-cancel:hover { background: #ffebee; }
-
-        /* ── Empty state ──────────────────────────────────── */
-        .empty-state {
-            text-align: center;
-            padding: 48px 20px;
-            color: #aaa;
-        }
-        .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
-        .empty-state p { font-size: .95rem; }
-
-        /* ── Modal overlay ────────────────────────────────── */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.45);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-overlay.active { display: flex; }
-
-        .modal {
-            background: #fff;
-            border-radius: 14px;
-            padding: 28px 32px;
-            max-width: 420px;
-            width: 90%;
-            box-shadow: 0 8px 40px rgba(0,0,0,.2);
-            animation: modalIn .18s ease;
-        }
-        @keyframes modalIn {
-            from { transform: scale(.94); opacity: 0; }
-            to   { transform: scale(1);   opacity: 1; }
-        }
-        .modal h3 { color: #003580; margin-bottom: 10px; }
-        .modal p  { font-size: .9rem; color: #555; margin-bottom: 20px; }
-        .modal-actions { display: flex; gap: 12px; justify-content: flex-end; }
-
-        .btn-confirm {
-            background: #e53935;
-            color: #fff;
-            border: none;
-            padding: 9px 22px;
-            border-radius: 7px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: .9rem;
-            transition: background .2s;
-        }
-        .btn-confirm:hover { background: #b71c1c; }
-
-        .btn-back {
-            background: #f5f5f5;
-            color: #555;
-            border: none;
-            padding: 9px 22px;
-            border-radius: 7px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: .9rem;
-            transition: background .2s;
-        }
-        .btn-back:hover { background: #e0e0e0; }
-
-        .btn-new {
-            background: linear-gradient(135deg, #003580, #0057b8);
-            color: #fff;
-            border: none;
-            padding: 10px 22px;
-            border-radius: 8px;
-            font-size: .9rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: all .2s;
-        }
-        .btn-new:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,53,128,.25); }
-    </style>
-</head>
-<body>
-
-<!-- Header -->
-<div class="header" style="justify-content: space-between; display: flex; width: 100%;">
-    <div style="display: flex; align-items: center; gap: 14px;">
-        <span style="font-size:1.6rem;">📚</span>
-        <div>
-            <h1>Thư viện FPT University</h1>
-            <a href="/">← Trang chủ</a>
-        </div>
-    </div>
-    <div style="display: flex; align-items: center; gap: 20px;">
-        <a th:if="${session.isLibrarian}" href="/librarian/create-loan" style="color: #fbbf24; text-decoration: none; font-size: .9rem; font-weight: bold;">📖 Tạo đơn mượn</a>
-        <a href="/reservations" style="font-weight: 600; color: #fff; text-decoration: none; font-size: .9rem;">Đặt chỗ của tôi</a>
-        <a href="/borrowing-history" style="color: rgba(255,255,255,.75); text-decoration: none; font-size: .9rem;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.75)'">Lịch sử mượn trả</a>
-    </div>
-</div>
-
-
-<div class="container">
-
-    <!-- Flash: Thành công -->
-    <div class="alert alert-success" th:if="${successMsg}">
-        <span class="alert-icon">✅</span>
-        <div>
-            <strong th:text="${successMsg}"></strong>
-            <div th:if="${expirationDate}" style="margin-top:4px; font-size:.85rem;">
-                ⏰ Thời hạn nhận sách: <strong th:text="${#temporals.format(expirationDate, 'HH:mm dd/MM/yyyy')}"></strong>
-            </div>
-            <div th:if="${waitlistPosition}" style="margin-top:4px; font-size:.85rem;">
-                📋 Số thứ tự hàng chờ của bạn: <strong>#<span th:text="${waitlistPosition}"></span></strong>
-            </div>
-        </div>
-    </div>
-
-    <!-- Flash: Lỗi -->
-    <div class="alert alert-error" th:if="${errorMsg}">
-        <span class="alert-icon">❌</span>
-        <span th:text="${errorMsg}"></span>
-    </div>
-
-    <div class="grid-layout">
-        
-        <!-- Cột 1: Hàng đợi nhận sách (Reservations) -->
-        <div>
-            <!-- Section title -->
-            <div class="section-title">
-                <h2>🔖 Đặt chỗ sách của tôi</h2>
-                <a class="btn-new" href="/books">➕ Đặt sách mới</a>
-            </div>
-
-            <!-- Danh sách reservations -->
-            <div class="card">
-                <!-- Empty state -->
-                <div class="empty-state" th:if="${reservations.empty}">
-                    <div class="empty-icon">📭</div>
-                    <p>Bạn chưa có đơn đặt giữ chỗ nào.<br/>
-                       <a href="/books" style="color:#0057b8;">Tìm sách và đặt ngay →</a>
-                    </p>
-                </div>
-
-                <!-- Danh sách -->
-                <div th:each="r : ${reservations}" class="reservation-item">
-                    <div>
-                        <!-- Tên sách -->
-                        <div class="res-title" th:text="${r.book.title}">Tên sách</div>
-
-                        <!-- Badge trạng thái -->
-                        <div style="margin: 5px 0;">
-                            <span class="badge badge-holding"   th:if="${r.status == 'Holding'}">⏳ Đang giữ chỗ</span>
-                            <span class="badge badge-completed" th:if="${r.status == 'Completed'}">✅ Đã nhận sách</span>
-                            <span class="badge badge-cancelled" th:if="${r.status == 'Cancelled'}">❌ Đã hủy</span>
-                            <span class="badge badge-expired"   th:if="${r.status == 'Expired'}">⌛ Hết hạn</span>
-                        </div>
-
-                        <!-- Metadata -->
-                        <div class="res-meta">
-                            <span>📋 Mã đơn #<span th:text="${r.reservationId}"></span></span>
-                            <span>🏫 <span th:text="${r.pickupCampus.campusName}">Campus</span></span>
-                            <span>📅 Đặt lúc: <span th:text="${#temporals.format(r.reservedAt, 'dd/MM/yyyy HH:mm')}"></span></span>
-                            <span th:if="${r.copy != null}">📦 Bản sách: <span th:text="${r.copy.copyId}"></span></span>
-                        </div>
-
-                        <!-- Countdown chỉ hiện với đơn đang Holding -->
-                        <div class="countdown" th:if="${r.status == 'Holding'}">
-                            ⏰ Thời hạn nhận: <span th:text="${#temporals.format(r.expirationDate, 'HH:mm dd/MM/yyyy')}"></span>
-                            <span th:id="'cd-' + ${r.reservationId}" th:data-expiry="${r.expirationDate}"></span>
-                        </div>
-                    </div>
-
-                    <!-- Nút hủy (chỉ với Holding) -->
-                    <div class="actions" th:if="${r.status == 'Holding'}">
-                        <button class="btn-cancel"
-                                th:data-id="${r.reservationId}"
-                                th:data-title="${r.book.title}"
-                                onclick="openModal(this.getAttribute('data-id'), this.getAttribute('data-title'))">
-                            🗑 Hủy đặt chỗ
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Cột 2: Danh sách chờ (Waitlist) -->
-        <div>
-            <!-- Section title -->
-            <div class="section-title">
-                <h2>📋 Danh sách xếp hàng chờ</h2>
-            </div>
-
-            <div class="card">
-                <!-- Empty state -->
-                <div class="empty-state" th:if="${waitlists.empty}">
-                    <div class="empty-icon">🛋️</div>
-                    <p>Bạn chưa tham gia danh sách chờ nào.</p>
-                </div>
-
-                <!-- Danh sách -->
-                <div th:each="w : ${waitlists}" class="reservation-item">
-                    <div>
-                        <!-- Tên sách -->
-                        <div class="res-title" th:text="${w.book.title}">Tên sách</div>
-
-                        <!-- Badge trạng thái -->
-                        <div style="margin: 5px 0;">
-                            <span class="badge badge-waiting"  th:if="${w.status == 'Waiting'}">⏳ Đang đợi sách</span>
-                            <span class="badge badge-notified" th:if="${w.status == 'Notified'}">🔔 Đã có sách (Kiểm tra Email)</span>
-                            <span class="badge badge-cancelled" th:if="${w.status == 'Cancelled'}">❌ Đã hủy đăng ký</span>
-                        </div>
-
-                        <!-- Metadata -->
-                        <div class="res-meta">
-                            <span>🏫 <span th:text="${w.campus.campusName}">Campus</span></span>
-                            <span>📅 Đăng ký lúc: <span th:text="${#temporals.format(w.requestedAt, 'dd/MM/yyyy HH:mm')}"></span></span>
-                        </div>
-                    </div>
-
-                    <!-- Nút hủy hàng chờ (chỉ với Waiting/Notified) -->
-                    <div class="actions" th:if="${w.status == 'Waiting' or w.status == 'Notified'}">
-                        <button class="btn-cancel"
-                                th:data-id="${w.waitlistId}"
-                                th:data-title="${w.book.title}"
-                                onclick="openWaitlistModal(this.getAttribute('data-id'), this.getAttribute('data-title'))">
-                            🗑 Hủy chờ sách
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-    </div>
-</div>
-
-<!-- ── Modal xác nhận hủy ─────────────────────────────────── -->
-<div id="cancelModal" class="modal-overlay">
-    <div class="modal">
-        <h3 id="modalTitle">⚠️ Xác nhận hủy đặt chỗ</h3>
-        <p id="modalMsg">Bạn có chắc muốn hủy đơn đặt giữ chỗ cho cuốn sách này không?
-           <br/>Thao tác này không thể hoàn tác.</p>
-        <div class="modal-actions">
-            <button class="btn-back" onclick="closeModal()">Không, giữ lại</button>
-            <form id="cancelForm" method="post" style="display:inline;">
-                <button id="btn-confirm-cancel" type="submit" class="btn-confirm">Đồng ý hủy</button>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script>
-    // ── Modal logic ─────────────────────────────────────────
-    function openModal(reservationId, bookTitle) {
-        document.getElementById('modalTitle').textContent = '⚠️ Xác nhận hủy đặt chỗ';
-        document.getElementById('modalMsg').innerHTML =
-            'Bạn có chắc muốn hủy đơn đặt giữ chỗ cho cuốn <strong>"' + bookTitle + '"</strong> không?<br/>Thao tác này không thể hoàn tác.';
-        document.getElementById('cancelForm').action = '/reservations/cancel/' + reservationId;
-        document.getElementById('cancelModal').classList.add('active');
-    }
-
-    function openWaitlistModal(waitlistId, bookTitle) {
-        document.getElementById('modalTitle').textContent = '⚠️ Xác nhận hủy chờ sách';
-        document.getElementById('modalMsg').innerHTML =
-            'Bạn có chắc muốn hủy đăng ký chờ sách cho cuốn <strong>"' + bookTitle + '"</strong> không?<br/>Thao tác này không thể hoàn tác.';
-        document.getElementById('cancelForm').action = '/reservations/waitlist/cancel/' + waitlistId;
-        document.getElementById('cancelModal').classList.add('active');
-    }
-
-    function closeModal() {
-        document.getElementById('cancelModal').classList.remove('active');
-    }
-
-    // Đóng modal khi click ra ngoài
-    document.getElementById('cancelModal').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
-    });
-
-    // ── Countdown timer ─────────────────────────────────────
-    function updateCountdowns() {
-        const spans = document.querySelectorAll('[id^="cd-"]');
-        const now = new Date();
-        spans.forEach(span => {
-            const expiryStr = span.dataset.expiry;
-            if (!expiryStr) return;
-            // Parse LocalDateTime string từ Thymeleaf (format: 2026-06-01T20:00:00)
-            const expiry = new Date(expiryStr);
-            const diff = expiry - now;
-            if (diff <= 0) {
-                span.textContent = ' (Đã hết hạn)';
-                span.style.color = '#999';
-                
-                const itemDiv = span.closest('.reservation-item');
-                if (itemDiv) {
-                    // Ẩn nút hủy
-                    const actionsDiv = itemDiv.querySelector('.actions');
-                    if (actionsDiv) actionsDiv.style.display = 'none';
-                    
-                    // Cập nhật badge từ Đang giữ chỗ -> Hết hạn
-                    const badge = itemDiv.querySelector('.badge-holding');
-                    if (badge) {
-                        badge.textContent = '⌛ Hết hạn';
-                        badge.className = 'badge badge-expired';
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yêu cầu đặt mượn — FLMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B',
+                            dark: '#0F172A',
+                            orangeHover: '#D95F18'
+                        }
                     }
                 }
-                return;
             }
-            const h = Math.floor(diff / 3600000);
-            const m = Math.floor((diff % 3600000) / 60000);
-            const s = Math.floor((diff % 60000) / 1000);
-            span.textContent = ' – còn ' + h + 'h ' + m + 'm ' + s + 's';
-        });
-    }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style th:replace="~{fragments/header :: header-style}"></style>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
 
-    updateCountdowns();
-    setInterval(updateCountdowns, 1000);
-</script>
+    <!-- Header -->
+    <div th:replace="~{fragments/header :: header('reservations')}"></div>
 
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row gap-8">
+        
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/sidebar :: sidebar('reservations')}"></div>
+
+        <!-- Content Area -->
+        <div class="flex-grow">
+            
+            <!-- Page Title -->
+            <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Yêu cầu đặt mượn</h2>
+                    <p class="text-sm text-slate-500 mt-1">Quản lý các sách bạn đã đặt giữ chỗ và danh sách chờ.</p>
+                </div>
+                <a href="/books" class="inline-flex items-center space-x-2 bg-fpt-orange hover:bg-fpt-orangeHover text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+                    <span>Đặt sách mới</span>
+                </a>
+            </div>
+
+            <!-- Flash: Success -->
+            <div th:if="${successMsg}" class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-4 flex items-start space-x-3 shadow-sm">
+                <div class="bg-emerald-100 p-1.5 rounded-lg text-emerald-600 mt-0.5 shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <div>
+                    <h4 class="font-bold text-emerald-700" th:text="${successMsg}"></h4>
+                    <p class="text-sm mt-1 text-emerald-600" th:if="${expirationDate}">⏰ Thời hạn nhận sách: <strong th:text="${#temporals.format(expirationDate, 'HH:mm dd/MM/yyyy')}"></strong></p>
+                    <p class="text-sm mt-1 text-emerald-600" th:if="${waitlistPosition}">📋 Số thứ tự hàng chờ của bạn: <strong>#<span th:text="${waitlistPosition}"></span></strong></p>
+                </div>
+            </div>
+
+            <!-- Flash: Error -->
+            <div th:if="${errorMsg}" class="mb-6 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-4 flex items-start space-x-3 shadow-sm">
+                <div class="bg-rose-100 p-1.5 rounded-lg text-rose-600 mt-0.5 shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </div>
+                <div class="font-bold text-rose-700 self-center" th:text="${errorMsg}"></div>
+            </div>
+
+            <!-- Layout Grid -->
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                
+                <!-- Cột 1: Đặt chỗ sách (Reservations) -->
+                <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                    <div class="p-4 border-b border-slate-100 bg-slate-50/50">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <span class="text-blue-500">🔖</span> Sách đang đặt giữ chỗ
+                        </h3>
+                    </div>
+
+                    <!-- Empty state -->
+                    <div th:if="${reservations.empty}" class="p-10 text-center flex-grow flex flex-col justify-center">
+                        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 border border-slate-100">
+                            <span class="text-2xl">📭</span>
+                        </div>
+                        <p class="text-slate-500 text-sm">Bạn chưa có đơn đặt giữ chỗ nào.</p>
+                        <a href="/books" class="text-fpt-orange hover:text-fpt-orangeHover text-sm font-semibold mt-2 inline-block">Tìm sách ngay →</a>
+                    </div>
+
+                    <!-- List -->
+                    <div class="divide-y divide-slate-100 flex-grow" th:unless="${reservations.empty}">
+                        <div th:each="r : ${reservations}" class="p-5 hover:bg-slate-50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <!-- Title -->
+                                <h4 class="font-bold text-slate-900 text-sm mb-1" th:text="${r.book.title}">Tên sách</h4>
+                                
+                                <!-- Badges -->
+                                <div class="mb-2">
+                                    <span th:if="${r.status == 'Holding'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">⏳ Đang giữ chỗ</span>
+                                    <span th:if="${r.status == 'Completed'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">✅ Đã nhận sách</span>
+                                    <span th:if="${r.status == 'Cancelled'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">❌ Đã hủy</span>
+                                    <span th:if="${r.status == 'Expired'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">⌛ Hết hạn</span>
+                                </div>
+                                
+                                <!-- Meta -->
+                                <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                                    <span><strong class="text-slate-700">#</strong> <span th:text="${r.reservationId}"></span></span>
+                                    <span>📍 <span th:text="${r.pickupCampus.campusName}"></span></span>
+                                    <span>📅 <span th:text="${#temporals.format(r.reservedAt, 'dd/MM/yyyy HH:mm')}"></span></span>
+                                    <span th:if="${r.copy != null}">📦 Bản: <span th:text="${r.copy.copyId}"></span></span>
+                                </div>
+                                
+                                <!-- Countdown -->
+                                <div th:if="${r.status == 'Holding'}" class="mt-2 text-xs font-semibold text-rose-600 bg-rose-50 px-2 py-1 rounded inline-block">
+                                    ⏰ Hạn: <span th:text="${#temporals.format(r.expirationDate, 'HH:mm dd/MM/yyyy')}"></span>
+                                    <span th:id="'cd-' + ${r.reservationId}" th:data-expiry="${r.expirationDate}"></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Action -->
+                            <div th:if="${r.status == 'Holding'}" class="shrink-0">
+                                <button class="px-3 py-1.5 border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg text-xs font-semibold transition-colors"
+                                        th:data-id="${r.reservationId}"
+                                        th:data-title="${r.book.title}"
+                                        onclick="openModal(this.getAttribute('data-id'), this.getAttribute('data-title'))">
+                                    Hủy đặt chỗ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột 2: Danh sách chờ (Waitlists) -->
+                <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                    <div class="p-4 border-b border-slate-100 bg-slate-50/50">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <span class="text-amber-500">📋</span> Danh sách xếp hàng chờ
+                        </h3>
+                    </div>
+
+                    <!-- Empty state -->
+                    <div th:if="${waitlists.empty}" class="p-10 text-center flex-grow flex flex-col justify-center">
+                        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 border border-slate-100">
+                            <span class="text-2xl">🛋️</span>
+                        </div>
+                        <p class="text-slate-500 text-sm">Bạn chưa tham gia danh sách chờ nào.</p>
+                    </div>
+
+                    <!-- List -->
+                    <div class="divide-y divide-slate-100 flex-grow" th:unless="${waitlists.empty}">
+                        <div th:each="w : ${waitlists}" class="p-5 hover:bg-slate-50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <!-- Title -->
+                                <h4 class="font-bold text-slate-900 text-sm mb-1" th:text="${w.book.title}">Tên sách</h4>
+                                
+                                <!-- Badges -->
+                                <div class="mb-2">
+                                    <span th:if="${w.status == 'Waiting'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">⏳ Đang đợi sách</span>
+                                    <span th:if="${w.status == 'Notified'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">🔔 Đã có sách (Kiểm tra Email)</span>
+                                    <span th:if="${w.status == 'Cancelled'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">❌ Đã hủy</span>
+                                    <span th:if="${w.status == 'Converted'}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">✅ Đã chuyển thành đặt chỗ</span>
+                                </div>
+                                
+                                <!-- Meta -->
+                                <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                                    <span>📍 <span th:text="${w.campus.campusName}"></span></span>
+                                    <span>📅 <span th:text="${#temporals.format(w.requestedAt, 'dd/MM/yyyy HH:mm')}"></span></span>
+                                    <span th:if="${w.queuePosition != null and (w.status == 'Waiting' or w.status == 'Notified')}" class="text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded">
+                                        Vị trí: #<span th:text="${w.queuePosition}"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Action -->
+                            <div th:if="${w.status == 'Waiting' or w.status == 'Notified'}" class="shrink-0">
+                                <button class="px-3 py-1.5 border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg text-xs font-semibold transition-colors"
+                                        th:data-id="${w.waitlistId}"
+                                        th:data-title="${w.book.title}"
+                                        onclick="openWaitlistModal(this.getAttribute('data-id'), this.getAttribute('data-title'))">
+                                    Hủy chờ sách
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div> <!-- End Grid -->
+            
+        </div>
+    </main>
+
+    <!-- Modal Xác Nhận Hủy -->
+    <div id="cancelModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeModal()"></div>
+        <!-- Modal Content -->
+        <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform scale-100 transition-transform">
+            <div class="p-6 text-center">
+                <div class="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-4 text-rose-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 id="modalTitle" class="text-lg font-bold text-slate-900 mb-2">Xác nhận hủy đặt chỗ</h3>
+                <p id="modalMsg" class="text-sm text-slate-500 mb-6">Bạn có chắc muốn hủy đơn đặt giữ chỗ này không? Thao tác không thể hoàn tác.</p>
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition-colors w-full sm:w-auto">
+                        Không, giữ lại
+                    </button>
+                    <form id="cancelForm" method="post" class="w-full sm:w-auto">
+                        <button type="submit" class="w-full px-5 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold shadow-sm transition-colors">
+                            Đồng ý hủy
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script>
+        // Modal logic
+        const modal = document.getElementById('cancelModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMsg = document.getElementById('modalMsg');
+        const cancelForm = document.getElementById('cancelForm');
+
+        function openModal(reservationId, bookTitle) {
+            modalTitle.textContent = 'Xác nhận hủy đặt chỗ';
+            modalMsg.innerHTML = 'Bạn có chắc muốn hủy đơn đặt giữ chỗ cho cuốn <strong>"' + bookTitle + '"</strong> không?<br/>Thao tác này không thể hoàn tác.';
+            cancelForm.action = '/reservations/cancel/' + reservationId;
+            modal.classList.remove('hidden');
+        }
+
+        function openWaitlistModal(waitlistId, bookTitle) {
+            modalTitle.textContent = 'Xác nhận hủy chờ sách';
+            modalMsg.innerHTML = 'Bạn có chắc muốn hủy đăng ký chờ sách cho cuốn <strong>"' + bookTitle + '"</strong> không?<br/>Thao tác này không thể hoàn tác.';
+            cancelForm.action = '/reservations/waitlist/cancel/' + waitlistId;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+
+        // Countdown timer
+        function updateCountdowns() {
+            const spans = document.querySelectorAll('[id^="cd-"]');
+            const now = new Date();
+            spans.forEach(span => {
+                const expiryStr = span.dataset.expiry;
+                if (!expiryStr) return;
+                
+                const expiry = new Date(expiryStr);
+                const diff = expiry - now;
+                if (diff <= 0) {
+                    span.textContent = ' (Đã hết hạn)';
+                    span.classList.remove('text-rose-600');
+                    span.classList.add('text-slate-500');
+                    
+                    const itemDiv = span.closest('.p-5');
+                    if (itemDiv) {
+                        const actionBtn = itemDiv.querySelector('button');
+                        if (actionBtn) actionBtn.style.display = 'none';
+                    }
+                    return;
+                }
+                const h = Math.floor(diff / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                span.textContent = ' (còn ' + h + 'h ' + m + 'm ' + s + 's)';
+            });
+        }
+
+        updateCountdowns();
+        setInterval(updateCountdowns, 1000);
+    </script>
 </body>
 </html>

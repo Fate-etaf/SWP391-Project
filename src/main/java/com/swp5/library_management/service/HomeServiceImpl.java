@@ -1,5 +1,16 @@
 package com.swp5.library_management.service;
 
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.swp5.library_management.dto.CategoryCardDTO;
 import com.swp5.library_management.dto.FeaturedBookDTO;
 import com.swp5.library_management.dto.HomeStatsDTO;
@@ -9,15 +20,10 @@ import com.swp5.library_management.repository.BookCopyRepository;
 import com.swp5.library_management.repository.BookRepository;
 import com.swp5.library_management.repository.CampusRepository;
 import com.swp5.library_management.repository.CategoryRepository;
-import com.swp5.library_management.repository.UserRepository;
 import com.swp5.library_management.repository.MajorRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.swp5.library_management.repository.UserRepository;
 
-import java.text.NumberFormat;
-import java.util.*;
+import lombok.RequiredArgsConstructor;
 
 
 @Service
@@ -29,7 +35,7 @@ public class HomeServiceImpl implements HomeService {
     private final BookCopyRepository  bookCopyRepository;
     private final CampusRepository    campusRepository;
     private final CategoryRepository  categoryRepository;
-    private final UserRepository      userRepository;   // ← Đã inject được vì User entity tồn tại
+    private final UserRepository      userRepository;   
     private final MajorRepository     majorRepository;
 
     // ── Bảng màu xoay vòng cho thẻ Category ───────────────────────────────────
@@ -64,7 +70,6 @@ public class HomeServiceImpl implements HomeService {
         long availableCopies = bookCopyRepository.countByCopyStatus("Available");
         long totalCampuses   = campusRepository.count();
 
-        // FIX: Không còn hardcode 0 — lấy thật từ DB bảng Users
         long activeReaders   = userRepository.countByStatus("Active");
 
         return HomeStatsDTO.builder()
@@ -117,39 +122,13 @@ public class HomeServiceImpl implements HomeService {
     // ─────────────────────────────────────────────────────────────────────────
 
     @Override
-    public List<FeaturedBookDTO> getFeaturedBooks() {
+    public List<FeaturedBookDTO> getFeaturedBooks(Integer campusId) {
         List<Book> books = bookRepository.findTop4ByOrderByCreatedAtDesc();
-
-        List<FeaturedBookDTO> result = new ArrayList<>();
-        for (int i = 0; i < books.size(); i++) {
-            Book book = books.get(i);
-
-            String categoryName = book.getCategories().stream()
-                    .findFirst()
-                    .map(Category::getCategoryName)
-                    .orElse("Chưa phân loại");
-
-            String subjectCode = (book.getSubject() != null)
-                    ? book.getSubject().getSubjectCode()
-                    : "N/A";
-
-            result.add(FeaturedBookDTO.builder()
-                    .bookId(book.getBookId())
-                    .title(book.getTitle())
-                    .authorNames(book.getAuthorNames())
-                    .subjectCode(subjectCode)
-                    .isbn(book.getIsbn() != null ? book.getIsbn() : "N/A")
-                    .categoryName(categoryName)
-                    .available(book.getAvailableCount() > 0)
-                    .coverColor(COVER_COLORS[i % COVER_COLORS.length])
-                    .coverImageUrl(book.getCoverImageUrl())
-                    .build());
-        }
-        return result;
+        return mapToFeaturedBookDTOs(books, campusId);
     }
 
     @Override
-    public List<com.swp5.library_management.dto.BookSectionDTO> getMajorsWithRandomBooks() {
+    public List<com.swp5.library_management.dto.BookSectionDTO> getMajorsWithRandomBooks(Integer campusId) {
         List<com.swp5.library_management.entity.Major> allMajors = majorRepository.findAll();
         List<com.swp5.library_management.dto.BookSectionDTO> result = new ArrayList<>();
 
@@ -162,7 +141,7 @@ public class HomeServiceImpl implements HomeService {
 
             result.add(com.swp5.library_management.dto.BookSectionDTO.builder()
                     .sectionName(major.getMajorName())
-                    .books(mapToFeaturedBookDTOs(randomBooks))
+                    .books(mapToFeaturedBookDTOs(randomBooks, campusId))
                     .build());
         }
 
@@ -171,14 +150,40 @@ public class HomeServiceImpl implements HomeService {
         if (!outsideBooks.isEmpty()) {
             result.add(com.swp5.library_management.dto.BookSectionDTO.builder()
                     .sectionName("Sách ngoài chuyên ngành")
-                    .books(mapToFeaturedBookDTOs(outsideBooks))
+                    .books(mapToFeaturedBookDTOs(outsideBooks, campusId))
                     .build());
         }
 
         return result;
     }
 
-    private List<com.swp5.library_management.dto.FeaturedBookDTO> mapToFeaturedBookDTOs(List<com.swp5.library_management.entity.Book> books) {
+    private List<com.swp5.library_management.dto.FeaturedBookDTO> mapToFeaturedBookDTOs(List<com.swp5.library_management.entity.Book> books, Integer campusId) {
+        if (books.isEmpty()) return List.of();
+
+        List<Integer> bookIds = books.stream()
+                .map(com.swp5.library_management.entity.Book::getBookId)
+                .collect(java.util.stream.Collectors.toList());
+
+        // Batch count cho available (có sẵn)
+        List<Object[]> availableRows = (campusId != null)
+                ? bookCopyRepository.countAvailableByBookIdsAndCampus(bookIds, campusId)
+                : bookCopyRepository.countAvailableByBookIds(bookIds);
+
+        java.util.Map<Integer, Long> availableMap = new java.util.HashMap<>();
+        for (Object[] row : availableRows) {
+            availableMap.put((Integer) row[0], (Long) row[1]);
+        }
+
+        // Batch count cho total (tổng cộng)
+        List<Object[]> totalRows = (campusId != null)
+                ? bookCopyRepository.countTotalByBookIdsAndCampus(bookIds, campusId)
+                : bookCopyRepository.countTotalByBookIds(bookIds);
+
+        java.util.Map<Integer, Long> totalMap = new java.util.HashMap<>();
+        for (Object[] row : totalRows) {
+            totalMap.put((Integer) row[0], (Long) row[1]);
+        }
+
         List<com.swp5.library_management.dto.FeaturedBookDTO> bookDTOs = new ArrayList<>();
         for (int i = 0; i < books.size(); i++) {
             com.swp5.library_management.entity.Book book = books.get(i);
@@ -199,7 +204,8 @@ public class HomeServiceImpl implements HomeService {
                     .subjectCode(subjectCode)
                     .isbn(book.getIsbn() != null ? book.getIsbn() : "N/A")
                     .categoryName(categoryName)
-                    .available(book.getAvailableCount() > 0)
+                    .availableCount(availableMap.getOrDefault(book.getBookId(), 0L))
+                    .totalCount(totalMap.getOrDefault(book.getBookId(), 0L))
                     .coverColor(COVER_COLORS[i % COVER_COLORS.length])
                     .coverImageUrl(book.getCoverImageUrl())
                     .build());

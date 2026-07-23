@@ -78,4 +78,119 @@ public class MaterialRequestServiceImpl implements MaterialRequestService {
 
         return savedRequest;
     }
+
+    @Override
+    @Transactional
+    public MaterialRequest approveRequest(Integer requestId, String librarianId) {
+        MaterialRequest request = materialRequestRepository.findById(requestId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy yêu cầu: " + requestId));
+
+        // ── Campus restriction: librarian can only approve requests from their own campus ──
+        User librarian = userRepository.findById(librarianId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy tài khoản thủ thư: " + librarianId));
+
+        Integer librarianCampusId = librarian.getCampusId();
+        Integer patronCampusId   = request.getPatron().getCampusId();
+
+        if (librarianCampusId == null || !librarianCampusId.equals(patronCampusId)) {
+            log.warn("[MaterialRequest] Campus mismatch — Librarian={} (campus={}) attempted to approve Request #{} from Patron={} (campus={}).",
+                    librarianId, librarianCampusId, requestId, request.getPatron().getUserId(), patronCampusId);
+            throw new IllegalStateException(
+                    "Bạn không thể duyệt yêu cầu từ bạn đọc thuộc cơ sở khác. " +
+                    "Yêu cầu này đến từ cơ sở #" + patronCampusId + ", trong khi bạn thuộc cơ sở #" + librarianCampusId + ".");
+        }
+
+        request.setStatus("Approved");
+        request.setReviewedBy(librarianId);
+        request.setReviewedAt(LocalDateTime.now());
+
+        MaterialRequest savedRequest = materialRequestRepository.save(request);
+
+        User patron = request.getPatron();
+
+        // Notification
+        String notifContent = String.format(
+                "Yêu cầu đề nghị tài liệu \"%s\" (Tác giả: %s) đã được DUYỆT.",
+                request.getTitle(),
+                request.getAuthor()
+        );
+
+        notificationRepository.save(Notification.builder()
+                .user(patron)
+                .notificationType("MATERIAL_REQUEST_APPROVED")
+                .title("Đề nghị tài liệu được duyệt")
+                .content(notifContent)
+                .status("Pending")
+                .createdAt(LocalDateTime.now())
+                .build());
+
+        // Email
+        emailService.sendMaterialRequestApproval(
+                request.getEmail(),
+                patron.getFullName(),
+                request.getTitle(),
+                request.getAuthor()
+        );
+
+        log.info("[MaterialRequest] Request #{} approved by Librarian={}", requestId, librarianId);
+
+        return savedRequest;
+    }
+
+    @Override
+    @Transactional
+    public MaterialRequest rejectRequest(Integer requestId, String librarianId) {
+        MaterialRequest request = materialRequestRepository.findById(requestId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy yêu cầu: " + requestId));
+
+        User librarian = userRepository.findById(librarianId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy tài khoản thủ thư: " + librarianId));
+
+        Integer librarianCampusId = librarian.getCampusId();
+        Integer patronCampusId   = request.getPatron().getCampusId();
+
+        if (librarianCampusId == null || !librarianCampusId.equals(patronCampusId)) {
+            log.warn("[MaterialRequest] Campus mismatch — Librarian={} (campus={}) attempted to reject Request #{} from Patron={} (campus={}).",
+                    librarianId, librarianCampusId, requestId, request.getPatron().getUserId(), patronCampusId);
+            throw new IllegalStateException(
+                    "Bạn không thể từ chối yêu cầu từ bạn đọc thuộc cơ sở khác. " +
+                    "Yêu cầu này đến từ cơ sở #" + patronCampusId + ", trong khi bạn thuộc cơ sở #" + librarianCampusId + ".");
+        }
+
+        request.setStatus("Rejected");
+        request.setReviewedBy(librarianId);
+        request.setReviewedAt(LocalDateTime.now());
+
+        MaterialRequest savedRequest = materialRequestRepository.save(request);
+
+        User patron = request.getPatron();
+
+        // Notification
+        String notifContent = String.format(
+                "Yêu cầu đề nghị tài liệu \"%s\" (Tác giả: %s) đã bị TỪ CHỐI.",
+                request.getTitle(),
+                request.getAuthor()
+        );
+
+        notificationRepository.save(Notification.builder()
+                .user(patron)
+                .notificationType("MATERIAL_REQUEST_REJECTED")
+                .title("Đề nghị tài liệu bị từ chối")
+                .content(notifContent)
+                .status("Pending")
+                .createdAt(LocalDateTime.now())
+                .build());
+
+        // Email
+        emailService.sendMaterialRequestRejection(
+                request.getEmail(),
+                patron.getFullName(),
+                request.getTitle(),
+                request.getAuthor()
+        );
+
+        log.info("[MaterialRequest] Request #{} rejected by Librarian={}", requestId, librarianId);
+
+        return savedRequest;
+    }
 }

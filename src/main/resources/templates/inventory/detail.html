@@ -11,30 +11,30 @@
     <style>
         /* ─── Design Tokens ─────────────────────────────────────────────── */
         :root {
-            --bg-base:       #080d17;
-            --bg-surface:    #0e1625;
-            --bg-card:       #131c2e;
-            --bg-card-hover: #1a2540;
-            --border:        rgba(99, 149, 255, 0.12);
-            --border-hover:  rgba(99, 149, 255, 0.28);
+            --bg-base:       #f8fafc;
+            --bg-surface:    #ffffff;
+            --bg-card:       #ffffff;
+            --bg-card-hover: #fff7ed;
+            --border:        #e2e8f0;
+            --border-hover:  #ffedd5;
 
-            --accent:        #4f8cff;
-            --accent-glow:   rgba(79, 140, 255, 0.18);
-            --violet:        #a78bfa;
-            --emerald:       #34d399;
-            --emerald-soft:  rgba(52,211,153,0.15);
-            --rose:          #fb7185;
-            --rose-soft:     rgba(251,113,133,0.15);
+            --accent:        #f97316;
+            --accent-glow:   #ffedd5;
+            --violet:        #8b5cf6;
+            --emerald:       #10b981;
+            --emerald-soft:  #d1fae5;
+            --rose:          #ef4444;
+            --rose-soft:     #fee2e2;
             --gold:          #f5a623;
-            --gold-soft:     rgba(245,166,35,0.15);
-            --teal:          #2dd4bf;
+            --gold-soft:     #fef3c7;
+            --teal:          #14b8a6;
 
-            --text-primary:   #e8f0ff;
-            --text-secondary: #7a8fb5;
-            --text-muted:     #4a5a7a;
+            --text-primary:   #0f172a;
+            --text-secondary: #475569;
+            --text-muted:     #64748b;
 
             --radius:    14px;
-            --shadow:    0 4px 24px rgba(0,0,0,0.45);
+            --shadow:    0 4px 24px rgba(15,23,42,0.06);
             --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -53,7 +53,7 @@
             position: sticky; top: 0; z-index: 100;
             display: flex; align-items: center; justify-content: space-between;
             padding: 0 2rem; height: 64px;
-            background: rgba(8,13,23,0.9);
+            background: rgba(248, 250, 252, 0.9);
             backdrop-filter: blur(18px);
             border-bottom: 1px solid var(--border);
         }
@@ -121,8 +121,8 @@
         .cover-img-wrap {
             width: 100%; aspect-ratio: 3/4;
             border-radius: 14px; overflow: hidden;
-            background: linear-gradient(145deg, #1a2540, #0e1625);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            background: linear-gradient(145deg, #ffedd5, #fed7aa);
+            box-shadow: 0 8px 32px rgba(249, 115, 22, 0.08);
         }
         .cover-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
@@ -130,7 +130,8 @@
             width: 100%; height: 100%;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center; gap: 0.6rem;
-            background: linear-gradient(145deg, hsl(220,40%,14%), hsl(250,35%,18%), hsl(270,30%,14%));
+            color: #ea580c;
+            background: linear-gradient(145deg, #fff7ed, #ffedd5, #fed7aa);
         }
         .cover-initial-lg {
             font-size: 5rem; font-weight: 800; line-height: 1;
@@ -264,16 +265,16 @@
         .badge-available    { background: var(--emerald-soft); color: var(--emerald); border: 1px solid rgba(52,211,153,0.3); }
         .badge-borrowed     { background: var(--rose-soft);    color: var(--rose);    border: 1px solid rgba(251,113,133,0.3); }
         .badge-reserved     { background: var(--gold-soft);    color: var(--gold);    border: 1px solid rgba(245,166,35,0.3); }
-        .badge-maintenance  { background: rgba(148,163,184,0.12); color: #94a3b8;    border: 1px solid rgba(148,163,184,0.3); }
-        .badge-lost         { background: rgba(167,139,250,0.12); color: var(--violet); border: 1px solid rgba(167,139,250,0.3); }
+        .badge-maintenance  { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .badge-lost         { background: #f5f3ff; color: var(--violet); border: 1px solid #ddd6fe; }
         .badge-good         { background: var(--emerald-soft); color: var(--emerald); }
         .badge-damaged      { background: var(--gold-soft);    color: var(--gold); }
 
         .shelf-tag {
             display: inline-flex; align-items: center; gap: 0.3rem;
             font-size: 0.68rem; font-weight: 500;
-            background: rgba(45,212,191,0.1); color: var(--teal);
-            border: 1px solid rgba(45,212,191,0.2); border-radius: 5px;
+            background: #f0fdfa; color: var(--teal);
+            border: 1px solid #ccfbf1; border-radius: 5px;
             padding: 0.15rem 0.5rem; margin-top: 0.4rem;
         }
 
@@ -300,25 +301,9 @@
 <div class="orb orb-1" aria-hidden="true"></div>
 <div class="orb orb-2" aria-hidden="true"></div>
 
-<!-- ═══ NAVBAR ══════════════════════════════════════════════════════════════ -->
-<nav class="navbar">
-    <a href="/librarian/inventory" class="navbar-brand">
-        <div class="brand-icon">📚</div>
-        <div>
-            <span class="brand-text">FPT Library</span>
-            <span class="brand-sub">Librarian Management</span>
-        </div>
-    </a>
-    <ul class="nav-links">
-        <li><a href="/" id="nav-home">Home</a></li>
-        <li><a href="/librarian/inventory" id="nav-books" class="active">Books</a></li>
-        <li><a href="/librarian/inventory/add" id="nav-add">Add Book</a></li>
-    </ul>
-</nav>
-
 <!-- ═══ BREADCRUMB ══════════════════════════════════════════════════════════ -->
 <div class="breadcrumb">
-    <a href="/librarian/inventory">Book Catalog</a>
+    <a href="/librarian/inventory/list">Book Catalog</a>
     <span class="sep">›</span>
     <span class="current" th:text="${book.title}">Book Title</span>
 </div>
@@ -327,7 +312,7 @@
 <div class="page-wrap">
 
     <!-- Back button -->
-    <a href="/librarian/inventory" class="back-btn">
+    <a href="/librarian/inventory/list" class="back-btn">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>

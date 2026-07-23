@@ -73,7 +73,7 @@
         <li>5.2. Không mang bất cứ tài liệu nào ra khỏi thư viện khi chưa làm thủ tục mượn về;</li>
         <li>5.3. Đối với giáo trình, tài liệu học tập: Mỗi sinh viên được mượn 1 bộ giáo trình, tài liệu dùng cho kỳ học hiện tại theo danh sách lớp của phòng Đào tạo. Những tài liệu giáo trình này được gia hạn tối đa 1 tuần khi có lý do hợp lý;</li>
         <li>5.4. Đối với sách giáo trình được mượn như tài liệu tham khảo, hạn trả áp dụng như đối với sách tham khảo thông thường;</li>
-        <li>5.5. Đối với tài liệu tham khảo: Bạn đọc được mượn tối đa 10 tên sách, trong thời hạn 1 tuần/ tài liệu tiếng Việt, 2 tuần/ tài liệu ngoại văn và được gia hạn 4 lần;</li>
+        <li>5.5. Đối với tài liệu tham khảo: Bạn đọc được mượn tối đa <strong><span th:text="${@systemConfigService.getIntConfig('MAX_BOOKS_LECTURER', 10)}">10</span> cuốn</strong> (Giảng viên) hoặc <strong><span th:text="${@systemConfigService.getIntConfig('MAX_BOOKS_STUDENT', 3)}">5</span> cuốn</strong> (Sinh viên), trong thời hạn 1 tuần/ tài liệu tiếng Việt, 2 tuần/ tài liệu ngoại văn và được gia hạn <span th:text="${@systemConfigService.getIntConfig('MAX_RENEWALS_ONLINE', 2)}">4</span> lần;</li>
         <li>5.6. Người mượn có trách nhiệm:
             <ul style="margin-top:8px;">
                 <li>5.6.1. Kiểm tra và xác nhận quá trình giao dịch với thủ thư ngay tại quầy;</li>
@@ -86,7 +86,7 @@
     <ul>
         <li>6.1. Bạn đọc vi phạm các quy định tại Điều 4, 5 tùy theo mức độ và lần vi phạm có thể bị nhắc nhở, khiển trách và mời ra khỏi thư viện; lập biên bản cảnh cáo, tạm ngừng sử dụng các dịch vụ thư viện hoặc sẽ bị tước quyền sử dụng các dịch vụ thư viện vĩnh viễn, tạm thời đình chỉ học tập hoặc buộc thôi học;</li>
         <li>6.2. Trường hợp làm hư hại (như long bìa, nhàu nát, bôi bẩn, viết, vẽ, mất trang...) hoặc mất tài liệu, bạn đọc phải bồi thường thiệt hại tương đương với giá trị của tài liệu;</li>
-        <li>6.3. Trường hợp mượn tài liệu quá hạn sẽ phải nộp tiền quá hạn: 5.000vnđ/ngày/1 cuốn (tính cả ngày nghỉ);</li>
+        <li>6.3. Trường hợp mượn tài liệu quá hạn sẽ phải nộp tiền quá hạn: <span th:text="${#numbers.formatDecimal(@systemConfigService.getIntConfig('FINE_PER_DAY', 5000), 0, 'COMMA', 0, 'POINT')}">5.000</span>vnđ/ngày/1 cuốn (tính cả ngày nghỉ);</li>
         <li>6.4. Trong bất cứ trường hợp vi phạm nào, bạn đọc phải đền bù thiệt hại theo quy định.</li>
     </ul>
 

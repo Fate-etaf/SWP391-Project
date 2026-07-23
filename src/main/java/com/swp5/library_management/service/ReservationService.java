@@ -65,4 +65,15 @@ public interface ReservationService {
      * @param waitlistId ID hàng chờ cần hủy
      */
     void cancelWaitlist(String patronId, Integer waitlistId);
+
+    /**
+     * Tự động xử lý hàng đợi khi có sách được trả lại.
+     * Quét những người đang chờ cuốn sách này tại cơ sở tương ứng.
+     * Lọc bỏ người vi phạm (khóa tài khoản, nợ sách).
+     * Gán sách cho người hợp lệ đầu tiên và sinh ra Reservation.
+     * 
+     * @param returnedCopy Bản sách vừa được trả
+     * @return true nếu đã có người nhận sách, false nếu không có ai nhận (sách trở về Available)
+     */
+    boolean processWaitlistForReturnedBook(com.swp5.library_management.entity.BookCopy returnedCopy);
 }

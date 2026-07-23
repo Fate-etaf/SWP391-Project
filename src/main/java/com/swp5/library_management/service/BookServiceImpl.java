@@ -4,6 +4,11 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -166,13 +171,18 @@ public class BookServiceImpl implements BookService {
      *   4. Map kết quả sang DTO mà không cần truy cập lazy collection.
      */
     @Override
-    public List<BookSearchResultDTO> searchBooks(String keyword, String subjectCode, Integer categoryId, Integer majorId, Integer campusId) {
+    public Page<BookSearchResultDTO> searchBooks(String keyword, String subjectCode, Integer categoryId, Integer majorId, Integer filterCampusId, Integer displayCampusId, int page, int size) {
         // Sanitize: blank string → null để WHERE clause bỏ qua bộ lọc
         String kw = StringUtils.hasText(keyword)     ? keyword.trim()     : null;
         String sc = StringUtils.hasText(subjectCode) ? subjectCode.trim() : null;
 
-        List<Book> books = bookRepository.searchBooks(kw, sc, categoryId, majorId, campusId);
-        return mapBooksToSearchResults(books, campusId);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        // Lọc DB theo filterCampusId (nếu user chọn dropdown)
+        Page<Book> bookPage = bookRepository.searchBooks(kw, sc, categoryId, majorId, filterCampusId, pageable);
+        
+        // Tính toán hiển thị số lượng theo displayCampusId (cơ sở của sinh viên)
+        List<BookSearchResultDTO> dtoList = mapBooksToSearchResults(bookPage.getContent(), displayCampusId);
+        return new PageImpl<>(dtoList, pageable, bookPage.getTotalElements());
     }
 
     // ── UCG01 – E1 Fallback: getRecentBooks ───────────────────────────────────
@@ -272,14 +282,24 @@ public class BookServiceImpl implements BookService {
                 .map(Book::getBookId)
                 .collect(Collectors.toList());
 
-        // Batch count: 1 query duy nhất cho tất cả sách
-        List<Object[]> countRows = (campusId != null)
+        // Batch count cho available (có sẵn)
+        List<Object[]> availableRows = (campusId != null)
                 ? bookCopyRepository.countAvailableByBookIdsAndCampus(bookIds, campusId)
                 : bookCopyRepository.countAvailableByBookIds(bookIds);
 
         Map<Integer, Long> availableMap = new HashMap<>();
-        for (Object[] row : countRows) {
+        for (Object[] row : availableRows) {
             availableMap.put((Integer) row[0], (Long) row[1]);
+        }
+
+        // Batch count cho total (tổng cộng)
+        List<Object[]> totalRows = (campusId != null)
+                ? bookCopyRepository.countTotalByBookIdsAndCampus(bookIds, campusId)
+                : bookCopyRepository.countTotalByBookIds(bookIds);
+
+        Map<Integer, Long> totalMap = new HashMap<>();
+        for (Object[] row : totalRows) {
+            totalMap.put((Integer) row[0], (Long) row[1]);
         }
 
         List<BookSearchResultDTO> result = new ArrayList<>();
@@ -301,6 +321,7 @@ public class BookServiceImpl implements BookService {
                     .subjectCode(subjectCode)
                     .categoryNames(categoryNames.isEmpty() ? "Chưa phân loại" : categoryNames)
                     .availableCount(availableMap.getOrDefault(book.getBookId(), 0L))
+                    .totalCount(totalMap.getOrDefault(book.getBookId(), 0L))
                     .coverImageUrl(book.getCoverImageUrl())
                     .coverColor(COVER_COLORS[i % COVER_COLORS.length])
                     .build());
