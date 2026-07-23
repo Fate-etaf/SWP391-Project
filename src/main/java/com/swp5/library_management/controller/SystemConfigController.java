@@ -27,12 +27,21 @@ public class SystemConfigController {
     private final SystemConfigRepository systemConfigRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Kiểm tra phân quyền: Chỉ cho phép Admin hoặc Thủ thư (Librarian) truy cập.
+     * @param session Phiên đăng nhập hiện tại
+     * @return true nếu không có quyền, false nếu hợp lệ
+     */
     private boolean isNotAdminOrLibrarian(HttpSession session) {
         Boolean isLibrarian = (Boolean) session.getAttribute("isLibrarian");
         Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
         return (isLibrarian == null || !isLibrarian) && (isAdmin == null || !isAdmin);
     }
 
+    /**
+     * Hiển thị giao diện Cấu hình Hệ thống.
+     * Lấy toàn bộ các tham số cấu hình (Tiền phạt, số ngày mượn...) từ Database và hiển thị ra UI.
+     */
     @GetMapping
     public String viewSettings(HttpSession session, Model model) {
         if (isNotAdminOrLibrarian(session)) return "redirect:/login";
@@ -44,6 +53,10 @@ public class SystemConfigController {
         return "admin/settings";
     }
 
+    /**
+     * Xử lý cập nhật giá trị của một tham số cấu hình cụ thể.
+     * Kiểm tra tính hợp lệ của dữ liệu (phải là số nguyên dương) và lưu vào Database.
+     */
     @PostMapping("/update")
     public String updateSetting(
             @RequestParam("configKey") String configKey,

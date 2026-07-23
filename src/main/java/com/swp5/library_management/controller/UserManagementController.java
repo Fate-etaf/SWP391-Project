@@ -29,6 +29,10 @@ public class UserManagementController {
     private final UserStatusService userStatusService;
     private final com.swp5.library_management.repository.BorrowTicketRepository borrowTicketRepository;
 
+    /**
+     * Hiển thị giao diện Quản lý Người dùng dành cho Admin.
+     * Cung cấp danh sách người dùng kèm bộ lọc theo trạng thái, cơ sở học tập (Campus), và thanh tìm kiếm.
+     */
     @GetMapping("/admin/users")
     public String manageStudents(
             @RequestParam(value = "search", required = false) String search,
@@ -76,6 +80,10 @@ public class UserManagementController {
         return "admin/users";
     }
 
+    /**
+     * Xử lý thêm người dùng (Sinh viên/Giảng viên/Thủ thư/Admin) thủ công.
+     * Tạo tài khoản, cấu hình mặc định (Active, mật khẩu "123", ...) và kích hoạt tiến trình gửi Email.
+     */
     @PostMapping("/admin/users/add-manual")
     public String addManualStudent(
             @RequestParam("userId") String userId,
@@ -139,6 +147,10 @@ public class UserManagementController {
         return "redirect:/admin/users";
     }
 
+    /**
+     * Xử lý chỉnh sửa thông tin cá nhân của Người dùng.
+     * Cho phép Admin cập nhật Họ tên, Email, Trạng thái (Status) của một tài khoản bất kỳ.
+     */
     @PostMapping("/admin/users/edit")
     public String editStudent(
             @RequestParam("userId") String userId,
@@ -171,6 +183,10 @@ public class UserManagementController {
         return "redirect:/admin/users";
     }
 
+    /**
+     * Xử lý xóa vĩnh viễn một người dùng khỏi hệ thống.
+     * Sẽ bị chặn (hiện lỗi) nếu người dùng đang có sách mượn (đang có BorrowTicket kích hoạt).
+     */
     @PostMapping("/admin/users/delete")
     public String deleteStudent(
             @RequestParam("userId") String userId,
@@ -192,11 +208,19 @@ public class UserManagementController {
         return "redirect:/admin/users";
     }
 
+    /**
+     * Hiển thị giao diện Import người dùng hàng loạt từ File Excel.
+     */
     @GetMapping("/admin/users/import")
     public String showImportPage() {
         return "admin/users-import"; 
     }
 
+    /**
+     * Xử lý đọc File Excel và tạo người dùng hàng loạt.
+     * Phân loại theo Sinh viên/Giảng viên, bỏ qua các dữ liệu trùng lặp (trùng Email/Mã số).
+     * Tạo tiến trình ngầm (Thread) để gửi Email thông báo mật khẩu hàng loạt.
+     */
     @PostMapping("/admin/users/import/process")
     public String processExcelUpload(
             @RequestParam("file") MultipartFile file,
@@ -330,6 +354,10 @@ public class UserManagementController {
         return "redirect:/admin/users";
     }
 
+    /**
+     * Bật/Tắt khóa thẻ mượn của Sinh viên/Giảng viên (Khóa cưỡng chế - Hard Lock).
+     * Khi khóa, người dùng sẽ không thể mượn sách, dù chưa đạt giới hạn mượn hay không bị phạt.
+     */
     @GetMapping("/admin/users/toggle-lock/{id}")
     public String toggleUserLock(
             @org.springframework.web.bind.annotation.PathVariable("id") String userId, 
