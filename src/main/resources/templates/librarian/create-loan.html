@@ -114,8 +114,8 @@
         <div class="mt-8 bg-white border border-slate-200 rounded-2xl p-6 text-xs text-slate-600 space-y-3 shadow-sm">
             <h4 class="font-bold text-slate-800 uppercase tracking-wider">Lưu ý nghiệp vụ đối với thủ thư:</h4>
             <ul class="list-disc pl-4 space-y-2 leading-relaxed">
-                <li>Hạn trả sách tiêu chuẩn: <strong class="text-fpt-orange">14 ngày</strong> cho Sinh viên, và <strong class="text-fpt-orange">30 ngày</strong> cho Giảng viên.</li>
-                <li>Hệ thống tự động kiểm tra số lượng sách đang mượn song hành (tối đa <strong class="text-fpt-orange">3 cuốn</strong> đối với sinh viên).</li>
+                <li>Hạn trả sách tiêu chuẩn: <strong class="text-fpt-orange"><span th:text="${@systemConfigService.getIntConfig('LOAN_DAYS_STUDENT', 14)}">14</span> ngày</strong> cho Sinh viên, và <strong class="text-fpt-orange"><span th:text="${@systemConfigService.getIntConfig('LOAN_DAYS_LECTURER', 30)}">30</span> ngày</strong> cho Giảng viên.</li>
+                <li>Hệ thống tự động kiểm tra số lượng sách đang mượn song hành (tối đa <strong class="text-fpt-orange"><span th:text="${@systemConfigService.getIntConfig('MAX_BOOKS_STUDENT', 3)}">3</span> cuốn</strong> đối với Sinh viên, <strong class="text-fpt-orange"><span th:text="${@systemConfigService.getIntConfig('MAX_BOOKS_LECTURER', 10)}">10</span> cuốn</strong> đối với Giảng viên).</li>
                 <li>Không thể cho mượn các bản sách có trạng thái khác <strong class="text-emerald-600">Available</strong> (ví dụ: đã có người mượn, hỏng đang bảo trì, hoặc đã báo mất).</li>
             </ul>
         </div>

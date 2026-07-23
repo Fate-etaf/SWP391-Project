@@ -5,6 +5,7 @@ import com.swp5.library_management.entity.FineInvoice;
 import com.swp5.library_management.repository.FineInvoiceRepository;
 import com.swp5.library_management.service.ViolationService;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -32,6 +34,10 @@ public class ViolationController {
     private final ViolationService violationService;
     private final FineInvoiceRepository fineInvoiceRepository;
 
+    private boolean isNotLibrarian(HttpSession session) {
+        Boolean isLibrarian = (Boolean) session.getAttribute("isLibrarian");
+        return isLibrarian == null || !isLibrarian;
+    }
 
     // ---------------------------------------------------------------
     // Trang: Sách đã trả quá hạn
@@ -45,7 +51,13 @@ public class ViolationController {
             @RequestParam(required = false) String borrowerId,
             @RequestParam(required = false) Long minOverdueDays,
             @RequestParam(required = false) Long maxOverdueDays,
+            HttpSession session,
+            RedirectAttributes redirectAttrs,
             Model model) {
+        if (isNotLibrarian(session)) {
+            redirectAttrs.addFlashAttribute("errorMsg", "Quyền truy cập bị từ chối. Vui lòng đăng nhập bằng tài khoản Thủ thư.");
+            return "redirect:/login";
+        }
         List<BorrowTicketDetail> overdueDetails = violationService.getReturnedOverdueBooks();
         List<OverdueItem> items = new ArrayList<>();
 
@@ -78,8 +90,7 @@ public class ViolationController {
         }
 
         // Sắp xếp: Chưa trả (UNPAID/NOT_CREATED) lên trên, Đã trả (PAID) xuống dưới
-        items.sort(Comparator.comparingInt(item ->
-                "PAID".equalsIgnoreCase(item.getFineStatus()) ? 1 : 0));
+        items.sort(Comparator.comparingInt(item -> "PAID".equalsIgnoreCase(item.getFineStatus()) ? 1 : 0));
 
         int totalPages = (int) Math.ceil((double) items.size() / PAGE_SIZE);
         List<OverdueItem> pagedItems = paginate(items, page, PAGE_SIZE);
@@ -97,8 +108,18 @@ public class ViolationController {
     }
 
     @PostMapping("/create-overdue/{id}")
-    public String createOverdueFine(@PathVariable("id") Integer id) {
-        violationService.createOverdueFine(id);
+    public String createOverdueFine(@PathVariable("id") Integer id, HttpSession session, RedirectAttributes redirectAttrs) {
+        if (isNotLibrarian(session)) {
+            redirectAttrs.addFlashAttribute("errorMsg", "Quyền truy cập bị từ chối. Vui lòng đăng nhập bằng tài khoản Thủ thư.");
+            return "redirect:/login";
+        }
+        try {
+            // conditionStatus = null: giữ nguyên tình trạng sách khi tạo phiếu phạt thủ công
+            violationService.createOverdueFine(id, null);
+            redirectAttrs.addFlashAttribute("successMsg", "Tạo phiếu phạt quá hạn thành công!");
+        } catch (Exception e) {
+            redirectAttrs.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
+        }
         return "redirect:/violations/overdue";
     }
 

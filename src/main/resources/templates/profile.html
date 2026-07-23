@@ -53,6 +53,13 @@
                     <h2 class="text-2xl font-extrabold text-slate-100 tracking-tight">Chi tiết hồ sơ</h2>
                     <p class="text-sm text-slate-400 mt-1">Quản lý thông tin định danh và tài khoản thư viện của bạn.</p>
                 </div>
+                <button type="button" onclick="document.getElementById('passwordModal').classList.remove('hidden')" 
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-700 hover:bg-slate-800 text-white rounded-xl text-sm font-bold transition-all shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    </svg>
+                    Đổi mật khẩu
+                </button>
             </div>
 
             <!-- Profile Info Card -->
@@ -144,6 +151,60 @@
             
         </div>
     </main>
+
+    <!-- Password Modal -->
+    <div id="passwordModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="document.getElementById('passwordModal').classList.add('hidden')"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl relative">
+                <button onclick="document.getElementById('passwordModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-500 hover:text-slate-300 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+
+                <div class="mb-6">
+                    <div class="w-10 h-10 rounded-full bg-fpt-orange/20 flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-fpt-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-100">Đổi mật khẩu</h3>
+                    <p class="text-sm text-slate-400 mt-1">Vui lòng nhập mật khẩu cũ và mật khẩu mới của bạn.</p>
+                </div>
+
+                <div th:if="${param.passwordError}" class="mb-4 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-sm flex items-start gap-2">
+                    <span class="mt-0.5">⚠️</span>
+                    <span th:text="${session.passwordErrorMsg}">Lỗi đổi mật khẩu!</span>
+                </div>
+                <div th:if="${param.passwordSuccess}" class="mb-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-xl text-sm flex items-start gap-2">
+                    <span class="mt-0.5">✅</span>
+                    <span>Đổi mật khẩu thành công!</span>
+                </div>
+
+                <form th:action="@{/api/profile/change-password}" method="POST" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Mật khẩu cũ</label>
+                        <input type="password" name="oldPassword" required class="w-full bg-slate-950 border border-slate-800 text-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Mật khẩu mới</label>
+                        <input type="password" name="newPassword" required class="w-full bg-slate-950 border border-slate-800 text-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Xác nhận mật khẩu mới</label>
+                        <input type="password" name="confirmPassword" required class="w-full bg-slate-950 border border-slate-800 text-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all">
+                    </div>
+
+                    <div class="mt-6">
+                        <button type="submit" class="w-full bg-fpt-orange hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-xl text-sm transition-all flex items-center justify-center gap-2">
+                            <span>Lưu mật khẩu mới</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- ═══════════════════════════════════════════════════════ FOOTER ══ -->
     <div th:replace="~{fragments/footer :: footer}"></div>

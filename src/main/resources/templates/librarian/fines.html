@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý vi phạm – FLMS</title>
+    <!-- Tailwind CSS Script -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B',
+                            dark: '#0F172A',
+                            orangeHover: '#D95F18'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style th:replace="~{fragments/header :: header-style}"></style>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .badge-overdue {
+            background: #f97316;
+            color: #fff;
+        }
+
+        .badge-lost {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .badge-damaged {
+            background: #f43f5e;
+            color: #fff;
+        }
+
+        .badge-paid {
+            background: #22c55e;
+            color: #fff;
+        }
+
+        .badge-unpaid {
+            background: #eab308;
+            color: #000;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        thead tr {
+            background: #f1f5f9;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+
+<body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-between relative overflow-x-hidden">
+
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px]"></div>
+    </div>
+
+    <div class="relative z-50">
+        <div th:replace="~{fragments/header :: header('librarian')}"></div>
+    </div>
+
+    <main class="flex-grow max-w-[95%] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
+        <!-- SIDEBAR -->
+        <div th:replace="~{fragments/sidebar :: sidebar('fines')}"></div>
+
+        <div class="flex-grow min-w-0">
+
+            <!-- Page title -->
+            <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-white">Quản lý vi phạm</h1>
+                    <p class="text-slate-400 text-sm mt-1">Toàn bộ hóa đơn vi phạm – xác nhận thu tiền & xuất báo cáo Excel
+                    </p>
+                </div>
+                <!-- Nút xuất Excel giữ nguyên bộ lọc hiện tại 
+            <a th:href="@{/librarian/fines/export(patronId=${patronId},paidStatus=${paidStatus})}"
+               class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                </svg>
+                Xuất Excel
+            </a>
+            -->
+            </div>
+
+            <!-- Flash messages -->
+            <div th:if="${successMsg}"
+                class="mb-4 bg-emerald-950/30 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-xl font-medium" role="alert"
+                th:text="${successMsg}"></div>
+            <div th:if="${errorMsg}" class="mb-4 bg-rose-950/30 border border-rose-500/30 text-rose-405 px-4 py-3 rounded-xl font-medium"
+                role="alert" th:text="${errorMsg}"></div>
+
+            <!-- Bộ lọc và Tìm kiếm YT-Style -->
+            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 mb-6 shadow-2xl backdrop-blur-xl">
+                <div class="flex flex-wrap gap-4 items-end">
+                    <!-- YouTube-style Search Input & Suggestions -->
+                    <div class="relative flex-1 min-w-[300px]">
+                        <label class="block text-xs font-semibold text-slate-400 mb-1.5 font-medium">Tìm kiếm phiếu phạt (Mã SV, Họ tên, Tên sách, Mã GD...)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </span>
+                            <input type="text" id="searchInput" th:value="${patronId}" placeholder="Nhập từ khóa tìm kiếm tự động..."
+                                class="w-full pl-10 pr-10 py-2.5 text-sm border border-slate-700 bg-slate-950 text-slate-100 placeholder-slate-550 rounded-full focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all shadow-sm">
+                            <button id="clearSearchBtn" type="button" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-450 hover:text-slate-205 hidden">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Suggestions Dropdown (YouTube Autocomplete) -->
+                        <div id="suggestionsDropdown" class="absolute left-0 right-0 mt-1 bg-slate-950 border border-slate-800 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto hidden">
+                        </div>
+                    </div>
+
+                    <!-- Dropdown Lọc Trạng Thái -->
+                    <div class="w-full sm:w-48">
+                        <label class="block text-xs font-semibold text-slate-450 mb-1.5 font-medium">Trạng thái</label>
+                        <select id="statusFilter" class="w-full border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-slate-950 shadow-sm font-medium text-slate-200">
+                            <option value="all" th:selected="${paidStatus == 'all'}">Tất cả trạng thái</option>
+                            <option value="Unpaid" th:selected="${paidStatus == null || paidStatus == 'Unpaid'}">Chưa trả</option>
+                            <option value="Paid" th:selected="${paidStatus == 'Paid'}">Đã trả</option>
+                        </select>
+                    </div>
+
+                    <!-- Dropdown Lọc Loại Vi Phạm -->
+                    <div class="w-full sm:w-48">
+                        <label class="block text-xs font-semibold text-slate-450 mb-1.5 font-medium">Loại vi phạm</label>
+                        <select id="violationTypeFilter" class="w-full border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-slate-950 shadow-sm font-medium text-slate-200">
+                            <option value="">Tất cả lỗi</option>
+                            <option value="Overdue">Quá hạn (Overdue)</option>
+                            <option value="Lost">Mất sách (Lost)</option>
+                            <option value="Damaged">Hỏng sách (Damaged)</option>
+                        </select>
+                    </div>
+
+                    <!-- Nút Xóa Lọc -->
+                    <button id="resetFiltersBtn" type="button" class="text-slate-400 hover:text-slate-200 text-sm font-semibold px-2 py-2.5 transition self-end">
+                        Xóa lọc
+                    </button>
+
+                    <!-- Nút Xuất Excel -->
+                    <a id="exportExcelLink" href="/librarian/fines/export"
+                       class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow-sm transition self-end h-[42px]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                        </svg>
+                        Xuất Excel
+                    </a>
+                </div>
+            </div>
+
+            <!-- Bảng dữ liệu -->
+            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden font-sans backdrop-blur-xl">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="bg-slate-950/90 text-slate-300 border-b border-slate-800">
+                            <th class="px-3 py-3 font-semibold text-left">Bạn đọc</th>
+                            <th class="px-3 py-3 font-semibold text-left">Sách vi phạm</th>
+                            <th class="px-3 py-3 font-semibold text-left">Loại</th>
+                            <th class="px-3 py-3 font-semibold text-left">Chi tiết tính phạt</th>
+                            <th class="px-3 py-3 font-semibold text-right">Tiền phạt</th>
+                            <th class="px-3 py-3 font-semibold text-right">Còn nợ</th>
+                            <th class="px-3 py-3 font-semibold text-left">Trạng thái</th>
+                            <th class="px-3 py-3 font-semibold text-left">Phương thức / Mã GD</th>
+                            <th class="px-3 py-3 font-semibold text-left">Ngày tạo</th>
+                            <th class="px-3 py-3 font-semibold text-left">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fineTableBody" class="divide-y divide-slate-800/50">
+                        <tr th:if="${#lists.isEmpty(fines)}">
+                            <td colspan="10" class="text-center text-slate-500 py-10">Không có phiếu phạt nào phù hợp.</td>
+                        </tr>
+                        
+                        <tr id="noRecordsRow" class="hidden">
+                            <td colspan="10" class="text-center text-slate-500 py-10">Không tìm thấy phiếu phạt phù hợp.</td>
+                        </tr>
+
+                        <tr th:each="fine : ${fines}" 
+                            class="fine-row hover:bg-slate-800/40 transition-colors"
+                            th:data-patron-name="${fine.patron != null ? fine.patron.fullName : ''}"
+                            th:data-patron-id="${fine.patron != null ? fine.patron.userId : ''}"
+                            th:data-book-title="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null and fine.ticketDetail.bookCopy.book != null ? fine.ticketDetail.bookCopy.book.title : ''}"
+                            th:data-copy-id="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null ? fine.ticketDetail.bookCopy.copyId : ''}"
+                            th:data-violation-type="${fine.violationType}"
+                            th:data-paid-status="${fine.paidStatus}"
+                            th:data-tx-code="${fine.transactionCode ?: ''}"
+                            th:data-reason="${fine.reason ?: ''}"
+                            th:data-payment-method="${fine.paymentMethod ?: ''}">
+                            <!-- Bạn đọc -->
+                            <td class="px-3 py-3">
+                                <div class="font-semibold text-slate-200"
+                                    th:text="${fine.patron != null ? fine.patron.fullName : '—'}"></div>
+                                <div class="text-xs text-slate-500 font-mono"
+                                    th:text="${fine.patron != null ? fine.patron.userId : ''}"></div>
+                            </td>
+
+                            <!-- Sách vi phạm -->
+                            <td class="px-3 py-3">
+                                <div class="font-medium text-slate-350 max-w-[180px] truncate"
+                                    th:text="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null and fine.ticketDetail.bookCopy.book != null ? fine.ticketDetail.bookCopy.book.title : '—'}">
+                                </div>
+                                <div class="text-xs text-slate-500 font-mono"
+                                    th:text="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null ? fine.ticketDetail.bookCopy.copyId : ''}">
+                                </div>
+                            </td>
+
+                            <!-- Loại vi phạm -->
+                            <td class="px-3 py-3">
+                                <span class="badge" th:classappend="${fine.violationType != null and (#strings.toUpperCase(fine.violationType) == 'OVERDUE' or fine.violationType == 'Overdue')} ? 'badge-overdue' :
+                                                   ((${fine.violationType != null and (#strings.toUpperCase(fine.violationType) == 'LOST' or fine.violationType == 'Lost')} ? 'badge-lost' : 'badge-damaged'))">
+                                    <span th:if="${fine.violationType != null and (#strings.toUpperCase(fine.violationType) == 'OVERDUE' or fine.violationType == 'Overdue')}">Quá hạn</span>
+                                    <span th:if="${fine.violationType != null and (#strings.toUpperCase(fine.violationType) == 'LOST' or fine.violationType == 'Lost')}">Mất sách</span>
+                                    <span th:if="${fine.violationType != null and (#strings.toUpperCase(fine.violationType) == 'DAMAGED' or fine.violationType == 'Damaged')}">Hỏng sách</span>
+                                    <span th:if="${fine.violationType == null or (fine.violationType != null and #strings.toUpperCase(fine.violationType) != 'OVERDUE' and fine.violationType != 'Overdue' and #strings.toUpperCase(fine.violationType) != 'LOST' and fine.violationType != 'Lost' and #strings.toUpperCase(fine.violationType) != 'DAMAGED' and fine.violationType != 'Damaged')}" th:text="${fine.violationType ?: '—'}"></span>
+                                </span>
+                            </td>
+
+                            <!-- Chi tiết tính phạt -->
+                            <td class="px-3 py-3 text-slate-400 text-xs font-mono">
+                                <span th:text="${fine.reason ?: '—'}"></span>
+                            </td>
+
+                            <!-- Tiền phạt -->
+                            <td class="px-3 py-3 text-right font-semibold text-slate-200">
+                                <span
+                                    th:text="${fine.fineAmount != null ? #numbers.formatDecimal(fine.fineAmount, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}"></span>
+                            </td>
+
+                            <!-- Còn nợ -->
+                            <td class="px-3 py-3 text-right">
+                                <span th:if="${fine.paidStatus == 'Unpaid'}" class="text-rose-500 font-semibold"
+                                    th:text="${fine.remainingAmount != null ? #numbers.formatDecimal(fine.remainingAmount, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}"></span>
+                                <span th:if="${fine.paidStatus != 'Unpaid'}" class="text-slate-500">0 đ</span>
+                            </td>
+
+                            <!-- Trạng thái -->
+                            <td class="px-3 py-3">
+                                <span class="badge"
+                                    th:classappend="${fine.paidStatus == 'Paid'} ? 'badge-paid' : 'badge-unpaid'"
+                                    th:text="${fine.paidStatus == 'Paid'} ? 'Đã trả' : 'Chưa trả'"></span>
+                            </td>
+
+                            <!-- Phương thức / Mã GD -->
+                            <td class="px-3 py-3 text-xs text-slate-405">
+                                <div th:text="${fine.paymentMethod ?: '—'}"></div>
+                                <div class="font-mono text-slate-550" th:text="${fine.transactionCode ?: ''}"></div>
+                            </td>
+
+                            <!-- Ngày tạo -->
+                            <td class="px-3 py-3 text-xs text-slate-405 whitespace-nowrap"
+                                th:text="${fine.createdAt != null ? #temporals.format(fine.createdAt, 'dd/MM/yyyy') : '—'}">
+                            </td>
+
+                            <!-- Thao tác -->
+                            <td class="px-3 py-3">
+                                <div th:if="${fine.paidStatus == 'Unpaid'}" class="flex gap-2">
+                                    <!-- Thu tiền mặt: mở modal xác nhận -->
+                                    <button type="button" onclick="openCashModal(this)" th:data-fine-id="${fine.fineId}"
+                                        th:data-patron-name="${fine.patron != null ? fine.patron.fullName : ''}"
+                                        th:data-patron-id="${fine.patron != null ? fine.patron.userId : ''}"
+                                        th:data-book-title="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null and fine.ticketDetail.bookCopy.book != null ? fine.ticketDetail.bookCopy.book.title : '—'}"
+                                        th:data-copy-id="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null ? fine.ticketDetail.bookCopy.copyId : '—'}"
+                                        th:data-violation-type="${fine.violationType ?: ''}"
+                                        th:data-amount="${fine.remainingAmount != null ? fine.remainingAmount : 0}"
+                                        th:data-created-at="${fine.createdAt != null ? #temporals.format(fine.createdAt, 'dd/MM/yyyy') : '—'}"
+                                        class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition whitespace-nowrap shadow-md">
+                                        Thu tiền mặt
+                                    </button>
+                                    <button type="button" onclick="openQRModal(this)" th:data-fine-id="${fine.fineId}"
+                                        th:data-amount="${fine.remainingAmount != null ? fine.remainingAmount : 0}"
+                                        th:data-patron-name="${fine.patron != null ? fine.patron.fullName : ''}"
+                                        th:data-patron-id="${fine.patron != null ? fine.patron.userId : ''}"
+                                        th:data-book-title="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null and fine.ticketDetail.bookCopy.book != null ? fine.ticketDetail.bookCopy.book.title : '—'}"
+                                        th:data-copy-id="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null ? fine.ticketDetail.bookCopy.copyId : '—'}"
+                                        th:data-violation-type="${fine.violationType ?: ''}"
+                                        th:data-created-at="${fine.createdAt != null ? #temporals.format(fine.createdAt, 'dd/MM/yyyy') : '—'}"
+                                        class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition whitespace-nowrap shadow-md">
+                                        Thanh toán QR
+                                    </button>
+                                </div>
+                                <span th:if="${fine.paidStatus != 'Unpaid'}" class="text-slate-500 text-xs">—</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                    </table>
+                </div>
+                <!-- Pagination container -->
+                <div id="paginationContainer"
+                    class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-6 py-4 border-t border-slate-800 bg-slate-950/60 hidden">
+                    <div class="text-sm text-slate-400">
+                        <span id="pageInfo">Trang 0 / 0</span>
+                    </div>
+                    <div id="pageButtons" class="flex flex-wrap gap-2">
+                        <!-- Dynamic page buttons -->
+                    </div>
+                </div>
+            </div>
+            <!-- Hiện số bản ghi -->
+            <p id="totalCountText" class="text-xs text-slate-405 mt-3 font-semibold"></p>    <!-- ══════════════════════════════════════════════════════════
+     Modal Thu Tiền Mặt – Xác nhận thông tin trước khi thu
+     ══════════════════════════════════════════════════════════ -->
+    <div id="cashModal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-2xl max-w-md w-full shadow-22xl overflow-hidden border border-slate-800">
+            <!-- Header -->
+            <div class="px-5 py-4 bg-amber-600 flex justify-between items-center text-white">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <h3 class="text-sm font-bold text-white">Xác nhận Thu Tiền Mặt</h3>
+                </div>
+                <button type="button" onclick="closeCashModal()" class="text-amber-100 hover:text-white transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 space-y-4">
+                <p class="text-xs text-slate-400 text-center">Vui lòng kiểm tra thông tin trước khi xác nhận đã nhận đủ
+                    tiền mặt.</p>
+
+                <!-- Thông tin bạn đọc -->
+                <div class="bg-amber-950/20 border border-amber-800/30 rounded-xl p-4 space-y-2">
+                    <p class="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-2">👤 Thông tin bạn đọc
+                    </p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">Họ tên:</span>
+                        <span id="cm-patron-name" class="font-semibold text-slate-205">—</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">Mã sinh viên:</span>
+                        <span id="cm-patron-id" class="font-mono font-semibold text-slate-200">—</span>
+                    </div>
+                </div>
+
+                <!-- Thông tin vi phạm -->
+                <div class="bg-slate-950/50 border border-slate-800 rounded-xl p-4 space-y-2">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">📚 Thông tin vi phạm
+                    </p>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">Tên sách:</span>
+                        <span id="cm-book-title" class="font-medium text-slate-200 text-right max-w-[60%]">—</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">Mã bản sao:</span>
+                        <span id="cm-copy-id" class="font-mono text-slate-350">—</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">Loại vi phạm:</span>
+                        <span id="cm-violation" class="font-medium text-slate-200">—</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">Ngày lập phiếu:</span>
+                        <span id="cm-created-at" class="text-slate-300">—</span>
+                    </div>
+                </div>
+
+                <!-- Số tiền cần thu -->
+                <div class="bg-rose-950/20 border border-rose-800/30 rounded-xl p-4 flex justify-between items-center">
+                    <span class="text-sm font-semibold text-rose-400">💰 Số tiền cần thu:</span>
+                    <span id="cm-amount" class="text-lg font-bold text-rose-500">0 đ</span>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-5 py-3 bg-slate-950/80 border-t border-slate-800 flex justify-end gap-2">
+                <button type="button" onclick="closeCashModal()"
+                    class="px-4 py-2 border border-slate-700 rounded-lg text-slate-300 hover:bg-slate-800 font-semibold text-sm transition">
+                    Hủy
+                </button>
+                <form id="cashConfirmForm" method="post" action="" class="inline">
+                    <button type="submit"
+                        class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-semibold text-sm transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Xác nhận đã nhận tiền
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- VietQR Payment Modal -->
+    <div id="qrModal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-850">
+            <!-- Header -->
+            <div class="px-5 py-3.5 bg-slate-950/90 flex justify-between items-center text-white border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 3.9A9 9 0 1 1 5.1 5.1L16 16" />
+                    </svg>
+                    <h3 class="text-sm font-bold text-white">Thanh toán qua VietQR</h3>
+                </div>
+                <button type="button" onclick="closeQRModal()" class="text-slate-400 hover:text-white transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Success Banner (hidden until auto-detected) -->
+            <div id="qrSuccessBanner" class="hidden bg-emerald-600 text-white text-center px-5 py-3 shadow-inner">
+                <p class="font-bold text-sm">🎉 Đã nhận thanh toán thành công!</p>
+                <p id="qrSuccessDetail" class="text-xs text-emerald-100 mt-0.5">Hệ thống sẽ tự động cập nhật...</p>
+            </div>
+
+            <!-- Body -->
+            <form id="qrConfirmForm" method="post" action="">
+                <div class="p-5 space-y-4">
+
+                    <!-- Thông tin bạn đọc -->
+                    <div class="bg-slate-950/50 border border-slate-800 rounded-xl p-4 space-y-2">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">👤 Thông tin vi phạm</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                                <span class="text-slate-500 block">Họ tên</span>
+                                <span id="qr-patron-name" class="font-semibold text-slate-200">—</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-500 block">Mã SV</span>
+                                <span id="qr-patron-id" class="font-mono font-semibold text-slate-205">—</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-500 block">Tên sách</span>
+                                <span id="qr-book-title" class="font-medium text-slate-200">—</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-500 block">Mã bản sao</span>
+                                <span id="qr-copy-id" class="font-mono text-slate-405">—</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-500 block">Loại vi phạm</span>
+                                <span id="qr-violation" class="font-medium text-slate-250">—</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-500 block">Ngày lập phiếu</span>
+                                <span id="qr-created-at" class="text-slate-350">—</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Layout 2 cột: QR bên trái, chi tiết ngân hàng bên phải -->
+                    <div class="flex gap-4 items-start">
+                        <!-- QR Image Box -->
+                        <div
+                            class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex justify-center items-center w-44 h-44 shrink-0 relative">
+                            <img id="qrImage" src="" alt="Mã VietQR" class="max-h-full max-w-full rounded shadow hidden"
+                                onload="this.classList.remove('hidden'); document.getElementById('qrLoading').classList.add('hidden')" />
+                            <div id="qrLoading" class="flex flex-col items-center justify-center text-slate-500">
+                                <svg class="animate-spin h-7 w-7 text-orange-500 mb-2" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4m2 0a6 6 0 006-6H9c0 3.313-2.687 6-6 6v2m2 0a8 8 0 008 8v-4c-2.21 0-4-1.79-4-4H5">
+                                    </path>
+                                </svg>
+                                <span class="text-[10px]">Đang tạo mã QR...</span>
+                            </div>
+                        </div>
+
+                        <!-- Banking details + Transaction input -->
+                        <div class="flex-1 space-y-3">
+                            <div
+                                class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1.5 text-xs text-slate-300">
+                                <div class="flex justify-between"><span class="text-slate-500">Ngân hàng:</span> <span
+                                        class="font-semibold text-slate-200" th:text="${vietqrBankName}">TPBank</span>
+                                </div>
+                                <div class="flex justify-between"><span class="text-slate-500">Số TK:</span> <span
+                                        class="font-mono font-semibold text-slate-200"
+                                        th:text="${vietqrAccountNo}">00000102719</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">Chủ TK:</span> <span
+                                        class="font-semibold text-slate-202" th:text="${vietqrAccountName}">NGUYEN QUANG
+                                        VINH</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">Số tiền:</span> <span
+                                        id="dbAmount" class="font-bold text-rose-500">0 đ</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">Nội dung:</span> <span
+                                        id="dbInfo"
+                                        class="font-mono font-bold text-emerald-450 bg-emerald-950/30 border border-emerald-500/20 px-1 rounded">NOP
+                                        PHAT</span></div>
+                            </div>
+                            <div class="space-y-1">
+                                <label for="transactionCode"
+                                    class="block text-[10px] font-semibold text-slate-450 uppercase tracking-wider">Mã
+                                    giao dịch (Nhập tay):</label>
+                                <input type="text" id="transactionCode" name="transactionCode"
+                                    placeholder="VD: MB127392817"
+                                    class="w-full text-xs px-3 py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-100 bg-slate-950" />
+                            </div>
+                            <p class="text-[10px] text-slate-500 leading-relaxed font-medium">🔄 Hệ thống đang tự động kiểm tra
+                                thanh toán...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div id="qrFooterActions"
+                    class="px-5 py-3 bg-slate-950/80 border-t border-slate-800 flex justify-end gap-2 text-xs">
+                    <button type="button" onclick="closeQRModal()"
+                        class="px-3.5 py-1.5 border border-slate-700 rounded-lg text-slate-300 hover:bg-slate-800 font-semibold transition">
+                        Hủy
+                    </button>
+                    <button type="submit"
+                        class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold transition shadow-md">
+                        Xác nhận nhận tiền QR
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        // ── Cash Modal ──────────────────────────────────────────────
+        const violationLabels = { 'Overdue': 'Quá hạn', 'Lost': 'Mất sách', 'Damaged': 'Hỏng sách' };
+
+        function openCashModal(btn) {
+            const ds = btn.dataset;
+            const fineId = ds.fineId;
+            const patronName = ds.patronName || '—';
+            const patronId = ds.patronId || '—';
+            const bookTitle = ds.bookTitle || '—';
+            const copyId = ds.copyId || '—';
+            const violationType = ds.violationType || '';
+            const amount = parseFloat(ds.amount) || 0;
+            const createdAt = ds.createdAt || '—';
+
+            document.getElementById('cm-patron-name').innerText = patronName;
+            document.getElementById('cm-patron-id').innerText = patronId;
+            document.getElementById('cm-book-title').innerText = bookTitle;
+            document.getElementById('cm-copy-id').innerText = copyId;
+            document.getElementById('cm-created-at').innerText = createdAt;
+
+            // Violation label + badge colour
+            const vEl = document.getElementById('cm-violation');
+            vEl.innerText = violationLabels[violationType] || violationType || '—';
+            vEl.className = 'font-semibold px-2 py-0.5 rounded-full text-xs ' +
+                (violationType === 'Overdue' ? 'bg-orange-100 text-orange-700' :
+                    violationType === 'Lost' ? 'bg-red-100 text-red-700' :
+                        'bg-pink-100 text-pink-700');
+
+            const amountFormatted = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+            document.getElementById('cm-amount').innerText = amountFormatted;
+
+            let actionBase = /*[[@{/librarian/fines/collect/}]]*/ '/librarian/fines/collect/';
+            let actionUrl;
+            if (actionBase.includes(';')) {
+                const parts = actionBase.split(';');
+                actionUrl = parts[0] + fineId + (parts[1] ? ';' + parts[1] : '');
+            } else {
+                actionUrl = actionBase + fineId;
+            }
+            document.getElementById('cashConfirmForm').action = actionUrl;
+
+            document.getElementById('cashModal').classList.remove('hidden');
+            document.getElementById('cashModal').classList.add('flex');
+        }
+
+        function closeCashModal() {
+            document.getElementById('cashModal').classList.remove('flex');
+            document.getElementById('cashModal').classList.add('hidden');
+        }
+        // ── End Cash Modal ──────────────────────────────────────────
+        const vqrBankId = /*[[${vietqrBankId}]]*/ 'TPB';
+        const vqrAccountNo = /*[[${vietqrAccountNo}]]*/ '00000102719';
+        const vqrAccountName = /*[[${vietqrAccountName}]]*/ 'NGUYEN QUANG VINH';
+
+        let pollIntervalId = null;
+
+        // Listen for pending success messages from automatic QR payment detection
+        document.addEventListener("DOMContentLoaded", function () {
+            const pendingMsg = sessionStorage.getItem('autoSuccessMsg');
+            if (pendingMsg) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = "mb-4 bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-xl";
+                alertDiv.setAttribute('role', 'alert');
+                alertDiv.innerText = pendingMsg;
+
+                // Insert alert at the top of the main container
+                const mainContainer = document.querySelector('main');
+                if (mainContainer) {
+                    mainContainer.insertBefore(alertDiv, mainContainer.firstChild);
+                }
+                sessionStorage.removeItem('autoSuccessMsg');
+            }
+        });
+
+        function openQRModal(btn) {
+            const ds = btn.dataset;
+            const fineId = ds.fineId;
+            const amount = parseFloat(ds.amount) || 0;
+            const patronName = ds.patronName || '—';
+            const patronId = ds.patronId || '—';
+            const bookTitle = ds.bookTitle || '—';
+            const copyId = ds.copyId || '—';
+            const violationType = ds.violationType || '';
+            const createdAt = ds.createdAt || '—';
+
+            // Populate patron/book info
+            document.getElementById('qr-patron-name').innerText = patronName;
+            document.getElementById('qr-patron-id').innerText = patronId;
+            document.getElementById('qr-book-title').innerText = bookTitle;
+            document.getElementById('qr-copy-id').innerText = copyId;
+            document.getElementById('qr-created-at').innerText = createdAt;
+            const qrVEl = document.getElementById('qr-violation');
+            qrVEl.innerText = violationLabels[violationType] || violationType || '—';
+            qrVEl.className = 'font-semibold px-2 py-0.5 rounded-full text-xs ' +
+                (violationType === 'Overdue' ? 'bg-orange-100 text-orange-700' :
+                    violationType === 'Lost' ? 'bg-red-100 text-red-700' :
+                        'bg-pink-100 text-pink-700');
+
+            // Banking info
+            const amountFormatted = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+            document.getElementById('dbAmount').innerText = amountFormatted;
+            const transferDesc = 'NOPPHAT' + fineId;
+            document.getElementById('dbInfo').innerText = transferDesc;
+
+            // Generate VietQR URL
+            const qrUrl = 'https://img.vietqr.io/image/' + vqrBankId + '-' + vqrAccountNo + '-compact2.png?amount=' + amount
+                + '&addInfo=' + encodeURIComponent(transferDesc) + '&accountName=' + encodeURIComponent(vqrAccountName);
+            document.getElementById('qrLoading').classList.remove('hidden');
+            const img = document.getElementById('qrImage');
+            img.classList.add('hidden');
+            img.src = qrUrl;
+
+            // Form action
+            let actionBaseUrl = /*[[@{/librarian/fines/collect-qr/}]]*/ '/librarian/fines/collect-qr/';
+            let actionUrl;
+            if (actionBaseUrl.includes(';')) {
+                const parts = actionBaseUrl.split(';');
+                actionUrl = parts[0] + fineId + (parts[1] ? ';' + parts[1] : '');
+            } else {
+                actionUrl = actionBaseUrl + fineId;
+            }
+            document.getElementById('qrConfirmForm').action = actionUrl;
+            document.getElementById('transactionCode').value = '';
+
+            // Reset success banner & footer
+            document.getElementById('qrSuccessBanner').classList.add('hidden');
+            document.getElementById('qrFooterActions').classList.remove('hidden');
+
+            // Show modal
+            document.getElementById('qrModal').classList.remove('hidden');
+            document.getElementById('qrModal').classList.add('flex');
+
+            // Start polling
+            if (pollIntervalId) clearInterval(pollIntervalId);
+            pollIntervalId = setInterval(function () {
+                let checkUrlBase = /*[[@{/librarian/fines/check-status/}]]*/ '/librarian/fines/check-status/';
+                let finalCheckUrl;
+                if (checkUrlBase.includes(';')) {
+                    const parts = checkUrlBase.split(';');
+                    finalCheckUrl = parts[0] + fineId + (parts[1] ? ';' + parts[1] : '');
+                } else {
+                    finalCheckUrl = checkUrlBase + fineId;
+                }
+                fetch(finalCheckUrl)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success && data.paid) {
+                            clearInterval(pollIntervalId);
+                            pollIntervalId = null;
+                            // Hide manual confirm button, show success banner inside modal
+                            document.getElementById('qrFooterActions').classList.add('hidden');
+                            const banner = document.getElementById('qrSuccessBanner');
+                            banner.classList.remove('hidden');
+                            document.getElementById('qrSuccessDetail').innerText =
+                                '🎉 Mã GD: ' + (data.transactionCode || 'N/A') + ' – Trang sẽ tự động làm mới sau 3 giây...';
+                            sessionStorage.setItem('autoSuccessMsg',
+                                '🎉 Hệ thống đã tự động nhận diện giao dịch chuyển khoản thành công cho phiếu phạt #' + fineId
+                                + ' (Mã GD: ' + (data.transactionCode || 'N/A') + ')');
+                            setTimeout(() => window.location.reload(), 3000);
+                        }
+                    })
+                    .catch(err => console.error('Error polling fine status:', err));
+            }, 2000);
+        }
+
+        function closeQRModal() {
+            document.getElementById('qrModal').classList.remove('flex');
+            document.getElementById('qrModal').classList.add('hidden');
+
+            if (pollIntervalId) {
+                clearInterval(pollIntervalId);
+                pollIntervalId = null;
+            }
+        }
+
+        // =====================================================================
+        // HỆ THỐNG TÌM KIẾM LIÊN TỤC VÀ LỌC TỰ ĐỘNG CỦA YOUTUBE
+        // =====================================================================
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const violationTypeFilter = document.getElementById('violationTypeFilter');
+        const suggestionsDropdown = document.getElementById('suggestionsDropdown');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+
+        let currentPage = 0;
+        const pageSize = 10;
+
+        function filterTable() {
+            const searchVal = searchInput.value.toLowerCase().trim();
+            const statusVal = statusFilter.value.toLowerCase();
+            const violationVal = violationTypeFilter.value.toLowerCase();
+
+            const rows = document.querySelectorAll('tbody#fineTableBody tr.fine-row');
+            const matchingRows = [];
+
+            rows.forEach(row => {
+                const name = (row.dataset.patronName || '').toLowerCase();
+                const patronId = (row.dataset.patronId || '').toLowerCase();
+                const bookTitle = (row.dataset.bookTitle || '').toLowerCase();
+                const copyId = (row.dataset.copyId || '').toLowerCase();
+                const violationType = (row.dataset.violationType || '').toLowerCase();
+                const paidStatus = (row.dataset.paidStatus || '').toLowerCase();
+                const txCode = (row.dataset.txCode || '').toLowerCase();
+                const reason = (row.dataset.reason || '').toLowerCase();
+                const paymentMethod = (row.dataset.paymentMethod || '').toLowerCase();
+
+                // 1. Check Search Input
+                let matchesSearch = true;
+                if (searchVal) {
+                    matchesSearch = name.includes(searchVal) ||
+                                    patronId.includes(searchVal) ||
+                                    bookTitle.includes(searchVal) ||
+                                    copyId.includes(searchVal) ||
+                                    txCode.includes(searchVal) ||
+                                    reason.includes(searchVal) ||
+                                    paymentMethod.includes(searchVal);
+                }
+
+                // 2. Check Status Dropdown
+                let matchesStatus = true;
+                if (statusVal && statusVal !== 'all') {
+                    matchesStatus = paidStatus === statusVal;
+                }
+
+                // 3. Check Violation Type Dropdown
+                let matchesViolation = true;
+                if (violationVal) {
+                    matchesViolation = violationType === violationVal;
+                }
+
+                if (matchesSearch && matchesStatus && matchesViolation) {
+                    matchingRows.push(row);
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+
+            const visibleCount = matchingRows.length;
+            const totalPages = Math.ceil(visibleCount / pageSize);
+
+            // Keep currentPage within valid bounds
+            if (currentPage >= totalPages) {
+                currentPage = Math.max(0, totalPages - 1);
+            }
+
+            // Paginate matching rows
+            matchingRows.forEach((row, index) => {
+                const start = currentPage * pageSize;
+                const end = start + pageSize;
+                if (index >= start && index < end) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+
+            // Handle "No matching items" display
+            const noRecordsRow = document.getElementById('noRecordsRow');
+            if (noRecordsRow) {
+                if (visibleCount === 0) {
+                    noRecordsRow.classList.remove('hidden');
+                } else {
+                    noRecordsRow.classList.add('hidden');
+                }
+            }
+
+            // Sync clear button visibility
+            if (searchVal) {
+                clearSearchBtn.classList.remove('hidden');
+            } else {
+                clearSearchBtn.classList.add('hidden');
+            }
+
+            // Update record count text
+            const countText = document.getElementById('totalCountText');
+            if (countText) {
+                countText.innerText = 'Tìm thấy: ' + visibleCount + ' phiếu phạt';
+            }
+
+            // Sync dynamic Excel export link
+            const exportLink = document.getElementById('exportExcelLink');
+            if (exportLink) {
+                const params = new URLSearchParams();
+                if (searchVal) params.append('search', searchVal);
+                if (statusVal) params.append('paidStatus', statusFilter.value);
+                if (violationVal) params.append('violationType', violationTypeFilter.value);
+                exportLink.href = '/librarian/fines/export?' + params.toString();
+            }
+
+            // Update Pagination UI
+            updatePaginationUI(totalPages);
+        }
+
+        function updatePaginationUI(totalPages) {
+            const pageInfo = document.getElementById('pageInfo');
+            const pageButtons = document.getElementById('pageButtons');
+            if (!pageInfo || !pageButtons) return;
+
+            if (totalPages === 0) {
+                pageInfo.innerText = 'Trang 0 / 0';
+                pageButtons.innerHTML = '';
+                document.getElementById('paginationContainer').classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('paginationContainer').classList.remove('hidden');
+            pageInfo.innerText = `Trang ${currentPage + 1} / ${totalPages}`;
+
+            let html = '';
+
+            // Button "Trước"
+            if (currentPage > 0) {
+                html += `<button type="button" onclick="goToPage(${currentPage - 1})" class="px-3 py-1.5 rounded-lg border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800/60 transition-colors">Trước</button>`;
+            } else {
+                html += `<span class="px-3 py-1.5 rounded-lg border border-slate-800/80 text-sm text-slate-600 block cursor-default">Trước</span>`;
+            }
+
+            // Numeric buttons
+            for (let p = 0; p < totalPages; p++) {
+                if (p === currentPage) {
+                    html += `<span class="px-3 py-1.5 rounded-lg border border-fpt-orange text-fpt-orange bg-fpt-orange/10 text-sm font-semibold cursor-default">${p + 1}</span>`;
+                } else {
+                    html += `<button type="button" onclick="goToPage(${p})" class="px-3 py-1.5 rounded-lg border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800/60 transition-colors">${p + 1}</button>`;
+                }
+            }
+
+            // Button "Sau"
+            if (currentPage + 1 < totalPages) {
+                html += `<button type="button" onclick="goToPage(${currentPage + 1})" class="px-3 py-1.5 rounded-lg border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800/60 transition-colors">Sau</button>`;
+            } else {
+                html += `<span class="px-3 py-1.5 rounded-lg border border-slate-800/80 text-sm text-slate-600 block cursor-default">Sau</span>`;
+            }
+
+            pageButtons.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            filterTable();
+            const container = document.querySelector('tbody#fineTableBody');
+            if (container) {
+                container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        async function fetchFinesFromServer() {
+            const statusVal = statusFilter.value;
+            const url = `/librarian/fines?paidStatus=${encodeURIComponent(statusVal)}`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) return;
+                const html = await response.text();
+
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // Swap fineTableBody
+                const newTbody = doc.getElementById('fineTableBody');
+                const currentTbody = document.getElementById('fineTableBody');
+                if (newTbody && currentTbody) {
+                    currentTbody.innerHTML = newTbody.innerHTML;
+                }
+
+                // Swap paginationContainer
+                const newPagination = doc.getElementById('paginationContainer');
+                const currentPagination = document.getElementById('paginationContainer');
+                if (newPagination && currentPagination) {
+                    currentPagination.innerHTML = newPagination.innerHTML;
+                }
+
+                // Reset page to 0 and run client-side filters
+                currentPage = 0;
+                filterTable();
+
+                window.history.replaceState(null, '', url);
+            } catch (error) {
+                console.error("Error fetching fines from server:", error);
+            }
+        }
+
+        // Generate Autocomplete Suggestions list (YouTube style)
+        function getSuggestions(query) {
+            if (!query) return [];
+            const q = query.toLowerCase().trim();
+            const results = new Set();
+
+            const rows = document.querySelectorAll('tbody#fineTableBody tr.fine-row');
+            for (let row of rows) {
+                const name = row.dataset.patronName || '';
+                const patronId = row.dataset.patronId || '';
+                const bookTitle = row.dataset.bookTitle || '';
+                const txCode = row.dataset.txCode || '';
+
+                if (name.toLowerCase().includes(q)) results.add(name);
+                if (patronId.toLowerCase().includes(q)) results.add(patronId);
+                if (bookTitle.toLowerCase().includes(q)) results.add(bookTitle);
+                if (txCode && txCode.toLowerCase().includes(q)) results.add(txCode);
+
+                if (results.size >= 8) break;
+            }
+            return Array.from(results);
+        }
+
+        // Render Dropdown suggestions
+        function updateSuggestionsDropdown() {
+            const query = searchInput.value;
+            const list = getSuggestions(query);
+
+            if (list.length === 0) {
+                suggestionsDropdown.innerHTML = '';
+                suggestionsDropdown.classList.add('hidden');
+                return;
+            }
+
+            suggestionsDropdown.innerHTML = '';
+            list.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'px-4 py-2.5 hover:bg-slate-800 cursor-pointer text-sm text-slate-300 transition flex items-center gap-2.5 border-b border-slate-900 last:border-b-0';
+                div.innerHTML = `
+                    <svg class="w-3.5 h-3.5 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <span class="truncate font-medium">${item}</span>
+                `;
+                
+                div.addEventListener('mousedown', (e) => {
+                    // Prevent blur from closing dropdown before selection is processed
+                    e.preventDefault();
+                    searchInput.value = item;
+                    suggestionsDropdown.classList.add('hidden');
+                    filterTable();
+                });
+                suggestionsDropdown.appendChild(div);
+            });
+            suggestionsDropdown.classList.remove('hidden');
+        }
+
+        // Input & filter event handlers
+        searchInput.addEventListener('input', () => {
+            currentPage = 0;
+            filterTable();
+            updateSuggestionsDropdown();
+        });
+
+        searchInput.addEventListener('focus', () => {
+            updateSuggestionsDropdown();
+        });
+
+        searchInput.addEventListener('blur', () => {
+            // Delay closing suggestion to allow click event
+            setTimeout(() => {
+                suggestionsDropdown.classList.add('hidden');
+            }, 150);
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                suggestionsDropdown.classList.add('hidden');
+                searchInput.blur();
+            }
+        });
+
+        statusFilter.addEventListener('change', () => {
+            fetchFinesFromServer();
+        });
+        violationTypeFilter.addEventListener('change', () => {
+            currentPage = 0;
+            filterTable();
+        });
+
+        // Clear button
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            suggestionsDropdown.classList.add('hidden');
+            currentPage = 0;
+            filterTable();
+            searchInput.focus();
+        });
+
+        // Reset filter action
+        resetFiltersBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            statusFilter.value = 'Unpaid';
+            violationTypeFilter.value = '';
+            suggestionsDropdown.classList.add('hidden');
+            fetchFinesFromServer();
+        });
+
+        // Execute filterTable at document load
+        document.addEventListener('DOMContentLoaded', () => {
+            filterTable();
+            // Handle clicking outside suggestions to auto close
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#suggestionsDropdown') && e.target !== searchInput) {
+                    suggestionsDropdown.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>

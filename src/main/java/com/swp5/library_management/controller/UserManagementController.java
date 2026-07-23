@@ -29,6 +29,10 @@ public class UserManagementController {
     private final UserStatusService userStatusService;
     private final com.swp5.library_management.repository.BorrowTicketRepository borrowTicketRepository;
 
+    /**
+     * Hiển thị giao diện Quản lý Người dùng dành cho Admin.
+     * Cung cấp danh sách người dùng kèm bộ lọc theo trạng thái, cơ sở học tập (Campus), và thanh tìm kiếm.
+     */
     @GetMapping("/admin/users")
     public String manageStudents(
             @RequestParam(value = "search", required = false) String search,
@@ -76,6 +80,10 @@ public class UserManagementController {
         return "admin/users";
     }
 
+    /**
+     * Xử lý thêm người dùng (Sinh viên/Giảng viên/Thủ thư/Admin) thủ công.
+     * Tạo tài khoản, cấu hình mặc định (Active, mật khẩu "123", ...) và kích hoạt tiến trình gửi Email.
+     */
     @PostMapping("/admin/users/add-manual")
     public String addManualStudent(
             @RequestParam("userId") String userId,
@@ -101,9 +109,13 @@ public class UserManagementController {
         
         Role userRole = new Role();
         userRole.setRoleId(roleId); 
+        newUser.setRole(userRole);
+        if (newUser.getRoles() == null) {
+            newUser.setRoles(new java.util.HashSet<>());
+        }
         newUser.getRoles().add(userRole);
         
-        newUser.setPasswordHash("123");
+        newUser.setPasswordHash("12345678");
         
         if (email != null && !email.trim().isEmpty()) {
             newUser.setEmail(email.trim());
@@ -122,7 +134,7 @@ public class UserManagementController {
                     message.setFrom("thuvienfpt.test@gmail.com"); 
                     message.setTo(finalEmail);
                     message.setSubject("[FLMS FPT Library] Thông báo kích hoạt tài khoản thư viện số");
-                    message.setText("Xin chào bạn,\n\nTài khoản thư viện số FLMS của bạn trên hệ thống đã được kích hoạt thành công bởi Ban quản trị.\nBây giờ bạn đã có thể truy cập hệ thống và thực hiện mượn trả tài liệu.\n\nTrân trọng,\nBan quản lý thư viện Đại học FPT.");
+                    message.setText("Xin chào bạn,\n\nTài khoản thư viện số FLMS của bạn trên hệ thống đã được kích hoạt thành công bởi Ban quản trị.\nBây giờ bạn đã có thể truy cập hệ thống và thực hiện mượn trả tài liệu.\n\nMật khẩu đăng nhập tạm thời của bạn là: 12345678\nVui lòng đăng nhập và đổi mật khẩu để bảo mật tài khoản.\n\nTrân trọng,\nBan quản lý thư viện Đại học FPT.");
                     mailSender.send(message);
                 } catch (Exception e) {
                     System.out.println("Lỗi gửi mail đến: " + finalEmail + " -> " + e.getMessage());
@@ -135,6 +147,10 @@ public class UserManagementController {
         return "redirect:/admin/users";
     }
 
+    /**
+     * Xử lý chỉnh sửa thông tin cá nhân của Người dùng.
+     * Cho phép Admin cập nhật Họ tên, Email, Trạng thái (Status) của một tài khoản bất kỳ.
+     */
     @PostMapping("/admin/users/edit")
     public String editStudent(
             @RequestParam("userId") String userId,
@@ -167,6 +183,10 @@ public class UserManagementController {
         return "redirect:/admin/users";
     }
 
+    /**
+     * Xử lý xóa vĩnh viễn một người dùng khỏi hệ thống.
+     * Sẽ bị chặn (hiện lỗi) nếu người dùng đang có sách mượn (đang có BorrowTicket kích hoạt).
+     */
     @PostMapping("/admin/users/delete")
     public String deleteStudent(
             @RequestParam("userId") String userId,
@@ -188,11 +208,19 @@ public class UserManagementController {
         return "redirect:/admin/users";
     }
 
+    /**
+     * Hiển thị giao diện Import người dùng hàng loạt từ File Excel.
+     */
     @GetMapping("/admin/users/import")
     public String showImportPage() {
         return "admin/users-import"; 
     }
 
+    /**
+     * Xử lý đọc File Excel và tạo người dùng hàng loạt.
+     * Phân loại theo Sinh viên/Giảng viên, bỏ qua các dữ liệu trùng lặp (trùng Email/Mã số).
+     * Tạo tiến trình ngầm (Thread) để gửi Email thông báo mật khẩu hàng loạt.
+     */
     @PostMapping("/admin/users/import/process")
     public String processExcelUpload(
             @RequestParam("file") MultipartFile file,
@@ -268,14 +296,17 @@ public class UserManagementController {
                     Role targetRole = new Role();
                     if ("LECTURER".equalsIgnoreCase(importType)) {
                         targetRole.setRoleId(2); // Gán quyền Giảng viên ngầm định
+                        account.setRole(targetRole);
+                        if (account.getRoles() == null) account.setRoles(new java.util.HashSet<>());
                         account.getRoles().add(targetRole);
                     } else if (!userOpt.isPresent()) {
                         targetRole.setRoleId(1); // Gán quyền Sinh viên cho tài khoản tạo mới
+                        account.setRole(targetRole);
+                        if (account.getRoles() == null) account.setRoles(new java.util.HashSet<>());
                         account.getRoles().add(targetRole);
                     }
 
-
-                    account.setPasswordHash("123"); 
+                    account.setPasswordHash("12345678");  
                     
                     usersToSave.add(account);
                     successCount++;
@@ -296,7 +327,7 @@ public class UserManagementController {
                                 message.setFrom("thuvienfpt.test@gmail.com"); 
                                 message.setTo(recipientEmail);
                                 message.setSubject("[FLMS FPT Library] Thông báo kích hoạt tài khoản thư viện số");
-                                message.setText("Xin chào bạn,\n\nTài khoản thư viện số FLMS của bạn trên hệ thống đã được kích hoạt thành công bởi Ban quản trị.\nBây giờ bạn đã có thể truy cập hệ thống và thực hiện mượn trả tài liệu.\n\nTrân trọng,\nBan quản lý thư viện Đại học FPT.");
+                                message.setText("Xin chào bạn,\n\nTài khoản thư viện số FLMS của bạn trên hệ thống đã được kích hoạt thành công bởi Ban quản trị.\nBây giờ bạn đã có thể truy cập hệ thống và thực hiện mượn trả tài liệu.\n\nMật khẩu đăng nhập tạm thời của bạn là: 12345678\nVui lòng đăng nhập và đổi mật khẩu để bảo mật tài khoản.\n\nTrân trọng,\nBan quản lý thư viện Đại học FPT.");
                                 mailSender.send(message);
                             } catch (Exception e) {
                                 System.out.println("Lỗi gửi mail đến: " + recipientEmail + " -> " + e.getMessage());
@@ -323,6 +354,10 @@ public class UserManagementController {
         return "redirect:/admin/users";
     }
 
+    /**
+     * Bật/Tắt khóa thẻ mượn của Sinh viên/Giảng viên (Khóa cưỡng chế - Hard Lock).
+     * Khi khóa, người dùng sẽ không thể mượn sách, dù chưa đạt giới hạn mượn hay không bị phạt.
+     */
     @GetMapping("/admin/users/toggle-lock/{id}")
     public String toggleUserLock(
             @org.springframework.web.bind.annotation.PathVariable("id") String userId, 

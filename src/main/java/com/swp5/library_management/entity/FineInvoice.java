@@ -51,4 +51,12 @@ public class FineInvoice {
     @ManyToOne
     @JoinColumn(name = "ProcessedBy")
     private User processedBy;
+
+    /** Phương thức thanh toán: 'Cash', 'QRCode', 'BankTransfer', hoặc NULL nếu chưa thanh toán */
+    @Column(name = "PaymentMethod", length = 255)
+    private String paymentMethod;
+
+    /** Mã giao dịch tham chiếu (biên lai tiền mặt hoặc mã chuyển khoản) */
+    @Column(name = "TransactionCode", length = 255)
+    private String transactionCode;
 }
