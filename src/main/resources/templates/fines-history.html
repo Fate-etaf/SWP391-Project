@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phiếu phạt của tôi — FLMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A', orangeHover: '#D95F18' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style th:replace="~{fragments/header :: header-style}"></style>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
+    <div th:replace="~{fragments/header :: header('profile')}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col md:flex-row gap-8">
+        <div th:replace="~{fragments/sidebar :: sidebar(${activeSidebar})}"></div>
+
+        <div class="flex-grow">
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Lịch sử nộp phạt</h2>
+                    <p class="text-sm text-slate-500 mt-1">Xem và thanh toán trực tuyến các khoản phí phạt của bạn.</p>
+                </div>
+                <!-- Filters -->
+                <div class="flex bg-white border border-slate-200 rounded-lg p-1 shadow-sm w-fit">
+                    <a href="/profile/fines?filterStatus=all" class="px-4 py-1.5 text-sm font-medium rounded-md transition-colors" th:classappend="${filterStatus == 'all'} ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:text-slate-700'">Tất cả</a>
+                    <a href="/profile/fines?filterStatus=unpaid" class="px-4 py-1.5 text-sm font-medium rounded-md transition-colors" th:classappend="${filterStatus == 'unpaid'} ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:text-slate-700'">Chưa thanh toán</a>
+                    <a href="/profile/fines?filterStatus=paid" class="px-4 py-1.5 text-sm font-medium rounded-md transition-colors" th:classappend="${filterStatus == 'paid'} ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:text-slate-700'">Đã thanh toán</a>
+                </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <div th:if="${#lists.isEmpty(fines)}" class="p-12 text-center">
+                    <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">Không có khoản phạt nào!</h3>
+                    <p class="text-slate-500 mt-1 text-sm">Tuyệt vời! Bạn không có khoản phạt nào cần thanh toán.</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(fines)}" class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200">
+                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Mã HĐ</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tài liệu / Loại vi phạm</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Lý do</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Số tiền</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Trạng thái</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr th:each="f : ${fines}" class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4 text-sm font-medium text-slate-900" th:text="'#' + ${f.fineId}"></td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-semibold text-slate-800" th:if="${f.ticketDetail != null and f.ticketDetail.bookCopy != null}" th:text="${f.ticketDetail.bookCopy.book.title}"></div>
+                                    <div class="text-xs text-slate-500 mt-1">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-800" th:text="${f.violationType}"></span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-slate-600" th:text="${f.reason}"></td>
+                                <td class="px-6 py-4 text-sm font-bold text-fpt-orange text-right" th:text="${#numbers.formatDecimal(f.fineAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                                <td class="px-6 py-4 text-sm">
+                                    <span th:if="${f.paidStatus == 'Paid' or f.paidStatus == 'PAID'}" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Đã thanh toán</span>
+                                    <span th:unless="${f.paidStatus == 'Paid' or f.paidStatus == 'PAID'}" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-rose-100 text-rose-800">Chưa thanh toán</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm">
+                                    <button th:if="${f.paidStatus == null or (f.paidStatus != 'Paid' and f.paidStatus != 'PAID')}"
+                                            type="button" 
+                                            th:onclick="openQrModal([[${f.fineId}]], [[${f.remainingAmount != null ? f.remainingAmount : f.fineAmount}]], [[${vietqrBankId}]], [[${vietqrAccountNo}]], [[${vietqrAccountName}]])"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-fpt-orange hover:bg-fpt-orangeHover text-white rounded-lg text-xs font-bold transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                                        Pay Now
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- QR Modal -->
+    <div id="qrModal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeQrModal()"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-sm">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl relative overflow-hidden flex flex-col items-center p-6">
+                <button onclick="closeQrModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+
+                <h3 class="text-xl font-bold text-slate-800 mb-1">Thanh toán nộp phạt</h3>
+                <p class="text-sm text-slate-500 mb-4">Mở ứng dụng ngân hàng và quét mã</p>
+
+                <div class="p-3 bg-white border-2 border-dashed border-slate-200 rounded-xl mb-4 relative">
+                    <img id="qrImage" src="" alt="VietQR" class="w-48 h-48 object-contain">
+                </div>
+
+                <div class="w-full bg-slate-50 rounded-xl p-4 text-sm text-slate-700">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-slate-500">Mã phiếu phạt:</span>
+                        <span class="font-bold" id="qrFineIdDisplay"></span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-slate-500">Số tiền:</span>
+                        <span class="font-bold text-fpt-orange" id="qrAmountDisplay"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Nội dung CK:</span>
+                        <span class="font-bold font-mono">NOPPHAT<span id="qrCodeContent"></span></span>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex items-center justify-center space-x-2 text-sm font-medium text-emerald-600">
+                    <svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span>Đang chờ thanh toán...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script>
+        let pollInterval;
+        let currentFineId = null;
+
+        function openQrModal(fineId, amount, bankId, accountNo, accountName) {
+            currentFineId = fineId;
+            const content = 'NOPPHAT' + fineId;
+            const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${amount}&addInfo=${content}&accountName=${encodeURIComponent(accountName)}`;
+            
+            document.getElementById('qrImage').src = qrUrl;
+            document.getElementById('qrFineIdDisplay').textContent = '#' + fineId;
+            document.getElementById('qrAmountDisplay').textContent = amount.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('qrCodeContent').textContent = fineId;
+            
+            document.getElementById('qrModal').classList.remove('hidden');
+
+            // Bắt đầu polling kiểm tra trạng thái thanh toán
+            pollInterval = setInterval(() => checkPaymentStatus(fineId), 2000);
+        }
+
+        function closeQrModal() {
+            document.getElementById('qrModal').classList.add('hidden');
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+            currentFineId = null;
+        }
+
+        function checkPaymentStatus(fineId) {
+            fetch(`/profile/fines/api/status/${fineId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.paid) {
+                        closeQrModal();
+                        alert('Thanh toán thành công! Trạng thái phiếu phạt đã được cập nhật.');
+                        window.location.reload();
+                    }
+                })
+                .catch(err => console.error('Error polling payment status:', err));
+        }
+    </script>
+</body>
+</html>

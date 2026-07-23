@@ -1,5 +1,14 @@
 package com.swp5.library_management.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.swp5.library_management.entity.Book;
 import com.swp5.library_management.entity.BookCopy;
 import com.swp5.library_management.entity.BorrowTicketDetail;
@@ -10,15 +19,8 @@ import com.swp5.library_management.repository.BookCopyRepository;
 import com.swp5.library_management.repository.BorrowTicketDetailRepository;
 import com.swp5.library_management.repository.FineInvoiceRepository;
 import com.swp5.library_management.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -190,7 +192,8 @@ public class ViolationServiceImpl implements ViolationService {
         return acquisitionOrderDetailRepository
                 .findLatestByBook(book)
                 .map(d -> d.getUnitPrice())
-                .orElse(BigDecimal.valueOf(100000)); // Fallback price 100,000 VND for testing
+                .orElseThrow(() -> new IllegalStateException(
+                        "Không tìm thấy thông tin đơn nhập hoặc đơn giá hợp lệ của sách: " + book.getTitle()));
     }
 
     private void markCopyStatus(BookCopy copy, String copyStatus, String conditionStatus) {
