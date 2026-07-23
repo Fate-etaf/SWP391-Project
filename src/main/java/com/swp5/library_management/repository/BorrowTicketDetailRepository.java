@@ -29,6 +29,9 @@ public interface BorrowTicketDetailRepository
         @Query("SELECT COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId = :patronId AND d.returnDate IS NULL")
         int countActiveBorrowedByPatronId(@Param("patronId") String patronId);
 
+        @Query("SELECT COUNT(d) > 0 FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId = :patronId AND d.bookCopy.book.bookId = :bookId AND d.returnDate IS NULL")
+        boolean existsActiveBorrowingByPatronAndBook(@Param("patronId") String patronId, @Param("bookId") Integer bookId);
+
         // Đếm số lượng sách MƯỢN tại cơ sở trong khoảng thời gian
         @Query("SELECT COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.campus.campusId = :campusId AND d.borrowTicket.createdAt BETWEEN :startDate AND :endDate")
         long countBorrowedInPeriod(@Param("campusId") Integer campusId, @Param("startDate") LocalDateTime startDate,

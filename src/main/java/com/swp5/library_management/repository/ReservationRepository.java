@@ -42,6 +42,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
                                     @Param("bookId") Integer bookId,
                                     @Param("campusId") Integer campusId);
 
+    @Query("SELECT COUNT(r) > 0 FROM Reservation r WHERE r.patron.userId = :patronId AND r.book.bookId = :bookId AND r.status = 'Holding'")
+    boolean existsActiveReservationForBook(@Param("patronId") String patronId, @Param("bookId") Integer bookId);
+
     /**
      * Tìm các đơn giữ chỗ có trạng thái cụ thể và thời gian hết hạn trước một thời điểm nhất định.
      */
