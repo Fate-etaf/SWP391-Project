@@ -1,11 +1,15 @@
 package com.swp5.library_management.service;
 
+import com.swp5.library_management.entity.Book;
 import com.swp5.library_management.entity.BookCopy;
 import com.swp5.library_management.entity.BorrowTicketDetail;
 import com.swp5.library_management.entity.FineInvoice;
+import com.swp5.library_management.entity.User;
+import com.swp5.library_management.repository.AcquisitionOrderDetailRepository;
 import com.swp5.library_management.repository.BookCopyRepository;
 import com.swp5.library_management.repository.BorrowTicketDetailRepository;
 import com.swp5.library_management.repository.FineInvoiceRepository;
+import com.swp5.library_management.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,12 +26,12 @@ import java.util.List;
 public class ViolationServiceImpl implements ViolationService {
 
     private static final BigDecimal OVERDUE_DAILY_FINE = BigDecimal.valueOf(5000);
-    private static final BigDecimal LOST_FIXED_FINE = BigDecimal.valueOf(200000);
-    private static final BigDecimal DAMAGED_FIXED_FINE = BigDecimal.valueOf(50000);
 
     private final BorrowTicketDetailRepository borrowTicketDetailRepository;
     private final FineInvoiceRepository fineInvoiceRepository;
     private final BookCopyRepository bookCopyRepository;
+    private final AcquisitionOrderDetailRepository acquisitionOrderDetailRepository;
+    private final UserRepository userRepository;
     private final ReservationService reservationService;
     private final SystemConfigService systemConfigService;
 
@@ -53,7 +57,7 @@ public class ViolationServiceImpl implements ViolationService {
     }
 
     @Override
-    public void returnBook(Integer borrowTicketDetailId) {
+    public void returnBook(Integer borrowTicketDetailId, String conditionStatus) {
         BorrowTicketDetail detail = getDetailOrThrow(borrowTicketDetailId);
         if (detail.getReturnDate() == null) {
             detail.setReturnDate(LocalDateTime.now());
@@ -62,19 +66,15 @@ public class ViolationServiceImpl implements ViolationService {
         borrowTicketDetailRepository.save(detail);
         BookCopy copy = detail.getBookCopy();
         if (copy != null) {
-            boolean assigned = reservationService.processWaitlistForReturnedBook(copy);
-            if (!assigned) {
-                markCopyStatus(copy, "Available", copy.getConditionStatus());
-            }
+            String newCondition = applyConditionStatus(copy.getConditionStatus(), conditionStatus);
+            markCopyStatus(copy, "Available", newCondition);
         }
     }
 
     @Override
-    public FineInvoice createOverdueFine(Integer borrowTicketDetailId) {
+    public FineInvoice createOverdueFine(Integer borrowTicketDetailId, String conditionStatus) {
         BorrowTicketDetail detail = getDetailOrThrow(borrowTicketDetailId);
-        FineInvoice fine = fineInvoiceRepository
-                .findByTicketDetailAndViolationType(detail, "OVERDUE")
-                .orElseGet(() -> buildOverdueFine(detail));
+        FineInvoice fine = buildOverdueFine(detail);
         if (detail.getReturnDate() == null) {
             detail.setReturnDate(LocalDateTime.now());
         }
@@ -82,7 +82,8 @@ public class ViolationServiceImpl implements ViolationService {
         borrowTicketDetailRepository.save(detail);
         BookCopy copy = detail.getBookCopy();
         if (copy != null) {
-            markCopyStatus(copy, "Available", copy.getConditionStatus());
+            String newCondition = applyConditionStatus(copy.getConditionStatus(), conditionStatus);
+            markCopyStatus(copy, "Available", newCondition);
         }
         fine.setPaidStatus("Paid");
         fine.setRemainingAmount(BigDecimal.ZERO);
@@ -91,25 +92,43 @@ public class ViolationServiceImpl implements ViolationService {
     }
 
     @Override
-    public FineInvoice createLostBookFine(Integer borrowTicketDetailId) {
+    public List<FineInvoice> createLostBookFine(Integer borrowTicketDetailId, String notes) {
         BorrowTicketDetail detail = getDetailOrThrow(borrowTicketDetailId);
         markCopyStatus(detail.getBookCopy(), "Maintenance", "Lost");
         updateTicketDetailStatus(detail, "Lost");
 
-        return fineInvoiceRepository
-                .findByTicketDetailAndViolationType(detail, "LOST")
-                .orElseGet(() -> buildFixedFine(detail, "LOST", getLostFineAmount(detail), "Lost book"));
+        List<FineInvoice> fines = new java.util.ArrayList<>();
+        LocalDate dueDate = detail.getDueDate() != null ? detail.getDueDate().toLocalDate() : null;
+        if (calculateOverdueDays(dueDate) > 0) {
+            fines.add(buildOverdueFine(detail));
+        }
+
+        String reason = "Lost book";
+        if (notes != null && !notes.isBlank()) {
+            reason += " — Ghi chú: " + notes.trim();
+        }
+        fines.add(buildFixedFine(detail, "LOST", getLostFineAmount(detail), reason));
+        return fines;
     }
 
     @Override
-    public FineInvoice createDamagedBookFine(Integer borrowTicketDetailId) {
+    public List<FineInvoice> createDamagedBookFine(Integer borrowTicketDetailId, String notes) {
         BorrowTicketDetail detail = getDetailOrThrow(borrowTicketDetailId);
         markCopyStatus(detail.getBookCopy(), "Maintenance", "Damaged");
         updateTicketDetailStatus(detail, "Damaged");
 
-        return fineInvoiceRepository
-                .findByTicketDetailAndViolationType(detail, "DAMAGED")
-                .orElseGet(() -> buildDamagedFine(detail));
+        List<FineInvoice> fines = new java.util.ArrayList<>();
+        LocalDate dueDate = detail.getDueDate() != null ? detail.getDueDate().toLocalDate() : null;
+        if (calculateOverdueDays(dueDate) > 0) {
+            fines.add(buildOverdueFine(detail));
+        }
+
+        String reason = "Damaged book";
+        if (notes != null && !notes.isBlank()) {
+            reason += " — Ghi chú: " + notes.trim();
+        }
+        fines.add(buildFine(detail, getDamagedFineAmount(detail), "DAMAGED", reason));
+        return fines;
     }
 
     private BorrowTicketDetail getDetailOrThrow(Integer id) {
@@ -130,10 +149,6 @@ public class ViolationServiceImpl implements ViolationService {
         return buildFine(detail, amount, "OVERDUE", "Overdue " + overdueDays + " day(s)");
     }
 
-    private FineInvoice buildDamagedFine(BorrowTicketDetail detail) {
-        BigDecimal amount = getDamagedFineAmount(detail);
-        return buildFine(detail, amount, "DAMAGED", "Damaged book");
-    }
 
     private FineInvoice buildFixedFine(BorrowTicketDetail detail, String violationType, BigDecimal amount,
             String reason) {
@@ -154,13 +169,29 @@ public class ViolationServiceImpl implements ViolationService {
     }
 
     private BigDecimal getLostFineAmount(BorrowTicketDetail detail) {
-        // Book price is not modeled in the current entity, so use fixed amount.
-        return LOST_FIXED_FINE;
+        return getBookImportPrice(detail);
     }
 
     private BigDecimal getDamagedFineAmount(BorrowTicketDetail detail) {
-        // Book price is not available in the entity, so use fixed amount.
-        return DAMAGED_FIXED_FINE;
+        return getBookImportPrice(detail);
+    }
+
+    @Override
+    public BigDecimal getBookPriceByTicketDetailId(Integer ticketDetailId) {
+        BorrowTicketDetail detail = getDetailOrThrow(ticketDetailId);
+        return getBookImportPrice(detail);
+    }
+
+    private BigDecimal getBookImportPrice(BorrowTicketDetail detail) {
+        if (detail.getBookCopy() == null || detail.getBookCopy().getBook() == null) {
+            throw new IllegalStateException("Không tìm thấy thông tin sách của bản sao tương ứng.");
+        }
+        Book book = detail.getBookCopy().getBook();
+        return acquisitionOrderDetailRepository
+                .findLatestByBook(book)
+                .map(d -> d.getUnitPrice())
+                .orElseThrow(() -> new IllegalStateException(
+                        "Không tìm thấy thông tin đơn nhập hoặc đơn giá hợp lệ của sách: " + book.getTitle()));
     }
 
     private void markCopyStatus(BookCopy copy, String copyStatus, String conditionStatus) {
@@ -172,8 +203,25 @@ public class ViolationServiceImpl implements ViolationService {
         bookCopyRepository.save(copy);
     }
 
+    /**
+     * Áp dụng tình trạng mới cho sách theo quy tắc CHỈ xuống cấp:
+     * New(3) → Good(2) → Fair(1). Không cho phép nâng cấp lên.
+     * Nếu newCondition là null/không hợp lệ, giữ nguyên giá trị cũ.
+     */
+    private String applyConditionStatus(String currentCondition, String newCondition) {
+        java.util.Map<String, Integer> rank = java.util.Map.of("New", 3, "Good", 2, "Fair", 1);
+        if (newCondition == null || !rank.containsKey(newCondition)) {
+            return currentCondition != null ? currentCondition : "Fair";
+        }
+        int currentRank = rank.getOrDefault(currentCondition, 1);
+        int newRank = rank.get(newCondition);
+        // Chỉ cho phép khi rank mới <= rank hiện tại (tức xuống cấp hoặc giữ nguyên)
+        return (newRank <= currentRank) ? newCondition : currentCondition;
+    }
+
     private void updateTicketDetailStatus(BorrowTicketDetail detail, String status) {
         detail.setStatus(status);
+        detail.setReturnDate(LocalDateTime.now());
         borrowTicketDetailRepository.save(detail);
     }
 
@@ -183,9 +231,98 @@ public class ViolationServiceImpl implements ViolationService {
         if (actives.isEmpty()) {
             throw new IllegalArgumentException("Không tìm thấy lượt mượn đang hoạt động cho mã sách: " + copyId);
         }
-        // Thường mỗi copy chỉ được mượn bởi 1 người tại 1 thời điểm
         BorrowTicketDetail detail = actives.get(0);
-        returnBook(detail.getTicketDetailId());
+        returnBook(detail.getTicketDetailId(), null);
         return detail;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FineInvoice> getAllFineInvoices(String patronId, String paidStatus) {
+        String pid = (patronId != null && patronId.isBlank()) ? null : patronId;
+        String ps = (paidStatus != null && paidStatus.isBlank()) ? null : paidStatus;
+        return fineInvoiceRepository.findAllFiltered(pid, ps);
+    }
+
+    @Override
+    public void collectFineCash(Integer fineId, String librarianId) {
+        FineInvoice fine = fineInvoiceRepository.findById(fineId)
+                .orElseThrow(() -> new IllegalArgumentException("Hóa đơn phạt không tồn tại: " + fineId));
+
+        if ("Paid".equalsIgnoreCase(fine.getPaidStatus())) {
+            throw new IllegalStateException("Hóa đơn này đã được thanh toán.");
+        }
+
+        User librarian = null;
+        if (librarianId != null && !librarianId.isBlank()) {
+            librarian = userRepository.findById(librarianId).orElse(null);
+        }
+        if (librarian == null) {
+            // Lấy tạm bất kỳ người dùng nào làm thủ thư xử lý để tránh lỗi khi bypass login
+            librarian = userRepository.findAll().stream().findFirst().orElse(null);
+        }
+
+        fine.setPaidStatus("Paid");
+        fine.setRemainingAmount(BigDecimal.ZERO);
+        fine.setPaidAt(LocalDateTime.now());
+        fine.setPaymentMethod("Cash");
+        fine.setProcessedBy(librarian);
+        fineInvoiceRepository.save(fine);
+
+        // Tự động mở khóa thẻ mượn nếu sinh viên không còn nợ phạt nào
+        User patron = fine.getPatron();
+        if (patron != null && Boolean.TRUE.equals(patron.getBorrowingLocked())) {
+            List<FineInvoice> remaining = fineInvoiceRepository
+                    .findByPatronUserIdAndPaidStatus(patron.getUserId(), "Unpaid");
+            if (remaining.isEmpty()) {
+                patron.setBorrowingLocked(false);
+                userRepository.save(patron);
+            }
+        }
+    }
+
+    @Override
+    public void collectFineQR(Integer fineId, String librarianId, String transactionCode) {
+        FineInvoice fine = fineInvoiceRepository.findById(fineId)
+                .orElseThrow(() -> new IllegalArgumentException("Hóa đơn phạt không tồn tại: " + fineId));
+
+        if ("Paid".equalsIgnoreCase(fine.getPaidStatus())) {
+            throw new IllegalStateException("Hóa đơn này đã được thanh toán.");
+        }
+
+        User librarian = null;
+        if (librarianId != null && !librarianId.isBlank()) {
+            librarian = userRepository.findById(librarianId).orElse(null);
+        }
+        if (librarian == null) {
+            // Lấy tạm bất kỳ người dùng nào làm thủ thư xử lý để tránh lỗi khi bypass login
+            librarian = userRepository.findAll().stream().findFirst().orElse(null);
+        }
+
+        fine.setPaidStatus("Paid");
+        fine.setRemainingAmount(BigDecimal.ZERO);
+        fine.setPaidAt(LocalDateTime.now());
+        fine.setPaymentMethod("QRCode");
+        fine.setTransactionCode(transactionCode != null && !transactionCode.isBlank() ? transactionCode
+                : "QR-" + System.currentTimeMillis());
+        fine.setProcessedBy(librarian);
+        fineInvoiceRepository.save(fine);
+
+        // Tự động mở khóa thẻ mượn nếu sinh viên không còn nợ phạt nào
+        User patron = fine.getPatron();
+        if (patron != null && Boolean.TRUE.equals(patron.getBorrowingLocked())) {
+            List<FineInvoice> remaining = fineInvoiceRepository
+                    .findByPatronUserIdAndPaidStatus(patron.getUserId(), "Unpaid");
+            if (remaining.isEmpty()) {
+                patron.setBorrowingLocked(false);
+                userRepository.save(patron);
+            }
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public FineInvoice getFineInvoiceById(Integer fineId) {
+        return fineInvoiceRepository.findById(fineId).orElse(null);
     }
 }
