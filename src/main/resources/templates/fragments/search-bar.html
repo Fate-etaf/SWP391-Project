@@ -23,7 +23,7 @@
     </div>
 
     <!-- Filter row -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
         <!-- Campus dropdown -->
         <div class="flex items-center bg-white/90 text-slate-700 rounded-xl px-4 py-2.5">
             <svg class="w-4 h-4 text-fpt-orange shrink-0 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -51,6 +51,20 @@
                         th:value="${major.majorId}"
                         th:text="${major.majorName}"
                         th:selected="${major != null and selectedMajorId != null and major.majorId == selectedMajorId}">Major</option>
+            </select>
+        </div>
+
+        <!-- Subject dropdown -->
+        <div class="flex items-center bg-white/90 text-slate-700 rounded-xl px-4 py-2.5">
+            <svg class="w-4 h-4 text-fpt-orange shrink-0 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+            <select id="subjectCode" name="subjectCode" class="w-full bg-transparent text-sm font-medium focus:outline-none cursor-pointer min-w-0">
+                <option value="">Tất cả môn học</option>
+                <option th:each="subj : ${subjects}"
+                        th:value="${subj.subjectCode}"
+                        th:text="${subj.subjectCode} + ' - ' + ${subj.subjectName}"
+                        th:selected="${subj != null and selectedSubjectCode != null and subj.subjectCode == selectedSubjectCode}">Subject</option>
             </select>
         </div>
 
