@@ -139,14 +139,14 @@
                             <td class="px-6 py-4">
                                 <span
                                     class="inline-flex items-center gap-2 text-xs font-semibold px-2.5 py-1 rounded-full"
-                                    th:classappend="${item.fineStatus == 'PAID'} ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'"
-                                    th:text="${item.fineStatus == 'PAID'} ? 'Đã trả' : 'Chưa trả'">
+                                    th:classappend="${item.fineStatus == 'PAID'} ? 'bg-emerald-100 text-emerald-700' : (${item.fineStatus == 'UNPAID'} ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500')"
+                                    th:text="${item.fineStatus == 'PAID'} ? 'Đã thu' : (${item.fineStatus == 'UNPAID'} ? 'Chưa nộp' : 'Chưa tạo')">
                                      Trạng thái
-</span>
+                                </span>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex flex-wrap gap-2">
-                                    <button type="button"
+                                    <button type="button" th:if="${item.fineStatus == 'NOT_CREATED'}"
                                         class="bg-fpt-navy hover:bg-slate-700 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
                                         th:attr="data-action=@{'/violations/create-overdue/' + ${item.detail.ticketDetailId}},
                                              data-book-title=${item.detail.bookCopy.book.title},
@@ -159,6 +159,9 @@
                                              data-fine-amount=${item.fineAmount}" onclick="openFineModal(this);">
                                         Tạo phiếu phạt
                                     </button>
+                                    <span th:if="${item.fineStatus != 'NOT_CREATED'}" class="text-xs text-slate-500 font-medium">
+                                        <a href="/librarian/fines" class="text-fpt-orange hover:underline">Quản lý phiếu phạt &rarr;</a>
+                                    </span>
                                 </div>
                             </td>
                         </tr>
