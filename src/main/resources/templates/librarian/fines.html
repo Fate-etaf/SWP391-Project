@@ -226,16 +226,16 @@
 
                             <!-- Còn nợ -->
                             <td class="px-6 py-4 text-right">
-                                <span th:if="${fine.paidStatus == 'Unpaid'}" class="text-rose-600 font-semibold"
+                                <span th:if="${fine.paidStatus != null and #strings.toUpperCase(fine.paidStatus) == 'UNPAID'}" class="text-rose-600 font-semibold"
                                     th:text="${fine.remainingAmount != null ? #numbers.formatDecimal(fine.remainingAmount, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}"></span>
-                                <span th:if="${fine.paidStatus != 'Unpaid'}" class="text-slate-500">0 đ</span>
+                                <span th:if="${fine.paidStatus == null or #strings.toUpperCase(fine.paidStatus) != 'UNPAID'}" class="text-slate-500">0 đ</span>
                             </td>
 
                             <!-- Trạng thái -->
                             <td class="px-6 py-4">
                                 <span class="badge"
-                                    th:classappend="${fine.paidStatus == 'Paid'} ? 'badge-paid' : 'badge-unpaid'"
-                                    th:text="${fine.paidStatus == 'Paid'} ? 'Đã thu' : 'Chưa nộp'"></span>
+                                    th:classappend="${fine.paidStatus != null and #strings.toUpperCase(fine.paidStatus) == 'PAID'} ? 'badge-paid' : 'badge-unpaid'"
+                                    th:text="${fine.paidStatus != null and #strings.toUpperCase(fine.paidStatus) == 'PAID'} ? 'Đã thu' : 'Chưa nộp'"></span>
                             </td>
 
                             <!-- Phương thức / Mã GD -->
@@ -251,7 +251,7 @@
 
                             <!-- Thao tác -->
                             <td class="px-6 py-4">
-                                <div th:if="${fine.paidStatus == 'Unpaid'}" class="flex gap-2">
+                                <div th:if="${fine.paidStatus != null and #strings.toUpperCase(fine.paidStatus) == 'UNPAID'}" class="flex gap-2">
                                     <!-- Thu tiền mặt: mở modal xác nhận -->
                                     <button type="button" onclick="openCashModal(this)" th:data-fine-id="${fine.fineId}"
                                         th:data-patron-name="${fine.patron != null ? fine.patron.fullName : ''}"
@@ -276,7 +276,7 @@
                                         Thanh toán QR
                                     </button>
                                 </div>
-                                <span th:if="${fine.paidStatus != 'Unpaid'}" class="text-slate-400 text-xs">—</span>
+                                <span th:if="${fine.paidStatus == null or #strings.toUpperCase(fine.paidStatus) != 'UNPAID'}" class="text-slate-400 text-xs">—</span>
                             </td>
                         </tr>
                     </tbody>
