@@ -73,15 +73,6 @@ public interface BorrowTicketDetailRepository
                         "AND (b.status IS NULL OR b.status NOT IN ('Returned', 'Lost', 'Damaged'))")
         List<BorrowTicketDetail> findCurrentlyBorrowing();
 
-        @EntityGraph(attributePaths = { "bookCopy", "bookCopy.book", "borrowTicket", "borrowTicket.patron",
-                        "borrowTicket.campus" })
-        @Query("SELECT b FROM BorrowTicketDetail b " +
-                        "WHERE b.returnDate IS NULL " +
-                        "AND (b.status IS NULL OR b.status NOT IN ('Returned', 'Lost', 'Damaged')) " +
-                        "AND (:title IS NULL OR LOWER(b.bookCopy.book.title) LIKE LOWER(CONCAT('%', :title, '%'))) " +
-                        "AND (:borrowerId IS NULL OR LOWER(b.borrowTicket.patron.userId) LIKE LOWER(CONCAT('%', :borrowerId, '%')))")
-        List<BorrowTicketDetail> searchCurrentlyBorrowing(@Param("title") String title, @Param("borrowerId") String borrowerId);
-
         /** Sách đã trả nhưng trả quá hạn — dùng cho trang "Quá hạn" */
         @EntityGraph(attributePaths = { "bookCopy", "bookCopy.book", "borrowTicket", "borrowTicket.patron" })
         @Query("SELECT b FROM BorrowTicketDetail b " +
@@ -124,4 +115,13 @@ public interface BorrowTicketDetailRepository
        java.util.List<Object[]> countOverdueByUsers(@Param("userIds") java.util.List<String> userIds);
 
        @Query("SELECT d.borrowTicket.patron.userId, COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId IN :userIds AND d.returnDate IS NULL GROUP BY d.borrowTicket.patron.userId")
-       java.util.List<Object[]> countActiveBorrowedByUsers(@Param("userIds") java.util.List<String> userIds);}
+       java.util.List<Object[]> countActiveBorrowedByUsers(@Param("userIds") java.util.List<String> userIds);
+@EntityGraph(attributePaths = { "bookCopy", "bookCopy.book", "borrowTicket", "borrowTicket.patron", "borrowTicket.campus" })
+       @Query("SELECT b FROM BorrowTicketDetail b " +
+              "WHERE b.returnDate IS NULL " +
+              "AND (b.status IS NULL OR b.status NOT IN ('Returned', 'Lost', 'Damaged')) " +
+              "AND (:title IS NULL OR LOWER(b.bookCopy.book.title) LIKE LOWER(CONCAT('%', :title, '%'))) " +
+              "AND (:borrowerId IS NULL OR LOWER(b.borrowTicket.patron.userId) LIKE LOWER(CONCAT('%', :borrowerId, '%')))")
+       List<BorrowTicketDetail> searchCurrentlyBorrowing(@Param("title") String title, @Param("borrowerId") String borrowerId);
+}
+                

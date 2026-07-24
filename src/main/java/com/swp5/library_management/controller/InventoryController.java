@@ -139,8 +139,8 @@ public class InventoryController {
         }
 
         List<MaterialRequest> approvedRequests = (librarianCampusId != null)
-                ? materialRequestRepository.findByStatusAndSearchTermAndCampusId("Approved", null, librarianCampusId)
-                : materialRequestRepository.findByStatusAndSearchTerm("Approved", null);
+                ? materialRequestRepository.findByStatusAndSearchTermAndCampusId("Approved", null, librarianCampusId, null, null)
+                : materialRequestRepository.findByStatusAndSearchTerm("Approved", null, null, null);
 
         model.addAttribute("bookForm", new AddBookForm());
         model.addAttribute("shelves", shelfRepository.findAll());
@@ -187,8 +187,8 @@ public class InventoryController {
             }
 
             List<MaterialRequest> approvedRequests = (librarianCampusId != null)
-                    ? materialRequestRepository.findByStatusAndSearchTermAndCampusId("Approved", null, librarianCampusId)
-                    : materialRequestRepository.findByStatusAndSearchTerm("Approved", null);
+                    ? materialRequestRepository.findByStatusAndSearchTermAndCampusId("Approved", null, librarianCampusId, null, null)
+                    : materialRequestRepository.findByStatusAndSearchTerm("Approved", null, null, null);
 
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("shelves", shelfRepository.findAll());
