@@ -5,6 +5,7 @@ import com.swp5.library_management.repository.*;
 import com.swp5.library_management.service.EmailService;
 import com.swp5.library_management.service.SystemConfigService;
 import com.swp5.library_management.service.MaterialRequestService;
+import com.swp5.library_management.service.MaterialRequestExportService;
 import com.swp5.library_management.service.UserStatusService;
 
 import jakarta.servlet.http.HttpSession;
@@ -36,6 +37,7 @@ public class LibrarianController {
     private final EmailService emailService;
     private final MaterialRequestService materialRequestService;
     private final UserStatusService userStatusService;
+    private final MaterialRequestExportService materialRequestExportService;
 
     private boolean isNotLibrarian(HttpSession session) {
         Boolean isLibrarian = (Boolean) session.getAttribute("isLibrarian");
@@ -246,6 +248,8 @@ public class LibrarianController {
     public String dashboard(@RequestParam(required = false) String status,
                             @RequestParam(required = false) String search,
                             @RequestParam(required = false) String patronRole,
+                            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate fromDate,
+                            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate toDate,
                             HttpSession session,
                             Model model,
                             RedirectAttributes redirectAttrs) {
@@ -274,11 +278,13 @@ public class LibrarianController {
                 ? materialRequestRepository.countByStatusAndPatronCampusId("Available", librarianCampusId)
                 : materialRequestRepository.countByStatus("Available");
 
+        LocalDateTime fromDateTime = (fromDate != null) ? fromDate.atStartOfDay() : null;
+        LocalDateTime toDateTime = (toDate != null) ? toDate.atTime(23, 59, 59) : null;
 
         // Request list scoped to this librarian's campus
         List<MaterialRequest> requests = (librarianCampusId != null)
-                ? materialRequestRepository.findByStatusAndSearchTermAndCampusId(status, search, librarianCampusId)
-                : materialRequestRepository.findByStatusAndSearchTerm(status, search);
+                ? materialRequestRepository.findByStatusAndSearchTermAndCampusId(status, search, librarianCampusId, fromDateTime, toDateTime)
+                : materialRequestRepository.findByStatusAndSearchTerm(status, search, fromDateTime, toDateTime);
 
         // Filter by Patron Role (Student / Lecturer)
         if (patronRole != null && !patronRole.isEmpty()) {
@@ -305,9 +311,62 @@ public class LibrarianController {
         model.addAttribute("currentStatus",      status);
         model.addAttribute("currentSearch",      search);
         model.addAttribute("currentPatronRole",  patronRole);
+        model.addAttribute("currentFromDate",    fromDate);
+        model.addAttribute("currentToDate",      toDate);
         model.addAttribute("librarianCampusId",  librarianCampusId);
 
         return "acquisition/dashboard";
+    }
+
+    @GetMapping("/acquisition/export-excel")
+    public void exportToExcel(@RequestParam(required = false) String status,
+                              @RequestParam(required = false) String search,
+                              @RequestParam(required = false) String patronRole,
+                              @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate fromDate,
+                              @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate toDate,
+                              HttpSession session,
+                              jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
+        if (isNotLibrarian(session)) {
+            response.sendRedirect("/login");
+            return;
+        }
+
+        String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+        User librarian = (loggedInUserId != null)
+                ? userRepository.findById(loggedInUserId).orElse(null)
+                : null;
+        Integer librarianCampusId = (librarian != null) ? librarian.getCampusId() : null;
+
+        LocalDateTime fromDateTime = (fromDate != null) ? fromDate.atStartOfDay() : null;
+        LocalDateTime toDateTime = (toDate != null) ? toDate.atTime(23, 59, 59) : null;
+
+        List<MaterialRequest> requests = (librarianCampusId != null)
+                ? materialRequestRepository.findByStatusAndSearchTermAndCampusId(status, search, librarianCampusId, fromDateTime, toDateTime)
+                : materialRequestRepository.findByStatusAndSearchTerm(status, search, fromDateTime, toDateTime);
+
+        // Filter by Patron Role
+        if (patronRole != null && !patronRole.isEmpty()) {
+            if ("Student".equalsIgnoreCase(patronRole)) {
+                requests = requests.stream()
+                        .filter(r -> r.getPatron() != null &&
+                                (r.getPatron().getRoles().isEmpty()
+                                 || r.getPatron().getRoles().stream().anyMatch(role -> Integer.valueOf(1).equals(role.getRoleId()))))
+                        .toList();
+            } else if ("Lecturer".equalsIgnoreCase(patronRole)) {
+                requests = requests.stream()
+                        .filter(r -> r.getPatron() != null &&
+                                r.getPatron().getRoles().stream().anyMatch(role -> Integer.valueOf(2).equals(role.getRoleId())))
+                        .toList();
+            }
+        }
+
+        byte[] excelData = materialRequestExportService.exportToExcel(requests);
+
+        String fileName = "material_requests_" + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")) + ".xlsx";
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+        response.getOutputStream().write(excelData);
+        response.getOutputStream().flush();
     }
 
     @PostMapping("/acquisition/approve/{id}")
