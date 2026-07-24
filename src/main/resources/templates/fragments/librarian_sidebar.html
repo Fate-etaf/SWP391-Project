@@ -88,6 +88,13 @@
                 <span>Sách Quá Hạn</span>
             </a>
             
+            <a href="/librarian/fines" 
+               class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors"
+               th:classappend="${activeItem == 'fines'} ? 'bg-fpt-orange/10 text-fpt-orange font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                <span>Quản lý phiếu phạt</span>
+            </a>
+            
             <p class="px-4 pt-5 pb-2 text-[10px] font-bold text-fpt-orange/80 uppercase tracking-wider">Tiện Ích</p>
             <a href="/librarian/study-rooms/management" 
                class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors"
