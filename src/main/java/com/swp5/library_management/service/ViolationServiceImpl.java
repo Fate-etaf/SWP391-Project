@@ -19,6 +19,8 @@ import com.swp5.library_management.repository.BookCopyRepository;
 import com.swp5.library_management.repository.BorrowTicketDetailRepository;
 import com.swp5.library_management.repository.FineInvoiceRepository;
 import com.swp5.library_management.repository.UserRepository;
+import com.swp5.library_management.entity.Campus;
+import com.swp5.library_management.repository.CampusRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,6 +38,19 @@ public class ViolationServiceImpl implements ViolationService {
     private final UserRepository userRepository;
     private final ReservationService reservationService;
     private final SystemConfigService systemConfigService;
+    private final CampusRepository campusRepository;
+    
+    private void setReturnCampusFromLibrarian(BorrowTicketDetail detail, String librarianId) {
+        if (librarianId != null && !librarianId.isBlank()) {
+            userRepository.findById(librarianId).ifPresent(librarian -> {
+                if (librarian.getCampusId() != null) {
+                    campusRepository.findById(librarian.getCampusId()).ifPresent(campus -> {
+                        detail.setReturnCampus(campus);
+                    });
+                }
+            });
+        }
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -59,12 +74,13 @@ public class ViolationServiceImpl implements ViolationService {
     }
 
     @Override
-    public void returnBook(Integer borrowTicketDetailId, String conditionStatus) {
+    public void returnBook(Integer borrowTicketDetailId, String conditionStatus, String librarianId) {
         BorrowTicketDetail detail = getDetailOrThrow(borrowTicketDetailId);
         if (detail.getReturnDate() == null) {
             detail.setReturnDate(LocalDateTime.now());
         }
         detail.setStatus("Returned");
+        setReturnCampusFromLibrarian(detail, librarianId);
         borrowTicketDetailRepository.save(detail);
         BookCopy copy = detail.getBookCopy();
         if (copy != null) {
@@ -74,13 +90,14 @@ public class ViolationServiceImpl implements ViolationService {
     }
 
     @Override
-    public FineInvoice createOverdueFine(Integer borrowTicketDetailId, String conditionStatus) {
+    public FineInvoice createOverdueFine(Integer borrowTicketDetailId, String conditionStatus, String librarianId) {
         BorrowTicketDetail detail = getDetailOrThrow(borrowTicketDetailId);
         FineInvoice fine = buildOverdueFine(detail);
         if (detail.getReturnDate() == null) {
             detail.setReturnDate(LocalDateTime.now());
         }
         detail.setStatus("Returned");
+        setReturnCampusFromLibrarian(detail, librarianId);
         borrowTicketDetailRepository.save(detail);
         BookCopy copy = detail.getBookCopy();
         if (copy != null) {
@@ -91,10 +108,10 @@ public class ViolationServiceImpl implements ViolationService {
     }
 
     @Override
-    public List<FineInvoice> createLostBookFine(Integer borrowTicketDetailId, String notes) {
+    public List<FineInvoice> createLostBookFine(Integer borrowTicketDetailId, String notes, String librarianId) {
         BorrowTicketDetail detail = getDetailOrThrow(borrowTicketDetailId);
         markCopyStatus(detail.getBookCopy(), "Maintenance", "Lost");
-        updateTicketDetailStatus(detail, "Lost");
+        updateTicketDetailStatus(detail, "Lost", librarianId);
 
         List<FineInvoice> fines = new java.util.ArrayList<>();
         LocalDate dueDate = detail.getDueDate() != null ? detail.getDueDate().toLocalDate() : null;
@@ -111,10 +128,10 @@ public class ViolationServiceImpl implements ViolationService {
     }
 
     @Override
-    public List<FineInvoice> createDamagedBookFine(Integer borrowTicketDetailId, String notes) {
+    public List<FineInvoice> createDamagedBookFine(Integer borrowTicketDetailId, String notes, String librarianId) {
         BorrowTicketDetail detail = getDetailOrThrow(borrowTicketDetailId);
         markCopyStatus(detail.getBookCopy(), "Maintenance", "Damaged");
-        updateTicketDetailStatus(detail, "Damaged");
+        updateTicketDetailStatus(detail, "Damaged", librarianId);
 
         List<FineInvoice> fines = new java.util.ArrayList<>();
         LocalDate dueDate = detail.getDueDate() != null ? detail.getDueDate().toLocalDate() : null;
@@ -230,20 +247,21 @@ public class ViolationServiceImpl implements ViolationService {
         return (newRank <= currentRank) ? newCondition : currentCondition;
     }
 
-    private void updateTicketDetailStatus(BorrowTicketDetail detail, String status) {
+    private void updateTicketDetailStatus(BorrowTicketDetail detail, String status, String librarianId) {
         detail.setStatus(status);
         detail.setReturnDate(LocalDateTime.now());
+        setReturnCampusFromLibrarian(detail, librarianId);
         borrowTicketDetailRepository.save(detail);
     }
 
     @Override
-    public BorrowTicketDetail returnByCopyId(String copyId) {
+    public BorrowTicketDetail returnByCopyId(String copyId, String librarianId) {
         List<BorrowTicketDetail> actives = borrowTicketDetailRepository.findActiveByCopyId(copyId.trim());
         if (actives.isEmpty()) {
             throw new IllegalArgumentException("Không tìm thấy lượt mượn đang hoạt động cho mã sách: " + copyId);
         }
         BorrowTicketDetail detail = actives.get(0);
-        returnBook(detail.getTicketDetailId(), null);
+        returnBook(detail.getTicketDetailId(), null, librarianId);
         return detail;
     }
 
