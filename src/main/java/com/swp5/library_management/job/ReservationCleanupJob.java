@@ -26,9 +26,10 @@ public class ReservationCleanupJob {
     private final com.swp5.library_management.service.ReservationService reservationService;
 
     /**
-     * Chạy tự động vào 0h00 mỗi ngày để dọn dẹp các đơn đặt chỗ quá hạn.
+     * Chạy tự động mỗi 5 phút và khi ứng dụng khởi động để dọn dẹp các đơn đặt chỗ quá hạn.
      */
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(fixedRate = 300000) // 5 minutes
+    @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
     @Transactional
     public void cleanupExpiredReservations() {
         log.info("[CRON] Bắt đầu dọn dẹp các đơn đặt chỗ (Reservation) quá hạn...");
