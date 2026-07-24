@@ -88,17 +88,25 @@
                     <p class="text-[10px] text-slate-500 mt-2">Định danh của Sinh viên/Giảng viên tương ứng trong file Excel danh sách.</p>
                 </div>
 
-                <!-- Book Copy ID field -->
+                <!-- Book Copy IDs field -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2.5">Mã bản sao sách (Copy ID)</label>
                     <div class="relative flex items-center">
                         <svg class="w-4 h-4 text-slate-500 absolute left-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
                         </svg>
-                        <input id="copyId" name="copyId" type="text" th:value="${copyId}" required placeholder="Ví dụ: SE-01, MC-01" autocomplete="off"
-                               class="w-full bg-slate-50 border border-slate-300 text-slate-800 pl-11 pr-4 py-3.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/10 transition-all placeholder-slate-400 font-mono">
+                        <input id="copyIdInput" type="text" placeholder="Nhập mã sách và ấn Enter" autocomplete="off"
+                               class="w-full bg-slate-50 border border-slate-300 text-slate-800 pl-11 pr-24 py-3.5 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/10 transition-all placeholder-slate-400 font-mono"
+                               onkeydown="if(event.key === 'Enter'){ event.preventDefault(); addCopyIdFromInput(); }">
+                        <button type="button" onclick="addCopyIdFromInput()" class="absolute right-2 px-3 py-1.5 bg-slate-200 text-slate-600 hover:text-fpt-orange text-xs font-bold rounded-lg hover:bg-orange-100 transition-colors">
+                            Thêm
+                        </button>
                     </div>
-                    <p class="text-[10px] text-slate-500 mt-2">Mã nhãn barcode dán trực tiếp trên sách vật lý dán ngoài bìa sau.</p>
+                    
+                    <div id="copyIdTags" class="flex flex-wrap gap-2 mt-3 empty:hidden">
+                    </div>
+                    
+                    <p class="text-[10px] text-slate-500 mt-2">Nhập mã nhãn barcode và ấn Thêm (hoặc Enter) để mượn nhiều cuốn. Cần ít nhất 1 mã sách.</p>
                 </div>
 
                 <!-- Submit and cancel -->
@@ -176,8 +184,38 @@
     }
 
     function useCopyId(copyId) {
-        document.getElementById('copyId').value = copyId;
-        document.querySelector('form').submit();
+        addCopyId(copyId);
+    }
+
+    function addCopyIdFromInput() {
+        const input = document.getElementById('copyIdInput');
+        const copyId = input.value.trim();
+        if(copyId) {
+            addCopyId(copyId);
+            input.value = '';
+        }
+    }
+
+    function addCopyId(copyId) {
+        const container = document.getElementById('copyIdTags');
+        const existingInputs = container.querySelectorAll('input[name="copyIds"]');
+        for (let input of existingInputs) {
+            if (input.value.toUpperCase() === copyId.toUpperCase()) {
+                alert('Mã sách này đã được thêm!');
+                return;
+            }
+        }
+
+        const span = document.createElement('span');
+        span.className = "inline-flex items-center gap-1.5 px-3 py-1.5 bg-fpt-orange/10 border border-fpt-orange/20 rounded-lg text-sm font-mono text-fpt-orange font-bold";
+        span.innerHTML = `
+            ${copyId}
+            <button type="button" onclick="this.parentElement.remove()" class="text-fpt-orange/60 hover:text-red-500 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <input type="hidden" name="copyIds" value="${copyId}">
+        `;
+        container.appendChild(span);
     }
 </script>
 
