@@ -114,8 +114,9 @@ public class ViolationController {
             return "redirect:/login";
         }
         try {
+            String librarianId = (String) session.getAttribute("loggedInUserId");
             // conditionStatus = null: giữ nguyên tình trạng sách khi tạo phiếu phạt thủ công
-            violationService.createOverdueFine(id, null);
+            violationService.createOverdueFine(id, null, librarianId);
             redirectAttrs.addFlashAttribute("successMsg", "Tạo phiếu phạt quá hạn thành công!");
         } catch (Exception e) {
             redirectAttrs.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());

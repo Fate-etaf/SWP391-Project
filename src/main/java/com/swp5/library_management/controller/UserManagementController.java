@@ -94,10 +94,46 @@ public class UserManagementController {
             @RequestParam(value = "status", defaultValue = "Active") String status,
             RedirectAttributes redirectAttributes) {
         
+        // Kiểm tra định dạng Mã định danh theo Role
+        String upperUserId = userId.trim().toUpperCase();
+        if (roleId == 1) { 
+            // Nếu là Sinh viên
+            if (!upperUserId.matches("^(HE|HS)\\d+$")) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Thêm thất bại: Mã Sinh viên bắt buộc phải bắt đầu bằng 'HE' hoặc 'HS' kèm theo các chữ số (VD: HE150000)!");
+                return "redirect:/admin/users";
+            }
+        } else {
+            // Nếu là Giảng viên, Admin, Thủ thư
+            if (upperUserId.startsWith("HE") || upperUserId.startsWith("HS")) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Thêm thất bại: Mã định danh của Cán bộ/Giảng viên không được dùng tiền tố HE hoặc HS của sinh viên!");
+                return "redirect:/admin/users";
+            }
+            if (!upperUserId.matches("^[A-Z0-9]+$")) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Mã định danh không hợp lệ (chỉ chấp nhận chữ cái và số)!");
+                return "redirect:/admin/users";
+            }
+        }
+
+        if (!fullName.matches("^[\\p{L}\\s]+$")) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Họ và tên không hợp lệ (không chứa số hoặc ký tự đặc biệt)!");
+            return "redirect:/admin/users";
+        }
+
         Optional<User> existingUser = userRepository.findById(userId);
         if (existingUser.isPresent()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Mã người dùng đã tồn tại trong hệ thống!");
             return "redirect:/admin/users";
+        }
+        
+        if (email != null && !email.trim().isEmpty()) {
+            if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Định dạng Email không hợp lệ!");
+                return "redirect:/admin/users";
+            }
+            if (userRepository.existsByEmail(email.trim())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Email này đã được sử dụng cho một tài khoản khác!");
+                return "redirect:/admin/users";
+            }
         }
         
         User newUser = new User();
@@ -161,9 +197,27 @@ public class UserManagementController {
             @RequestParam("status") String status,
             RedirectAttributes redirectAttributes) {
         
+        if (!fullName.matches("^[\\p{L}\\s]+$")) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Họ và tên không hợp lệ (chỉ chấp nhận chữ và khoảng trắng)!");
+            return "redirect:/admin/users";
+        }
+
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+            
+            if (email != null && !email.trim().isEmpty()) {
+                if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Định dạng Email không hợp lệ!");
+                    return "redirect:/admin/users";
+                }
+                Optional<User> emailOwnerOpt = userRepository.findByEmail(email.trim());
+                if (emailOwnerOpt.isPresent() && !emailOwnerOpt.get().getUserId().equalsIgnoreCase(userId)) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Email này đã được sử dụng cho một tài khoản khác!");
+                    return "redirect:/admin/users";
+                }
+            }
+            
             user.setFullName(fullName.trim());
             user.setEmail(email.trim());
             user.setCampusId(campusId);
@@ -277,6 +331,9 @@ public class UserManagementController {
                     User account = new User();
                     
                     if (email != null && !email.trim().isEmpty()) {
+                        if (userRepository.existsByEmail(email.trim())) {
+                            continue; // Bỏ qua nếu email đã tồn tại để tránh lỗi Unique Constraint
+                        }
                         emailsToNotify.add(email.trim());
                     }
 

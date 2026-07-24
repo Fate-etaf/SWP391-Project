@@ -31,39 +31,17 @@
     </style>
 </head>
 
-<body class="bg-slate-50 min-h-screen text-slate-800">
+<body class="bg-slate-50 min-h-screen text-slate-900 flex flex-col justify-between relative overflow-x-hidden">
 
-    <header class="bg-fpt-dark text-white sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                <div class="flex items-center space-x-3">
-                    <div
-                        class="bg-fpt-orange text-white p-2.5 rounded-lg font-extrabold text-xl tracking-wider shadow-lg">
-                        FPT</div>
-                    <div>
-                        <h1 class="text-lg font-bold tracking-tight leading-none text-orange-400">FLMS</h1>
-                        <p class="text-xs text-slate-400 font-medium">Library Management System</p>
-                    </div>
-                </div>
-                <nav class="hidden md:flex space-x-8 font-medium text-sm">
-                    <a href="/home"
-                        class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Trang
-                        chủ</a>
-                    <a href="/books"
-                        class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Tra
-                        cứu sách</a>
-                    <a href="/borrowing"
-                        class="text-slate-300 hover:text-white transition-colors py-2 border-b-2 border-transparent hover:border-slate-400">Đang
-                        mượn</a>
-                    <a href="/violations/overdue"
-                        class="text-fpt-orange hover:text-orange-400 transition-colors py-2 border-b-2 border-fpt-orange">Quá
-                        hạn</a>
-                </nav>
-            </div>
-        </div>
-    </header>
+    
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
+    </div>
+    <main class="flex-grow max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col xl:flex-row gap-8">
+        <div th:replace="~{fragments/librarian_sidebar :: sidebar('overdue')}"></div>
+        <div class="flex-grow min-w-0">
         <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-wider text-fpt-orange">Quản lý vi phạm</p>
@@ -161,14 +139,14 @@
                             <td class="px-6 py-4">
                                 <span
                                     class="inline-flex items-center gap-2 text-xs font-semibold px-2.5 py-1 rounded-full"
-                                    th:classappend="${item.fineStatus == 'PAID'} ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'"
-                                    th:text="${item.fineStatus == 'PAID'} ? 'Đã trả' : 'Chưa trả'">
+                                    th:classappend="${item.fineStatus == 'PAID'} ? 'bg-emerald-100 text-emerald-700' : (${item.fineStatus == 'UNPAID'} ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500')"
+                                    th:text="${item.fineStatus == 'PAID'} ? 'Đã thu' : (${item.fineStatus == 'UNPAID'} ? 'Chưa nộp' : 'Chưa tạo')">
                                      Trạng thái
-</span>
+                                </span>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex flex-wrap gap-2">
-                                    <button type="button"
+                                    <button type="button" th:if="${item.fineStatus == 'NOT_CREATED'}"
                                         class="bg-fpt-navy hover:bg-slate-700 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
                                         th:attr="data-action=@{'/violations/create-overdue/' + ${item.detail.ticketDetailId}},
                                              data-book-title=${item.detail.bookCopy.book.title},
@@ -181,6 +159,9 @@
                                              data-fine-amount=${item.fineAmount}" onclick="openFineModal(this);">
                                         Tạo phiếu phạt
                                     </button>
+                                    <span th:if="${item.fineStatus != 'NOT_CREATED'}" class="text-xs text-slate-500 font-medium">
+                                        <a href="/librarian/fines" class="text-fpt-orange hover:underline">Quản lý phiếu phạt &rarr;</a>
+                                    </span>
                                 </div>
                             </td>
                         </tr>
@@ -215,6 +196,7 @@
                 </div>
             </div>
         </section>
+            </div>
     </main>
 
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50">

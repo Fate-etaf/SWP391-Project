@@ -17,16 +17,16 @@ public interface ViolationService {
     long calculateOverdueDays(LocalDate dueDate);
 
     /** Xác nhận trả sách */
-    void returnBook(Integer borrowTicketDetailId, String conditionStatus);
+    void returnBook(Integer borrowTicketDetailId, String conditionStatus, String librarianId);
 
-    FineInvoice createOverdueFine(Integer borrowTicketDetailId, String conditionStatus);
+    FineInvoice createOverdueFine(Integer borrowTicketDetailId, String conditionStatus, String librarianId);
 
-    List<FineInvoice> createLostBookFine(Integer borrowTicketDetailId, String notes);
+    List<FineInvoice> createLostBookFine(Integer borrowTicketDetailId, String notes, String librarianId);
 
-    List<FineInvoice> createDamagedBookFine(Integer borrowTicketDetailId, String notes);
+    List<FineInvoice> createDamagedBookFine(Integer borrowTicketDetailId, String notes, String librarianId);
 
     /** Trả sách qua mã Barcode (CopyID) */
-    BorrowTicketDetail returnByCopyId(String copyId);
+    BorrowTicketDetail returnByCopyId(String copyId, String librarianId);
 
     /**
      * Lấy danh sách tất cả hóa đơn phạt, có thể lọc theo mã bạn đọc và trạng thái.

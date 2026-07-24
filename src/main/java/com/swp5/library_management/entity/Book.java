@@ -26,6 +26,10 @@ public class Book {
     @JoinColumn(name = "SubjectCode", referencedColumnName = "SubjectCode")
     private Subject subject;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MajorID")
+    private Major major;
+
     @Column(name = "ISBN", unique = true, length = 20)
     private String isbn;
 
