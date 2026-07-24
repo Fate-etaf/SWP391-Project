@@ -87,9 +87,6 @@ public class ViolationServiceImpl implements ViolationService {
             String newCondition = applyConditionStatus(copy.getConditionStatus(), conditionStatus);
             markCopyStatus(copy, "Available", newCondition);
         }
-        fine.setPaidStatus("Paid");
-        fine.setRemainingAmount(BigDecimal.ZERO);
-        fine.setPaidAt(LocalDateTime.now());
         return fineInvoiceRepository.save(fine);
     }
 
@@ -141,7 +138,12 @@ public class ViolationServiceImpl implements ViolationService {
 
     private FineInvoice buildOverdueFine(BorrowTicketDetail detail) {
         LocalDate dueDate = detail.getDueDate() != null ? detail.getDueDate().toLocalDate() : null;
-        long overdueDays = calculateOverdueDays(dueDate);
+        if (dueDate == null) {
+            throw new IllegalStateException("Borrow ticket detail has no due date.");
+        }
+        LocalDate endDate = detail.getReturnDate() != null ? detail.getReturnDate().toLocalDate() : LocalDate.now();
+        long overdueDays = Math.max(ChronoUnit.DAYS.between(dueDate, endDate), 0L);
+        
         if (overdueDays <= 0) {
             throw new IllegalStateException("Borrow ticket detail is not overdue.");
         }
