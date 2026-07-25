@@ -1,0 +1,25 @@
+Đây là một công việc rất phổ biến khi làm việc nhóm với SQL Server. Để cả nhóm đồng bộ được dữ liệu chuẩn xác nhất, bạn hãy làm theo 2 phần hướng dẫn dưới đây nhé:
+
+Phần 1: Dành cho bạn (Cách tạo file .bak để gửi cho nhóm)
+Mở SQL Server Management Studio (SSMS) và kết nối vào Server của bạn.
+Ở cột bên trái (Object Explorer), mở rộng mục Databases.
+Click chuột phải vào database LMSVer2, chọn Tasks > Back Up...
+Một cửa sổ sẽ hiện ra. Chú ý các mục sau:
+Backup type: Hãy chắc chắn là chọn Full.
+Ở mục Destination (phía dưới cùng), bạn sẽ thấy đường dẫn lưu file mặc định.
+Mẹo: Nếu đường dẫn mặc định quá khó tìm, bạn có thể bấm nút Remove đường dẫn đó đi, rồi bấm Add... để chọn lưu ra Desktop hoặc một thư mục nào đó dễ lấy (Ví dụ: C:\Users\Admin\Desktop\LMSVer2.bak). Lưu ý: Bạn phải tự gõ thêm chữ .bak vào tên file nếu tự lưu.
+Bấm OK. Sẽ có thông báo "The backup of database 'LMSVer2' completed successfully".
+Bây giờ bạn chỉ cần copy file LMSVer2.bak đó gửi cho bạn bè (qua Zalo, Google Drive, v.v.).
+Phần 2: Dành cho bạn bè của bạn (Cách nhận file .bak và Restore)
+Khi bạn bè của bạn nhận được file LMSVer2.bak, hãy bảo họ làm theo các bước sau để nạp vào máy:
+
+Mở SQL Server Management Studio (SSMS) và kết nối vào Server của họ.
+Click chuột phải thẳng vào thư mục gốc Databases, chọn Restore Database...
+Ở cửa sổ hiện ra, trong phần Source, chọn Device (thay vì Database).
+Bấm vào nút có biểu tượng dấu 3 chấm (...) bên cạnh chữ Device.
+Cửa sổ mới hiện ra, bấm nút Add và tìm đến thư mục chứa file LMSVer2.bak vừa tải về (Nếu không thấy file dù đã vào đúng thư mục, hãy xem mục Files of type góc dưới cùng đang để là .bak hay All files, chọn All files sẽ thấy).
+Bấm OK 2 lần để quay lại cửa sổ chính.
+Lúc này SSMS sẽ tự động điền tên database là LMSVer2 vào ô Database ở mục Destination.
+Chuyển sang tab Options (ở cột bên trái cửa sổ), tick vào ô Overwrite the existing database (WITH REPLACE) (để phòng trường hợp máy họ đang có sẵn một DB cũ tên là LMSVer2 thì nó sẽ ghi đè lên luôn).
+Bấm OK để tiến hành Restore.
+Sẽ có thông báo báo Restore thành công. Lúc này bạn của bạn vào thư mục Databases, F5 lại là sẽ thấy LMSVer2 với toàn bộ sách, user y hệt máy bạn.
