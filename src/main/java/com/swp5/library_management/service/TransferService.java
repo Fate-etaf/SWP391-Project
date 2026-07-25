@@ -18,7 +18,7 @@ public interface TransferService {
 
     // 5. Giao cho vận chuyển (Đổi sang InTransit) - Bổ sung tham số thứ 2 để kiểm
     // tra quyền
-    void markAsInTransit(Integer transferId, Integer librarianCampusId);
+    void markAsInTransit(Integer transferId, Integer librarianCampusId, String userId);
 
     // 6. Nhập kho (Postcondition: Cập nhật CampusID và đưa sách về Available)
     void confirmReceipt(Integer transferId, String confirmedByUserId);
@@ -40,7 +40,7 @@ public interface TransferService {
     void updateRequestStatus(Integer transferId, String status, String note, Integer librarianCampusId);
 
     // Batch Confirm: Xác nhận xuất kho hàng loạt cho tất cả các đơn Accepted
-    void confirmBatchShipment(Integer campusId);
+    void confirmBatchShipment(Integer campusId, String userId);
 
     // Batch Receive: Xác nhận nhập kho hàng loạt theo ToCampus và ShippedAt
     void confirmBatchReceipt(Integer toCampusId, java.time.LocalDateTime shippedAt, String confirmedByUserId);

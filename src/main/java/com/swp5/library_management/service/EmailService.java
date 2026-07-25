@@ -89,7 +89,7 @@ public interface EmailService {
      * @param author       Tác giả sách đề nghị
      */
     void sendMaterialRequestRejection(String toEmail, String patronName, String bookTitle, String author);
-        /**
+    /**
      * Gửi email thông báo mã OTP kích hoạt hoặc đặt lại mật khẩu tài khoản.
      *
      * @param toEmail  Địa chỉ email của bạn đọc
@@ -97,4 +97,37 @@ public interface EmailService {
      * @param content  Nội dung thông báo (chứa mã OTP)
      */
     void sendOtpEmail(String toEmail, String subject, String content);
+
+    // ==========================================
+    // STUDY ROOM NOTIFICATIONS
+    // ==========================================
+
+    /**
+     * Gửi email xác nhận đặt phòng học nhóm thành công.
+     */
+    void sendStudyRoomBookingConfirmation(String toEmail, String patronName, String roomName, String date, String timeSlot);
+
+    /**
+     * Gửi email thông báo hủy phòng do không đến nhận phòng (No Show).
+     */
+    void sendStudyRoomNoShow(String toEmail, String patronName, String roomName, String date, String timeSlot);
+
+    /**
+     * Gửi email xác nhận hủy đặt phòng học nhóm.
+     */
+    void sendStudyRoomCancellation(String toEmail, String patronName, String roomName, String date, String timeSlot);
+
+    // ==========================================
+    // BOOK TRANSFER NOTIFICATIONS
+    // ==========================================
+
+    /**
+     * Gửi email thông báo quyết định luân chuyển sách (Chấp nhận/Từ chối).
+     */
+    void sendBookTransferDecision(String toEmail, String librarianName, String bookTitle, String sourceCampus, String status);
+
+    /**
+     * Gửi email thông báo sách luân chuyển đã được nhận thành công.
+     */
+    void sendBookTransferReceiptConfirmation(String toEmail, String librarianName, String bookTitle, String destinationCampus);
 }
