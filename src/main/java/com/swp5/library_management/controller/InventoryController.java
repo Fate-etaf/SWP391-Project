@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.ResponseEntity;
 
 import com.swp5.library_management.dto.AddBookForm;
 import com.swp5.library_management.dto.BookDetailDTO;
@@ -81,6 +85,8 @@ public class InventoryController {
         this.bookRepository = bookRepository;
     }
 
+    private static final int PAGE_SIZE = 12;
+
     @GetMapping("/inventory/list")
     public String listBooks(
             @RequestParam(required = false) String keyword,
@@ -88,6 +94,7 @@ public class InventoryController {
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) Integer majorId,
             @RequestParam(required = false) Integer campusId,
+            @RequestParam(defaultValue = "0") int page,
             HttpSession session,
             Model model) {
 
@@ -99,16 +106,27 @@ public class InventoryController {
                 || campusId != null;
 
         if (hasSearch) {
-            List<BookSearchResultDTO> results = bookService.searchBooks(keyword, subjectCode, categoryId, majorId,
-                    campusId, librarianCampusId, 0, 100).getContent();
-            model.addAttribute("results", results);
-            model.addAttribute("noResults", results.isEmpty());
+            Page<BookSearchResultDTO> resultPage = bookService.searchBooks(keyword, subjectCode, categoryId, majorId,
+                    campusId, librarianCampusId, page, PAGE_SIZE);
+            model.addAttribute("results", resultPage.getContent());
+            model.addAttribute("noResults", resultPage.isEmpty());
+            model.addAttribute("totalPages", resultPage.getTotalPages());
+            model.addAttribute("totalElements", resultPage.getTotalElements());
+            model.addAttribute("currentPage", page);
 
-            if (results.isEmpty()) {
+            if (resultPage.isEmpty()) {
                 model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks(librarianCampusId));
             }
         } else {
-            model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks(librarianCampusId));
+            // Show all books with pagination even without search
+            Page<BookSearchResultDTO> resultPage = bookService.searchBooks(null, null, null, null,
+                    null, librarianCampusId, page, PAGE_SIZE);
+            model.addAttribute("results", resultPage.getContent());
+            model.addAttribute("noResults", resultPage.isEmpty());
+            model.addAttribute("totalPages", resultPage.getTotalPages());
+            model.addAttribute("totalElements", resultPage.getTotalElements());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("hasSearch", false);
         }
 
         model.addAttribute("campuses", campusRepository.findAll());
@@ -124,6 +142,66 @@ public class InventoryController {
         model.addAttribute("hasSearch", hasSearch);
         model.addAttribute("searchAction", "/librarian/inventory/list");
         return "inventory/list";
+    }
+
+    /**
+     * GET /librarian/inventory/import-excel → Tải về file Excel mẫu để thủ thư điền thông tin sách.
+     */
+    @GetMapping("/inventory/import-excel/template")
+    public void downloadExcelTemplate(jakarta.servlet.http.HttpServletResponse response) throws Exception {
+        byte[] templateBytes = bookService.generateImportTemplate();
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"book_import_template.xlsx\"");
+        response.getOutputStream().write(templateBytes);
+        response.getOutputStream().flush();
+    }
+
+    /**
+     * POST /librarian/inventory/import-excel → Xử lý file Excel import sách hàng loạt.
+     */
+    @PostMapping("/inventory/import-excel")
+    public String importBooksFromExcel(
+            @RequestParam("file") MultipartFile file,
+            HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        if (file == null || file.isEmpty()) {
+            redirectAttributes.addFlashAttribute("importError", "Vui lòng chọn file Excel để import.");
+            return "redirect:/librarian/inventory/list";
+        }
+
+        String filename = file.getOriginalFilename();
+        if (filename == null || (!filename.endsWith(".xlsx") && !filename.endsWith(".xls"))) {
+            redirectAttributes.addFlashAttribute("importError", "File không đúng định dạng. Vui lòng upload file Excel (.xlsx hoặc .xls).");
+            return "redirect:/librarian/inventory/list";
+        }
+
+        Integer campusId = (Integer) session.getAttribute("loggedInCampusId");
+        if (campusId == null) {
+            String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+            if (loggedInUserId != null) {
+                User librarian = userRepository.findById(loggedInUserId).orElse(null);
+                if (librarian != null) campusId = librarian.getCampusId();
+            }
+        }
+
+        try {
+            BookService.ImportResult result = bookService.importBooksFromExcel(file.getInputStream(), campusId);
+            if (result.successCount() > 0) {
+                redirectAttributes.addFlashAttribute("importSuccess",
+                        "Import thành công " + result.successCount() + " cuốn sách."
+                        + (result.errorCount() > 0 ? " Có " + result.errorCount() + " dòng lỗi." : ""));
+            }
+            if (result.errorCount() > 0 && result.successCount() == 0) {
+                redirectAttributes.addFlashAttribute("importError",
+                        "Import thất bại. Chi tiết lỗi: " + result.firstError());
+            }
+            if (!result.errors().isEmpty()) {
+                redirectAttributes.addFlashAttribute("importErrors", result.errors());
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("importError", "Lỗi khi đọc file: " + e.getMessage());
+        }
+        return "redirect:/librarian/inventory/list";
     }
 
     @GetMapping("/inventory/add")

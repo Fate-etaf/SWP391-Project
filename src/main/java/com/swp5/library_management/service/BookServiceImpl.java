@@ -346,4 +346,192 @@ public class BookServiceImpl implements BookService {
         }
         return result;
     }
+
+    // ── Excel Import ──────────────────────────────────────────────────────────
+
+    /**
+     * Tạo file Excel mẫu (template) để librarian download và điền thông tin.
+     * Cột: Title | AuthorName | ISBN | PublisherName | PublishYear | Edition | Language | SubjectCode | ShelfCode | Copies | Description | CoverImageUrl
+     */
+    @Override
+    public byte[] generateImportTemplate() throws Exception {
+        try (org.apache.poi.xssf.usermodel.XSSFWorkbook workbook = new org.apache.poi.xssf.usermodel.XSSFWorkbook()) {
+            org.apache.poi.ss.usermodel.Sheet sheet = workbook.createSheet("Books");
+
+            // Header style
+            org.apache.poi.ss.usermodel.CellStyle headerStyle = workbook.createCellStyle();
+            headerStyle.setFillForegroundColor(org.apache.poi.ss.usermodel.IndexedColors.ORANGE.getIndex());
+            headerStyle.setFillPattern(org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND);
+            headerStyle.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.THIN);
+            org.apache.poi.ss.usermodel.Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerFont.setColor(org.apache.poi.ss.usermodel.IndexedColors.WHITE.getIndex());
+            headerStyle.setFont(headerFont);
+
+            // Create header row
+            org.apache.poi.ss.usermodel.Row headerRow = sheet.createRow(0);
+            String[] headers = {
+                "Title (*)", "AuthorName (*)", "ISBN", "PublisherName",
+                "PublishYear", "Edition", "Language", "SubjectCode",
+                "ShelfCode", "Copies", "Description", "CoverImageUrl"
+            };
+            for (int i = 0; i < headers.length; i++) {
+                org.apache.poi.ss.usermodel.Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle);
+                sheet.setColumnWidth(i, 5000);
+            }
+            sheet.setColumnWidth(0, 8000);
+            sheet.setColumnWidth(10, 10000);
+
+            // Sample row
+            org.apache.poi.ss.usermodel.Row sampleRow = sheet.createRow(1);
+            String[] sampleData = {
+                "Lập Trình Java Cơ Bản", "Nguyễn Văn A", "978-604-1234-56-7",
+                "NXB Giáo Dục", "2023", "1st Edition", "Vietnamese",
+                "PRF192", "A1", "5", "Sách lập trình Java dành cho sinh viên.", ""
+            };
+            for (int i = 0; i < sampleData.length; i++) {
+                sampleRow.createCell(i).setCellValue(sampleData[i]);
+            }
+
+            // Instruction sheet
+            org.apache.poi.ss.usermodel.Sheet instrSheet = workbook.createSheet("Hướng dẫn");
+            String[] instructions = {
+                "HƯỚNG DẪN SỬ DỤNG FILE IMPORT SÁCH",
+                "",
+                "(*) = Bắt buộc phải nhập",
+                "- Title: Tên sách (bắt buộc)",
+                "- AuthorName: Tên tác giả (bắt buộc). Nhiều tác giả cách nhau dấu phẩy.",
+                "- ISBN: Mã ISBN (tùy chọn, nhưng không được trùng nếu có)",
+                "- PublisherName: Tên nhà xuất bản (sẽ tự tạo mới nếu chưa có)",
+                "- PublishYear: Năm xuất bản (số nguyên, ví dụ: 2023)",
+                "- Edition: Phiên bản (ví dụ: 1st Edition)",
+                "- Language: Ngôn ngữ (mặc định: Vietnamese nếu để trống)",
+                "- SubjectCode: Mã môn học (phải tồn tại trong hệ thống)",
+                "- ShelfCode: Mã kệ sách (phải tồn tại trong hệ thống)",
+                "- Copies: Số bản sao cần tạo (số nguyên >= 0, mặc định: 0)",
+                "- Description: Mô tả nội dung sách (tùy chọn)",
+                "- CoverImageUrl: URL ảnh bìa sách (tùy chọn)"
+            };
+            for (int i = 0; i < instructions.length; i++) {
+                org.apache.poi.ss.usermodel.Row row = instrSheet.createRow(i);
+                row.createCell(0).setCellValue(instructions[i]);
+            }
+            instrSheet.setColumnWidth(0, 20000);
+
+            java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+            workbook.write(bos);
+            return bos.toByteArray();
+        }
+    }
+
+    /**
+     * Đọc và xử lý file Excel import sách hàng loạt.
+     * Cột theo thứ tự: Title | AuthorName | ISBN | PublisherName | PublishYear | Edition | Language | SubjectCode | ShelfCode | Copies | Description | CoverImageUrl
+     */
+    @Override
+    @Transactional
+    public ImportResult importBooksFromExcel(java.io.InputStream inputStream, Integer campusId) throws Exception {
+        int successCount = 0;
+        java.util.List<String> errors = new java.util.ArrayList<>();
+
+        try (org.apache.poi.ss.usermodel.Workbook workbook = org.apache.poi.ss.usermodel.WorkbookFactory.create(inputStream)) {
+            org.apache.poi.ss.usermodel.Sheet sheet = workbook.getSheetAt(0);
+            if (sheet == null) {
+                errors.add("File Excel không có sheet dữ liệu.");
+                return new ImportResult(0, 1, errors);
+            }
+
+            int lastRow = sheet.getLastRowNum();
+            for (int rowIdx = 1; rowIdx <= lastRow; rowIdx++) {
+                org.apache.poi.ss.usermodel.Row row = sheet.getRow(rowIdx);
+                if (row == null) continue;
+
+                String title = getCellString(row, 0);
+                if (title == null || title.isBlank()) continue;
+
+                String authorName     = getCellString(row, 1);
+                String isbn           = getCellString(row, 2);
+                String publisherName  = getCellString(row, 3);
+                String publishYearStr = getCellString(row, 4);
+                String edition        = getCellString(row, 5);
+                String language       = getCellString(row, 6);
+                String subjectCode    = getCellString(row, 7);
+                String shelfCode      = getCellString(row, 8);
+                String copiesStr      = getCellString(row, 9);
+                String description    = getCellString(row, 10);
+                String coverImageUrl  = getCellString(row, 11);
+
+                if (authorName == null || authorName.isBlank()) {
+                    errors.add("Dòng " + (rowIdx + 1) + ": Thiếu tên tác giả (AuthorName).");
+                    continue;
+                }
+
+                Integer publishYear = null;
+                if (publishYearStr != null && !publishYearStr.isBlank()) {
+                    try { publishYear = Integer.parseInt(publishYearStr.trim()); }
+                    catch (NumberFormatException e) {
+                        errors.add("Dòng " + (rowIdx + 1) + ": PublishYear không hợp lệ ('" + publishYearStr + "').");
+                        continue;
+                    }
+                }
+
+                Integer copies = 0;
+                if (copiesStr != null && !copiesStr.isBlank()) {
+                    try { copies = Integer.parseInt(copiesStr.trim()); }
+                    catch (NumberFormatException e) {
+                        errors.add("Dòng " + (rowIdx + 1) + ": Copies không hợp lệ ('" + copiesStr + "').");
+                        continue;
+                    }
+                }
+
+                try {
+                    AddBookForm form = new AddBookForm();
+                    form.setTitle(title.trim());
+                    form.setAuthorName(authorName.trim());
+                    form.setIsbn(isbn != null && !isbn.isBlank() ? isbn.trim() : null);
+                    form.setPublisherName(publisherName != null && !publisherName.isBlank() ? publisherName.trim() : null);
+                    form.setPublishYear(publishYear);
+                    form.setEdition(edition != null && !edition.isBlank() ? edition.trim() : null);
+                    form.setLanguage(language != null && !language.isBlank() ? language.trim() : "Vietnamese");
+                    form.setSubjectCode(subjectCode != null && !subjectCode.isBlank() ? subjectCode.trim() : null);
+                    form.setShelfCode(shelfCode != null && !shelfCode.isBlank() ? shelfCode.trim() : null);
+                    form.setCopies(copies);
+                    form.setDescription(description != null && !description.isBlank() ? description.trim() : null);
+                    form.setCoverImageUrl(coverImageUrl != null && !coverImageUrl.isBlank() ? coverImageUrl.trim() : null);
+
+                    saveBook(form, campusId);
+                    successCount++;
+                } catch (IllegalArgumentException e) {
+                    errors.add("Dòng " + (rowIdx + 1) + " ('" + title + "'): " + e.getMessage());
+                } catch (Exception e) {
+                    errors.add("Dòng " + (rowIdx + 1) + " ('" + title + "'): Lỗi - " + e.getMessage());
+                }
+            }
+        }
+
+        return new ImportResult(successCount, errors.size(), errors);
+    }
+
+    /** Đọc giá trị cell thành String, hỗ trợ cả cell kiểu số và chuỗi. */
+    private String getCellString(org.apache.poi.ss.usermodel.Row row, int colIdx) {
+        org.apache.poi.ss.usermodel.Cell cell = row.getCell(colIdx, org.apache.poi.ss.usermodel.Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+        if (cell == null) return null;
+        switch (cell.getCellType()) {
+            case STRING:  return cell.getStringCellValue();
+            case NUMERIC:
+                if (org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell)) {
+                    return String.valueOf((int) cell.getNumericCellValue());
+                }
+                double val = cell.getNumericCellValue();
+                if (val == Math.floor(val)) return String.valueOf((long) val);
+                return String.valueOf(val);
+            case BOOLEAN: return String.valueOf(cell.getBooleanCellValue());
+            case FORMULA:
+                try { return cell.getStringCellValue(); }
+                catch (Exception e) { return String.valueOf(cell.getNumericCellValue()); }
+            default: return null;
+        }
+    }
 }

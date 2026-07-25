@@ -5,6 +5,7 @@ import com.swp5.library_management.dto.BookDetailDTO;
 import com.swp5.library_management.dto.BookSearchResultDTO;
 import com.swp5.library_management.entity.Book;
 import org.springframework.data.domain.Page;
+import java.io.InputStream;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -52,4 +53,29 @@ public interface BookService {
      * @throws NoSuchElementException Nếu bookId không tồn tại → UCG02 E1.
      */
     BookDetailDTO getBookDetail(Integer bookId, Integer campusId);
+
+    // ── Excel Import ──────────────────────────────────────────────────────────
+
+    /**
+     * Kết quả của quá trình import Excel.
+     */
+    record ImportResult(int successCount, int errorCount, List<String> errors) {
+        public String firstError() {
+            return errors.isEmpty() ? "" : errors.get(0);
+        }
+    }
+
+    /**
+     * Tạo file Excel mẫu để thủ thư download và điền thông tin sách.
+     */
+    byte[] generateImportTemplate() throws Exception;
+
+    /**
+     * Đọc và xử lý file Excel import sách hàng loạt.
+     *
+     * @param inputStream InputStream của file Excel upload
+     * @param campusId    Campus để tạo bản sao sách (lấy từ session librarian)
+     * @return {@link ImportResult} chứa số lượng thành công và danh sách lỗi
+     */
+    ImportResult importBooksFromExcel(InputStream inputStream, Integer campusId) throws Exception;
 }

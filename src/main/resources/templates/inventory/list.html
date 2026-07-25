@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="description" content="Browse the full book catalog of FPT University Library System."/>
+    <meta name="description" content="Danh mục sách toàn bộ tại thư viện Đại học FPT."/>
     <title>Danh Mục Sách — FPT University Library</title>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
@@ -15,128 +15,379 @@
             theme: { extend: { colors: { fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A', orangeHover: '#D95F18' } } } }
         }
     </script>
-    
-    
     <link rel="stylesheet" th:href="@{/css/inventory-list.css}">
+    <style>
+        /* ── Modal overlay ── */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-box {
+            background: #fff; border-radius: 20px;
+            padding: 2rem; width: 100%; max-width: 520px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+            transform: translateY(20px);
+            transition: transform 0.25s ease;
+        }
+        .modal-overlay.open .modal-box { transform: translateY(0); }
+
+        /* ── Pagination ── */
+        .pagination { display: flex; align-items: center; justify-content: center; gap: 0.4rem; margin-top: 2rem; flex-wrap: wrap; }
+        .page-btn {
+            min-width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.8rem; font-weight: 600;
+            text-decoration: none; color: #475569; transition: all 0.15s ease;
+            background: #fff;
+        }
+        .page-btn:hover { border-color: #F27125; color: #F27125; background: #fff7ed; }
+        .page-btn.active { background: #F27125; color: #fff; border-color: #F27125; }
+        .page-btn.disabled { opacity: 0.35; pointer-events: none; }
+
+        /* ── Alert banners ── */
+        .alert-success { background: #d1fae5; border: 1px solid #10b981; color: #065f46; padding: 1rem 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 0.75rem; }
+        .alert-error   { background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; padding: 1rem 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 0.75rem; }
+        .alert-icon    { font-size: 1.1rem; flex-shrink: 0; }
+
+        /* ── Drop zone ── */
+        .drop-zone {
+            border: 2px dashed #e2e8f0; border-radius: 12px; padding: 2rem;
+            text-align: center; cursor: pointer; transition: all 0.2s ease;
+            background: #f8fafc; position: relative;
+        }
+        .drop-zone:hover, .drop-zone.drag-over { border-color: #F27125; background: #fff7ed; }
+        .drop-zone input[type=file] {
+            position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+        }
+
+        /* ── Error list in modal ── */
+        .error-list { max-height: 180px; overflow-y: auto; background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 0.75rem; margin-top: 0.75rem; }
+        .error-list li { font-size: 0.78rem; color: #b91c1c; margin-bottom: 0.3rem; }
+
+        /* ── File badge ── */
+        .file-badge { display: inline-flex; align-items: center; gap: 0.4rem; background: #dcfce7; color: #166534; border: 1px solid #86efac; border-radius: 6px; padding: 0.3rem 0.7rem; font-size: 0.8rem; font-weight: 600; margin-top: 0.75rem; }
+    </style>
 </head>
 <body>
-    
 
-    <div class="orb orb-1" aria-hidden="true"></div>
-    <div class="orb orb-2" aria-hidden="true"></div>
+<div class="orb orb-1" aria-hidden="true"></div>
+<div class="orb orb-2" aria-hidden="true"></div>
 
-    <main class="flex-grow max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
-        <div th:replace="~{fragments/librarian_sidebar :: sidebar('list')}"></div>
-        
-        <div class="flex-grow min-w-0">
-            <!-- Page header -->
-            <div class="bg-gradient-to-br from-fpt-navy via-slate-800 to-slate-900 rounded-2xl p-8 mb-8 text-white relative overflow-hidden shadow-xl">
-                <div class="flex justify-between items-start relative z-10">
-                    <div>
-                        <h1 class="text-3xl font-extrabold mb-2 text-white">Danh Mục Sách</h1>
-                        <p class="text-slate-300 text-sm">Toàn bộ tài liệu trong kho, phân theo chuyên ngành.</p>
-                    </div>
+<!-- ═══ IMPORT EXCEL MODAL ════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="importModal" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+    <div class="modal-box">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+            <div>
+                <h2 id="importModalTitle" style="font-size:1.15rem;font-weight:800;color:#0f172a;margin-bottom:0.15rem;">📥 Import Sách từ Excel</h2>
+                <p style="font-size:0.8rem;color:#64748b;">Thêm nhiều sách cùng lúc bằng file Excel</p>
+            </div>
+            <button onclick="closeImportModal()" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:1.4rem;line-height:1;" aria-label="Đóng">&times;</button>
+        </div>
+
+        <!-- Step 1: Download template -->
+        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:1rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+            <div>
+                <p style="font-size:0.82rem;font-weight:700;color:#0369a1;margin-bottom:0.15rem;">Bước 1: Tải file mẫu</p>
+                <p style="font-size:0.75rem;color:#0284c7;">Download và điền thông tin sách theo mẫu</p>
+            </div>
+            <a href="/librarian/inventory/import-excel/template" download
+               style="flex-shrink:0;background:#0ea5e9;color:#fff;border:none;padding:0.5rem 1rem;border-radius:8px;font-size:0.8rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:0.4rem;transition:opacity 0.2s;"
+               onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Tải mẫu .xlsx
+            </a>
+        </div>
+
+        <!-- Step 2: Upload file -->
+        <p style="font-size:0.82rem;font-weight:700;color:#0f172a;margin-bottom:0.6rem;">Bước 2: Upload file đã điền</p>
+        <form id="importForm" th:action="@{/librarian/inventory/import-excel}" method="post" enctype="multipart/form-data">
+            <div class="drop-zone" id="dropZone"
+                 ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                <input type="file" name="file" id="excelFileInput" accept=".xlsx,.xls" onchange="handleFileSelect(event)" required>
+                <div id="dropZoneContent">
+                    <svg width="36" height="36" fill="none" stroke="#94a3b8" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 0.75rem;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <p style="font-size:0.85rem;font-weight:600;color:#475569;margin-bottom:0.25rem;">Kéo thả file vào đây hoặc click để chọn</p>
+                    <p style="font-size:0.75rem;color:#94a3b8;">Hỗ trợ .xlsx và .xls</p>
+                </div>
+                <div id="fileSelectedBadge" style="display:none;" class="file-badge">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    <span id="selectedFileName">Chưa chọn file</span>
+                    <button type="button" onclick="clearFile()" style="background:none;border:none;cursor:pointer;color:#16a34a;font-weight:700;">&times;</button>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
+                <button type="button" onclick="closeImportModal()"
+                        style="flex:1;background:#f1f5f9;color:#475569;border:none;padding:0.65rem 1rem;border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:background 0.15s;"
+                        onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">Hủy</button>
+                <button type="submit" id="importSubmitBtn"
+                        style="flex:2;background:linear-gradient(135deg,#F27125,#D95F18);color:white;border:none;padding:0.65rem 1rem;border-radius:10px;font-size:0.85rem;font-weight:700;cursor:pointer;transition:opacity 0.2s;"
+                        onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                    📤 Bắt đầu Import
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ═══ MAIN CONTENT ═══════════════════════════════════════════════════════════ -->
+<main class="flex-grow max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
+    <div th:replace="~{fragments/librarian_sidebar :: sidebar('list')}"></div>
+
+    <div class="flex-grow min-w-0">
+
+        <!-- ── Alert banners (flash messages) ── -->
+        <div th:if="${importSuccess}" class="alert-success">
+            <span class="alert-icon">✅</span>
+            <div>
+                <strong style="display:block;margin-bottom:0.1rem;">Import thành công!</strong>
+                <span th:text="${importSuccess}"></span>
+            </div>
+        </div>
+        <div th:if="${importError}" class="alert-error">
+            <span class="alert-icon">❌</span>
+            <div>
+                <strong style="display:block;margin-bottom:0.1rem;">Lỗi Import</strong>
+                <span th:text="${importError}"></span>
+            </div>
+        </div>
+        <div th:if="${importErrors != null and !#lists.isEmpty(importErrors)}" class="alert-error">
+            <span class="alert-icon">⚠️</span>
+            <div style="flex:1;">
+                <strong style="display:block;margin-bottom:0.4rem;">Một số dòng gặp lỗi khi import:</strong>
+                <ul class="error-list">
+                    <li th:each="err : ${importErrors}" th:text="${err}">Lỗi dòng X...</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ── Page header ── -->
+        <div class="bg-gradient-to-br from-fpt-navy via-slate-800 to-slate-900 rounded-2xl p-8 mb-8 text-white relative overflow-hidden shadow-xl">
+            <div class="flex justify-between items-start relative z-10 flex-wrap gap-4">
+                <div>
+                    <h1 class="text-3xl font-extrabold mb-2 text-white">Danh Mục Sách</h1>
+                    <p class="text-slate-300 text-sm">Toàn bộ tài liệu trong kho, phân theo chuyên ngành.</p>
+                </div>
+                <div class="flex gap-3 flex-wrap">
+                    <!-- Import Excel button -->
+                    <button onclick="openImportModal()"
+                            class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg transition-all flex items-center space-x-2">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span>Import Excel</span>
+                    </button>
+                    <!-- Add book manually -->
                     <a href="/librarian/inventory/add"
                        class="bg-fpt-orange hover:bg-fpt-orangeHover text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-orange-500/30 transition-all flex items-center space-x-2">
                         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                         <span>Thêm sách mới</span>
                     </a>
                 </div>
-                <div class="relative z-10 mt-8 mb-4 w-full">
-                    <div th:replace="~{fragments/search-bar :: search-form}"></div>
-                </div>
-                
-                <div class="absolute top-0 right-0 w-64 h-64 bg-fpt-orange/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-                <div class="absolute bottom-0 left-10 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl -mb-10 pointer-events-none"></div>
             </div>
-            <!-- Search Results Block -->
-            <div th:if="${hasSearch}">
-                <div class="flex items-center justify-between mb-4 mt-8 first:mt-0">
-                    <div>
-                        <h3 class="text-xl font-extrabold text-black">Kết quả tìm kiếm</h3>
-                        <p class="text-sm text-slate-500 mt-0.5" th:if="${!noResults}">Tìm thấy các tài liệu phù hợp</p>
-                        <p class="text-sm text-rose-500 mt-0.5" th:if="${noResults}">Không tìm thấy tài liệu nào phù hợp với bộ lọc!</p>
-                    </div>
-                </div>
-                <!-- Vòng lặp hiển thị kết quả -->
-                <div th:unless="${noResults}" th:replace="~{inventory/list :: book-grid(${results})}"></div>
+            <div class="relative z-10 mt-8 mb-4 w-full">
+                <div th:replace="~{fragments/search-bar :: search-form}"></div>
             </div>
 
-            <!-- Books by major section (Chỉ hiển thị khi KHÔNG search hoặc khi search KHÔNG có kết quả để làm gợi ý) -->
-            <div th:if="${!hasSearch or noResults}">
-                <th:block th:each="section : ${majorSections}">
-                    <div class="flex items-center justify-between mb-4 mt-8 first:mt-0">
-                        <div>
-                            <h3 class="text-xl font-extrabold text-black" th:text="${section.sectionName}">Chuyên ngành</h3>
-                            <p class="text-sm text-slate-500 mt-0.5">Một số tựa sách ngẫu nhiên</p>
-                        </div>
-                    </div>
-                    <div th:replace="~{inventory/list :: book-grid(${section.books})}"></div>
-                </th:block>
-            </div>
+            <div class="absolute top-0 right-0 w-64 h-64 bg-fpt-orange/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+            <div class="absolute bottom-0 left-10 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl -mb-10 pointer-events-none"></div>
         </div>
-    </main>
 
-    <!-- ═══ BOOK GRID FRAGMENT ══════════════════════════════════════════════════ -->
-    <th:block th:fragment="book-grid(books)">
-        <div th:if="${books != null and !#lists.isEmpty(books)}"
-             class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-4">
-            <div th:each="book : ${books}"
-                 class="bg-[#131c2e] rounded-2xl overflow-hidden shadow-sm card-hover flex flex-col border border-transparent hover:border-[#4f8cff]/30">
-                <!-- Cover with image -->
-                <div th:if="${book.coverImageUrl != null and not #strings.isEmpty(book.coverImageUrl)}"
-                     class="h-40 w-full relative group overflow-hidden bg-[#0e1625] flex-shrink-0">
-                    <img th:src="${book.coverImageUrl}" th:alt="${book.title}"
-                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"/>
-                    <div class="absolute top-3 right-3">
-                        <span class="bg-black/50 text-orange-300 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">FPTU</span>
-                    </div>
-                    <div class="absolute top-3 left-3" th:if="${book.subjectCode != null}">
-                        <span class="bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase backdrop-blur-sm"
-                              th:text="${book.subjectCode}">CODE</span>
-                    </div>
-                </div>
-                <!-- Cover fallback -->
-                <div th:unless="${book.coverImageUrl != null and not #strings.isEmpty(book.coverImageUrl)}"
-                     class="h-40 w-full flex-shrink-0 bg-gradient-to-br flex flex-col justify-between p-4 text-white select-none"
-                     th:classappend="${book.coverColor}">
-                    <div class="flex justify-between items-start">
-                        <span th:if="${book.subjectCode != null}"
-                              class="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase backdrop-blur-sm"
-                              th:text="${book.subjectCode}">CODE</span>
-                        <span class="text-[10px] font-bold text-orange-300 ml-auto">FPTU</span>
-                    </div>
-                    <h4 class="font-extrabold text-xs tracking-tight line-clamp-3 mb-1" th:text="${book.title}">Title</h4>
-                    <span class="text-[10px] text-slate-300 truncate" th:text="${book.authorNames}">Author</span>
-                </div>
-                <!-- Card body -->
-                <div class="p-4 flex flex-col flex-grow">
-                    <span class="text-[10px] text-fpt-orange font-bold uppercase tracking-wider block mb-1 truncate"
-                          th:text="${book.categoryName != null ? book.categoryName : (book.categoryNames != null ? book.categoryNames : '')}">Category</span>
-                    <h5 class="font-bold text-white text-sm line-clamp-2 mb-1" th:text="${book.title}">Title</h5>
-                    <p class=" text-xs text-white mb-2 truncate" th:text="${'Tác giả: ' + book.authorNames}">Author</p>
-                    <p class="text-[11px] text-white font-mono mb-3" th:text="${'ISBN: ' + book.isbn}">ISBN</p>
-                    <div class="mt-auto flex items-center justify-between pt-3 border-t border-[#1e293b]">
-                        <div class="flex items-center space-x-1.5">
-                            <span class="w-2 h-2 rounded-full"
-                                  th:classappend="${book.availableCount > 0 ? 'bg-emerald-500' : 'bg-red-400'}"></span>
-                            <span class="text-xs font-semibold"
-                                  th:classappend="${book.availableCount > 0 ? 'text-emerald-400' : 'text-red-400'}"
-                                  th:text="${book.availableCount > 0 ? 'Còn sách' : 'Hết sách'}">Còn sách</span>
-                        </div>
-                        <a th:href="@{/librarian/inventory/{id}(id=${book.bookId})}"
-                           class="bg-white hover:bg-gray text-black text-xs font-bold py-1.5 px-3 rounded-lg transition-all border border-[#1e293b]">
-                            Chi tiết
-                        </a>
-                    </div>
+        <!-- ── Results info bar ── -->
+        <div class="flex items-center justify-between mb-4" th:if="${totalElements != null}">
+            <p class="text-sm text-slate-500">
+                Hiển thị trang <span class="font-semibold text-slate-700" th:text="${currentPage + 1}">1</span>
+                / <span class="font-semibold text-slate-700" th:text="${totalPages}">1</span>
+                &mdash; Tổng <span class="font-semibold text-slate-700" th:text="${totalElements}">0</span> cuốn sách
+                <span th:if="${hasSearch}"> phù hợp bộ lọc</span>
+            </p>
+        </div>
+
+        <!-- ── Search results ── -->
+        <div th:if="${hasSearch}">
+            <div class="flex items-center justify-between mb-4 mt-2">
+                <div>
+                    <h3 class="text-xl font-extrabold text-black">Kết quả tìm kiếm</h3>
+                    <p class="text-sm text-slate-500 mt-0.5" th:if="${!noResults}">Tìm thấy các tài liệu phù hợp</p>
+                    <p class="text-sm text-rose-500 mt-0.5" th:if="${noResults}">Không tìm thấy tài liệu nào phù hợp với bộ lọc!</p>
                 </div>
             </div>
+            <div th:unless="${noResults}" th:replace="~{inventory/list :: book-grid(${results})}"></div>
         </div>
-        <div th:if="${books == null or #lists.isEmpty(books)}" class="text-center py-12 text-slate-400">
-            <p class="text-sm">Chưa có sách nào trong hệ thống.</p>
-        </div>
-    </th:block>
 
-    
+        <!-- ── Default: all books (paginated) ── -->
+        <div th:unless="${hasSearch}">
+            <div class="flex items-center justify-between mb-4 mt-2">
+                <h3 class="text-xl font-extrabold text-black">Tất cả sách trong kho</h3>
+            </div>
+            <div th:replace="~{inventory/list :: book-grid(${results})}"></div>
+        </div>
+
+        <!-- ── Pagination ── -->
+        <div class="pagination" th:if="${totalPages != null and totalPages > 1}">
+            <!-- Prev -->
+            <a th:href="@{/librarian/inventory/list(page=${currentPage - 1},keyword=${keyword},subjectCode=${selectedSubjectCode},categoryId=${selectedCategoryId},majorId=${selectedMajorId},campusId=${selectedCampusId})}"
+               class="page-btn" th:classappend="${currentPage == 0 ? ' disabled' : ''}" aria-label="Trang trước">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+            </a>
+
+            <!-- Page numbers -->
+            <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                <span th:if="${i > 2 and i < currentPage - 2 and i == 3}" style="padding:0 0.3rem;color:#94a3b8;font-size:0.85rem;">…</span>
+                <a th:if="${i == 0 or i == totalPages - 1 or (i >= currentPage - 2 and i <= currentPage + 2)}"
+                   th:href="@{/librarian/inventory/list(page=${i},keyword=${keyword},subjectCode=${selectedSubjectCode},categoryId=${selectedCategoryId},majorId=${selectedMajorId},campusId=${selectedCampusId})}"
+                   class="page-btn" th:classappend="${i == currentPage ? ' active' : ''}"
+                   th:text="${i + 1}">1</a>
+                <span th:if="${i < totalPages - 3 and i > currentPage + 2 and i == totalPages - 4}" style="padding:0 0.3rem;color:#94a3b8;font-size:0.85rem;">…</span>
+            </th:block>
+
+            <!-- Next -->
+            <a th:href="@{/librarian/inventory/list(page=${currentPage + 1},keyword=${keyword},subjectCode=${selectedSubjectCode},categoryId=${selectedCategoryId},majorId=${selectedMajorId},campusId=${selectedCampusId})}"
+               class="page-btn" th:classappend="${currentPage >= totalPages - 1 ? ' disabled' : ''}" aria-label="Trang sau">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </a>
+        </div>
+
+    </div>
+</main>
+
+<!-- ═══ BOOK GRID FRAGMENT ══════════════════════════════════════════════════════ -->
+<th:block th:fragment="book-grid(books)">
+    <div th:if="${books != null and !#lists.isEmpty(books)}"
+         class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-4">
+        <div th:each="book : ${books}"
+             class="bg-[#131c2e] rounded-2xl overflow-hidden shadow-sm card-hover flex flex-col border border-transparent hover:border-[#4f8cff]/30">
+            <!-- Cover with image -->
+            <div th:if="${book.coverImageUrl != null and not #strings.isEmpty(book.coverImageUrl)}"
+                 class="h-40 w-full relative group overflow-hidden bg-[#0e1625] flex-shrink-0">
+                <img th:src="${book.coverImageUrl}" th:alt="${book.title}"
+                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"/>
+                <div class="absolute top-3 right-3">
+                    <span class="bg-black/50 text-orange-300 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">FPTU</span>
+                </div>
+                <div class="absolute top-3 left-3" th:if="${book.subjectCode != null}">
+                    <span class="bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase backdrop-blur-sm"
+                          th:text="${book.subjectCode}">CODE</span>
+                </div>
+            </div>
+            <!-- Cover fallback -->
+            <div th:unless="${book.coverImageUrl != null and not #strings.isEmpty(book.coverImageUrl)}"
+                 class="h-40 w-full flex-shrink-0 bg-gradient-to-br flex flex-col justify-between p-4 text-white select-none"
+                 th:classappend="${book.coverColor}">
+                <div class="flex justify-between items-start">
+                    <span th:if="${book.subjectCode != null}"
+                          class="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase backdrop-blur-sm"
+                          th:text="${book.subjectCode}">CODE</span>
+                    <span class="text-[10px] font-bold text-orange-300 ml-auto">FPTU</span>
+                </div>
+                <h4 class="font-extrabold text-xs tracking-tight line-clamp-3 mb-1" th:text="${book.title}">Title</h4>
+                <span class="text-[10px] text-slate-300 truncate" th:text="${book.authorNames}">Author</span>
+            </div>
+            <!-- Card body -->
+            <div class="p-4 flex flex-col flex-grow">
+                <span class="text-[10px] text-fpt-orange font-bold uppercase tracking-wider block mb-1 truncate"
+                      th:text="${book.categoryName != null ? book.categoryName : (book.categoryNames != null ? book.categoryNames : '')}">Category</span>
+                <h5 class="font-bold text-white text-sm line-clamp-2 mb-1" th:text="${book.title}">Title</h5>
+                <p class="text-xs text-white mb-2 truncate" th:text="${'Tác giả: ' + book.authorNames}">Author</p>
+                <p class="text-[11px] text-white font-mono mb-3" th:text="${'ISBN: ' + book.isbn}">ISBN</p>
+                <div class="mt-auto flex items-center justify-between pt-3 border-t border-[#1e293b]">
+                    <div class="flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full"
+                              th:classappend="${book.availableCount > 0 ? 'bg-emerald-500' : 'bg-red-400'}"></span>
+                        <span class="text-xs font-semibold"
+                              th:classappend="${book.availableCount > 0 ? 'text-emerald-400' : 'text-red-400'}"
+                              th:text="${book.availableCount > 0 ? 'Còn sách' : 'Hết sách'}">Còn sách</span>
+                    </div>
+                    <a th:href="@{/librarian/inventory/{id}(id=${book.bookId})}"
+                       class="bg-white hover:bg-gray text-black text-xs font-bold py-1.5 px-3 rounded-lg transition-all border border-[#1e293b]">
+                        Chi tiết
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:if="${books == null or #lists.isEmpty(books)}" class="text-center py-12 text-slate-400">
+        <p class="text-sm">Chưa có sách nào trong hệ thống.</p>
+    </div>
+</th:block>
+
+<script>
+    // ── Modal controls ──────────────────────────────────────────────────────
+    function openImportModal() {
+        document.getElementById('importModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeImportModal() {
+        document.getElementById('importModal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    // Close when clicking overlay background
+    document.getElementById('importModal').addEventListener('click', function(e) {
+        if (e.target === this) closeImportModal();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeImportModal();
+    });
+
+    // ── File selection ──────────────────────────────────────────────────────
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) showFileBadge(file.name);
+    }
+
+    function showFileBadge(name) {
+        document.getElementById('dropZoneContent').style.display = 'none';
+        const badge = document.getElementById('fileSelectedBadge');
+        badge.style.display = 'inline-flex';
+        document.getElementById('selectedFileName').textContent = name;
+    }
+
+    function clearFile() {
+        document.getElementById('excelFileInput').value = '';
+        document.getElementById('dropZoneContent').style.display = 'block';
+        document.getElementById('fileSelectedBadge').style.display = 'none';
+        document.getElementById('dropZone').classList.remove('drag-over');
+    }
+
+    // ── Drag & Drop ─────────────────────────────────────────────────────────
+    function handleDragOver(event) {
+        event.preventDefault();
+        document.getElementById('dropZone').classList.add('drag-over');
+    }
+    function handleDragLeave(event) {
+        document.getElementById('dropZone').classList.remove('drag-over');
+    }
+    function handleDrop(event) {
+        event.preventDefault();
+        document.getElementById('dropZone').classList.remove('drag-over');
+        const files = event.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                // Assign to input
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                document.getElementById('excelFileInput').files = dt.files;
+                showFileBadge(file.name);
+            } else {
+                alert('Chỉ hỗ trợ file Excel (.xlsx hoặc .xls)');
+            }
+        }
+    }
+
+    // ── Submit with loading state ────────────────────────────────────────────
+    document.getElementById('importForm').addEventListener('submit', function() {
+        const btn = document.getElementById('importSubmitBtn');
+        btn.textContent = '⏳ Đang xử lý...';
+        btn.disabled = true;
+        btn.style.opacity = '0.7';
+    });
+</script>
 </body>
 </html>
