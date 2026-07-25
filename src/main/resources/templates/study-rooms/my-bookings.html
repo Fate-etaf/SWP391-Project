@@ -26,11 +26,22 @@
     <div th:replace="~{fragments/header :: header('service')}"></div>
 
     <!-- Main Content -->
-    <main class="flex-grow container mx-auto px-4 py-8">
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col md:flex-row gap-8">
         
-        <div class="mb-8">
-            <h1 class="text-3xl font-extrabold text-fpt-navy tracking-tight">Đơn Đặt Phòng Của Tôi</h1>
-            <p class="text-gray-600 mt-2">Quản lý các lịch hẹn sử dụng phòng học nhóm của bạn.</p>
+        <!-- SIDEBAR -->
+        <div th:replace="~{fragments/sidebar :: sidebar('study-rooms')}"></div>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="flex-grow min-w-0">
+        
+        <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-fpt-navy tracking-tight">Đơn Đặt Phòng Của Tôi</h1>
+                <p class="text-gray-600 mt-2">Quản lý các lịch hẹn sử dụng phòng học nhóm của bạn.</p>
+            </div>
+            <a href="/study-rooms" class="inline-block bg-fpt-orange hover:bg-fpt-orangeHover text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-sm active:scale-95 text-center">
+                + Đặt phòng mới
+            </a>
         </div>
 
         <div th:if="${param.success}" class="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl flex items-center shadow-sm">
@@ -130,6 +141,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </main>
 
