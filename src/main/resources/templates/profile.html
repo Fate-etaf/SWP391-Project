@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -102,6 +102,20 @@
                         </div>
                     </div>
 
+                    <!-- Field 3.5 (Phone) -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Số điện thoại</p>
+                            <button onclick="document.getElementById('phoneModal').classList.remove('hidden')" class="text-fpt-orange hover:text-fpt-orangeHover hover:underline text-xs font-bold transition-colors">
+                                Sửa
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-3 text-slate-800 font-medium">
+                            <div class="p-2 bg-slate-100 rounded-lg text-slate-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg></div>
+                            <span th:text="${user.phone != null && !user.phone.isEmpty() ? user.phone : 'Chưa cập nhật'}">0123456789</span>
+                        </div>
+                    </div>
+
                     <!-- Field 4 -->
                     <div>
                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Cơ sở học tập</p>
@@ -145,6 +159,36 @@
             
         </div>
     </main>
+
+    <!-- Phone Modal -->
+    <div id="phoneModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="document.getElementById('phoneModal').classList.add('hidden')"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-2xl relative">
+                <button onclick="document.getElementById('phoneModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-500 hover:text-slate-700 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+                <div class="mb-6">
+                    <div class="w-12 h-12 bg-fpt-orange/10 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-fpt-orange" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800">Cập nhật Số điện thoại</h3>
+                    <p class="text-sm text-slate-500 mt-1">Sử dụng để thư viện có thể liên hệ với bạn khi cần thiết.</p>
+                </div>
+                <form action="/profile/update-phone" method="POST" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Số điện thoại mới</label>
+                        <input type="text" name="phone" required pattern="[0-9]{10,11}" title="Vui lòng nhập số điện thoại hợp lệ (10-11 số)" placeholder="VD: 0987654321" th:value="${user.phone}" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:border-fpt-orange outline-none transition-all">
+                    </div>
+                    <button type="submit" class="w-full py-2.5 bg-fpt-orange hover:bg-fpt-orangeHover text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-fpt-orange/20">
+                        Lưu Thay Đổi
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Password Modal -->
     <div id="passwordModal" class="fixed inset-0 z-50 hidden">

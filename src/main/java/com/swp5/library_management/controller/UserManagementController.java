@@ -224,16 +224,19 @@ public class UserManagementController {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             
-            if (email != null && !email.trim().isEmpty()) {
-                if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
-                    redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Định dạng Email không hợp lệ!");
-                    return "redirect:/admin/users";
-                }
-                Optional<User> emailOwnerOpt = userRepository.findByEmail(email.trim());
-                if (emailOwnerOpt.isPresent() && !emailOwnerOpt.get().getUserId().equalsIgnoreCase(userId)) {
-                    redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Email này đã được sử dụng cho một tài khoản khác!");
-                    return "redirect:/admin/users";
-                }
+            if (email == null || email.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Email không được để trống!");
+                return "redirect:/admin/users";
+            }
+            
+            if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Định dạng Email không hợp lệ!");
+                return "redirect:/admin/users";
+            }
+            Optional<User> emailOwnerOpt = userRepository.findByEmail(email.trim());
+            if (emailOwnerOpt.isPresent() && !emailOwnerOpt.get().getUserId().equalsIgnoreCase(userId)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Email này đã được sử dụng cho một tài khoản khác!");
+                return "redirect:/admin/users";
             }
             
             user.setFullName(fullName.trim());
@@ -242,6 +245,7 @@ public class UserManagementController {
             
             Role userRole = new Role();
             userRole.setRoleId(roleId);
+            user.setRole(userRole); // Cập nhật luôn thuộc tính role (ManyToOne)
             user.getRoles().clear();
             user.getRoles().add(userRole);
             
@@ -254,6 +258,8 @@ public class UserManagementController {
         
         return "redirect:/admin/users";
     }
+
+    private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
     /**
      * Xử lý xóa vĩnh viễn một người dùng khỏi hệ thống.
@@ -271,10 +277,28 @@ public class UserManagementController {
                 redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa! Người dùng này đang có sách chưa trả. Vui lòng sử dụng tính năng Khóa Thẻ.");
             } else {
                 try {
+                    // Force Delete: Xóa tất cả các bản ghi liên quan (Lịch sử) trước khi xóa User
+                    jdbcTemplate.update("DELETE FROM dbo.UserRoles WHERE UserID = ?", userId);
+                    jdbcTemplate.update("DELETE FROM dbo.Notifications WHERE UserID = ?", userId);
+                    
+                    // Xóa chi tiết mượn và đơn mượn
+                    jdbcTemplate.update("DELETE FROM BorrowTicketDetails WHERE TicketID IN (SELECT TicketID FROM BorrowTickets WHERE PatronID = ?)", userId);
+                    jdbcTemplate.update("DELETE FROM BorrowTickets WHERE PatronID = ?", userId);
+                    
+                    // Xóa hóa đơn phạt
+                    jdbcTemplate.update("DELETE FROM FineInvoices WHERE PatronID = ?", userId);
+                    
+                    // Xóa các dữ liệu khác (nếu có)
+                    jdbcTemplate.update("DELETE FROM dbo.Reservations WHERE PatronID = ?", userId);
+                    jdbcTemplate.update("DELETE FROM dbo.Waitlists WHERE PatronID = ?", userId);
+                    jdbcTemplate.update("DELETE FROM dbo.RoomBookings WHERE PatronID = ?", userId);
+                    jdbcTemplate.update("DELETE FROM dbo.MaterialRequests WHERE PatronID = ?", userId);
+                    
+                    // Cuối cùng xóa User
                     userRepository.deleteById(userId);
-                    redirectAttributes.addFlashAttribute("successMessage", "Đã xóa hoàn toàn tài khoản: " + userId + " khỏi hệ thống!");
-                } catch (org.springframework.dao.DataIntegrityViolationException e) {
-                    redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa tài khoản này vì họ đã có lịch sử giao dịch (mượn sách, đóng phạt, thông báo...) trong hệ thống. Khuyến nghị: Hãy đổi trạng thái sang Inactive hoặc Graduated để lưu vết dữ liệu!");
+                    redirectAttributes.addFlashAttribute("successMessage", "Đã xóa hoàn toàn tài khoản và mọi lịch sử liên quan của: " + userId + " khỏi hệ thống!");
+                } catch (Exception e) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi xóa tài khoản: " + e.getMessage());
                 }
             }
         } else {
@@ -322,7 +346,7 @@ public class UserManagementController {
                 org.apache.poi.ss.usermodel.Row row = sheet.getRow(i);
                 if (row == null) continue;
 
-                String userId = getSafeCellValue(row, 0);
+                String userId = getSafeCellValue(row, 0).toUpperCase();
                 String fullName = getSafeCellValue(row, 1);
                 String email = getSafeCellValue(row, 2);
                 String campusIdStr = getSafeCellValue(row, 3);
@@ -341,9 +365,26 @@ public class UserManagementController {
                 if ("GRADUATED".equalsIgnoreCase(importType)) {
                     if (userOpt.isPresent()) {
                         User student = userOpt.get();
-                        student.setStatus("Graduated"); 
-                        usersToSave.add(student);
-                        successCount++;
+                        
+                        // Chỉ cập nhật nếu trạng thái hiện tại chưa phải là Graduated
+                        if (!"Graduated".equalsIgnoreCase(student.getStatus())) {
+                            student.setStatus("Graduated");
+                            student.setBorrowingLocked(false);
+                            usersToSave.add(student);
+                            successCount++;
+                            
+                            // Tạo thông báo
+                            Notification notif = Notification.builder()
+                                .user(student)
+                                .notificationType("STATUS_UPDATE")
+                                .title("Cập nhật trạng thái Tốt Nghiệp")
+                                .content("Tài khoản của bạn đã được chuyển sang trạng thái Đã Tốt Nghiệp. Bạn sẽ không thể mượn thêm sách nhưng vẫn có thể tra cứu lịch sử.")
+                                .status("Pending")
+                                .createdAt(LocalDateTime.now())
+                                .read(false)
+                                .build();
+                            notificationRepository.save(notif);
+                        }
                     }
                 } else {
                     if (userOpt.isPresent()) {
@@ -501,6 +542,11 @@ public class UserManagementController {
                 user.setStatus("Inactive");
                 user.setBorrowingLocked(false);
             } else if ("Graduated".equalsIgnoreCase(newStatus)) {
+                boolean isStudent = user.getRoles() != null && user.getRoles().stream().anyMatch(r -> r.getRoleId() == 1);
+                if (!isStudent) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Trạng thái 'Tốt nghiệp' chỉ áp dụng cho Sinh viên!");
+                    return "redirect:/admin/users";
+                }
                 user.setStatus("Graduated");
                 user.setBorrowingLocked(false);
             } else if ("BorrowingLocked".equalsIgnoreCase(newStatus)) {

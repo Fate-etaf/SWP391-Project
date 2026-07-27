@@ -91,6 +91,12 @@
             </div>
         </div>
 
+        <div class="px-3 py-2 bg-slate-50 border-t border-slate-200 flex gap-2 overflow-x-auto scrollbar-none whitespace-nowrap">
+            <button onclick="document.getElementById('userInput').value='Bạn gợi ý vài sách ngành SE được không?'; sendChatMessage()" class="text-[11px] px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-full hover:bg-fpt-orange hover:text-white hover:border-fpt-orange transition-all shadow-sm">Sách chuyên ngành SE</button>
+            <button onclick="document.getElementById('userInput').value='Luật mượn sách thư viện là gì?'; sendChatMessage()" class="text-[11px] px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-full hover:bg-fpt-orange hover:text-white hover:border-fpt-orange transition-all shadow-sm">Luật mượn trả</button>
+            <button onclick="document.getElementById('userInput').value='Review cho tôi một cuốn sách hay?'; sendChatMessage()" class="text-[11px] px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-full hover:bg-fpt-orange hover:text-white hover:border-fpt-orange transition-all shadow-sm">Review sách ngẫu nhiên</button>
+        </div>
+
         <div class="p-3 bg-white border-t border-slate-200 flex gap-2">
             <input type="text" id="userInput" placeholder="Nhập câu hỏi của cậu tại đây..." 
                    onkeypress="if(event.key === 'Enter') sendChatMessage()"
