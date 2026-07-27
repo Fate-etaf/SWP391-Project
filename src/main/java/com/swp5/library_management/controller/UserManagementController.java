@@ -43,6 +43,7 @@ public class UserManagementController {
             @RequestParam(value = "campusId", required = false) Integer campusId,
             @RequestParam(value = "tab", defaultValue = "all") String tab,
             @RequestParam(value = "computedStatus", required = false) String computedStatus,
+            @RequestParam(value = "page", defaultValue = "1") int page,
             Model model) {
         
         List<User> allUsers = userRepository.findAll();
@@ -87,7 +88,26 @@ public class UserManagementController {
                 .collect(java.util.stream.Collectors.toList());
         }
 
-        model.addAttribute("students", filteredStudents);
+        // Pagination Logic
+        int pageSize = 20;
+        int totalItems = filteredStudents.size();
+        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+        if (totalPages == 0) totalPages = 1;
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+        
+        int startItem = (page - 1) * pageSize;
+        List<User> pagedStudents;
+        if (filteredStudents.size() < startItem) {
+            pagedStudents = java.util.Collections.emptyList();
+        } else {
+            int toIndex = Math.min(startItem + pageSize, filteredStudents.size());
+            pagedStudents = filteredStudents.subList(startItem, toIndex);
+        }
+
+        model.addAttribute("students", pagedStudents);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         model.addAttribute("currentSearch", search);
         model.addAttribute("currentCampusId", campusId);
         model.addAttribute("currentTab", tab);
