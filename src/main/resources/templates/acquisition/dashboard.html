@@ -158,8 +158,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-slate-600" th:text="${req.patron.isStudent() ? 'Student' : 'Lecturer'}">Reader</div>
-                                        <div class="text-xs text-slate-400"
-                                             th:text="${req.patron.campusId != null} ? 'Campus #' + ${req.patron.campusId} : ''"></div>
+
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2.5 py-1 text-xs font-bold rounded-full"
