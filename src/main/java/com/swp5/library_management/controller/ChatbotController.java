@@ -87,6 +87,9 @@ private final BookRepository bookRepository;
                          .replace("là gì", "").replace("không", "").replace("tác giả", "").replace("ai", "")
                          .replace("mượn cuốn", "").replace("cuốn", "")
                          .replace("những cuốn", "").replace("thể loại", "")
+                         .replace("bạn gợi ý", "").replace("vài", "").replace("được không", "").replace("bạn", "")
+                         .replace("gợi ý", "").replace("ngành", "").replace("chuyên ngành", "").replace("cho mình", "")
+                         .replace("giúp", "").replace("có thể", "").replace("nào", "").replace("?", "")
                          .trim();
                  
                  if (searchStr.length() > 2) {
@@ -113,6 +116,12 @@ private final BookRepository bookRepository;
                          keywords.add("kinh tế");
                          keywords.add("quản trị");
                          keywords.add("marketing");
+                     }
+                     if (searchStr.contains("se") || searchStr.contains("phần mềm") || searchStr.contains("software")) {
+                         keywords.add("công nghệ thông tin");
+                         keywords.add("software");
+                         keywords.add("engineering");
+                         keywords.add("kỹ nghệ");
                      }
 
                      //Hung: Quét từ khóa mở rộng trên cả Tiêu đề, Thể loại và Tên Tác giả
