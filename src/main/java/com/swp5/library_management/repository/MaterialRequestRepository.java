@@ -27,17 +27,28 @@ public interface MaterialRequestRepository extends JpaRepository<MaterialRequest
     @Query("SELECT m FROM MaterialRequest m WHERE " +
            "(:status IS NULL OR :status = '' OR m.status = :status) AND " +
            "(:search IS NULL OR :search = '' OR LOWER(m.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(m.author) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-           "ORDER BY m.createdAt DESC")
-    List<MaterialRequest> findByStatusAndSearchTerm(@Param("status") String status, @Param("search") String search);
+           "OR LOWER(m.author) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+           "(:fromDate IS NULL OR m.createdAt >= :fromDate) AND " +
+           "(:toDate IS NULL OR m.createdAt <= :toDate) " +
+           "ORDER BY CASE WHEN m.status = 'Pending' THEN 0 ELSE 1 END ASC, m.createdAt DESC")
+    List<MaterialRequest> findByStatusAndSearchTerm(
+            @Param("status") String status,
+            @Param("search") String search,
+            @Param("fromDate") java.time.LocalDateTime fromDate,
+            @Param("toDate") java.time.LocalDateTime toDate);
 
     @Query("SELECT m FROM MaterialRequest m WHERE " +
            "m.patron.campusId = :campusId AND " +
            "(:status IS NULL OR :status = '' OR m.status = :status) AND " +
            "(:search IS NULL OR :search = '' OR LOWER(m.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(m.author) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-           "ORDER BY m.createdAt DESC")
-    List<MaterialRequest> findByStatusAndSearchTermAndCampusId(@Param("status") String status,
-                                                               @Param("search") String search,
-                                                               @Param("campusId") Integer campusId);
+           "OR LOWER(m.author) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+           "(:fromDate IS NULL OR m.createdAt >= :fromDate) AND " +
+           "(:toDate IS NULL OR m.createdAt <= :toDate) " +
+           "ORDER BY CASE WHEN m.status = 'Pending' THEN 0 ELSE 1 END ASC, m.createdAt DESC")
+    List<MaterialRequest> findByStatusAndSearchTermAndCampusId(
+            @Param("status") String status,
+            @Param("search") String search,
+            @Param("campusId") Integer campusId,
+            @Param("fromDate") java.time.LocalDateTime fromDate,
+            @Param("toDate") java.time.LocalDateTime toDate);
 }

@@ -18,6 +18,9 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     /** Kiểm tra xem mã ISBN đã tồn tại trong hệ thống chưa. */
     boolean existsByIsbn(String isbn);
 
+    /** Tìm sách theo ISBN (dùng khi import Excel để thêm copies vào sách đã có). */
+    Optional<Book> findByIsbn(String isbn);
+
     /**
      * Tìm kiếm sách theo tiêu đề HOẶC tên tác giả (không phân biệt hoa thường).
      *

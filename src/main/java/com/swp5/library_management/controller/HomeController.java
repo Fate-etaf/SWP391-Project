@@ -36,6 +36,7 @@ public class HomeController {
         model.addAttribute("campuses", homeService.getCampuses());
         model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("majors", majorRepository.findAll());
+        model.addAttribute("subjects", subjectRepository.findAll());
         // === XỬ LÝ ĐỒNG BỘ TRẠNG THÁI ĐĂNG NHẬP (GOOGLE & FORM TRUYỀN THỐNG) ===
         String loggedInUserId = (String) session.getAttribute("loggedInUserId");
 
