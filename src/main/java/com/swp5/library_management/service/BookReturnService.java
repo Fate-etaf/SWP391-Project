@@ -7,7 +7,7 @@ import java.util.Map;
 public interface BookReturnService {
     List<BorrowTicketDetail> getCurrentlyBorrowing();
 
-    List<BorrowTicketDetail> searchCurrentlyBorrowing(String title, String borrowerId);
+    List<BorrowTicketDetail> searchCurrentlyBorrowing(String title, String borrowerId, String librarianId);
 
     Map<String, Object> checkScan(String copyId);
 

@@ -97,4 +97,19 @@ public interface EmailService {
      * @param content  Nội dung thông báo (chứa mã OTP)
      */
     void sendOtpEmail(String toEmail, String subject, String content);
+
+    /**
+     * Gửi email xác nhận trả sách và ghi nhận các khoản phạt / thanh toán nếu có.
+     *
+     * @param toEmail       Địa chỉ email bạn đọc
+     * @param patronName    Tên bạn đọc
+     * @param bookTitle     Tên sách trả
+     * @param copyId        Mã bản sao
+     * @param returnDate    Thời điểm nhận trả
+     * @param fineAmount    Số tiền phạt
+     * @param paymentMethod Phương thức thanh toán
+     * @param status        Trạng thái trả sách
+     */
+    void sendReturnConfirmation(String toEmail, String patronName, String bookTitle, String copyId, 
+                                String returnDate, String fineAmount, String paymentMethod, String status);
 }

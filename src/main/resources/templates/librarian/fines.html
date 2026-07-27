@@ -54,7 +54,11 @@
     </style>
 </head>
 
+<<<<<<< HEAD
+<body class="bg-white min-h-screen text-slate-800 flex flex-col justify-between relative overflow-x-hidden">
+=======
 <body class="bg-slate-50 min-h-screen text-slate-900 flex flex-col justify-between relative overflow-x-hidden">
+>>>>>>> origin/main
 
     <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
@@ -70,14 +74,33 @@
             <!-- Page title -->
             <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
                 <div>
+<<<<<<< HEAD
+                    <h1 class="text-2xl font-bold text-slate-900">Quản lý vi phạm</h1>
+                    <p class="text-slate-600 text-sm mt-1">Toàn bộ hóa đơn vi phạm – xác nhận thu tiền & xuất báo cáo Excel
+                    </p>
+=======
                     <p class="text-xs font-semibold uppercase tracking-wider text-fpt-orange">Quản lý vi phạm</p>
                     <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Quản lý phiếu phạt</h2>
                     <p class="text-sm text-slate-500 mt-1">Toàn bộ hóa đơn vi phạm – xác nhận thu tiền & xuất báo cáo Excel</p>
+>>>>>>> origin/main
                 </div>
             </div>
 
             <!-- Flash messages -->
             <div th:if="${successMsg}"
+<<<<<<< HEAD
+                class="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl font-medium" role="alert"
+                th:text="${successMsg}"></div>
+            <div th:if="${errorMsg}" class="mb-4 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl font-medium"
+                role="alert" th:text="${errorMsg}"></div>
+
+            <!-- Bộ lọc và Tìm kiếm YT-Style -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 mb-6 shadow-sm">
+                <div class="flex flex-wrap gap-4 items-end">
+                    <!-- YouTube-style Search Input & Suggestions -->
+                    <div class="relative flex-1 min-w-[300px]">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5 font-medium">Tìm kiếm phiếu phạt (Mã SV, Họ tên, Tên sách, Mã GD...)</label>
+=======
                 class="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl font-medium shadow-sm" role="alert"
                 th:text="${successMsg}"></div>
             <div th:if="${errorMsg}" class="mb-4 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl font-medium shadow-sm"
@@ -89,6 +112,7 @@
                     <!-- YouTube-style Search Input & Suggestions -->
                     <div class="relative flex-1 min-w-[300px]">
                         <label class="block text-xs font-semibold text-slate-500 mb-1.5">Tìm kiếm phiếu phạt (Mã SV, Họ tên, Tên sách, Mã GD...)</label>
+>>>>>>> origin/main
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,8 +120,13 @@
                                 </svg>
                             </span>
                             <input type="text" id="searchInput" th:value="${patronId}" placeholder="Nhập từ khóa tìm kiếm tự động..."
+<<<<<<< HEAD
+                                class="w-full pl-10 pr-10 py-2.5 text-sm border border-slate-300 bg-white text-slate-800 placeholder-slate-400 rounded-full focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all shadow-sm">
+                            <button id="clearSearchBtn" type="button" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-700 hidden">
+=======
                                 class="w-full pl-10 pr-10 py-2.5 text-sm border border-slate-300 bg-white text-slate-900 placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-fpt-orange/40 transition-all shadow-sm">
                             <button id="clearSearchBtn" type="button" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 hidden">
+>>>>>>> origin/main
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
@@ -105,24 +134,38 @@
                         </div>
                         
                         <!-- Suggestions Dropdown (YouTube Autocomplete) -->
+<<<<<<< HEAD
+                        <div id="suggestionsDropdown" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto hidden">
+=======
                         <div id="suggestionsDropdown" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto hidden">
+>>>>>>> origin/main
                         </div>
                     </div>
 
                     <!-- Dropdown Lọc Trạng Thái -->
                     <div class="w-full sm:w-48">
+<<<<<<< HEAD
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5 font-medium">Trạng thái</label>
+                        <select id="statusFilter" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white shadow-sm font-medium text-slate-800">
+=======
                         <label class="block text-xs font-semibold text-slate-500 mb-1.5">Trạng thái</label>
                         <select id="statusFilter" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange/40 bg-white shadow-sm font-medium text-slate-700">
+>>>>>>> origin/main
                             <option value="all" th:selected="${paidStatus == 'all'}">Tất cả trạng thái</option>
-                            <option value="Unpaid" th:selected="${paidStatus == null || paidStatus == 'Unpaid'}">Chưa trả</option>
-                            <option value="Paid" th:selected="${paidStatus == 'Paid'}">Đã trả</option>
+                            <option value="Unpaid" th:selected="${paidStatus == 'Unpaid'}">Chưa trả</option>
+                            <option value="Paid" th:selected="${paidStatus == null || paidStatus == 'Paid'}">Đã trả</option>
                         </select>
                     </div>
 
                     <!-- Dropdown Lọc Loại Vi Phạm -->
                     <div class="w-full sm:w-48">
+<<<<<<< HEAD
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5 font-medium">Loại vi phạm</label>
+                        <select id="violationTypeFilter" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white shadow-sm font-medium text-slate-800">
+=======
                         <label class="block text-xs font-semibold text-slate-500 mb-1.5">Loại vi phạm</label>
                         <select id="violationTypeFilter" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange/40 bg-white shadow-sm font-medium text-slate-700">
+>>>>>>> origin/main
                             <option value="">Tất cả lỗi</option>
                             <option value="Overdue">Quá hạn (Overdue)</option>
                             <option value="Lost">Mất sách (Lost)</option>
@@ -131,22 +174,51 @@
                     </div>
 
                     <!-- Nút Xóa Lọc -->
+<<<<<<< HEAD
+                    <button id="resetFiltersBtn" type="button" class="text-slate-500 hover:text-slate-800 text-sm font-semibold px-2 py-2.5 transition self-end">
+=======
                     <button id="resetFiltersBtn" type="button" class="text-slate-500 hover:text-slate-700 text-sm font-semibold px-2 py-2.5 transition self-end">
+>>>>>>> origin/main
                         Xóa lọc
                     </button>
 
                     <!-- Nút Xuất Excel -->
+<<<<<<< HEAD
+                    <button type="button" onclick="openExportExcelModal()"
+                       class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow-sm transition self-end h-[42px]">
+=======
                     <a id="exportExcelLink" href="/librarian/fines/export"
                        class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-sm transition self-end h-[42px]">
+>>>>>>> origin/main
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                         </svg>
                         Xuất Excel
-                    </a>
+                    </button>
                 </div>
             </div>
 
             <!-- Bảng dữ liệu -->
+<<<<<<< HEAD
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden font-sans">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-700 border-b border-slate-200">
+                            <th class="px-3 py-3 font-semibold text-left">Bạn đọc</th>
+                            <th class="px-3 py-3 font-semibold text-left">Sách vi phạm</th>
+                            <th class="px-3 py-3 font-semibold text-left">Loại</th>
+                            <th class="px-3 py-3 font-semibold text-left">Chi tiết tính phạt</th>
+                            <th class="px-3 py-3 font-semibold text-right">Tiền phạt</th>
+                            <th class="px-3 py-3 font-semibold text-right">Còn nợ</th>
+                            <th class="px-3 py-3 font-semibold text-left">Trạng thái</th>
+                            <th class="px-3 py-3 font-semibold text-left">Phương thức / Mã GD</th>
+                            <th class="px-3 py-3 font-semibold text-left">Ngày tạo</th>
+                            <th class="px-3 py-3 font-semibold text-left">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fineTableBody" class="divide-y divide-slate-200">
+=======
             <div class="bg-white border border-slate-300 rounded-2xl shadow-sm overflow-hidden font-sans">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
@@ -165,6 +237,7 @@
                         </tr>
                     </thead>
                     <tbody id="fineTableBody" class="divide-y divide-slate-300">
+>>>>>>> origin/main
                         <tr th:if="${#lists.isEmpty(fines)}">
                             <td colspan="10" class="text-center text-slate-500 py-10">Không có phiếu phạt nào phù hợp.</td>
                         </tr>
@@ -174,7 +247,11 @@
                         </tr>
 
                         <tr th:each="fine : ${fines}" 
+<<<<<<< HEAD
+                            class="fine-row hover:bg-slate-50 transition-colors"
+=======
                             class="fine-row hover:bg-slate-50/70 transition-colors"
+>>>>>>> origin/main
                             th:data-patron-name="${fine.patron != null ? fine.patron.fullName : ''}"
                             th:data-patron-id="${fine.patron != null ? fine.patron.userId : ''}"
                             th:data-book-title="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null and fine.ticketDetail.bookCopy.book != null ? fine.ticketDetail.bookCopy.book.title : ''}"
@@ -185,16 +262,26 @@
                             th:data-reason="${fine.reason ?: ''}"
                             th:data-payment-method="${fine.paymentMethod ?: ''}">
                             <!-- Bạn đọc -->
+<<<<<<< HEAD
+                            <td class="px-3 py-3">
+                                <div class="font-semibold text-slate-800"
+=======
                             <td class="px-6 py-4">
                                 <div class="font-semibold text-slate-900"
+>>>>>>> origin/main
                                     th:text="${fine.patron != null ? fine.patron.fullName : '—'}"></div>
                                 <div class="text-xs text-slate-500 font-mono"
                                     th:text="${fine.patron != null ? fine.patron.userId : ''}"></div>
                             </td>
 
                             <!-- Sách vi phạm -->
+<<<<<<< HEAD
+                            <td class="px-3 py-3">
+                                <div class="font-medium text-slate-700 max-w-[180px] truncate"
+=======
                             <td class="px-6 py-4">
                                 <div class="font-semibold text-slate-700 max-w-[180px] truncate"
+>>>>>>> origin/main
                                     th:text="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null and fine.ticketDetail.bookCopy.book != null ? fine.ticketDetail.bookCopy.book.title : '—'}">
                                 </div>
                                 <div class="text-xs text-slate-500 font-mono"
@@ -214,12 +301,20 @@
                             </td>
 
                             <!-- Chi tiết tính phạt -->
+<<<<<<< HEAD
+                            <td class="px-3 py-3 text-slate-600 text-xs font-mono">
+=======
                             <td class="px-6 py-4 text-slate-600 text-xs font-mono">
+>>>>>>> origin/main
                                 <span th:text="${fine.reason ?: '—'}"></span>
                             </td>
 
                             <!-- Tiền phạt -->
+<<<<<<< HEAD
+                            <td class="px-3 py-3 text-right font-semibold text-slate-800">
+=======
                             <td class="px-6 py-4 text-right font-semibold text-slate-700">
+>>>>>>> origin/main
                                 <span
                                     th:text="${fine.fineAmount != null ? #numbers.formatDecimal(fine.fineAmount, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}"></span>
                             </td>
@@ -239,17 +334,29 @@
                             </td>
 
                             <!-- Phương thức / Mã GD -->
+<<<<<<< HEAD
+                            <td class="px-3 py-3 text-xs text-slate-600">
+=======
                             <td class="px-6 py-4 text-xs text-slate-500">
+>>>>>>> origin/main
                                 <div th:text="${fine.paymentMethod ?: '—'}"></div>
                                 <div class="font-mono text-slate-600" th:text="${fine.transactionCode ?: ''}"></div>
                             </td>
 
                             <!-- Ngày tạo -->
+<<<<<<< HEAD
+                            <td class="px-3 py-3 text-xs text-slate-600 whitespace-nowrap"
+=======
                             <td class="px-6 py-4 text-xs text-slate-600 whitespace-nowrap"
+>>>>>>> origin/main
                                 th:text="${fine.createdAt != null ? #temporals.format(fine.createdAt, 'dd/MM/yyyy') : '—'}">
                             </td>
 
                             <!-- Thao tác -->
+<<<<<<< HEAD
+                            <td class="px-3 py-3">
+                                <span class="text-slate-500 text-xs">—</span>
+=======
                             <td class="px-6 py-4">
                                 <div th:if="${fine.paidStatus != null and #strings.toUpperCase(fine.paidStatus) == 'UNPAID'}" class="flex gap-2">
                                     <!-- Thu tiền mặt: mở modal xác nhận -->
@@ -277,6 +384,7 @@
                                     </button>
                                 </div>
                                 <span th:if="${fine.paidStatus == null or #strings.toUpperCase(fine.paidStatus) != 'UNPAID'}" class="text-slate-400 text-xs">—</span>
+>>>>>>> origin/main
                             </td>
                         </tr>
                     </tbody>
@@ -284,8 +392,13 @@
                 </div>
                 <!-- Pagination container -->
                 <div id="paginationContainer"
+<<<<<<< HEAD
+                    class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 hidden">
+                    <div class="text-sm text-slate-600">
+=======
                     class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-6 py-4 border-t border-slate-300 bg-slate-50 hidden">
                     <div class="text-sm text-slate-500">
+>>>>>>> origin/main
                         <span id="pageInfo">Trang 0 / 0</span>
                     </div>
                     <div id="pageButtons" class="flex flex-wrap gap-2">
@@ -294,7 +407,11 @@
                 </div>
             </div>
             <!-- Hiện số bản ghi -->
+<<<<<<< HEAD
+            <p id="totalCountText" class="text-xs text-slate-600 mt-3 font-semibold"></p>    <!-- ══════════════════════════════════════════════════════════
+=======
             <p id="totalCountText" class="text-xs text-slate-500 mt-3 font-semibold"></p>    <!-- ══════════════════════════════════════════════════════════
+>>>>>>> origin/main
      Modal Thu Tiền Mặt – Xác nhận thông tin trước khi thu
      ══════════════════════════════════════════════════════════ -->
     <div id="cashModal"
@@ -386,8 +503,29 @@
 
     <!-- VietQR Payment Modal -->
     <div id="qrModal"
+<<<<<<< HEAD
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="relative bg-slate-900 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-850">
+            <!-- Success Overlay -->
+            <div id="successOverlay" class="hidden absolute inset-0 bg-slate-900/95 flex flex-col items-center justify-center p-8 text-center z-50 animate-fade-in">
+                <div class="w-20 h-20 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mb-6 animate-bounce shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                    <svg class="w-12 h-12 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-black text-emerald-400 tracking-wide uppercase mb-2">✨ THANH TOÁN THÀNH CÔNG!</h3>
+                <p class="text-slate-200 text-sm max-w-xs mb-4">Hệ thống đã nhận diện thanh toán tự động qua VietQR thành công.</p>
+                <div class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 mb-6 w-full max-w-xs text-xs space-y-2">
+                    <p class="text-slate-400 flex justify-between"><span>Mã giao dịch:</span> <span id="successTxCode" class="font-mono font-bold text-slate-200">-</span></p>
+                    <p class="text-slate-400 flex justify-between"><span>Thanh toán cho:</span> <span id="successDescription" class="font-semibold text-slate-200">-</span></p>
+                </div>
+                <p class="text-xs text-slate-500 mb-4 animate-pulse">Trang sẽ tự động cập nhật sau <span id="successCountdown" class="font-bold text-emerald-400">5</span> giây...</p>
+                <button type="button" onclick="window.location.reload()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-lg transition-all uppercase">Thanh toán thành công</button>
+            </div>
+=======
         class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-300">
+>>>>>>> origin/main
             <!-- Header -->
             <div class="px-5 py-3.5 bg-emerald-600 flex justify-between items-center text-white border-b border-emerald-700">
                 <div class="flex items-center gap-2">
@@ -515,7 +653,97 @@
         </div>
     </div>
 
+    <!-- Export Excel Modal -->
+    <div id="exportExcelModal"
+        class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200">
+            <!-- Header -->
+            <div class="px-5 py-4 bg-emerald-600 flex justify-between items-center text-white">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                    </svg>
+                    <h3 class="text-sm font-bold text-white">Xuất Báo Cáo Excel</h3>
+                </div>
+                <button type="button" onclick="closeExportExcelModal()" class="text-emerald-100 hover:text-white transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <form id="exportExcelForm" method="get" action="/librarian/fines/export">
+                <input type="hidden" id="exportSearch" name="search" value="" />
+                <input type="hidden" id="exportPaidStatus" name="paidStatus" value="" />
+
+                <div class="p-6 space-y-4">
+                    <p class="text-xs text-slate-500 text-center">Vui lòng chọn thông tin bộ lọc trước khi xác nhận xuất báo cáo Excel.</p>
+
+                    <!-- Ngày bắt đầu -->
+                    <div class="space-y-1">
+                        <label for="exportStartDate" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider">Ngày Bắt Đầu:</label>
+                        <input type="date" id="exportStartDate" name="startDate" onclick="try { this.showPicker(); } catch(e) {}"
+                            class="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 bg-white font-medium cursor-pointer placeholder-slate-400" />
+                    </div>
+
+                    <!-- Ngày kết thúc -->
+                    <div class="space-y-1">
+                        <label for="exportEndDate" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider">Ngày Kết Thúc:</label>
+                        <input type="date" id="exportEndDate" name="endDate" onclick="try { this.showPicker(); } catch(e) {}"
+                            class="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 bg-white font-medium cursor-pointer placeholder-slate-400" />
+                    </div>
+
+                    <!-- Loại vi phạm -->
+                    <div class="space-y-1">
+                        <label for="exportViolationType" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider">Loại Vi Phạm:</label>
+                        <select id="exportViolationType" name="violationType"
+                            class="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 bg-white font-medium">
+                            <option value="">Tất cả lỗi</option>
+                            <option value="Overdue">Quá hạn (Overdue)</option>
+                            <option value="Lost">Mất sách (Lost)</option>
+                            <option value="Damaged">Hỏng sách (Damaged)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+                    <button type="button" onclick="closeExportExcelModal()"
+                        class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
+                        Hủy
+                    </button>
+                    <button type="submit" onclick="closeExportExcelModal()"
+                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-sm transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Xác nhận xuất Excel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script th:inline="javascript">
+        // ── Export Modal ─────────────────────────────────────────────
+        function openExportExcelModal() {
+            // Pick up current quick filter values
+            document.getElementById('exportSearch').value = searchInput.value;
+            document.getElementById('exportPaidStatus').value = statusFilter.value;
+            document.getElementById('exportViolationType').value = violationTypeFilter.value;
+
+            // Show the modal
+            document.getElementById('exportExcelModal').classList.remove('hidden');
+            document.getElementById('exportExcelModal').classList.add('flex');
+        }
+
+        function closeExportExcelModal() {
+            document.getElementById('exportExcelModal').classList.remove('flex');
+            document.getElementById('exportExcelModal').classList.add('hidden');
+        }
+
         // ── Cash Modal ──────────────────────────────────────────────
         const violationLabels = { 'Overdue': 'Quá hạn', 'Lost': 'Mất sách', 'Damaged': 'Hỏng sách' };
 
@@ -617,16 +845,13 @@
             // Banking info
             const amountFormatted = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
             document.getElementById('dbAmount').innerText = amountFormatted;
-            const transferDesc = 'NOPPHAT' + fineId;
-            document.getElementById('dbInfo').innerText = transferDesc;
-
-            // Generate VietQR URL
-            const qrUrl = 'https://img.vietqr.io/image/' + vqrBankId + '-' + vqrAccountNo + '-compact2.png?amount=' + amount
-                + '&addInfo=' + encodeURIComponent(transferDesc) + '&accountName=' + encodeURIComponent(vqrAccountName);
+            
+            // Set temporary loading status
+            document.getElementById('dbInfo').innerText = "Đang tạo mã thanh toán...";
             document.getElementById('qrLoading').classList.remove('hidden');
             const img = document.getElementById('qrImage');
             img.classList.add('hidden');
-            img.src = qrUrl;
+            img.src = "";
 
             // Form action
             let actionBaseUrl = /*[[@{/librarian/fines/collect-qr/}]]*/ '/librarian/fines/collect-qr/';
@@ -648,37 +873,78 @@
             document.getElementById('qrModal').classList.remove('hidden');
             document.getElementById('qrModal').classList.add('flex');
 
-            // Start polling
-            if (pollIntervalId) clearInterval(pollIntervalId);
-            pollIntervalId = setInterval(function () {
-                let checkUrlBase = /*[[@{/librarian/fines/check-status/}]]*/ '/librarian/fines/check-status/';
-                let finalCheckUrl;
-                if (checkUrlBase.includes(';')) {
-                    const parts = checkUrlBase.split(';');
-                    finalCheckUrl = parts[0] + fineId + (parts[1] ? ';' + parts[1] : '');
-                } else {
-                    finalCheckUrl = checkUrlBase + fineId;
-                }
-                fetch(finalCheckUrl)
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success && data.paid) {
-                            clearInterval(pollIntervalId);
-                            pollIntervalId = null;
-                            // Hide manual confirm button, show success banner inside modal
-                            document.getElementById('qrFooterActions').classList.add('hidden');
-                            const banner = document.getElementById('qrSuccessBanner');
-                            banner.classList.remove('hidden');
-                            document.getElementById('qrSuccessDetail').innerText =
-                                '🎉 Mã GD: ' + (data.transactionCode || 'N/A') + ' – Trang sẽ tự động làm mới sau 3 giây...';
-                            sessionStorage.setItem('autoSuccessMsg',
-                                '🎉 Hệ thống đã tự động nhận diện giao dịch chuyển khoản thành công cho phiếu phạt #' + fineId
-                                + ' (Mã GD: ' + (data.transactionCode || 'N/A') + ')');
-                            setTimeout(() => window.location.reload(), 3000);
+            // Call API to generate secure token
+            fetch('/borrowing/api/generate-payment-token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=F&id=' + fineId
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.token) {
+                    const transferDesc = data.token;
+                    document.getElementById('dbInfo').innerText = transferDesc;
+
+                    // Generate VietQR URL
+                    const qrUrl = 'https://img.vietqr.io/image/' + vqrBankId + '-' + vqrAccountNo + '-compact2.png?amount=' + amount
+                        + '&addInfo=' + encodeURIComponent(transferDesc) + '&accountName=' + encodeURIComponent(vqrAccountName);
+                    
+                    document.getElementById('qrLoading').classList.remove('hidden');
+                    img.src = qrUrl;
+
+                    // Start polling
+                    if (pollIntervalId) clearInterval(pollIntervalId);
+                    pollIntervalId = setInterval(function () {
+                        let checkUrlBase = /*[[@{/librarian/fines/check-status/}]]*/ '/librarian/fines/check-status/';
+                        let finalCheckUrl;
+                        if (checkUrlBase.includes(';')) {
+                            const parts = checkUrlBase.split(';');
+                            finalCheckUrl = parts[0] + fineId + (parts[1] ? ';' + parts[1] : '');
+                        } else {
+                            finalCheckUrl = checkUrlBase + fineId;
                         }
-                    })
-                    .catch(err => console.error('Error polling fine status:', err));
-            }, 2000);
+                        fetch(finalCheckUrl)
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.success && data.paid) {
+                                    clearInterval(pollIntervalId);
+                                    pollIntervalId = null;
+                                    
+                                    // Hiển thị overlay thành công đẹp mắt
+                                    document.getElementById('successTxCode').textContent = data.transactionCode || 'N/A';
+                                    document.getElementById('successDescription').textContent = 'Hóa đơn phạt #' + fineId;
+                                    
+                                    const overlay = document.getElementById('successOverlay');
+                                    overlay.classList.remove('hidden');
+                                    
+                                    let secondsLeft = 5;
+                                    const countdownSpan = document.getElementById('successCountdown');
+                                    countdownSpan.textContent = secondsLeft;
+                                    
+                                    const countdownInterval = setInterval(() => {
+                                        secondsLeft--;
+                                        countdownSpan.textContent = secondsLeft;
+                                        if (secondsLeft <= 0) {
+                                            clearInterval(countdownInterval);
+                                            window.location.reload();
+                                        }
+                                    }, 1000);
+                                }
+                            })
+                            .catch(err => console.error('Error polling fine status:', err));
+                    }, 2000);
+                } else {
+                    document.getElementById('dbInfo').innerText = "Lỗi sinh Token: " + (data.message || "Unknown error");
+                    document.getElementById('qrLoading').classList.add('hidden');
+                }
+            })
+            .catch(err => {
+                document.getElementById('dbInfo').innerText = "Không thể kết nối đến máy chủ.";
+                document.getElementById('qrLoading').classList.add('hidden');
+                console.error(err);
+            });
         }
 
         function closeQRModal() {
@@ -796,15 +1062,7 @@
                 countText.innerText = 'Tìm thấy: ' + visibleCount + ' phiếu phạt';
             }
 
-            // Sync dynamic Excel export link
-            const exportLink = document.getElementById('exportExcelLink');
-            if (exportLink) {
-                const params = new URLSearchParams();
-                if (searchVal) params.append('search', searchVal);
-                if (statusVal) params.append('paidStatus', statusFilter.value);
-                if (violationVal) params.append('violationType', violationTypeFilter.value);
-                exportLink.href = '/librarian/fines/export?' + params.toString();
-            }
+
 
             // Update Pagination UI
             updatePaginationUI(totalPages);
@@ -829,9 +1087,9 @@
 
             // Button "Trước"
             if (currentPage > 0) {
-                html += `<button type="button" onclick="goToPage(${currentPage - 1})" class="px-3 py-1.5 rounded-lg border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800/60 transition-colors">Trước</button>`;
+                html += `<button type="button" onclick="goToPage(${currentPage - 1})" class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors">Trước</button>`;
             } else {
-                html += `<span class="px-3 py-1.5 rounded-lg border border-slate-800/80 text-sm text-slate-600 block cursor-default">Trước</span>`;
+                html += `<span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400 block cursor-default">Trước</span>`;
             }
 
             // Numeric buttons
@@ -839,15 +1097,15 @@
                 if (p === currentPage) {
                     html += `<span class="px-3 py-1.5 rounded-lg border border-fpt-orange text-fpt-orange bg-fpt-orange/10 text-sm font-semibold cursor-default">${p + 1}</span>`;
                 } else {
-                    html += `<button type="button" onclick="goToPage(${p})" class="px-3 py-1.5 rounded-lg border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800/60 transition-colors">${p + 1}</button>`;
+                    html += `<button type="button" onclick="goToPage(${p})" class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors">${p + 1}</button>`;
                 }
             }
 
             // Button "Sau"
             if (currentPage + 1 < totalPages) {
-                html += `<button type="button" onclick="goToPage(${currentPage + 1})" class="px-3 py-1.5 rounded-lg border border-slate-700 text-sm font-semibold text-slate-300 hover:bg-slate-800/60 transition-colors">Sau</button>`;
+                html += `<button type="button" onclick="goToPage(${currentPage + 1})" class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors">Sau</button>`;
             } else {
-                html += `<span class="px-3 py-1.5 rounded-lg border border-slate-800/80 text-sm text-slate-600 block cursor-default">Sau</span>`;
+                html += `<span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400 block cursor-default">Sau</span>`;
             }
 
             pageButtons.innerHTML = html;
@@ -935,7 +1193,7 @@
             suggestionsDropdown.innerHTML = '';
             list.forEach(item => {
                 const div = document.createElement('div');
-                div.className = 'px-4 py-2.5 hover:bg-slate-800 cursor-pointer text-sm text-slate-300 transition flex items-center gap-2.5 border-b border-slate-900 last:border-b-0';
+                div.className = 'px-4 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-700 transition flex items-center gap-2.5 border-b border-slate-100 last:border-b-0';
                 div.innerHTML = `
                     <svg class="w-3.5 h-3.5 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -1000,7 +1258,7 @@
         // Reset filter action
         resetFiltersBtn.addEventListener('click', () => {
             searchInput.value = '';
-            statusFilter.value = 'Unpaid';
+            statusFilter.value = 'Paid';
             violationTypeFilter.value = '';
             suggestionsDropdown.classList.add('hidden');
             fetchFinesFromServer();

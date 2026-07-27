@@ -19,8 +19,16 @@ import com.swp5.library_management.repository.BookCopyRepository;
 import com.swp5.library_management.repository.BorrowTicketDetailRepository;
 import com.swp5.library_management.repository.FineInvoiceRepository;
 import com.swp5.library_management.repository.UserRepository;
+<<<<<<< HEAD
+import com.swp5.library_management.entity.Notification;
+import com.swp5.library_management.repository.NotificationRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+=======
 import com.swp5.library_management.entity.Campus;
 import com.swp5.library_management.repository.CampusRepository;
+>>>>>>> origin/main
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,6 +46,10 @@ public class ViolationServiceImpl implements ViolationService {
     private final UserRepository userRepository;
     private final ReservationService reservationService;
     private final SystemConfigService systemConfigService;
+<<<<<<< HEAD
+    private final FineEmailService fineEmailService;
+    private final NotificationRepository notificationRepository;
+=======
     private final CampusRepository campusRepository;
     
     private void setReturnCampusFromLibrarian(BorrowTicketDetail detail, String librarianId) {
@@ -51,6 +63,7 @@ public class ViolationServiceImpl implements ViolationService {
             });
         }
     }
+>>>>>>> origin/main
 
     @Override
     @Transactional(readOnly = true)
@@ -267,10 +280,17 @@ public class ViolationServiceImpl implements ViolationService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<FineInvoice> getAllFineInvoices(String patronId, String paidStatus) {
+    public List<FineInvoice> getAllFineInvoices(String patronId, String paidStatus, String librarianId) {
         String pid = (patronId != null && patronId.isBlank()) ? null : patronId;
         String ps = (paidStatus != null && paidStatus.isBlank()) ? null : paidStatus;
-        return fineInvoiceRepository.findAllFiltered(pid, ps);
+        Integer campusId = null;
+        if (librarianId != null && !librarianId.isBlank()) {
+            User librarian = userRepository.findById(librarianId).orElse(null);
+            if (librarian != null) {
+                campusId = librarian.getCampusId();
+            }
+        }
+        return fineInvoiceRepository.findAllFiltered(pid, ps, campusId);
     }
 
     @Override
@@ -287,8 +307,10 @@ public class ViolationServiceImpl implements ViolationService {
             librarian = userRepository.findById(librarianId).orElse(null);
         }
         if (librarian == null) {
-            // Lấy tạm bất kỳ người dùng nào làm thủ thư xử lý để tránh lỗi khi bypass login
-            librarian = userRepository.findAll().stream().findFirst().orElse(null);
+            librarian = userRepository.findAnyLibrarian().stream().findFirst().orElse(null);
+            if (librarian == null) {
+                librarian = userRepository.findAll().stream().findFirst().orElse(null);
+            }
         }
 
         fine.setPaidStatus("Paid");
@@ -308,6 +330,14 @@ public class ViolationServiceImpl implements ViolationService {
                 userRepository.save(patron);
             }
         }
+
+        // Action-hook: Gửi email thông báo thanh toán thành công
+        try {
+            fineEmailService.sendFinePaymentConfirmation(fine);
+            saveFinePaidNotification(patron, fine);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -324,8 +354,10 @@ public class ViolationServiceImpl implements ViolationService {
             librarian = userRepository.findById(librarianId).orElse(null);
         }
         if (librarian == null) {
-            // Lấy tạm bất kỳ người dùng nào làm thủ thư xử lý để tránh lỗi khi bypass login
-            librarian = userRepository.findAll().stream().findFirst().orElse(null);
+            librarian = userRepository.findAnyLibrarian().stream().findFirst().orElse(null);
+            if (librarian == null) {
+                librarian = userRepository.findAll().stream().findFirst().orElse(null);
+            }
         }
 
         fine.setPaidStatus("Paid");
@@ -347,6 +379,38 @@ public class ViolationServiceImpl implements ViolationService {
                 userRepository.save(patron);
             }
         }
+
+        // Action-hook: Gửi email thông báo thanh toán thành công
+        try {
+            fineEmailService.sendFinePaymentConfirmation(fine);
+            saveFinePaidNotification(patron, fine);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveFinePaidNotification(User patron, FineInvoice fine) {
+        if (patron == null || fine == null) return;
+        String bookTitle = fine.getTicketDetail() != null && fine.getTicketDetail().getBookCopy() != null 
+                           ? fine.getTicketDetail().getBookCopy().getBook().getTitle() : "N/A";
+        String amountStr = String.format("%,.0f VND", fine.getFineAmount() != null ? fine.getFineAmount() : BigDecimal.ZERO);
+        String methodDisplay = "Cash".equalsIgnoreCase(fine.getPaymentMethod()) ? "Tiền mặt" 
+                               : ("QRCode".equalsIgnoreCase(fine.getPaymentMethod()) ? "QRCode" : fine.getPaymentMethod());
+        
+        String msg = String.format("Thanh toán thành công số tiền phạt %s cho sách \"%s\" qua phương thức %s.",
+                amountStr, bookTitle, methodDisplay);
+        
+        Notification notification = Notification.builder()
+                .user(patron)
+                .notificationType("FINE_PAID")
+                .title("Thanh toán tiền phạt thành công")
+                .content(msg)
+                .status("Sent")
+                .sentAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .read(false)
+                .build();
+        notificationRepository.save(notification);
     }
 
     @Override
