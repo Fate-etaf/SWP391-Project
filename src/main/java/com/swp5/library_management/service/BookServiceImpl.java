@@ -458,7 +458,7 @@ public class BookServiceImpl implements BookService {
                 String edition        = getCellString(row, 5);
                 String language       = getCellString(row, 6);
                 String subjectCode    = getCellString(row, 7);
-                String shelfCode      = getCellStringPreserveLeadingZeros(row, 8);
+                String shelfCode      = getCellString(row, 8);
                 String copiesStr      = getCellString(row, 9);
                 String description    = getCellString(row, 10);
                 String coverImageUrl  = getCellString(row, 11);
