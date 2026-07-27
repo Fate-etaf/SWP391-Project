@@ -1,17 +1,19 @@
 package com.swp5.library_management.service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.swp5.library_management.dto.BorrowingHistoryDTO;
 import com.swp5.library_management.entity.Book;
 import com.swp5.library_management.entity.BookCopy;
 import com.swp5.library_management.entity.BorrowTicketDetail;
 import com.swp5.library_management.repository.BorrowTicketDetailRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -110,7 +112,7 @@ public class BorrowingServiceImpl implements BorrowingService {
         }
 
         // R2: Số lần gia hạn tối đa (user requested 4)
-        int maxRenewals = systemConfigService.getIntConfig("MAX_RENEWALS", 4);
+        int maxRenewals = systemConfigService.getIntConfig("MAX_RENEWALS", 1);
         int currentRenewals = detail.getRenewalCount() != null ? detail.getRenewalCount() : 0;
         if (currentRenewals >= maxRenewals) {
             return com.swp5.library_management.dto.ReservationResultDTO.builder()

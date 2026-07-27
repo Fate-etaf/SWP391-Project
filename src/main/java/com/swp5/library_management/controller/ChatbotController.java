@@ -19,41 +19,122 @@ private final BookRepository bookRepository;
     private final String GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"; 
     private final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + GEMINI_API_KEY;
 
-   // 2. Chỉ có DUY NHẤT một hàm chatWithAI nhận request này:
+   //Hung
+   // === 2. XỬ LÝ CHATBOT VÀ TÌM KIẾM SÁCH (SUPER SEARCH) ===
+   /**
+    * Nhận câu hỏi từ người dùng, lọc từ khóa và tìm kiếm sách thông minh.
+    * Tích hợp "Từ điển đồng nghĩa" (Smart Aliases) giúp nhận diện từ khóa (lập trình, cntt...) 
+    * và tự động trả lời các câu hỏi về quy định của thư viện.
+    */
     @PostMapping("/chat")
     public ResponseEntity<Map<String, String>> chatWithAI(@RequestBody ChatRequest request) {
         Map<String, String> responseBody = new HashMap<>();
 
         if ("YOUR_GEMINI_API_KEY".equals(GEMINI_API_KEY)) {
             String userMsg = request.getMessage().toLowerCase();
+            
+            //Hung: Xử lý các câu hỏi chung về quy định thư viện (Hardcoded)
+            // 1. Hardcoded generic library questions
+            if (userMsg.contains("giờ mở cửa") || userMsg.contains("thời gian làm việc") || userMsg.contains("mở cửa")) {
+                responseBody.put("reply", "Thư viện mở cửa từ 7h30 sáng đến 21h30 tối, từ Thứ 2 đến Chủ nhật hàng tuần bạn nhé.");
+                return ResponseEntity.ok(responseBody);
+            }
+            if (userMsg.contains("mượn được bao nhiêu cuốn") || userMsg.contains("số lượng sách") || userMsg.contains("mượn tối đa")) {
+                responseBody.put("reply", "Hiện tại quy định của thư viện là Sinh viên có thể mượn tối đa 3 cuốn sách cùng lúc.");
+                return ResponseEntity.ok(responseBody);
+            }
+            if (userMsg.contains("mượn bao lâu") || userMsg.contains("thời gian mượn") || userMsg.contains("gia hạn")) {
+                responseBody.put("reply", "Bạn có thể mượn sách tối đa trong 14 ngày. Nếu chưa đọc xong, bạn hoàn toàn có thể gia hạn thêm 1 lần thông qua website, miễn là sách đó không có ai đang đặt trước.");
+                return ResponseEntity.ok(responseBody);
+            }
+            if (userMsg.contains("bị phạt") || userMsg.contains("mất sách") || userMsg.contains("trả trễ") || userMsg.contains("quá hạn")) {
+                responseBody.put("reply", "Nếu bạn trả sách trễ hạn, hệ thống sẽ tự động tính phí phạt là 5,000đ/ngày. Nếu làm hỏng hoặc mất sách, bạn sẽ phải bồi thường theo quy định của thư viện.");
+                return ResponseEntity.ok(responseBody);
+            }
+            if (userMsg.contains("xin chào") || userMsg.contains("hello") || userMsg.contains("hi") || userMsg.contains("chào bạn")) {
+                responseBody.put("reply", "Chào bạn! Mình là FLMS-Bot, trợ lý ảo của thư viện. Mình có thể giúp gì cho bạn hôm nay? (Ví dụ: Tìm sách, hỏi về giờ mở cửa, quy định mượn trả...)");
+                return ResponseEntity.ok(responseBody);
+            }
+            if (userMsg.contains("những loại sách nào") || userMsg.contains("những thể loại nào") || userMsg.contains("danh mục sách") || userMsg.contains("thể loại sách có trong thư viện") || userMsg.contains("các thể loại sách") || userMsg.equals("thể loại") || userMsg.equals("loại sách") || userMsg.equals("chuyên ngành")) {
+                responseBody.put("reply", "Thư viện hiện đang có rất nhiều thể loại đa dạng phục vụ học tập và nghiên cứu, tiêu biểu như: Công nghệ Thông tin, Kinh tế, Quản trị Kinh doanh, Thiết kế Đồ họa, Ngoại ngữ, Tiểu thuyết và sách Kỹ năng mềm. Bạn đang muốn tìm sách thuộc chuyên ngành nào?");
+                return ResponseEntity.ok(responseBody);
+            }
+            if (userMsg.contains("tôi muốn hỏi về sách có trong thư viện") || userMsg.contains("hỏi về sách có trong thư viện") || userMsg.equals("sách trong thư viện")) {
+                responseBody.put("reply", "Thư viện hiện có hàng ngàn đầu sách phong phú đa dạng các lĩnh vực. Bạn có thể cho mình biết cụ thể bạn đang quan tâm đến cuốn sách nào, chủ đề hay môn học nào không?");
+                return ResponseEntity.ok(responseBody);
+            }
+
+            // 2. Book search logic
             List<Book> allBooks = bookRepository.findAll();
             
-            // Try to find books where the title is mentioned in the user's message
+            // Try to find books where the title or category is mentioned in the user's message
             List<Book> matchedBooks = allBooks.stream()
-                .filter(b -> b.getTitle() != null && userMsg.contains(b.getTitle().toLowerCase()))
+                .filter(b -> (b.getTitle() != null && userMsg.contains(b.getTitle().toLowerCase())) || 
+                             (b.getCategories() != null && b.getCategories().stream().anyMatch(c -> c.getCategoryName() != null && userMsg.contains(c.getCategoryName().toLowerCase()))))
                 .collect(Collectors.toList());
             
+            String searchStr = "";
+            //Hung: Bóc tách các từ thừa để trích xuất ra đúng từ khóa cần tìm kiếm
             // If none found, try to extract the book name by removing question keywords
             if (matchedBooks.isEmpty()) {
-                 String searchStr = userMsg
+                 searchStr = userMsg
                          .replace("tôi muốn hỏi", "").replace("tìm sách", "")
                          .replace("thông tin sách", "").replace("về sách", "").replace("sách", "")
                          .replace("thông tin", "").replace("về", "")
                          .replace("ưu nhược điểm", "").replace("ưu điểm", "").replace("nhược điểm", "")
                          .replace("tính khả thi", "").replace("phù hợp với ai", "").replace("phù hợp", "")
                          .replace("đánh giá", "").replace("review", "").replace("của", "").replace("có", "")
-                         .replace("là gì", "").replace("không", "").replace("tác giả", "").replace("ai", "").trim();
+                         .replace("là gì", "").replace("không", "").replace("tác giả", "").replace("ai", "")
+                         .replace("mượn cuốn", "").replace("cuốn", "")
+                         .replace("những cuốn", "").replace("thể loại", "")
+                         .trim();
                  
                  if (searchStr.length() > 2) {
+                     List<String> keywords = new ArrayList<>();
+                     keywords.add(searchStr);
+                     
+                     //Hung: Bộ Từ điển đồng nghĩa (Smart Aliases) để tự động ánh xạ lĩnh vực
+                     // Smart aliases (AI giả lập)
+                     if (searchStr.contains("lập trình") || searchStr.contains("cntt") || searchStr.contains("it") || searchStr.contains("code")) {
+                         keywords.add("công nghệ thông tin");
+                         keywords.add("python");
+                         keywords.add("java");
+                         keywords.add("c++");
+                         keywords.add("html");
+                         keywords.add("web");
+                     }
+                     if (searchStr.contains("ngoại ngữ") || searchStr.contains("tiếng anh") || searchStr.contains("học tiếng")) {
+                         keywords.add("english");
+                         keywords.add("toeic");
+                         keywords.add("ielts");
+                         keywords.add("ngôn ngữ");
+                     }
+                     if (searchStr.contains("kinh doanh") || searchStr.contains("bán hàng") || searchStr.contains("làm giàu")) {
+                         keywords.add("kinh tế");
+                         keywords.add("quản trị");
+                         keywords.add("marketing");
+                     }
+
+                     //Hung: Quét từ khóa mở rộng trên cả Tiêu đề, Thể loại và Tên Tác giả
                      matchedBooks = allBooks.stream()
-                        .filter(b -> b.getTitle() != null && b.getTitle().toLowerCase().contains(searchStr))
+                        .filter(b -> {
+                            for (String kw : keywords) {
+                                if ((b.getTitle() != null && b.getTitle().toLowerCase().contains(kw)) ||
+                                    (b.getCategories() != null && b.getCategories().stream().anyMatch(c -> c.getCategoryName() != null && c.getCategoryName().toLowerCase().contains(kw))) ||
+                                    (b.getAuthors() != null && b.getAuthors().stream().anyMatch(a -> a.getAuthorName() != null && a.getAuthorName().toLowerCase().contains(kw)))) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        })
                         .collect(Collectors.toList());
                  }
             }
 
             if (!matchedBooks.isEmpty()) {
-                StringBuilder reply = new StringBuilder("Mình tìm thấy một số thông tin chi tiết về sách bạn cần:\n\n");
-                for (Book b : matchedBooks) {
+                List<Book> displayBooks = matchedBooks.stream().limit(3).collect(Collectors.toList());
+                StringBuilder reply = new StringBuilder("Mình tìm thấy " + matchedBooks.size() + " cuốn sách phù hợp. Dưới đây là một số gợi ý nổi bật:\n\n");
+                for (Book b : displayBooks) {
                     reply.append("- **").append(b.getTitle()).append("**");
                     if (b.getIsbn() != null) reply.append(" (ISBN: ").append(b.getIsbn()).append(")\n");
                     else reply.append("\n");
@@ -83,17 +164,15 @@ private final BookRepository bookRepository;
                         reply.append("  Vị trí: ").append(b.getShelfCode()).append("\n");
                     }
                     
-                    // Thêm thông tin bổ sung (Mock AI Analysis)
-                    reply.append("  💡 **Góc nhìn AI (Review Nhanh):**\n");
-                    reply.append("  - **Phù hợp với:** Sinh viên chuyên ngành, giảng viên tham khảo, và người muốn nghiên cứu chuyên sâu về lĩnh vực này.\n");
-                    reply.append("  - **Ưu điểm:** Nội dung được hệ thống hóa bài bản, bám sát thực tiễn, tính khả thi cao khi áp dụng vào đồ án/thực hành.\n");
-                    reply.append("  - **Nhược điểm:** Yêu cầu người đọc cần có kiến thức nền tảng cơ bản và sự kiên nhẫn để hoàn thành các bài tập ứng dụng.\n");
-                    
                     reply.append("\n");
                 }
                 responseBody.put("reply", reply.toString());
             } else {
-                responseBody.put("reply", "Hệ thống AI hiện đang trong chế độ cục bộ (Thiếu API Key). Qua tìm kiếm cơ bản, mình không tìm thấy cuốn sách nào khớp với yêu cầu của bạn. Bạn có thể cho mình tên sách chính xác hơn không?");
+                if (searchStr.length() > 2) {
+                    responseBody.put("reply", "Xin lỗi bạn, hiện tại mình không tìm thấy cuốn sách nào liên quan đến từ khóa '" + searchStr + "'. Bạn có thể thử tìm bằng một từ khóa khác hoặc kiểm tra lại chính tả giúp mình nhé!");
+                } else {
+                    responseBody.put("reply", "Xin lỗi bạn, mình chưa rõ bạn muốn tìm sách gì. Bạn có thể nói cụ thể hơn tên sách, tác giả hoặc chủ đề bạn quan tâm được không?");
+                }
             }
             return ResponseEntity.ok(responseBody);
         }

@@ -29,6 +29,9 @@ public interface BorrowTicketDetailRepository
         @Query("SELECT COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId = :patronId AND d.returnDate IS NULL")
         int countActiveBorrowedByPatronId(@Param("patronId") String patronId);
 
+        @Query("SELECT COUNT(d) > 0 FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId = :patronId AND d.bookCopy.book.bookId = :bookId AND d.returnDate IS NULL")
+        boolean existsActiveBorrowingByPatronAndBook(@Param("patronId") String patronId, @Param("bookId") Integer bookId);
+
         // Đếm số lượng sách MƯỢN tại cơ sở trong khoảng thời gian
         @Query("SELECT COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.campus.campusId = :campusId AND d.borrowTicket.createdAt BETWEEN :startDate AND :endDate")
         long countBorrowedInPeriod(@Param("campusId") Integer campusId, @Param("startDate") LocalDateTime startDate,
@@ -113,12 +116,17 @@ public interface BorrowTicketDetailRepository
 
        @Query("SELECT d.borrowTicket.patron.userId, COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId IN :userIds AND d.returnDate IS NULL GROUP BY d.borrowTicket.patron.userId")
        java.util.List<Object[]> countActiveBorrowedByUsers(@Param("userIds") java.util.List<String> userIds);
+<<<<<<< HEAD
 
        @EntityGraph(attributePaths = { "bookCopy", "bookCopy.book", "borrowTicket", "borrowTicket.patron", "borrowTicket.campus" })
+=======
+@EntityGraph(attributePaths = { "bookCopy", "bookCopy.book", "borrowTicket", "borrowTicket.patron", "borrowTicket.campus" })
+>>>>>>> origin/main
        @Query("SELECT b FROM BorrowTicketDetail b " +
               "WHERE b.returnDate IS NULL " +
               "AND (b.status IS NULL OR b.status NOT IN ('Returned', 'Lost', 'Damaged')) " +
               "AND (:title IS NULL OR LOWER(b.bookCopy.book.title) LIKE LOWER(CONCAT('%', :title, '%'))) " +
+<<<<<<< HEAD
               "AND (:borrowerId IS NULL OR LOWER(b.borrowTicket.patron.userId) LIKE LOWER(CONCAT('%', :borrowerId, '%'))) " +
               "AND b.returnCampus.campusId = :campusId")
        List<BorrowTicketDetail> searchCurrentlyBorrowing(@Param("title") String title, @Param("borrowerId") String borrowerId, @Param("campusId") Integer campusId);
@@ -126,3 +134,9 @@ public interface BorrowTicketDetailRepository
 }
 
        
+=======
+              "AND (:borrowerId IS NULL OR LOWER(b.borrowTicket.patron.userId) LIKE LOWER(CONCAT('%', :borrowerId, '%')))")
+       List<BorrowTicketDetail> searchCurrentlyBorrowing(@Param("title") String title, @Param("borrowerId") String borrowerId);
+}
+                
+>>>>>>> origin/main

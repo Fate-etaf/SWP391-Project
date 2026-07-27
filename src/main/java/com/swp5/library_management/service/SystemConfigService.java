@@ -23,6 +23,7 @@ public class SystemConfigService {
             config.setConfigKey("MAX_BOOKS_LECTURER");
             config.setConfigValue("10");
             config.setDescription("Số cuốn tối đa Giảng viên có thể mượn cùng lúc");
+            config.setUpdatedAt(java.time.LocalDateTime.now());
             systemConfigRepository.save(config);
         }
         
@@ -31,6 +32,7 @@ public class SystemConfigService {
             SystemConfig studentConfig = studentConfigOpt.get();
             if ("Student".equals(studentConfig.getDescription()) || "Số cuốn tối đa có thể mượn cùng lúc".equals(studentConfig.getDescription())) {
                 studentConfig.setDescription("Số cuốn tối đa Sinh viên có thể mượn cùng lúc");
+                studentConfig.setUpdatedAt(java.time.LocalDateTime.now());
                 systemConfigRepository.save(studentConfig);
             }
         }

@@ -173,6 +173,37 @@ public class ReservationServiceImpl implements ReservationService {
                     .build();
         }
 
+        // Kiểm tra đã đặt giữ chỗ trước đó chưa
+        boolean alreadyReserved = reservationRepository.existsActiveReservationForBook(patronId, bookId);
+        if (alreadyReserved) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Bạn đã có đơn đặt giữ chỗ cho cuốn sách này. Không thể đặt thêm.")
+                    .build();
+        }
+
+        // Kiểm tra đã mượn chưa
+        boolean alreadyBorrowing = borrowTicketDetailRepository.existsActiveBorrowingByPatronAndBook(patronId, bookId);
+        if (alreadyBorrowing) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Bạn đang mượn cuốn sách này. Không thể đặt giữ chỗ thêm.")
+                    .build();
+        }
+
+        // Kiểm tra có đang xếp hàng chờ không
+        boolean alreadyWaiting = waitlistRepository.existsByBookBookIdAndPatronUserIdAndStatusIn(
+                bookId, patronId, List.of("Waiting", "Notified"));
+        if (alreadyWaiting) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Bạn đang trong danh sách chờ của cuốn sách này. Hệ thống sẽ tự động cấp sách cho bạn khi có bản sao trống.")
+                    .build();
+        }
+
         // ── Bước 3: Kiểm tra giới hạn đơn đặt giữ chỗ ──────────────────────
         int maxActiveReservations = systemConfigService.getIntConfig("MAX_BOOKS_STUDENT", 3);
         long activeCount = reservationRepository.countByPatronUserIdAndStatus(patronId, "Holding");
@@ -420,6 +451,24 @@ public class ReservationServiceImpl implements ReservationService {
                     .success(false)
                     .resultType("ERROR")
                     .message("Bạn đã có trong danh sách chờ cho cuốn sách này tại cơ sở đã chọn.")
+                    .build();
+        }
+
+        boolean alreadyReserved = reservationRepository.existsActiveReservationForBook(patronId, bookId);
+        if (alreadyReserved) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Bạn đã có đơn đặt giữ chỗ cho cuốn sách này. Không thể xếp hàng chờ thêm.")
+                    .build();
+        }
+        
+        boolean alreadyBorrowing = borrowTicketDetailRepository.existsActiveBorrowingByPatronAndBook(patronId, bookId);
+        if (alreadyBorrowing) {
+            return ReservationResultDTO.builder()
+                    .success(false)
+                    .resultType("ERROR")
+                    .message("Bạn đang mượn cuốn sách này. Không thể xếp hàng chờ thêm.")
                     .build();
         }
 

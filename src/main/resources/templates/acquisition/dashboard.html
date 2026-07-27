@@ -40,7 +40,14 @@
                     <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight mb-1">Acquisition Dashboard</h2>
                     <p class="text-sm text-slate-500">Manage and track material requests and orders.</p>
                 </div>
-                <div class="text-right mt-2 md:mt-0">
+                <div class="flex gap-3 mt-2 md:mt-0">
+                    <a th:href="@{/librarian/acquisition/export-excel(status=${currentStatus}, search=${currentSearch}, patronRole=${currentPatronRole}, fromDate=${currentFromDate}, toDate=${currentToDate})}"
+                       class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-lg gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Export Excel
+                    </a>
                     <a href="/librarian/acquisition/dashboard" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg bg-fpt-orange text-white hover:bg-fpt-orangeHover transition-colors shadow-lg">
                         Refresh Data
                     </a>
@@ -69,26 +76,37 @@
 
             <!-- Filters & Search -->
             <div class="bg-white border border-slate-200 rounded-2xl p-4 mb-6 shadow-sm">
-                <form action="/librarian/acquisition/dashboard" method="get" class="flex flex-col md:flex-row gap-4 items-center">
-                    <div class="w-full md:w-48">
-                        <select name="patronRole" onchange="this.form.submit()"
-                                class="block w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-800 focus:outline-none focus:ring-1 focus:ring-fpt-orange focus:border-fpt-orange sm:text-sm">
-                            <option value="" th:selected="${currentPatronRole == null or currentPatronRole == ''}">All Roles</option>
-                            <option value="Student" th:selected="${currentPatronRole == 'Student'}">Student</option>
-                            <option value="Lecturer" th:selected="${currentPatronRole == 'Lecturer'}">Lecturer</option>
-                        </select>
+                <form action="/librarian/acquisition/dashboard" method="get" class="flex flex-col lg:flex-row gap-4 items-center justify-between">
+                    <input type="hidden" name="status" th:value="${currentStatus}">
+                    <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                        <div class="w-full sm:w-36">
+                            <select name="patronRole" onchange="this.form.submit()"
+                                    class="block w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-800 focus:outline-none focus:ring-1 focus:ring-fpt-orange focus:border-fpt-orange sm:text-xs">
+                                <option value="" th:selected="${currentPatronRole == null or currentPatronRole == ''}">All Roles</option>
+                                <option value="Student" th:selected="${currentPatronRole == 'Student'}">Student</option>
+                                <option value="Lecturer" th:selected="${currentPatronRole == 'Lecturer'}">Lecturer</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-500 font-medium">Từ:</span>
+                            <input type="date" name="fromDate" th:value="${currentFromDate}" onchange="this.form.submit()"
+                                   class="px-2.5 py-1.5 border border-slate-300 rounded-lg bg-slate-50 text-slate-800 text-xs focus:ring-fpt-orange focus:border-fpt-orange outline-none">
+                            <span class="text-xs text-slate-500 font-medium">Đến:</span>
+                            <input type="date" name="toDate" th:value="${currentToDate}" onchange="this.form.submit()"
+                                   class="px-2.5 py-1.5 border border-slate-300 rounded-lg bg-slate-50 text-slate-800 text-xs focus:ring-fpt-orange focus:border-fpt-orange outline-none">
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
-                        <a th:href="@{/librarian/acquisition/dashboard(search=${currentSearch}, patronRole=${currentPatronRole})}" 
+                    <div class="flex items-center gap-2 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0">
+                        <a th:href="@{/librarian/acquisition/dashboard(search=${currentSearch}, patronRole=${currentPatronRole}, fromDate=${currentFromDate}, toDate=${currentToDate})}" 
                            th:classappend="${currentStatus == null or currentStatus == ''} ? 'bg-fpt-orange text-white border-fpt-orange' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'"
                            class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap">All</a>
-                        <a th:href="@{/librarian/acquisition/dashboard(status='Pending', search=${currentSearch}, patronRole=${currentPatronRole})}" 
+                        <a th:href="@{/librarian/acquisition/dashboard(status='Pending', search=${currentSearch}, patronRole=${currentPatronRole}, fromDate=${currentFromDate}, toDate=${currentToDate})}" 
                            th:classappend="${currentStatus == 'Pending'} ? 'bg-fpt-orange text-white border-fpt-orange' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'"
                            class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap">Pending</a>
-                        <a th:href="@{/librarian/acquisition/dashboard(status='Approved', search=${currentSearch}, patronRole=${currentPatronRole})}" 
+                        <a th:href="@{/librarian/acquisition/dashboard(status='Approved', search=${currentSearch}, patronRole=${currentPatronRole}, fromDate=${currentFromDate}, toDate=${currentToDate})}" 
                            th:classappend="${currentStatus == 'Approved'} ? 'bg-fpt-orange text-white border-fpt-orange' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'"
                            class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap">Approved</a>
-                        <a th:href="@{/librarian/acquisition/dashboard(status='Available', search=${currentSearch}, patronRole=${currentPatronRole})}" 
+                        <a th:href="@{/librarian/acquisition/dashboard(status='Available', search=${currentSearch}, patronRole=${currentPatronRole}, fromDate=${currentFromDate}, toDate=${currentToDate})}" 
                            th:classappend="${currentStatus == 'Available'} ? 'bg-fpt-orange text-white border-fpt-orange' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'"
                            class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap">Available</a>
                     </div>

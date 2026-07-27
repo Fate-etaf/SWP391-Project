@@ -59,38 +59,42 @@
         </div>
     </div>
 
+    <!-- //Hung -->
+    <!-- === 3. GIAO DIỆN CHATBOT VÀ LƯU TRỮ SESSION === -->
+    <!-- Nút bấm Chatbot nổi ở góc dưới, kèm theo cửa sổ Chat và đoạn Script -->
+    <!-- xử lý giao tiếp với Backend, cộng thêm logic lưu lịch sử chat bằng SessionStorage -->
     <div class="fixed bottom-6 right-6 z-50">
     <button id="chatbotToggle" onclick="toggleChatWindow()"
-            class="w-14 h-14 bg-gradient-to-tr from-fpt-orange to-amber-500 text-white rounded-full flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all cursor-pointer group">
+            class="w-14 h-14 bg-gradient-to-tr from-fpt-orange to-amber-500 text-slate-900 rounded-full flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all cursor-pointer group">
         <svg class="w-7 h-7 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
         </svg>
     </button>
 
-    <div id="chatWindow" class="hidden absolute bottom-16 right-0 w-80 sm:w-96 h-[480px] bg-slate-900/95 border border-slate-800 backdrop-blur-xl rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all">
-        <div class="p-4 bg-gradient-to-r from-slate-950 to-slate-900 border-b border-slate-800 flex items-center justify-between">
+    <div id="chatWindow" class="hidden absolute bottom-16 right-0 w-80 sm:w-96 h-[480px] bg-white border border-slate-200 backdrop-blur-xl rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all">
+        <div class="p-4 bg-gradient-to-r from-slate-950 to-slate-900 border-b border-slate-200 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <div class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
                 <div>
-                    <h3 class="text-sm font-bold text-white tracking-wide">Trợ lý ảo FLMS-Bot</h3>
-                    <p class="text-[10px] text-slate-400">Tư vấn mượn & review sách 24/7</p>
+                    <h3 class="text-sm font-bold text-slate-900 tracking-wide">Trợ lý ảo FLMS-Bot</h3>
+                    <p class="text-[10px] text-slate-500">Tư vấn mượn & review sách 24/7</p>
                 </div>
             </div>
-            <button onclick="toggleChatWindow()" class="text-slate-400 hover:text-white transition-colors">✕</button>
+            <button onclick="toggleChatWindow()" class="text-slate-500 hover:text-slate-900 transition-colors">✕</button>
         </div>
 
         <div id="chatMessages" class="flex-grow p-4 overflow-y-auto space-y-3 text-xs scrollbar-thin">
             <div class="flex justify-start">
-                <div class="bg-slate-800 text-slate-200 p-3 rounded-2xl rounded-tl-none max-w-[85%] leading-relaxed border border-slate-700/50">
+                <div class="bg-white text-slate-800 p-3 rounded-2xl rounded-tl-none max-w-[85%] leading-relaxed border border-slate-200">
                     Xin chào! Mình là trợ lý ảo của thư viện số FPT. Cậu cần mình gợi ý sách ngành gì, hoặc muốn mình review/góp ý cuốn sách nào sắp mượn không?
                 </div>
             </div>
         </div>
 
-        <div class="p-3 bg-slate-950 border-t border-slate-800 flex gap-2">
+        <div class="p-3 bg-white border-t border-slate-200 flex gap-2">
             <input type="text" id="userInput" placeholder="Nhập câu hỏi của cậu tại đây..." 
                    onkeypress="if(event.key === 'Enter') sendChatMessage()"
-                   class="flex-grow bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-fpt-orange transition-all"/>
+                   class="flex-grow bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-fpt-orange transition-all"/>
             <button onclick="sendChatMessage()" class="bg-fpt-orange hover:bg-fpt-orangeHover text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-colors">
                 Gửi
             </button>
@@ -99,6 +103,22 @@
 </div>
 
 <script>
+    //Hung: Khởi tạo sự kiện khi trang vừa load xong, sẽ tự động lấy lịch sử chat từ Session
+    document.addEventListener('DOMContentLoaded', () => {
+        const chatMessages = document.getElementById('chatMessages');
+        const history = sessionStorage.getItem('flmsChatHistory');
+        if (history) {
+            chatMessages.innerHTML = history;
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Cuộn xuống cuối
+        }
+    });
+
+    //Hung: Hàm lưu lịch sử toàn bộ thẻ div khung chat vào trong SessionStorage
+    function saveChatHistory() {
+        const chatMessages = document.getElementById('chatMessages');
+        sessionStorage.setItem('flmsChatHistory', chatMessages.innerHTML);
+    }
+
     function toggleChatWindow() {
         const win = document.getElementById('chatWindow');
         win.classList.toggle('hidden');
@@ -121,12 +141,13 @@
         `;
         input.value = '';
         container.scrollTop = container.scrollHeight;
+        saveChatHistory();
 
         // 2. Tạo hiệu ứng dấu ba chấm chờ AI phản hồi
         const loadingId = 'loading-' + Date.now();
         container.innerHTML += `
             <div class="flex justify-start" id="${loadingId}">
-                <div class="bg-slate-800 text-slate-400 p-3 rounded-2xl rounded-tl-none border border-slate-700/50 italic animate-pulse">
+                <div class="bg-white text-slate-500 p-3 rounded-2xl rounded-tl-none border border-slate-200 italic animate-pulse">
                     FLMS-Bot đang suy nghĩ...
                 </div>
             </div>
@@ -146,11 +167,12 @@
             document.getElementById(loadingId).remove();
             container.innerHTML += `
                 <div class="flex justify-start">
-                    <div class="bg-slate-800 text-slate-200 p-3 rounded-2xl rounded-tl-none max-w-[85%] leading-relaxed border border-slate-700/50">
+                    <div class="bg-white text-slate-800 p-3 rounded-2xl rounded-tl-none max-w-[85%] leading-relaxed border border-slate-200">
                         ${data.reply.replace(/\n/g, '<br>')}
                     </div>
                 </div>
             `;
+            saveChatHistory();
         } catch (error) {
             document.getElementById(loadingId).remove();
             container.innerHTML += `
@@ -158,6 +180,7 @@
                     Có lỗi kết nối xảy ra. Vui lòng thử lại!
                 </div>
             `;
+            saveChatHistory();
         }
         container.scrollTop = container.scrollHeight;
     }
@@ -166,3 +189,5 @@
 
 </body>
 </html>
+
+

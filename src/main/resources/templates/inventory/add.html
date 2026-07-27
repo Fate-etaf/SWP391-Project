@@ -129,6 +129,25 @@
         .btn-secondary:hover {
             background: rgba(0,0,0,0.03);
         }
+
+        /* ── Validation styles ─────────────────────── */
+        .field-error {
+            display: block;
+            margin-top: 0.35rem;
+            font-size: 0.8rem;
+            color: #dc2626;
+            font-weight: 500;
+        }
+
+        .form-control.is-invalid {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+        }
+
+        .form-control.is-invalid:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -173,35 +192,52 @@
         <p>Fill in the details below to register a new book in the library catalog.</p>
     </div>
 
+    <!-- Error message alert -->
+    <div th:if="${errorMessage}" style="background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; font-weight: 500;">
+        <span th:text="${errorMessage}">ErrorMessage</span>
+    </div>
+
     <form th:action="@{/librarian/inventory/add}" th:object="${bookForm}" method="post">
         <!-- Hidden field to track which approved request was auto-filled -->
         <input type="hidden" id="requestId" name="requestId" value=""/>
         
         <div class="form-group">
             <label for="title">Title <span style="color: #fb7185">*</span></label>
-            <input type="text" id="title" th:field="*{title}" class="form-control" required placeholder="E.g., Clean Code"/>
+            <input type="text" id="title" th:field="*{title}"
+                   th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'"
+                   class="form-control" placeholder="E.g., Clean Code"/>
+            <span class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></span>
         </div>
 
         <div class="form-group">
             <label for="authorName">Author <span style="color: #fb7185">*</span></label>
-            <input type="text" id="authorName" th:field="*{authorName}" class="form-control" required placeholder="E.g., Robert C. Martin (comma-separate multiple)"/>
+            <input type="text" id="authorName" th:field="*{authorName}"
+                   th:classappend="${#fields.hasErrors('authorName')} ? 'is-invalid'"
+                   class="form-control" placeholder="E.g., Robert C. Martin (comma-separate multiple)"/>
+            <span class="field-error" th:if="${#fields.hasErrors('authorName')}" th:errors="*{authorName}"></span>
         </div>
 
         <div class="form-row">
             <div class="form-group">
                 <label for="isbn">ISBN <span style="color: #fb7185">*</span></label>
-                <input type="text" id="isbn" th:field="*{isbn}" class="form-control" required placeholder="978-0132350884"/>
+                <input type="text" id="isbn" th:field="*{isbn}"
+                       th:classappend="${#fields.hasErrors('isbn')} ? 'is-invalid'"
+                       class="form-control" placeholder="978-0132350884"/>
+                <span class="field-error" th:if="${#fields.hasErrors('isbn')}" th:errors="*{isbn}"></span>
             </div>
             
             <div class="form-group">
                 <label for="language">Language <span style="color: #fb7185">*</span></label>
-                <select id="language" th:field="*{language}" class="form-control" required>
+                <select id="language" th:field="*{language}"
+                        th:classappend="${#fields.hasErrors('language')} ? 'is-invalid'"
+                        class="form-control">
                     <option value="Vietnamese">Vietnamese</option>
                     <option value="English">English</option>
                     <option value="Japanese">Japanese</option>
                     <option value="Korean">Korean</option>
                     <option value="Chinese">Chinese</option>
                 </select>
+                <span class="field-error" th:if="${#fields.hasErrors('language')}" th:errors="*{language}"></span>
             </div>
         </div>
 
@@ -257,8 +293,10 @@
             </div>
             
             <div class="form-group">
-                <label for="campusId">Campus</label>
-                <select id="campusId" th:field="*{campusId}" class="form-control" required>
+                <label for="campusId">Campus <span style="color: #fb7185">*</span></label>
+                <select id="campusId" th:field="*{campusId}"
+                        th:classappend="${#fields.hasErrors('campusId')} ? 'is-invalid'"
+                        class="form-control">
                     <option value="" disabled selected>Select a campus</option>
                     <option value="1">Hòa Lạc</option>
                     <option value="2">Cần Thơ</option>
@@ -266,6 +304,7 @@
                     <option value="4">Tp.Hồ Chí Minh</option>
                     <option value="5">Quy Nhơn</option>
                 </select>
+                <span class="field-error" th:if="${#fields.hasErrors('campusId')}" th:errors="*{campusId}"></span>
             </div>
         </div>
 

@@ -25,6 +25,9 @@ public interface BookCopyRepository extends JpaRepository<BookCopy, String> {
    */
   long countByCopyStatus(String copyStatus);
 
+  /** Đếm tổng số bản sao của một cuốn sách (dùng khi import Excel để tính offset copyId). */
+  int countByBook(com.swp5.library_management.entity.Book book);
+
   long countByCampusCampusIdAndCopyStatus(Integer campusId, String copyStatus);
 
   @Query("SELECT COUNT(bc) FROM BookCopy bc WHERE bc.book.bookId = :bookId AND bc.campus.campusId = :campusId AND bc.copyStatus = 'Available'")

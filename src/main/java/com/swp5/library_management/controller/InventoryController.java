@@ -5,26 +5,29 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import jakarta.validation.Valid;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.ResponseEntity;
 
 import com.swp5.library_management.dto.AddBookForm;
 import com.swp5.library_management.dto.BookDetailDTO;
 import com.swp5.library_management.dto.BookSearchResultDTO;
 import com.swp5.library_management.dto.DashboardDataDTO;
-import com.swp5.library_management.dto.InventoryOverviewDTO;
 import com.swp5.library_management.entity.User;
 import com.swp5.library_management.entity.Major;
 import com.swp5.library_management.entity.Subject;
-import com.swp5.library_management.entity.Campus;
-import com.swp5.library_management.entity.Category;
 import com.swp5.library_management.entity.MaterialRequest;
 import com.swp5.library_management.repository.CampusRepository;
 import com.swp5.library_management.repository.CategoryRepository;
@@ -33,6 +36,8 @@ import com.swp5.library_management.repository.ShelfRepository;
 import com.swp5.library_management.repository.SubjectRepository;
 import com.swp5.library_management.repository.MaterialRequestRepository;
 import com.swp5.library_management.repository.UserRepository;
+import com.swp5.library_management.repository.BookCopyRepository;
+import com.swp5.library_management.repository.BookRepository;
 import com.swp5.library_management.service.BookService;
 import com.swp5.library_management.service.HomeService;
 import com.swp5.library_management.service.InventoryService;
@@ -53,6 +58,8 @@ public class InventoryController {
     private final HomeService homeService;
     private final MaterialRequestRepository materialRequestRepository;
     private final UserRepository userRepository;
+    private final BookCopyRepository bookCopyRepository;
+    private final BookRepository bookRepository;
 
     public InventoryController(InventoryService inventoryService,
                                CampusRepository campusRepository,
@@ -63,7 +70,9 @@ public class InventoryController {
                                MajorRepository majorRepository,
                                HomeService homeService,
                                MaterialRequestRepository materialRequestRepository,
-                               UserRepository userRepository) {
+                               UserRepository userRepository,
+                               BookCopyRepository bookCopyRepository,
+                               BookRepository bookRepository) {
         this.inventoryService = inventoryService;
         this.campusRepository = campusRepository;
         this.categoryRepository = categoryRepository;
@@ -74,7 +83,11 @@ public class InventoryController {
         this.homeService = homeService;
         this.materialRequestRepository = materialRequestRepository;
         this.userRepository = userRepository;
+        this.bookCopyRepository = bookCopyRepository;
+        this.bookRepository = bookRepository;
     }
+
+    private static final int PAGE_SIZE = 12;
 
     @GetMapping("/inventory/list")
     public String listBooks(
@@ -83,6 +96,7 @@ public class InventoryController {
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) Integer majorId,
             @RequestParam(required = false) Integer campusId,
+            @RequestParam(defaultValue = "0") int page,
             HttpSession session,
             Model model) {
 
@@ -94,16 +108,27 @@ public class InventoryController {
                 || campusId != null;
 
         if (hasSearch) {
-            List<BookSearchResultDTO> results = bookService.searchBooks(keyword, subjectCode, categoryId, majorId,
-                    campusId, librarianCampusId, 0, 100).getContent();
-            model.addAttribute("results", results);
-            model.addAttribute("noResults", results.isEmpty());
+            Page<BookSearchResultDTO> resultPage = bookService.searchBooks(keyword, subjectCode, categoryId, majorId,
+                    campusId, librarianCampusId, page, PAGE_SIZE);
+            model.addAttribute("results", resultPage.getContent());
+            model.addAttribute("noResults", resultPage.isEmpty());
+            model.addAttribute("totalPages", resultPage.getTotalPages());
+            model.addAttribute("totalElements", resultPage.getTotalElements());
+            model.addAttribute("currentPage", page);
 
-            if (results.isEmpty()) {
+            if (resultPage.isEmpty()) {
                 model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks(librarianCampusId));
             }
         } else {
-            model.addAttribute("majorSections", homeService.getMajorsWithRandomBooks(librarianCampusId));
+            // Show all books with pagination even without search
+            Page<BookSearchResultDTO> resultPage = bookService.searchBooks(null, null, null, null,
+                    null, librarianCampusId, page, PAGE_SIZE);
+            model.addAttribute("results", resultPage.getContent());
+            model.addAttribute("noResults", resultPage.isEmpty());
+            model.addAttribute("totalPages", resultPage.getTotalPages());
+            model.addAttribute("totalElements", resultPage.getTotalElements());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("hasSearch", false);
         }
 
         model.addAttribute("campuses", campusRepository.findAll());
@@ -121,6 +146,66 @@ public class InventoryController {
         return "inventory/list";
     }
 
+    /**
+     * GET /librarian/inventory/import-excel → Tải về file Excel mẫu để thủ thư điền thông tin sách.
+     */
+    @GetMapping("/inventory/import-excel/template")
+    public void downloadExcelTemplate(jakarta.servlet.http.HttpServletResponse response) throws Exception {
+        byte[] templateBytes = bookService.generateImportTemplate();
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"book_import_template.xlsx\"");
+        response.getOutputStream().write(templateBytes);
+        response.getOutputStream().flush();
+    }
+
+    /**
+     * POST /librarian/inventory/import-excel → Xử lý file Excel import sách hàng loạt.
+     */
+    @PostMapping("/inventory/import-excel")
+    public String importBooksFromExcel(
+            @RequestParam("file") MultipartFile file,
+            HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        if (file == null || file.isEmpty()) {
+            redirectAttributes.addFlashAttribute("importError", "Vui lòng chọn file Excel để import.");
+            return "redirect:/librarian/inventory/list";
+        }
+
+        String filename = file.getOriginalFilename();
+        if (filename == null || (!filename.endsWith(".xlsx") && !filename.endsWith(".xls"))) {
+            redirectAttributes.addFlashAttribute("importError", "File không đúng định dạng. Vui lòng upload file Excel (.xlsx hoặc .xls).");
+            return "redirect:/librarian/inventory/list";
+        }
+
+        Integer campusId = (Integer) session.getAttribute("loggedInCampusId");
+        if (campusId == null) {
+            String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+            if (loggedInUserId != null) {
+                User librarian = userRepository.findById(loggedInUserId).orElse(null);
+                if (librarian != null) campusId = librarian.getCampusId();
+            }
+        }
+
+        try {
+            BookService.ImportResult result = bookService.importBooksFromExcel(file.getInputStream(), campusId);
+            if (result.successCount() > 0) {
+                redirectAttributes.addFlashAttribute("importSuccess",
+                        "Import thành công " + result.successCount() + " cuốn sách."
+                        + (result.errorCount() > 0 ? " Có " + result.errorCount() + " dòng lỗi." : ""));
+            }
+            if (result.errorCount() > 0 && result.successCount() == 0) {
+                redirectAttributes.addFlashAttribute("importError",
+                        "Import thất bại. Chi tiết lỗi: " + result.firstError());
+            }
+            if (!result.errors().isEmpty()) {
+                redirectAttributes.addFlashAttribute("importErrors", result.errors());
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("importError", "Lỗi khi đọc file: " + e.getMessage());
+        }
+        return "redirect:/librarian/inventory/list";
+    }
+
     @GetMapping("/inventory/add")
     public String showAddBookForm(HttpSession session, Model model) {
         // Resolve the librarian's campus so we only show approved requests from their campus
@@ -134,8 +219,8 @@ public class InventoryController {
         }
 
         List<MaterialRequest> approvedRequests = (librarianCampusId != null)
-                ? materialRequestRepository.findByStatusAndSearchTermAndCampusId("Approved", null, librarianCampusId)
-                : materialRequestRepository.findByStatusAndSearchTerm("Approved", null);
+                ? materialRequestRepository.findByStatusAndSearchTermAndCampusId("Approved", null, librarianCampusId, null, null)
+                : materialRequestRepository.findByStatusAndSearchTerm("Approved", null, null, null);
 
         model.addAttribute("bookForm", new AddBookForm());
         model.addAttribute("shelves", shelfRepository.findAll());
@@ -147,25 +232,69 @@ public class InventoryController {
      * POST /librarian/inventory/add → Lưu sách mới và redirect về danh sách.
      */
     @PostMapping("/inventory/add")
-    public String saveBook(@ModelAttribute("bookForm") AddBookForm form, jakarta.servlet.http.HttpSession session) {
+    public String saveBook(
+            @Valid @ModelAttribute("bookForm") AddBookForm form,
+            BindingResult bindingResult,
+            jakarta.servlet.http.HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes,
+            Model model) {
+
+        // ── Server-side validation ─────────────────────────────────────────────
+        if (bindingResult.hasErrors()) {
+            String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+            Integer librarianCampusId = null;
+            if (loggedInUserId != null) {
+                User librarian = userRepository.findById(loggedInUserId).orElse(null);
+                if (librarian != null) {
+                    librarianCampusId = librarian.getCampusId();
+                }
+            }
+            List<MaterialRequest> approvedRequests = (librarianCampusId != null)
+                    ? materialRequestRepository.findByStatusAndSearchTermAndCampusId("Approved", null, librarianCampusId, null, null)
+                    : materialRequestRepository.findByStatusAndSearchTerm("Approved", null, null, null);
+            model.addAttribute("shelves", shelfRepository.findAll());
+            model.addAttribute("approvedRequests", approvedRequests);
+            return "inventory/add";
+        }
+
         Integer campusId = form.getCampusId();
         if (campusId == null) {
             campusId = (Integer) session.getAttribute("loggedInCampusId");
         }
-        bookService.saveBook(form, campusId);
 
-        // If the form was auto-filled from an approved request, mark it as Available
-        // so its "Auto-fill Form" button no longer shows on the page
-        if (form.getRequestId() != null && !form.getRequestId().trim().isEmpty()) {
-            try {
-                Integer reqId = Integer.parseInt(form.getRequestId().trim());
-                materialRequestRepository.updateStatus(reqId, "Available");
-            } catch (NumberFormatException e) {
-                // Ignore if it's not a valid number
+        try {
+            bookService.saveBook(form, campusId);
+
+            if (form.getRequestId() != null && !form.getRequestId().trim().isEmpty()) {
+                try {
+                    Integer reqId = Integer.parseInt(form.getRequestId().trim());
+                    materialRequestRepository.updateStatus(reqId, "Available");
+                } catch (NumberFormatException e) {
+                    // Ignore if it's not a valid number
+                }
             }
-        }
 
-        return "redirect:/librarian/inventory/list";
+            redirectAttributes.addFlashAttribute("successMessage", "Thêm sách mới thành công!");
+            return "redirect:/librarian/inventory/list";
+        } catch (IllegalArgumentException e) {
+            String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+            Integer librarianCampusId = null;
+            if (loggedInUserId != null) {
+                User librarian = userRepository.findById(loggedInUserId).orElse(null);
+                if (librarian != null) {
+                    librarianCampusId = librarian.getCampusId();
+                }
+            }
+
+            List<MaterialRequest> approvedRequests = (librarianCampusId != null)
+                    ? materialRequestRepository.findByStatusAndSearchTermAndCampusId("Approved", null, librarianCampusId, null, null)
+                    : materialRequestRepository.findByStatusAndSearchTerm("Approved", null, null, null);
+
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("shelves", shelfRepository.findAll());
+            model.addAttribute("approvedRequests", approvedRequests);
+            return "inventory/add";
+        }
     }
 
     @GetMapping("/inventory/{id}")
@@ -183,6 +312,103 @@ public class InventoryController {
         } catch (NoSuchElementException e) {
             return "error/404";
         }
+    }
+
+    @PostMapping("/inventory/{id}/add-copies")
+    public String addCopies(
+            @PathVariable Integer id,
+            @RequestParam(required = false) Integer campusId,
+            @RequestParam Integer count,
+            HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            Integer effectiveCampusId = (Integer) session.getAttribute("loggedInCampusId");
+            if (effectiveCampusId == null && campusId != null) {
+                effectiveCampusId = campusId;
+            } else if (effectiveCampusId == null) {
+                String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+                if (loggedInUserId != null) {
+                    User librarian = userRepository.findById(loggedInUserId).orElse(null);
+                    if (librarian != null && librarian.getCampusId() != null) {
+                        effectiveCampusId = librarian.getCampusId();
+                    }
+                }
+            }
+            if (effectiveCampusId == null) {
+                effectiveCampusId = 1; // Fallback
+            }
+
+            com.swp5.library_management.entity.Book book = bookRepository.findById(id)
+                    .orElseThrow(() -> new NoSuchElementException("Không tìm thấy sách"));
+            com.swp5.library_management.entity.Campus campus = campusRepository.findById(effectiveCampusId)
+                    .orElseThrow(() -> new NoSuchElementException("Không tìm thấy cơ sở"));
+            
+            com.swp5.library_management.entity.Shelf shelf = book.getShelfCode() != null 
+                    ? shelfRepository.findById(book.getShelfCode()).orElse(null) : null;
+
+            if (count == null || count <= 0) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Số lượng bản sao cần lớn hơn 0");
+                return "redirect:/librarian/inventory/" + id;
+            }
+
+            // Tìm hậu tố lớn nhất để đặt ID dạng BOOK-{bookId}-{index}
+            List<com.swp5.library_management.entity.BookCopy> existing = bookCopyRepository.findByBookBookId(id);
+            int maxIndex = 0;
+            String prefix = "BOOK-" + id + "-";
+            for (com.swp5.library_management.entity.BookCopy copy : existing) {
+                if (copy.getCopyId().startsWith(prefix)) {
+                    try {
+                        int index = Integer.parseInt(copy.getCopyId().substring(prefix.length()));
+                        if (index > maxIndex) {
+                            maxIndex = index;
+                        }
+                    } catch (NumberFormatException e) {
+                        // ignore
+                    }
+                }
+            }
+
+            for (int i = 1; i <= count; i++) {
+                String copyId = prefix + (maxIndex + i);
+                com.swp5.library_management.entity.BookCopy copy = com.swp5.library_management.entity.BookCopy.builder()
+                        .copyId(copyId)
+                        .book(book)
+                        .campus(campus)
+                        .shelf(shelf)
+                        .copyStatus("Available")
+                        .conditionStatus("Good")
+                        .acquiredAt(java.time.LocalDateTime.now())
+                        .build();
+                bookCopyRepository.save(copy);
+            }
+
+            redirectAttributes.addFlashAttribute("successMessage", "Đã thêm thành công " + count + " bản sao sách.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/librarian/inventory/" + id;
+    }
+
+    @PostMapping("/inventory/{id}/delete-copy")
+    public String deleteCopy(
+            @PathVariable Integer id,
+            @RequestParam String copyId,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            com.swp5.library_management.entity.BookCopy copy = bookCopyRepository.findById(copyId)
+                    .orElseThrow(() -> new NoSuchElementException("Không tìm thấy bản sao sách"));
+
+            if (!"Available".equals(copy.getCopyStatus())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa bản sao sách khi trạng thái đang là: " + copy.getCopyStatus());
+                return "redirect:/librarian/inventory/" + id;
+            }
+
+            bookCopyRepository.delete(copy);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã xóa bản sao sách " + copyId + " thành công.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/librarian/inventory/" + id;
     }
 
     @GetMapping("/inventory/dashboard")

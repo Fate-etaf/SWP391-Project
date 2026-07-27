@@ -193,6 +193,13 @@
                         </div>
                     </div>
 
+                    <!-- Shelf Code -->
+                    <div th:if="${book.shelfCode != null}" class="flex items-start mb-3">
+                        <span class="text-slate-400 text-sm w-24 shrink-0">Vị trí kệ</span>
+                        <span class="inline-block bg-orange-500/20 text-orange-300 text-xs font-bold px-2 py-0.5 rounded font-mono"
+                              th:text="${book.shelfCode}">SHELF</span>
+                    </div>
+
                     <!-- Description -->
                     <div th:if="${book.description != null and !#strings.isEmpty(book.description)}"
                          class="mt-5 bg-white/5 border border-white/10 rounded-xl p-4">

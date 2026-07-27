@@ -319,6 +319,14 @@
         Back to Catalog
     </a>
 
+    <!-- Alert Messages -->
+    <div th:if="${successMessage}" style="background: #d1fae5; border: 1px solid #10b981; color: #065f46; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; font-size: 0.9rem; font-weight: 500;">
+        <span th:text="${successMessage}">Success!</span>
+    </div>
+    <div th:if="${errorMessage}" style="background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; font-size: 0.9rem; font-weight: 500;">
+        <span th:text="${errorMessage}">Error!</span>
+    </div>
+
     <!-- ── HERO: Cover + Info ──────────────────────────────────────────────── -->
     <div class="book-hero">
 
@@ -383,6 +391,12 @@
                     <span th:text="${book.subjectName}">Subject Name</span>
                 </span>
 
+                <span class="meta-label" th:if="${book.shelfCode != null}">Shelf Location</span>
+                <span class="meta-value" th:if="${book.shelfCode != null}">
+                    <span class="badge-subject" th:text="${book.shelfCode}" style="background: rgba(242,113,37,0.1); color: var(--accent); border-color: rgba(242,113,37,0.3);">SHELF</span>
+                    <span th:if="${book.shelfNumber != null}" th:text="'(Kệ số ' + ${book.shelfNumber} + ')'" style="font-weight: 500; font-size: 0.82rem; margin-left: 0.2rem; color: var(--text-secondary);"></span>
+                </span>
+
                 <span class="meta-label">Total Copies</span>
                 <span class="meta-value highlight" th:text="${#lists.size(book.copies)}">0</span>
             </div>
@@ -395,6 +409,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- ── COPIES SECTION ─────────────────────────────────────────────────── -->
     <div class="section-header">
@@ -455,16 +470,32 @@
                           th:text="${copy.conditionStatus}">Good</span>
                 </div>
 
+                <div class="copy-row-item" th:if="${copy.shelfCodeTopic != null and copy.shelfCodeTopic != '—'}">
+                    <span class="label">Shelf Topic</span>
+                    <span th:text="${copy.shelfCodeTopic}" style="font-weight: 500; text-align: right; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Topic</span>
+                </div>
+
                 <div th:if="${copy.shelfCode != null and copy.shelfCode != '—'}">
                     <span class="shelf-tag">
                         <svg width="11" height="11" fill="none" stroke="currentColor"
-                            stroke-width="2" viewBox="0 0 24 24">
+                             stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M3 7h18M3 12h18M3 17h18"/>
+                                  stroke-linejoin="round"
+                                  d="M3 7h18M3 12h18M3 17h18"/>
                         </svg>
-                        <span th:text="${copy.shelfCode}">SHELF</span>
+                        <span th:text="${copy.shelfCode + (copy.shelfNumber != null ? ' (Kệ số ' + copy.shelfNumber + ')' : '')}">SHELF</span>
                     </span>
+                </div>
+
+                <!-- Xóa bản sao sách (chỉ cho phép khi status = Available) -->
+                <div th:if="${copy.copyStatus == 'Available'}" style="margin-top: 0.8rem; border-top: 1px dashed var(--border); padding-top: 0.6rem;">
+                    <form th:action="@{/librarian/inventory/{id}/delete-copy(id=${book.bookId})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bản sao sách này không?');">
+                        <input type="hidden" name="copyId" th:value="${copy.copyId}">
+                        <button type="submit" style="background: transparent; color: var(--rose); border: 1px solid var(--rose); padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.2rem; width: 100%; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='var(--rose-soft)'" onmouseout="this.style.background='transparent'">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            Xóa Bản Sao
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

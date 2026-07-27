@@ -5,6 +5,7 @@ import com.swp5.library_management.repository.*;
 import com.swp5.library_management.service.EmailService;
 import com.swp5.library_management.service.SystemConfigService;
 import com.swp5.library_management.service.MaterialRequestService;
+import com.swp5.library_management.service.MaterialRequestExportService;
 import com.swp5.library_management.service.UserStatusService;
 
 import jakarta.servlet.http.HttpSession;
@@ -36,6 +37,7 @@ public class LibrarianController {
     private final EmailService emailService;
     private final MaterialRequestService materialRequestService;
     private final UserStatusService userStatusService;
+    private final MaterialRequestExportService materialRequestExportService;
 
     private boolean isNotLibrarian(HttpSession session) {
         Boolean isLibrarian = (Boolean) session.getAttribute("isLibrarian");
@@ -86,7 +88,7 @@ public class LibrarianController {
     @PostMapping("/create-loan")
     @Transactional
     public String handleCreateLoan(@RequestParam String patronId,
-                                   @RequestParam String copyId,
+                                   @RequestParam(required = false) List<String> copyIds,
                                    HttpSession session,
                                    RedirectAttributes redirectAttrs,
                                    Model model) {
@@ -96,27 +98,30 @@ public class LibrarianController {
         }
 
         patronId = patronId.trim();
-        copyId = copyId.trim();
+        List<String> validCopyIds = copyIds == null ? java.util.Collections.emptyList() : copyIds.stream().map(String::trim).filter(s -> !s.isEmpty()).distinct().toList();
+
+        if (validCopyIds.isEmpty()) {
+            model.addAttribute("errorMsg", "Vui lòng nhập ít nhất một Mã bản sao sách (Copy ID)!");
+            model.addAttribute("patronId", patronId);
+            return "librarian/create-loan";
+        }
 
         // Validate patron
         Optional<User> patronOpt = userRepository.findById(patronId);
         if (patronOpt.isEmpty()) {
             model.addAttribute("errorMsg", "Mã số bạn đọc (Patron ID) không tồn tại trên hệ thống!");
             model.addAttribute("patronId", patronId);
-            model.addAttribute("copyId", copyId);
             return "librarian/create-loan";
         }
         User patron = patronOpt.get();
         if (!"Active".equalsIgnoreCase(patron.getStatus())) {
             model.addAttribute("errorMsg", "Tài khoản bạn đọc đang bị khóa hoặc không hoạt động!");
             model.addAttribute("patronId", patronId);
-            model.addAttribute("copyId", copyId);
             return "librarian/create-loan";
         }
         if (patron.getBorrowingLocked() != null && patron.getBorrowingLocked()) {
             model.addAttribute("errorMsg", "Tài khoản bạn đọc hiện đang bị khóa chức năng mượn sách!");
             model.addAttribute("patronId", patronId);
-            model.addAttribute("copyId", copyId);
             return "librarian/create-loan";
         }
         
@@ -124,65 +129,89 @@ public class LibrarianController {
         if ("Under Penalty".equals(granularStatus)) {
             model.addAttribute("errorMsg", "Bạn đọc đang có phiếu phạt chưa nộp, không thể mượn thêm sách!");
             model.addAttribute("patronId", patronId);
-            model.addAttribute("copyId", copyId);
             return "librarian/create-loan";
         }
         if ("Overdue".equals(granularStatus)) {
             model.addAttribute("errorMsg", "Bạn đọc đang có sách mượn quá hạn, không thể mượn thêm sách!");
             model.addAttribute("patronId", patronId);
-            model.addAttribute("copyId", copyId);
             return "librarian/create-loan";
         }
         if ("Graduated".equals(granularStatus) || "Inactive".equals(granularStatus)) {
             model.addAttribute("errorMsg", "Tài khoản không hoạt động hoặc đã tốt nghiệp, không thể mượn sách!");
             model.addAttribute("patronId", patronId);
-            model.addAttribute("copyId", copyId);
             return "librarian/create-loan";
         }
 
         // Check borrowing limit
         int currentBorrowedCount = borrowTicketDetailRepository.countActiveBorrowedByPatronId(patronId);
         int maxAllowed = systemConfigService.getIntConfig("MAX_BOOKS_STUDENT", 3);
-        if (currentBorrowedCount >= maxAllowed) {
-            model.addAttribute("errorMsg", "Bạn đọc đã vượt quá giới hạn mượn sách song hành (Đang mượn " + currentBorrowedCount + "/" + maxAllowed + " cuốn)!");
+        List<String> patronRoles = userRepository.findRolesByUserId(patronId);
+        if (patronRoles.contains("Lecturer")) {
+            maxAllowed = systemConfigService.getIntConfig("MAX_BOOKS_LECTURER", 10);
+        }
+
+        if (currentBorrowedCount + validCopyIds.size() > maxAllowed) {
+            model.addAttribute("errorMsg", "Vượt quá giới hạn! Bạn đọc đang mượn " + currentBorrowedCount + " cuốn, mượn thêm " + validCopyIds.size() + " cuốn sẽ vượt mức tối đa " + maxAllowed + " cuốn.");
             model.addAttribute("patronId", patronId);
-            model.addAttribute("copyId", copyId);
             return "librarian/create-loan";
         }
 
-        // Validate book copy
-        Optional<BookCopy> copyOpt = bookCopyRepository.findById(copyId);
-        if (copyOpt.isEmpty()) {
-            model.addAttribute("errorMsg", "Mã bản sao sách (Copy ID) không tồn tại trên hệ thống!");
-            model.addAttribute("patronId", patronId);
-            model.addAttribute("copyId", copyId);
-            return "librarian/create-loan";
-        }
-        BookCopy copy = copyOpt.get();
-        Reservation matchedReservation = null;
-        if ("Reserved".equalsIgnoreCase(copy.getCopyStatus())) {
-            List<Reservation> reservations = reservationRepository.findByPatronUserIdAndStatusOrderByReservedAtDesc(patronId, "Holding");
-            for (Reservation r : reservations) {
-                if (r.getCopy() != null && r.getCopy().getCopyId().equals(copyId)) {
-                    matchedReservation = r;
-                    break;
-                }
-            }
-            if (matchedReservation == null) {
-                model.addAttribute("errorMsg", "Bản sao sách này hiện đang được đặt giữ chỗ bởi một Bạn đọc khác!");
+        // Validate book copies before saving anything
+        List<BookCopy> copiesToBorrow = new java.util.ArrayList<>();
+        List<Reservation> matchedReservations = new java.util.ArrayList<>();
+        java.util.Set<Integer> bookIdsInThisTransaction = new java.util.HashSet<>();
+
+        for (String copyId : validCopyIds) {
+            Optional<BookCopy> copyOpt = bookCopyRepository.findById(copyId);
+            if (copyOpt.isEmpty()) {
+                model.addAttribute("errorMsg", "Mã bản sao sách (Copy ID) '" + copyId + "' không tồn tại trên hệ thống!");
                 model.addAttribute("patronId", patronId);
-                model.addAttribute("copyId", copyId);
                 return "librarian/create-loan";
             }
-        } else if (!"Available".equalsIgnoreCase(copy.getCopyStatus())) {
-            model.addAttribute("errorMsg", "Bản sao sách này hiện không sẵn sàng để mượn (Trạng thái hiện tại: " + copy.getCopyStatus() + ")!");
-            model.addAttribute("patronId", patronId);
-            model.addAttribute("copyId", copyId);
-            return "librarian/create-loan";
+            BookCopy copy = copyOpt.get();
+
+            // Duplicate Book Check 1: Already borrowing
+            boolean alreadyBorrowing = borrowTicketDetailRepository.existsActiveBorrowingByPatronAndBook(patronId, copy.getBook().getBookId());
+            if (alreadyBorrowing) {
+                model.addAttribute("errorMsg", "Bạn đọc đang mượn một bản sao của cuốn '" + copy.getBook().getTitle() + "'. Không thể mượn thêm bản sao khác cùng đầu sách!");
+                model.addAttribute("patronId", patronId);
+                return "librarian/create-loan";
+            }
+
+            // Duplicate Book Check 2: Same book multiple times in this transaction
+            if (!bookIdsInThisTransaction.add(copy.getBook().getBookId())) {
+                model.addAttribute("errorMsg", "Phát hiện 2 bản sao của cùng một đầu sách '" + copy.getBook().getTitle() + "' trong danh sách mượn. Không thể tạo đơn!");
+                model.addAttribute("patronId", patronId);
+                return "librarian/create-loan";
+            }
+
+            Reservation matchedReservation = null;
+            if ("Reserved".equalsIgnoreCase(copy.getCopyStatus())) {
+                List<Reservation> reservations = reservationRepository.findByPatronUserIdAndStatusOrderByReservedAtDesc(patronId, "Holding");
+                for (Reservation r : reservations) {
+                    if (r.getCopy() != null && r.getCopy().getCopyId().equals(copyId)) {
+                        matchedReservation = r;
+                        break;
+                    }
+                }
+                if (matchedReservation == null) {
+                    model.addAttribute("errorMsg", "Bản sao sách '" + copyId + "' hiện đang được đặt giữ chỗ bởi một Bạn đọc khác!");
+                    model.addAttribute("patronId", patronId);
+                    return "librarian/create-loan";
+                }
+            } else if (!"Available".equalsIgnoreCase(copy.getCopyStatus())) {
+                model.addAttribute("errorMsg", "Bản sao sách '" + copyId + "' hiện không sẵn sàng để mượn (Trạng thái hiện tại: " + copy.getCopyStatus() + ")!");
+                model.addAttribute("patronId", patronId);
+                return "librarian/create-loan";
+            }
+
+            copiesToBorrow.add(copy);
+            if (matchedReservation != null) {
+                matchedReservations.add(matchedReservation);
+            }
         }
 
         // Determine loan duration
-        List<String> patronRoles = userRepository.findRolesByUserId(patronId);
         int loanDays = systemConfigService.getIntConfig("LOAN_DAYS_STUDENT", 14);
         if (patronRoles.contains("Lecturer")) {
             loanDays = systemConfigService.getIntConfig("LOAN_DAYS_LECTURER", 30);
@@ -198,47 +227,46 @@ public class LibrarianController {
             }
         }
 
-
-        // Create BorrowTicket
+        // Create exactly 1 BorrowTicket
         BorrowTicket ticket = new BorrowTicket();
         ticket.setPatron(patron);
         ticket.setLibrarian(librarian);
         ticket.setCampus(librarianCampus);
         ticket.setCreatedAt(LocalDateTime.now());
-        ticket.setNote("Được tạo bởi thủ thư tại quầy");
+        ticket.setNote("Được tạo bởi thủ thư tại quầy (" + validCopyIds.size() + " cuốn)");
         ticket = borrowTicketRepository.save(ticket);
 
-        // Create BorrowTicketDetail
-        BorrowTicketDetail detail = new BorrowTicketDetail();
-        detail.setBorrowTicket(ticket);
-        detail.setBookCopy(copy);
-        detail.setDueDate(LocalDateTime.now().plusDays(loanDays));
-        detail.setRenewalCount(0);
-        detail.setStatus("Borrowing");
-        detail.setReturnDate(null);
-        borrowTicketDetailRepository.save(detail);
+        // Process each copy
+        for (BookCopy copy : copiesToBorrow) {
+            BorrowTicketDetail detail = new BorrowTicketDetail();
+            detail.setBorrowTicket(ticket);
+            detail.setBookCopy(copy);
+            detail.setDueDate(LocalDateTime.now().plusDays(loanDays));
+            detail.setRenewalCount(0);
+            detail.setStatus("Borrowing");
+            detail.setReturnDate(null);
+            borrowTicketDetailRepository.save(detail);
 
-        // Update BookCopy status
-        copy.setCopyStatus("Borrowed");
-        bookCopyRepository.save(copy);
+            copy.setCopyStatus("Borrowed");
+            bookCopyRepository.save(copy);
 
-        // Update Reservation status if checkout for a reserved copy
-        if (matchedReservation != null) {
-            matchedReservation.setStatus("Completed");
-            reservationRepository.save(matchedReservation);
+            String formattedDueDate = detail.getDueDate().format(DateTimeFormatter.ofPattern("HH:mm 'ngày' dd/MM/yyyy"));
+            emailService.sendLoanConfirmation(
+                    patron.getEmail(),
+                    patron.getFullName(),
+                    copy.getBook().getTitle(),
+                    copy.getCopyId(),
+                    formattedDueDate
+            );
         }
 
-        // Send email confirmation to patron
-        String formattedDueDate = detail.getDueDate().format(DateTimeFormatter.ofPattern("HH:mm 'ngày' dd/MM/yyyy"));
-        emailService.sendLoanConfirmation(
-                patron.getEmail(),
-                patron.getFullName(),
-                copy.getBook().getTitle(),
-                copy.getCopyId(),
-                formattedDueDate
-        );
+        // Update Reservation status if checkout for a reserved copy
+        for (Reservation res : matchedReservations) {
+            res.setStatus("Completed");
+            reservationRepository.save(res);
+        }
 
-        redirectAttrs.addFlashAttribute("successMsg", "Tạo đơn mượn sách thành công! Bạn đọc " + patron.getFullName() + " đã mượn bản sao " + copyId + " (Hạn trả: " + detail.getDueDate().toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ").");
+        redirectAttrs.addFlashAttribute("successMsg", "Tạo đơn mượn sách thành công! Đã xử lý " + validCopyIds.size() + " bản sao cho bạn đọc " + patron.getFullName() + ".");
         return "redirect:/librarian/create-loan";
     }
     // ── 4. ACQUISITION DASHBOARD ──
@@ -246,6 +274,8 @@ public class LibrarianController {
     public String dashboard(@RequestParam(required = false) String status,
                             @RequestParam(required = false) String search,
                             @RequestParam(required = false) String patronRole,
+                            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate fromDate,
+                            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate toDate,
                             HttpSession session,
                             Model model,
                             RedirectAttributes redirectAttrs) {
@@ -274,11 +304,13 @@ public class LibrarianController {
                 ? materialRequestRepository.countByStatusAndPatronCampusId("Available", librarianCampusId)
                 : materialRequestRepository.countByStatus("Available");
 
+        LocalDateTime fromDateTime = (fromDate != null) ? fromDate.atStartOfDay() : null;
+        LocalDateTime toDateTime = (toDate != null) ? toDate.atTime(23, 59, 59) : null;
 
         // Request list scoped to this librarian's campus
         List<MaterialRequest> requests = (librarianCampusId != null)
-                ? materialRequestRepository.findByStatusAndSearchTermAndCampusId(status, search, librarianCampusId)
-                : materialRequestRepository.findByStatusAndSearchTerm(status, search);
+                ? materialRequestRepository.findByStatusAndSearchTermAndCampusId(status, search, librarianCampusId, fromDateTime, toDateTime)
+                : materialRequestRepository.findByStatusAndSearchTerm(status, search, fromDateTime, toDateTime);
 
         // Filter by Patron Role (Student / Lecturer)
         if (patronRole != null && !patronRole.isEmpty()) {
@@ -305,9 +337,62 @@ public class LibrarianController {
         model.addAttribute("currentStatus",      status);
         model.addAttribute("currentSearch",      search);
         model.addAttribute("currentPatronRole",  patronRole);
+        model.addAttribute("currentFromDate",    fromDate);
+        model.addAttribute("currentToDate",      toDate);
         model.addAttribute("librarianCampusId",  librarianCampusId);
 
         return "acquisition/dashboard";
+    }
+
+    @GetMapping("/acquisition/export-excel")
+    public void exportToExcel(@RequestParam(required = false) String status,
+                              @RequestParam(required = false) String search,
+                              @RequestParam(required = false) String patronRole,
+                              @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate fromDate,
+                              @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate toDate,
+                              HttpSession session,
+                              jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
+        if (isNotLibrarian(session)) {
+            response.sendRedirect("/login");
+            return;
+        }
+
+        String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+        User librarian = (loggedInUserId != null)
+                ? userRepository.findById(loggedInUserId).orElse(null)
+                : null;
+        Integer librarianCampusId = (librarian != null) ? librarian.getCampusId() : null;
+
+        LocalDateTime fromDateTime = (fromDate != null) ? fromDate.atStartOfDay() : null;
+        LocalDateTime toDateTime = (toDate != null) ? toDate.atTime(23, 59, 59) : null;
+
+        List<MaterialRequest> requests = (librarianCampusId != null)
+                ? materialRequestRepository.findByStatusAndSearchTermAndCampusId(status, search, librarianCampusId, fromDateTime, toDateTime)
+                : materialRequestRepository.findByStatusAndSearchTerm(status, search, fromDateTime, toDateTime);
+
+        // Filter by Patron Role
+        if (patronRole != null && !patronRole.isEmpty()) {
+            if ("Student".equalsIgnoreCase(patronRole)) {
+                requests = requests.stream()
+                        .filter(r -> r.getPatron() != null &&
+                                (r.getPatron().getRoles().isEmpty()
+                                 || r.getPatron().getRoles().stream().anyMatch(role -> Integer.valueOf(1).equals(role.getRoleId()))))
+                        .toList();
+            } else if ("Lecturer".equalsIgnoreCase(patronRole)) {
+                requests = requests.stream()
+                        .filter(r -> r.getPatron() != null &&
+                                r.getPatron().getRoles().stream().anyMatch(role -> Integer.valueOf(2).equals(role.getRoleId())))
+                        .toList();
+            }
+        }
+
+        byte[] excelData = materialRequestExportService.exportToExcel(requests);
+
+        String fileName = "material_requests_" + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")) + ".xlsx";
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+        response.getOutputStream().write(excelData);
+        response.getOutputStream().flush();
     }
 
     @PostMapping("/acquisition/approve/{id}")
