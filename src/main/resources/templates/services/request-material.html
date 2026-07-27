@@ -201,6 +201,22 @@
                 grid-column: span 1;
             }
         }
+
+        /* ── Validation ── */
+        .form-input.is-invalid,
+        .form-select.is-invalid,
+        .form-textarea.is-invalid {
+            border-color: #ef4444;
+            background-color: #fff5f5;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+        }
+
+        .field-error-msg {
+            font-size: 12.5px;
+            color: #dc2626;
+            font-weight: 500;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
@@ -273,11 +289,18 @@
 
             <!-- ISBN Field -->
             <div class="form-group">
-                <label for="isbn" class="form-label">Mã sách (ISBN)</label>
-                <input type="text" name="isbn" id="isbn" class="form-input" 
+                <label for="isbn" class="form-label">
+                    Mã sách (ISBN) <span th:if="${req == null}" class="required-star">*</span>
+                </label>
+                <input type="text" name="isbn" id="isbn" class="form-input"
                        th:value="${req != null ? req.isbn : ''}"
                        th:readonly="${req != null}"
-                       placeholder="Nhập mã ISBN nếu có (10 hoặc 13 số)..." autocomplete="off">
+                       th:required="${req == null}"
+                       placeholder="Nhập mã ISBN (10 hoặc 13 số)..."
+                       autocomplete="off"
+                       oninvalid="this.setCustomValidity('Vui lòng nhập mã ISBN')"
+                       oninput="this.setCustomValidity(''); handleIsbnInput(this.value)">
+                <span id="isbn-feedback" style="display:none; font-size:12.5px; font-weight:500; margin-top:4px;"></span>
             </div>
 
             <!-- Publisher Field -->
@@ -373,6 +396,55 @@
 </main>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    // ── Real-time ISBN duplicate check ──
+    let isbnTimer = null;
+    const isbnInput   = document.getElementById('isbn');
+    const isbnFeedback = document.getElementById('isbn-feedback');
+    const submitBtn   = document.querySelector('.form-actions .btn-primary[type="submit"]:not([th\\:formaction])');
+
+    function setIsbnFeedback(text, color, isError) {
+        if (!isbnFeedback) return;
+        isbnFeedback.textContent = text;
+        isbnFeedback.style.color = color;
+        isbnFeedback.style.display = text ? 'block' : 'none';
+        if (isbnInput) {
+            if (isError) {
+                isbnInput.classList.add('is-invalid');
+            } else {
+                isbnInput.classList.remove('is-invalid');
+            }
+        }
+        if (submitBtn) submitBtn.disabled = isError;
+    }
+
+    function handleIsbnInput(value) {
+        clearTimeout(isbnTimer);
+        const trimmed = value.trim();
+        if (!trimmed) {
+            setIsbnFeedback('', '#64748b', false);
+            return;
+        }
+        setIsbnFeedback('Đang kiểm tra...', '#64748b', false);
+        isbnTimer = setTimeout(() => {
+            fetch('/services/check-isbn?isbn=' + encodeURIComponent(trimmed))
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'exists_book') {
+                        setIsbnFeedback('❌ ' + data.message, '#dc2626', true);
+                    } else if (data.status === 'exists_request') {
+                        setIsbnFeedback('⚠️ ' + data.message, '#d97706', true);
+                    } else if (data.status === 'ok') {
+                        setIsbnFeedback('✅ ISBN hợp lệ, có thể sử dụng.', '#16a34a', false);
+                    } else {
+                        setIsbnFeedback('', '#64748b', false);
+                    }
+                })
+                .catch(() => setIsbnFeedback('', '#64748b', false));
+        }, 500);
+    }
+</script>
 
 </body>
 </html>

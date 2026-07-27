@@ -22,6 +22,10 @@ public interface MaterialRequestRepository extends JpaRepository<MaterialRequest
 
     boolean existsByPatronUserIdAndTitleIgnoreCaseAndStatusNot(String patronId, String title, String status);
 
+    /** Kiểm tra ISBN đã từng được request chưa (bất kỳ trạng thái nào). */
+    boolean existsByIsbnIgnoreCase(String isbn);
+
+
     long countByStatus(String status);
 
     long countByStatusAndPatronCampusId(String status, Integer campusId);
