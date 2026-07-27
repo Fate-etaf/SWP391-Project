@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kiểm tra nghĩa vụ tốt nghiệp – FLMS</title>
+    <!-- Tailwind CSS Script -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B',
+                            dark: '#0F172A',
+                            orangeHover: '#D95F18'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style th:replace="~{fragments/header :: header-style}"></style>
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .drop-zone { transition: all 0.3s ease; }
+        .drop-zone.drag-over { border-color: #F27125; background-color: rgba(242,113,37,0.06); transform: scale(1.01); }
+        .tab-active { border-bottom: 3px solid #F27125; color: #F27125; font-weight: 700; }
+        .tab-inactive { border-bottom: 3px solid transparent; color: #94a3b8; }
+        .tab-inactive:hover { color: #cbd5e1; border-color: #475569; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+
+<body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-between relative overflow-x-hidden">
+
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px]"></div>
+    </div>
+
+    <div class="relative z-50">
+        <div th:replace="~{fragments/header :: header('librarian')}"></div>
+    </div>
+
+    <main class="flex-grow max-w-[95%] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
+        <!-- SIDEBAR -->
+        <div th:replace="~{fragments/sidebar :: sidebar('graduationCheck')}"></div>
+
+        <div class="flex-grow min-w-0">
+            <!-- Page Header -->
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-fpt-orange">Quản lý tốt nghiệp</p>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-slate-100">Kiểm tra nghĩa vụ thư viện</h2>
+                    <p class="text-sm text-slate-400 mt-1">Import danh sách sinh viên từ file Excel để kiểm tra trạng thái hoàn thành nghĩa vụ.</p>
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            <div th:if="${success}" class="mb-6 fade-in">
+                <div class="bg-emerald-950/30 border border-emerald-800/60 text-emerald-400 px-5 py-4 rounded-xl flex items-center gap-3">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="text-sm font-medium" th:text="${success}">Thành công</span>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div th:if="${error}" class="mb-6 fade-in">
+                <div class="bg-red-950/30 border border-red-800/60 text-rose-400 px-5 py-4 rounded-xl flex items-center gap-3">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="text-sm font-medium" th:text="${error}">Lỗi</span>
+                </div>
+            </div>
+
+            <!-- Upload Section -->
+            <section class="bg-slate-900/60 border border-slate-800 rounded-2xl shadow-2xl p-6 md:p-8 mb-8 backdrop-blur-xl">
+                <div class="flex items-center gap-3 mb-5">
+                    <div class="bg-fpt-orange/10 p-2.5 rounded-xl">
+                        <svg class="w-6 h-6 text-fpt-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-100">Tải lên file Excel</h3>
+                        <p class="text-xs text-slate-400">Định dạng hỗ trợ: .xlsx — Cột A: Mã SV, Cột B: Họ tên</p>
+                    </div>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" th:action="@{/graduation/check}" id="uploadForm">
+                    <div class="drop-zone border-2 border-dashed border-slate-700 rounded-xl p-8 text-center cursor-pointer hover:border-fpt-orange/50 hover:bg-orange-500/5"
+                         id="dropZone"
+                         onclick="document.getElementById('fileInput').click()">
+                        <div id="dropContent">
+                            <svg class="w-12 h-12 text-slate-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <p class="text-sm text-slate-300 font-medium">Kéo thả file Excel vào đây hoặc <span class="text-fpt-orange font-semibold">nhấn để chọn</span></p>
+                            <p class="text-xs text-slate-550 mt-1">Tối đa 10MB</p>
+                        </div>
+                        <div id="fileInfo" class="hidden">
+                            <svg class="w-10 h-10 text-emerald-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-sm text-slate-200 font-semibold" id="fileName"></p>
+                            <p class="text-xs text-slate-400 mt-0.5" id="fileSize"></p>
+                        </div>
+                    </div>
+                    <input type="file" name="file" id="fileInput" accept=".xlsx" class="hidden" onchange="handleFileSelect(this)" />
+                    <div class="mt-5 flex items-center gap-3">
+                        <button type="submit" id="submitBtn" disabled
+                                class="inline-flex items-center gap-2 bg-fpt-orange hover:bg-fpt-orangeHover disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold text-sm px-6 py-3 rounded-xl shadow-sm transition-all shadow-lg hover:shadow-orange-500/20">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                            </svg>
+                            Kiểm tra nghĩa vụ
+                        </button>
+                        <button type="button" id="clearBtn" class="hidden text-sm font-semibold text-slate-400 hover:text-slate-200" onclick="clearFile()">
+                            Xóa file
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Results Section -->
+            <div th:if="${hasResults}" class="fade-in">
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-2xl backdrop-blur-xl">
+                        <p class="text-xs font-semibold text-slate-450 uppercase tracking-wider">Tổng số sinh viên</p>
+                        <p class="text-3xl font-extrabold text-slate-100 mt-1" th:text="${totalStudentsCount}">0</p>
+                        <p class="text-xs text-slate-400 mt-1">File: <span th:text="${fileName}">file.xlsx</span></p>
+                    </div>
+                    <div class="bg-emerald-950/20 border border-emerald-800/80 rounded-2xl p-5 shadow-2xl backdrop-blur-xl">
+                        <p class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Sinh viên đủ điều kiện</p>
+                        <p class="text-3xl font-extrabold text-emerald-400 mt-1" th:text="${clearedStudentsCount}">0</p>
+                        <p class="text-xs text-emerald-500 mt-1">Đã hoàn thành mọi nghĩa vụ</p>
+                    </div>
+                    <div class="bg-rose-950/20 border border-rose-800/80 rounded-2xl p-5 shadow-2xl backdrop-blur-xl">
+                        <p class="text-xs font-semibold text-rose-450 uppercase tracking-wider">Sinh viên vi phạm</p>
+                        <p class="text-3xl font-extrabold text-rose-400 mt-1" th:text="${violationStudentsCount}">0</p>
+                        <p class="text-xs text-rose-500 mt-1">Chưa hoàn thành mọi nghĩa vụ</p>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-800 mb-0 gap-4">
+                    <div class="flex">
+                        <button type="button" class="tab-active px-6 py-3 text-sm transition-all" id="tabCleared" onclick="switchTab('cleared')">
+                            ✓ Đủ điều kiện (<span th:text="${clearedList.size()}">0</span>)
+                        </button>
+                        <button type="button" class="tab-inactive px-6 py-3 text-sm transition-all" id="tabNotCleared" onclick="switchTab('notCleared')">
+                            ✗ Danh sách vi phạm (<span th:text="${notClearedList.size()}">0</span>)
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-2 pb-3 sm:pb-0 mr-2">
+                        <a th:href="@{/graduation/clear-results}"
+                           class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Xóa kết quả
+                        </a>
+
+                        <!-- Xuất Excel Đủ điều kiện -->
+                        <a th:href="@{/graduation/export-cleared}" id="btnExportCleared"
+                           class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-emerald-990/10 transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Xuất Excel
+                        </a>
+
+                        <!-- Xuất Excel Vi phạm -->
+                        <a th:href="@{/graduation/export-violations}" id="btnExportViolations"
+                           class="inline-flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-rose-990/10 transition-all hidden">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Xuất Excel
+                        </a>
+
+                        <!-- Nút gửi toàn bộ email -->
+                        <form method="post" th:action="@{/graduation/send-all-emails}" id="sendAllForm" class="hidden">
+                            <button type="button"
+                                    onclick="openConfirmModal('sendAllForm', 'Gửi email cho tất cả sinh viên vi phạm?', 'Hệ thống sẽ gửi email thông báo chi tiết vi phạm cho từng sinh viên chưa hoàn thành nghĩa vụ.')"
+                                    class="inline-flex items-center gap-2 bg-red-650 hover:bg-red-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-red-990/15 transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                Gửi toàn bộ email
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Cleared Table -->
+                <section id="clearedSection" class="bg-slate-900/60 border border-t-0 border-slate-800 rounded-b-2xl shadow-2xl overflow-hidden backdrop-blur-xl">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-slate-950/80 text-emerald-400 border-b border-slate-800">
+                                <tr>
+                                    <th class="text-left px-6 py-4 font-semibold w-16">STT</th>
+                                    <th class="text-left px-6 py-4 font-semibold">Mã sinh viên</th>
+                                    <th class="text-left px-6 py-4 font-semibold">Họ tên</th>
+                                    <th class="text-left px-6 py-4 font-semibold">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/40">
+                                <tr th:if="${clearedList.isEmpty()}">
+                                    <td colspan="4" class="px-6 py-12 text-center text-slate-500 text-sm">Không có sinh viên nào đủ điều kiện tốt nghiệp.</td>
+                                </tr>
+                                <tr th:each="item, stat : ${clearedList}" class="hover:bg-slate-800/20 transition-colors">
+                                    <td class="px-6 py-3.5 text-slate-400 font-mono text-xs" th:text="${stat.index + 1}">1</td>
+                                    <td class="px-6 py-3.5 text-slate-200 font-semibold font-mono" th:text="${item.studentId}">—</td>
+                                    <td class="px-6 py-3.5 text-slate-300" th:text="${item.fullName}">—</td>
+                                    <td class="px-6 py-3.5">
+                                        <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-950/40 text-emerald-450 border border-emerald-900/50">
+                                            ✓ Đã hoàn thành
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Not Cleared Table -->
+                <section id="notClearedSection" class="bg-slate-900/60 border border-t-0 border-slate-800 rounded-b-2xl shadow-2xl overflow-hidden hidden backdrop-blur-xl">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-slate-950/80 text-rose-450 border-b border-slate-800">
+                                <tr>
+                                    <th class="text-left px-6 py-4 font-semibold w-16">STT</th>
+                                    <th class="text-left px-6 py-4 font-semibold">Mã sinh viên</th>
+                                    <th class="text-left px-6 py-4 font-semibold">Họ tên</th>
+                                    <th class="text-left px-6 py-4 font-semibold">Mã bản sao (CopyID)</th>
+                                    <th class="text-left px-6 py-4 font-semibold">Tên sách</th>
+                                    <th class="text-left px-6 py-4 font-semibold">Lý do</th>
+                                    <th class="text-left px-6 py-4 font-semibold">Số tiền nợ</th>
+                                    <th class="text-left px-6 py-4 font-semibold">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/40">
+                                <tr th:if="${notClearedList.isEmpty()}">
+                                    <td colspan="8" class="px-6 py-12 text-center text-slate-500 text-sm font-semibold">Không tìm thấy lỗi vi phạm nào! 🎉</td>
+                                </tr>
+                                <tr th:each="item, stat : ${notClearedList}" class="hover:bg-slate-800/20 transition-colors">
+                                    <td class="px-6 py-3.5 text-slate-400 font-mono text-xs" th:text="${stat.index + 1}">1</td>
+                                    <td class="px-6 py-3.5 text-slate-200 font-semibold font-mono" th:text="${item.studentId}">—</td>
+                                    <td class="px-6 py-3.5 text-slate-350" th:text="${item.fullName}">—</td>
+                                    <td class="px-6 py-3.5 text-slate-450 font-mono text-xs" th:text="${item.copyId}">—</td>
+                                    <td class="px-6 py-3.5 text-slate-200 font-semibold" th:text="${item.bookTitle}">—</td>
+                                    <td class="px-6 py-3.5">
+                                        <span th:classappend="${item.reason == 'Chưa trả sách' ? 'text-red-400 bg-red-950/40 border border-red-900/50' : (item.reason == 'Tài khoản không tồn tại trong hệ thống' ? 'text-slate-400 bg-slate-800/50 border border-slate-700/50' : 'text-amber-400 bg-amber-950/45 border border-amber-900/50')}"
+                                              class="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-lg"
+                                              th:text="${item.reason}">
+                                            Chưa trả sách
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-3.5 font-mono text-xs font-bold">
+                                        <span th:if="${item.remainingAmount != null}" class="text-red-400"
+                                              th:text="${#numbers.formatInteger(item.remainingAmount, 1, 'POINT') + ' đ'}">
+                                            0 đ
+                                        </span>
+                                        <span th:if="${item.remainingAmount == null}" class="text-slate-550">—</span>
+                                    </td>
+                                    <td class="px-6 py-3.5">
+                                        <form method="post" th:action="@{/graduation/send-email}" class="inline"
+                                              th:if="${item.email != null and !item.email.isBlank()}">
+                                            <input type="hidden" name="studentId" th:value="${item.studentId}" />
+                                            <button type="button"
+                                                    th:attr="data-form-id=${'emailForm_' + stat.index}"
+                                                    th:id="${'emailForm_' + stat.index}"
+                                                    onclick="openConfirmModal(this.closest('form'), 'Gửi email thông báo?', 'Hệ thống sẽ gửi email thông báo tất cả vi phạm cho sinh viên ' + this.closest('form').querySelector('[name=studentId]').value)"
+                                                    class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 hover:scale-[1.02] active:scale-95 text-white font-semibold text-xs px-3 py-1.5 rounded-lg shadow-sm transition-all">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                                </svg>
+                                                Gửi email
+                                            </button>
+                                        </form>
+                                        <span th:if="${item.email == null or item.email.isBlank()}"
+                                              class="text-xs text-slate-500 italic">Không có email</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Xác nhận -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-950/70 hidden items-center justify-center z-50 transition-opacity">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-6 backdrop-blur-xl">
+            <h3 id="confirmTitle" class="text-lg font-extrabold text-slate-100">Xác nhận</h3>
+            <p id="confirmMessage" class="text-sm text-slate-400 mt-2">Thông báo</p>
+            <div class="flex items-center justify-end gap-3 mt-6">
+                <button type="button"
+                    class="px-4 py-2 rounded-xl border border-slate-800 text-sm font-semibold text-slate-300 hover:bg-slate-800"
+                    onclick="closeConfirmModal()">
+                    Hủy
+                </button>
+                <button type="button" id="confirmBtn"
+                    class="px-4 py-2 rounded-xl bg-fpt-orange hover:bg-fpt-orangeHover text-white text-sm font-bold shadow-lg shadow-orange-500/20 active:scale-95 transition-all">
+                    Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Loading -->
+    <div id="loadingModal" class="fixed inset-0 bg-slate-950/70 hidden items-center justify-center z-50">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8 flex flex-col items-center max-w-xs w-full text-center">
+            <svg class="animate-spin h-10 w-10 text-fpt-orange mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <h4 class="text-sm font-bold text-slate-200">Đang gửi thông báo email...</h4>
+            <p class="text-xs text-slate-400 mt-1">Xin vui lòng chờ trong giây lát.</p>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-24 right-5 z-55 flex flex-col gap-3 max-w-sm w-full"></div>
+
+    <script>
+        /* ───── File Upload UX ───── */
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        if (dropZone) {
+            dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+            dropZone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileSelect(fileInput);
+                }
+            });
+        }
+
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            if (!file) return;
+            document.getElementById('dropContent').classList.add('hidden');
+            document.getElementById('fileInfo').classList.remove('hidden');
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(1) + ' KB';
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('clearBtn').classList.remove('hidden');
+        }
+
+        function clearFile() {
+            fileInput.value = '';
+            document.getElementById('dropContent').classList.remove('hidden');
+            document.getElementById('fileInfo').classList.add('hidden');
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('clearBtn').classList.add('hidden');
+        }
+
+        /* ───── Tab Switching ───── */
+        function switchTab(tab) {
+            const tabCleared = document.getElementById('tabCleared');
+            const tabNotCleared = document.getElementById('tabNotCleared');
+            const sectionCleared = document.getElementById('clearedSection');
+            const sectionNotCleared = document.getElementById('notClearedSection');
+            const sendAllForm = document.getElementById('sendAllForm');
+            const btnExportCleared = document.getElementById('btnExportCleared');
+            const btnExportViolations = document.getElementById('btnExportViolations');
+
+            if (tab === 'cleared') {
+                tabCleared.className = 'tab-active px-6 py-3 text-sm transition-all';
+                tabNotCleared.className = 'tab-inactive px-6 py-3 text-sm transition-all';
+                sectionCleared.classList.remove('hidden');
+                sectionNotCleared.classList.add('hidden');
+                if (sendAllForm) sendAllForm.classList.add('hidden');
+                if (btnExportCleared) btnExportCleared.classList.remove('hidden');
+                if (btnExportViolations) btnExportViolations.classList.add('hidden');
+            } else {
+                tabNotCleared.className = 'tab-active px-6 py-3 text-sm transition-all';
+                tabCleared.className = 'tab-inactive px-6 py-3 text-sm transition-all';
+                sectionNotCleared.classList.remove('hidden');
+                sectionCleared.classList.add('hidden');
+                if (sendAllForm) sendAllForm.classList.remove('hidden');
+                if (btnExportCleared) btnExportCleared.classList.add('hidden');
+                if (btnExportViolations) btnExportViolations.classList.remove('hidden');
+            }
+        }
+
+        /* ───── Toast notification ───── */
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `fade-in p-4 rounded-xl shadow-2xl border text-sm font-semibold flex items-center gap-2.5 transform transition-all translate-x-10 opacity-0 duration-300`;
+            
+            if (type === 'success') {
+                toast.classList.add('bg-emerald-950/60', 'border-emerald-800/60', 'text-emerald-300', 'backdrop-blur-xl');
+                toast.innerHTML = `
+                    <svg class="w-5 h-5 text-emerald-450 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>${message}</span>
+                `;
+            } else {
+                toast.classList.add('bg-rose-955/60', 'border-rose-800/60', 'text-rose-300', 'backdrop-blur-xl');
+                toast.innerHTML = `
+                    <svg class="w-5 h-5 text-rose-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>${message}</span>
+                `;
+            }
+            
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.remove('translate-x-10', 'opacity-0');
+            }, 10);
+            
+            // Remove after 4s
+            setTimeout(() => {
+                toast.classList.add('translate-x-10', 'opacity-0');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 4000);
+        }
+
+        /* ───── Loading indicators ───── */
+        function showLoading() {
+            const loader = document.getElementById('loadingModal');
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+        }
+        function hideLoading() {
+            const loader = document.getElementById('loadingModal');
+            loader.classList.add('hidden');
+            loader.classList.remove('flex');
+        }
+
+        /* ───── Confirm Modal & AJAX submission ───── */
+        let pendingForm = null;
+
+        function openConfirmModal(form, title, message) {
+            if (typeof form === 'string') {
+                pendingForm = document.getElementById(form);
+            } else {
+                pendingForm = form;
+            }
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeConfirmModal() {
+            pendingForm = null;
+            const modal = document.getElementById('confirmModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        document.getElementById('confirmBtn').addEventListener('click', function() {
+            if (pendingForm) {
+                const formToSubmit = pendingForm;
+                closeConfirmModal();
+                showLoading();
+
+                const formData = new FormData(formToSubmit);
+                const actionUrl = formToSubmit.getAttribute('action') || formToSubmit.action;
+
+                fetch(actionUrl, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    return response.json()
+                        .catch(() => {
+                            throw new Error('Đường truyền thất bại hoặc máy chủ trả về lỗi không mong muốn.');
+                        })
+                        .then(data => {
+                            if (!response.ok) {
+                                throw new Error(data.error || data.message || 'Lỗi gửi email');
+                            }
+                            return data;
+                        });
+                })
+                .then(data => {
+                    hideLoading();
+                    showToast(data.message || 'Gửi email thành công!', 'success');
+                })
+                .catch(error => {
+                    hideLoading();
+                    showToast(error.message || 'Gửi email thất bại. Vui lòng kiểm tra lại.', 'error');
+                });
+            }
+        });
+
+        document.getElementById('confirmModal').addEventListener('click', function(event) {
+            if (event.target.id === 'confirmModal') closeConfirmModal();
+        });
+    </script>
+
+</body>
+</html>
