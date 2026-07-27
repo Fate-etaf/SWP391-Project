@@ -30,6 +30,9 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Query(value = "SELECT r.RoleName FROM Roles r JOIN UserRoles ur ON r.RoleID = ur.RoleID WHERE ur.UserID = :userId", nativeQuery = true)
     List<String> findRolesByUserId(@Param("userId") String userId);
 
+    @Query("SELECT DISTINCT u FROM User u LEFT JOIN u.roles r WHERE u.role.roleId = 3 OR u.role.roleName = 'Librarian' OR r.roleId = 3 OR r.roleName = 'Librarian'")
+    List<User> findAnyLibrarian();
+
     // ════════════ CÁC HÀM PHỤC VỤ SEARCH / FILTER SINH VIÊN ════════════
     @Query("SELECT u FROM User u WHERE u.status = :status")
     List<User> findByStatus(@Param("status") String status);

@@ -52,9 +52,11 @@ public interface FineInvoiceRepository extends JpaRepository<FineInvoice, Intege
            "LEFT JOIN FETCH bc.book " +
            "WHERE (:patronId IS NULL OR f.patron.userId = :patronId) " +
            "AND (:paidStatus IS NULL OR f.paidStatus = :paidStatus) " +
+           "AND td.returnCampus.campusId = :campusId " +
            "ORDER BY f.createdAt DESC")
     List<FineInvoice> findAllFiltered(@Param("patronId") String patronId,
-                                      @Param("paidStatus") String paidStatus);
+                                      @Param("paidStatus") String paidStatus,
+                                      @Param("campusId") Integer campusId);
 
     /** Lấy tất cả hóa đơn phạt còn nợ (Unpaid) của một bạn đọc */
     List<FineInvoice> findByPatronUserIdAndPaidStatus(String patronUserId, String paidStatus);

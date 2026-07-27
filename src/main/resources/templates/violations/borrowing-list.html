@@ -215,13 +215,13 @@
     </main>
 
     <!-- Modal Xác nhận -->
-    <div id="confirmModal" class="fixed inset-0 bg-slate-950/80 hidden items-center justify-center z-50">
-        <div class="bg-slate-900 w-full max-w-md rounded-2xl border border-slate-800 shadow-xl p-6 text-slate-100">
-            <h3 id="confirmTitle" class="text-lg font-extrabold text-slate-100">Xác nhận</h3>
-            <p id="confirmMessage" class="text-sm text-slate-400 mt-2">Thông báo</p>
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-2xl p-6 text-slate-800">
+            <h3 id="confirmTitle" class="text-lg font-extrabold text-slate-900">Xác nhận</h3>
+            <p id="confirmMessage" class="text-sm text-slate-650 mt-2">Thông báo</p>
             <div class="flex items-center justify-end gap-3 mt-6">
                 <button type="button"
-                    class="px-4 py-2 rounded-lg border border-slate-700 bg-slate-950 text-sm font-semibold text-slate-300 hover:bg-slate-800/80 transition-colors"
+                    class="px-4 py-2 rounded-lg border border-slate-350 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
                     onclick="closeConfirmModal()">
                     Hủy
                 </button>
@@ -369,37 +369,37 @@
 
     <!-- ====== MODAL 1: TRẢ ĐÚNG HẠN ====== -->
     <div id="normalReturnModal"
-        class="fixed inset-0 bg-slate-950/80 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div
-            class="bg-slate-900 w-full max-w-md rounded-2xl border border-slate-800 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-100">
-            <div class="flex items-center gap-3 border-b border-slate-800 pb-4 mb-4">
+            class="bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-800">
+            <div class="flex items-center gap-3 border-b border-slate-200 pb-4 mb-4">
                 <div
-                    class="w-10 h-10 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center shrink-0">
+                    class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7">
                         </path>
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold text-slate-100">Trả sách đúng hạn</h3>
-                    <p class="text-xs text-slate-400">Không có hóa đơn phạt phát sinh</p>
+                    <h3 class="text-lg font-bold text-slate-900">Trả sách đúng hạn</h3>
+                    <p class="text-xs text-slate-500">Không có hóa đơn phạt phát sinh</p>
                 </div>
             </div>
 
-            <div class="space-y-3 mb-4 bg-slate-950 border border-slate-800/80 p-4 rounded-xl text-sm text-slate-350">
-                <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-200">...</span></p>
-                <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-400 font-mono font-bold">...</span>
+            <div class="space-y-3 mb-4 bg-slate-50 border border-slate-150 p-4 rounded-xl text-sm text-slate-650">
+                <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-800">...</span></p>
+                <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-600 font-mono font-bold">...</span>
                 </p>
-                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-200">...</span> (<span
-                        class="txt-patron-id">...</span>)</p>
-                <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-300">...</span></p>
-                <p><strong>Hạn trả:</strong> <span class="txt-due-date text-slate-300">...</span></p>
+                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-800">...</span> (<span
+                        class="txt-patron-id text-slate-650">...</span>)</p>
+                <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-700">...</span></p>
+                <p><strong>Hạn trả:</strong> <span class="txt-due-date text-slate-700">...</span></p>
             </div>
 
             <div class="mb-4">
-                <label class="block text-xs font-bold text-slate-400 mb-1">📋 Tình trạng sách khi nhận lại</label>
+                <label class="block text-xs font-bold text-slate-600 mb-1">📋 Tình trạng sách khi nhận lại</label>
                 <select id="conditionStatusNormal"
-                    class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange">
+                    class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange">
                     <option value="New">✨ New — Mới</option>
                     <option value="Good">👍 Good — Tốt</option>
                     <option value="Fair">📖 Fair — Bình thường</option>
@@ -408,13 +408,13 @@
             </div>
 
             <div class="flex justify-between items-center mt-6">
-                <button onclick="switchModalToReport('Lost')" class="text-xs text-red-400 hover:underline">⚠️ Báo mất
-                    sách</button>
+                <button onclick="switchModalToReport('Lost')" class="text-xs text-red-500 hover:underline">⚠️ Báo hỏng sách
+                 </button>
                 <div class="flex gap-3">
                     <button onclick="closeModal('normalReturnModal')"
-                        class="px-4 py-2 border border-slate-750 bg-slate-950 text-slate-300 hover:bg-slate-800 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
+                        class="px-4 py-2 border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
                     <button id="btnConfirmNormal"
-                        class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Xác
+                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Xác
                         nhận trả</button>
                 </div>
             </div>
@@ -423,11 +423,26 @@
 
     <!-- ====== MODAL 2: TRẢ QUÁ HẠN ====== -->
     <div id="overdueReturnModal"
-        class="fixed inset-0 bg-slate-950/80 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div
-            class="bg-slate-900 w-full max-w-md rounded-2xl border border-slate-800 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-100">
-            <div class="flex items-center gap-3 border-b border-slate-800 pb-4 mb-4">
-                <div class="w-10 h-10 bg-red-500/10 text-red-400 rounded-full flex items-center justify-center shrink-0">
+            class="relative bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-800">
+            <!-- Success Overlay -->
+            <div id="overdueSuccessOverlay" class="hidden absolute inset-0 bg-white/98 flex flex-col items-center justify-center p-6 text-center z-50 rounded-2xl animate-fade-in">
+                <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-5 animate-bounce shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                    <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-black text-emerald-600 tracking-wide uppercase mb-1">✨ THANH TOÁN THÀNH CÔNG!</h3>
+                <p class="text-slate-650 text-xs max-w-xs mb-3">Hệ thống đã nhận diện thanh toán tự động qua VietQR thành công.</p>
+                <div class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 mb-5 w-full max-w-xs text-xs space-y-1">
+                    <p class="text-slate-500 flex justify-between"><span>Thông tin:</span> <span class="font-semibold text-slate-800" id="overdueSuccessDesc">-</span></p>
+                </div>
+                <p class="text-xs text-slate-500 mb-4 animate-pulse">Trang sẽ tự động cập nhật sau <span id="overdueSuccessCountdown" class="font-bold text-emerald-600">5</span> giây...</p>
+                <button type="button" onclick="window.location.reload()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-lg shadow-md transition-all uppercase">Thanh toán thành công</button>
+            </div>
+            <div class="flex items-center gap-3 border-b border-slate-200 pb-4 mb-4">
+                <div class="w-10 h-10 bg-red-50 text-red-600 rounded-full flex items-center justify-center shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
@@ -435,28 +450,28 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold text-slate-100">Trả sách quá hạn</h3>
-                    <p class="text-xs text-red-450 font-semibold txt-overdue-days">Quá hạn: 0 ngày</p>
+                    <h3 class="text-lg font-bold text-slate-900">Trả sách quá hạn</h3>
+                    <p class="text-xs text-red-650 font-semibold txt-overdue-days">Quá hạn: 0 ngày</p>
                 </div>
             </div>
 
-            <div class="space-y-3 mb-4 bg-slate-950 border border-slate-800/80 p-4 rounded-xl text-sm text-slate-350">
-                <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-200">...</span></p>
-                <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-500 font-mono font-bold">...</span>
+            <div class="space-y-3 mb-4 bg-slate-50 border border-slate-200 p-4 rounded-xl text-sm text-slate-650">
+                <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-800">...</span></p>
+                <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-600 font-mono font-bold">...</span>
                 </p>
-                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-200">...</span></p>
-                <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-300">...</span></p>
-                <p><strong>Hạn trả:</strong> <span class="txt-due-date text-slate-300">...</span></p>
-                <p><strong>Số ngày quá hạn:</strong> <span class="txt-overdue-days-val font-semibold text-red-450">0</span> ngày</p>
-                <p class="border-t border-slate-800 pt-2 text-base font-bold text-red-400">
+                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-800">...</span></p>
+                <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-700">...</span></p>
+                <p><strong>Hạn trả:</strong> <span class="txt-due-date text-slate-700">...</span></p>
+                <p><strong>Số ngày quá hạn:</strong> <span class="txt-overdue-days-val font-semibold text-red-600">0</span> ngày</p>
+                <p class="border-t border-slate-200 pt-2 text-base font-bold text-red-500">
                     Tiền phạt quá hạn: <span class="txt-fine-amount">0</span>đ
                 </p>
             </div>
 
             <div class="mb-4">
-                <label class="block text-xs font-bold text-slate-400 mb-1">📋 Tình trạng sách khi nhận lại</label>
+                <label class="block text-xs font-bold text-slate-600 mb-1">📋 Tình trạng sách khi nhận lại</label>
                 <select id="conditionStatusOverdue"
-                    class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange">
+                    class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange">
                     <option value="New">✨ New — Mới</option>
                     <option value="Good">👍 Good — Tốt</option>
                     <option value="Fair">📖 Fair — Bình thường</option>
@@ -465,9 +480,9 @@
             </div>
 
             <div class="mb-4">
-                <label class="block text-xs font-bold text-slate-400 mb-1">Phương thức thanh toán phạt</label>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Phương thức thanh toán phạt</label>
                 <select id="paymentMethodOverdue"
-                    class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+                    class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
                     onchange="toggleTxCode()">
                     <option value="Cash">💵 Tiền mặt tại quầy</option>
                     <option value="QRCode">📲 QRCode Chuyển khoản</option>
@@ -475,56 +490,67 @@
             </div>
 
             <div id="txCodeContainer" class="hidden mb-6 animate-fade-in">
-                <label class="block text-xs font-bold text-slate-400 mb-1">Mã giao dịch đối chiếu (Chuyển khoản)</label>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Mã giao dịch đối chiếu (Chuyển khoản)</label>
                 <input type="text" id="transactionCodeOverdue"
-                    class="w-full bg-slate-950 border border-slate-750 rounded-lg p-2 text-sm uppercase font-mono text-slate-200 focus:outline-none focus:border-fpt-orange"
+                    class="w-full bg-white border border-slate-300 rounded-lg p-2 text-sm uppercase font-mono text-slate-800 focus:outline-none focus:border-fpt-orange"
                     placeholder="Nhập mãGD ngân hàng...">
             </div>
 
             <!-- QR Code container -->
             <div id="overdueQrContainer"
-                class="hidden space-y-4 border border-slate-800 rounded-xl p-4 bg-slate-950/80 mt-4 animate-fade-in text-xs text-slate-300">
+                class="hidden space-y-4 border border-slate-200 rounded-xl p-4 bg-slate-50 mt-4 animate-fade-in text-xs text-slate-650">
                 <div class="flex justify-center mb-2">
                     <img id="overdueQrImage" src="" alt="Mã VietQR"
-                        class="h-44 w-44 rounded-lg shadow-sm border border-slate-750">
+                        class="h-44 w-44 rounded-lg shadow-sm border border-slate-205">
                 </div>
                 <div class="space-y-1">
                     <div class="flex justify-between"><span class="text-slate-500">Ngân hàng:</span> <span
-                            class="font-semibold text-slate-200" th:text="${vietqrBankName}">TPBank</span></div>
+                            class="font-semibold text-slate-800" th:text="${vietqrBankName}">TPBank</span></div>
                     <div class="flex justify-between"><span class="text-slate-500">Số tài khoản:</span> <span
-                            class="font-mono font-semibold text-slate-200"
+                            class="font-mono font-semibold text-slate-800"
                             th:text="${vietqrAccountNo}">00000102719</span></div>
                     <div class="flex justify-between"><span class="text-slate-500">Tên tài khoản:</span> <span
-                            class="font-semibold text-slate-200" th:text="${vietqrAccountName}">NGUYEN QUANG VINH</span>
+                            class="font-semibold text-slate-800" th:text="${vietqrAccountName}">NGUYEN QUANG VINH</span>
                     </div>
                     <div class="flex justify-between"><span class="text-slate-500">Nội dung:</span> <span
                             id="overdueQrInfo"
-                            class="font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">...</span></div>
+                            class="font-mono font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">...</span></div>
                 </div>
             </div>
 
-            <div class="flex justify-between items-center mt-6">
-                <button type="button" onclick="submitOverdueReturnLater()"
-                    class="text-xs text-amber-500 hover:underline font-bold">💳 Trả sách thanh toán sau</button>
-                <div class="flex gap-3">
-                    <button onclick="closeModal('overdueReturnModal')"
-                        class="px-4 py-2 border border-slate-755 bg-slate-950 text-slate-300 hover:bg-slate-800 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
-                    <button id="btnConfirmOverdue"
-                        class="px-4 py-2 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Thu
-                        tiền &amp; Trả sách</button>
-                </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeModal('overdueReturnModal')"
+                    class="px-4 py-2 border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
+                <button id="btnConfirmOverdue"
+                    class="px-4 py-2 bg-fpt-orange hover:bg-fpt-orangeHover active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Thu
+                    tiền &amp; Trả sách</button>
             </div>
         </div>
     </div>
 
     <!-- ====== MODAL 3: BÁO MẤT / BÁO HỎNG ====== -->
     <div id="reportIncidentModal"
-        class="fixed inset-0 bg-slate-950/80 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div
-            class="bg-slate-900 w-full max-w-md rounded-2xl border border-slate-800 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-100">
-            <div class="flex items-center gap-3 border-b border-slate-800 pb-4 mb-4">
+            class="relative bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-800">
+            <!-- Success Overlay -->
+            <div id="incidentSuccessOverlay" class="hidden absolute inset-0 bg-white/98 flex flex-col items-center justify-center p-6 text-center z-50 rounded-2xl animate-fade-in animate-duration-300">
+                <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-5 animate-bounce shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                    <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-black text-emerald-600 tracking-wide uppercase mb-1">✨ THANH TOÁN THÀNH CÔNG!</h3>
+                <p class="text-slate-655 text-xs max-w-xs mb-3">Hệ thống đã nhận diện thanh toán tự động qua VietQR thành công.</p>
+                <div class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 mb-5 w-full max-w-xs text-xs space-y-1">
+                    <p class="text-slate-500 flex justify-between"><span>Thông tin:</span> <span class="font-semibold text-slate-800" id="incidentSuccessDesc">-</span></p>
+                </div>
+                <p class="text-xs text-slate-500 mb-4 animate-pulse">Trang sẽ tự động cập nhật sau <span id="incidentSuccessCountdown" class="font-bold text-emerald-600">5</span> giây...</p>
+                <button type="button" onclick="window.location.reload()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-lg shadow-md transition-all uppercase">Thanh toán thành công</button>
+            </div>
+            <div class="flex items-center gap-3 border-b border-slate-200 pb-4 mb-4">
                 <div
-                    class="w-10 h-10 bg-amber-500/10 text-amber-450 rounded-full flex items-center justify-center shrink-0">
+                    class="w-10 h-10 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
@@ -532,40 +558,40 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold text-slate-100" id="reportModalTitle">Báo cáo mất / hỏng sách</h3>
-                    <p class="text-xs text-slate-400">Cập nhật trạng thái sách và lập biên bản xử lý</p>
+                    <h3 class="text-lg font-bold text-slate-900" id="reportModalTitle">Báo cáo mất / hỏng sách</h3>
+                    <p class="text-xs text-slate-550">Cập nhật trạng thái sách và lập biên bản xử lý</p>
                 </div>
             </div>
 
-            <div class="space-y-2 mb-4 bg-slate-950 border border-slate-800/80 p-4 rounded-xl text-sm text-slate-350">
-                <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-200">...</span></p>
-                <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-400 font-mono font-bold">...</span>
+            <div class="space-y-2 mb-4 bg-slate-50 border border-slate-200 p-4 rounded-xl text-sm text-slate-655">
+                <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-800">...</span></p>
+                <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-600 font-mono font-bold">...</span>
                 </p>
-                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-200">...</span></p>
-                <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-300">—</span></p>
-                <p><strong>Hạn trả:</strong> <span class="txt-due-date text-amber-500 font-bold">—</span></p>
+                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-800">...</span></p>
+                <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-700">—</span></p>
+                <p><strong>Hạn trả:</strong> <span class="txt-due-date text-amber-600 font-bold">—</span></p>
             </div>
 
             <!-- Combined Fine Warning Banner for Overdue Lost Books -->
             <div id="combinedFineWarning"
-                class="hidden mb-4 p-3 bg-red-950/60 border border-red-900 rounded-xl text-xs text-red-200">
+                class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-800">
                 <div class="flex items-start gap-2">
                     <span class="text-sm">⚠️</span>
                     <div>
                         <p class="font-bold">Bản sao này đang quá hạn <span id="combinedOverdueDays"
-                                class="font-extrabold text-red-400">0</span> ngày!</p>
-                        <p class="mt-1">Ngoài tiền đền bù mất sách (<span id="combinedBookPrice" class="font-semibold text-slate-200">0</span>đ), người mượn
-                            vẫn cần đóng thêm tiền phạt quá hạn là <span id="combinedOverdueFine" class="font-semibold text-slate-250">0</span>đ.</p>
-                        <p class="font-bold mt-1 text-red-300 border-t border-red-900/60 pt-1">Tổng tiền phạt/đền bù: <span
-                                id="combinedTotalFine" class="text-red-400 font-extrabold">0</span>đ</p>
+                                class="font-extrabold text-red-600">0</span> ngày!</p>
+                        <p class="mt-1">Ngoài tiền đền bù mất sách (<span id="combinedBookPrice" class="font-semibold text-slate-800">0</span>đ), người mượn
+                            vẫn cần đóng thêm tiền phạt quá hạn là <span id="combinedOverdueFine" class="font-semibold text-slate-700">0</span>đ.</p>
+                        <p class="font-bold mt-1 text-red-650 border-t border-red-150 pt-1">Tổng tiền phạt/đền bù: <span
+                                id="combinedTotalFine" class="text-red-600 font-extrabold">0</span>đ</p>
                     </div>
                 </div>
             </div>
 
             <div class="mb-4">
-                <label class="block text-xs font-bold text-slate-400 mb-1">Loại sự cố</label>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Loại sự cố</label>
                 <select id="incidentType"
-                    class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+                    class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
                     onchange="onSwitchIncidentType()">
                     <option value="Lost">🚨 Mất sách (Đền bù giá sách)</option>
                     <option value="Damaged">📘 Hỏng sách (Phạt hư hại)</option>
@@ -573,24 +599,24 @@
             </div>
 
             <div class="mb-4">
-                <label class="block text-xs font-bold text-slate-400 mb-1">Ghi chú (Lý do / Tình trạng chi tiết)</label>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Ghi chú (Lý do / Tình trạng chi tiết)</label>
                 <textarea id="incidentNotes" rows="2"
-                    class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+                    class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
                     placeholder="Nhập lý do đền bù hoặc ghi chú tình trạng..."></textarea>
             </div>
 
-            <div class="mb-4 flex items-center gap-2">
-                <input type="checkbox" id="incidentPayNow" class="rounded border-slate-700 bg-slate-950 text-fpt-orange focus:ring-fpt-orange"
+            <div class="mb-4 flex items-center gap-2 hidden">
+                <input type="checkbox" id="incidentPayNow" class="rounded border-slate-305 bg-white text-fpt-orange focus:ring-fpt-orange"
                     onchange="toggleIncidentPay()" checked>
-                <label for="incidentPayNow" class="text-xs font-bold text-slate-350">Thanh toán tiền phạt đền bù ngay
+                <label for="incidentPayNow" class="text-xs font-bold text-slate-600">Thanh toán tiền phạt đền bù ngay
                     lúc này</label>
             </div>
 
             <div id="incidentPaymentFields">
                 <div class="mb-4">
-                    <label class="block text-xs font-bold text-slate-400 mb-1">Phương thức thanh toán</label>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Phương thức thanh toán</label>
                     <select id="paymentMethodIncident"
-                        class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+                        class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
                         onchange="toggleIncidentTxCode()">
                         <option value="Cash">💵 Tiền mặt tại quầy</option>
                         <option value="QRCode">📲 QRCode Chuyển khoản</option>
@@ -598,41 +624,41 @@
                 </div>
 
                 <div id="txCodeContainerIncident" class="hidden mb-6">
-                    <label class="block text-xs font-bold text-slate-400 mb-1">Mã giao dịch đối chiếu (Chuyển
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Mã giao dịch đối chiếu (Chuyển
                         khoản)</label>
                     <input type="text" id="transactionCodeIncident"
-                        class="w-full bg-slate-950 border border-slate-750 rounded-lg p-2 text-sm uppercase font-mono text-slate-200 focus:outline-none focus:border-fpt-orange"
+                        class="w-full bg-white border border-slate-300 rounded-lg p-2 text-sm uppercase font-mono text-slate-800 focus:outline-none focus:border-fpt-orange"
                         placeholder="Nhập mãGD ngân hàng...">
                 </div>
 
                 <!-- QR Code container for Incident -->
                 <div id="incidentQrContainer"
-                    class="hidden space-y-4 border border-slate-800 rounded-xl p-4 bg-slate-950/80 mt-4 animate-fade-in text-xs text-slate-300">
+                    class="hidden space-y-4 border border-slate-200 rounded-xl p-4 bg-slate-50 mt-4 animate-fade-in text-xs text-slate-655">
                     <div class="flex justify-center mb-2">
                         <img id="incidentQrImage" src="" alt="Mã VietQR"
-                            class="h-44 w-44 rounded-lg shadow-sm border border-slate-750">
+                            class="h-44 w-44 rounded-lg shadow-sm border border-slate-200">
                     </div>
                     <div class="space-y-1">
                         <div class="flex justify-between"><span class="text-slate-500">Ngân hàng:</span> <span
-                                class="font-semibold text-slate-200" th:text="${vietqrBankName}">TPBank</span></div>
+                                class="font-semibold text-slate-850" th:text="${vietqrBankName}">TPBank</span></div>
                         <div class="flex justify-between"><span class="text-slate-500">Số tài khoản:</span> <span
-                                class="font-mono font-semibold text-slate-205"
+                                class="font-mono font-semibold text-slate-800"
                                 th:text="${vietqrAccountNo}">00000102719</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">Tên tài khoản:</span> <span
-                                class="font-semibold text-slate-200" th:text="${vietqrAccountName}">NGUYEN QUANG VINH</span>
+                        <div class="flex justify-between"><span class="text-slate-550">Tên tài khoản:</span> <span
+                                class="font-semibold text-slate-800" th:text="${vietqrAccountName}">NGUYEN QUANG VINH</span>
                         </div>
                         <div class="flex justify-between"><span class="text-slate-500">Nội dung:</span> <span
                                 id="incidentQrInfo"
-                                class="font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">...</span></div>
+                                class="font-mono font-bold text-emerald-700 bg-emerald-55 bg-emerald-50 px-1.5 py-0.5 rounded">...</span></div>
                     </div>
                 </div>
             </div>
 
             <div class="flex justify-end gap-3 mt-6">
                 <button onclick="closeModal('reportIncidentModal')"
-                    class="px-4 py-2 border border-slate-755 bg-slate-950 text-slate-300 hover:bg-slate-800 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
+                    class="px-4 py-2 border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
                 <button id="btnConfirmIncident"
-                    class="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Lập
+                    class="px-4 py-2 bg-fpt-orange hover:bg-fpt-orangeHover active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Lập
                     Biên Bản</button>
             </div>
         </div>
@@ -813,12 +839,7 @@
             }
         }
 
-        function submitOverdueReturnLater() {
-            if (!activeScanData) return;
-            if (confirm("Xác nhận trả sách quá hạn và ghi nhận nợ phạt (sinh viên sẽ nộp phạt vào hôm khác)?")) {
-                submitOverdueReturn(activeScanData.ticketDetailId, true);
-            }
-        }
+        // submitOverdueReturnLater has been removed since paying later is no longer allowed.
 
         // 2. Trả sách quá hạn có đóng tiền
         async function submitOverdueReturn(ticketDetailId, payLater = false) {
@@ -948,17 +969,43 @@
                 if (activeScanData) {
                     const isOverdue = activeScanData.isOverdue;
                     const amount = isOverdue ? activeScanData.combinedAmount : activeScanData.bookPrice;
-                    const transferDesc = 'MATSAT' + activeScanData.ticketDetailId;
-                    document.getElementById('incidentQrInfo').textContent = transferDesc;
+                    
+                    const incidentType = document.getElementById('incidentType').value;
+                    const action = incidentType === 'Lost' ? 'M' : 'D';
 
-                    const vqrBankId = document.getElementById('vqrBankId').value;
-                    const vqrAccountNo = document.getElementById('vqrAccountNo').value;
-                    const vqrAccountName = document.getElementById('vqrAccountName').value;
+                    // Đặt trạng thái đang tải mã
+                    document.getElementById('incidentQrInfo').textContent = "Đang tạo mã thanh toán...";
+                    document.getElementById('incidentQrImage').src = "";
 
-                    const qrUrl = 'https://img.vietqr.io/image/' + vqrBankId + '-' + vqrAccountNo + '-compact2.png?amount=' + amount + '&addInfo=' + encodeURIComponent(transferDesc) + '&accountName=' + encodeURIComponent(vqrAccountName);
-                    document.getElementById('incidentQrImage').src = qrUrl;
+                    fetch('/borrowing/api/generate-payment-token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: 'action=' + action + '&id=' + activeScanData.ticketDetailId
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success && data.token) {
+                            const transferDesc = data.token;
+                            document.getElementById('incidentQrInfo').textContent = transferDesc;
 
-                    startOverdueReturnStatusPolling(activeScanData.ticketDetailId);
+                            const vqrBankId = document.getElementById('vqrBankId').value;
+                            const vqrAccountNo = document.getElementById('vqrAccountNo').value;
+                            const vqrAccountName = document.getElementById('vqrAccountName').value;
+
+                            const qrUrl = 'https://img.vietqr.io/image/' + vqrBankId + '-' + vqrAccountNo + '-compact2.png?amount=' + amount + '&addInfo=' + encodeURIComponent(transferDesc) + '&accountName=' + encodeURIComponent(vqrAccountName);
+                            document.getElementById('incidentQrImage').src = qrUrl;
+
+                            startOverdueReturnStatusPolling(activeScanData.ticketDetailId);
+                        } else {
+                            document.getElementById('incidentQrInfo').textContent = "Lỗi sinh Token: " + (data.message || "Unknown error");
+                        }
+                    })
+                    .catch(err => {
+                        document.getElementById('incidentQrInfo').textContent = "Không thể kết nối đến máy chủ.";
+                        console.error(err);
+                    });
                 }
             } else {
                 container.classList.add('hidden');
@@ -981,12 +1028,49 @@
                     const data = await response.json();
                     if (data.success && data.returned) {
                         stopOverdueReturnStatusPolling();
-                        showToast('🎉 Giao dịch chuyển khoản QR thành công!', 'success');
-                        setTimeout(() => {
-                            closeModal('overdueReturnModal');
-                            closeModal('reportIncidentModal');
-                            window.location.reload();
-                        }, 1500);
+                        
+                        const isOverdueModalOpen = document.getElementById('overdueReturnModal').classList.contains('flex');
+                        const isIncidentModalOpen = document.getElementById('reportIncidentModal').classList.contains('flex');
+                        
+                        if (isOverdueModalOpen) {
+                            document.getElementById('overdueSuccessDesc').textContent = 'Trả sách quá hạn #' + ticketDetailId;
+                            document.getElementById('overdueSuccessOverlay').classList.remove('hidden');
+                            
+                            let secondsLeft = 5;
+                            const countdownSpan = document.getElementById('overdueSuccessCountdown');
+                            countdownSpan.textContent = secondsLeft;
+                            const countdownInterval = setInterval(() => {
+                                secondsLeft--;
+                                countdownSpan.textContent = secondsLeft;
+                                if (secondsLeft <= 0) {
+                                    clearInterval(countdownInterval);
+                                    window.location.reload();
+                                }
+                            }, 1000);
+                        } else if (isIncidentModalOpen) {
+                            const incidentType = document.getElementById('incidentType').value;
+                            document.getElementById('incidentSuccessDesc').textContent = (incidentType === 'Lost' ? 'Báo hỏng sách #' : 'Báo hỏng sách #') + ticketDetailId;
+                            document.getElementById('incidentSuccessOverlay').classList.remove('hidden');
+                            
+                            let secondsLeft = 5;
+                            const countdownSpan = document.getElementById('incidentSuccessCountdown');
+                            countdownSpan.textContent = secondsLeft;
+                            const countdownInterval = setInterval(() => {
+                                secondsLeft--;
+                                countdownSpan.textContent = secondsLeft;
+                                if (secondsLeft <= 0) {
+                                    clearInterval(countdownInterval);
+                                    window.location.reload();
+                                }
+                            }, 1000);
+                        } else {
+                            showToast('🎉 Giao dịch chuyển khoản QR thành công!', 'success');
+                            setTimeout(() => {
+                                closeModal('overdueReturnModal');
+                                closeModal('reportIncidentModal');
+                                window.location.reload();
+                            }, 1500);
+                        }
                     }
                 } catch (error) {
                     console.error("Lỗi kiểm tra trạng thái trả sách:", error);
@@ -1011,18 +1095,41 @@
                 qrContainer.classList.remove('hidden');
                 if (activeScanData) {
                     const amount = activeScanData.fineAmount;
-                    const transferDesc = 'TRASACH' + activeScanData.ticketDetailId;
-                    document.getElementById('overdueQrInfo').textContent = transferDesc;
 
-                    const vqrBankId = document.getElementById('vqrBankId').value;
-                    const vqrAccountNo = document.getElementById('vqrAccountNo').value;
-                    const vqrAccountName = document.getElementById('vqrAccountName').value;
+                    // Đặt trạng thái đang tải mã
+                    document.getElementById('overdueQrInfo').textContent = "Đang tạo mã thanh toán...";
+                    document.getElementById('overdueQrImage').src = "";
 
-                    const qrUrl = 'https://img.vietqr.io/image/' + vqrBankId + '-' + vqrAccountNo + '-compact2.png?amount=' + amount + '&addInfo=' + encodeURIComponent(transferDesc) + '&accountName=' + encodeURIComponent(vqrAccountName);
-                    document.getElementById('overdueQrImage').src = qrUrl;
+                    fetch('/borrowing/api/generate-payment-token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: 'action=T&id=' + activeScanData.ticketDetailId
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success && data.token) {
+                            const transferDesc = data.token;
+                            document.getElementById('overdueQrInfo').textContent = transferDesc;
 
-                    // Bắt đầu khảo sát trạng thái trả sách sau khi quét
-                    startOverdueReturnStatusPolling(activeScanData.ticketDetailId);
+                            const vqrBankId = document.getElementById('vqrBankId').value;
+                            const vqrAccountNo = document.getElementById('vqrAccountNo').value;
+                            const vqrAccountName = document.getElementById('vqrAccountName').value;
+
+                            const qrUrl = 'https://img.vietqr.io/image/' + vqrBankId + '-' + vqrAccountNo + '-compact2.png?amount=' + amount + '&addInfo=' + encodeURIComponent(transferDesc) + '&accountName=' + encodeURIComponent(vqrAccountName);
+                            document.getElementById('overdueQrImage').src = qrUrl;
+
+                            // Bắt đầu khảo sát trạng thái trả sách sau khi quét
+                            startOverdueReturnStatusPolling(activeScanData.ticketDetailId);
+                        } else {
+                            document.getElementById('overdueQrInfo').textContent = "Lỗi sinh Token: " + (data.message || "Unknown error");
+                        }
+                    })
+                    .catch(err => {
+                        document.getElementById('overdueQrInfo').textContent = "Không thể kết nối đến máy chủ.";
+                        console.error(err);
+                    });
                 }
             } else {
                 container.classList.add('hidden');

@@ -20,6 +20,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class BookReturnController {
 
     private final BookReturnService bookReturnService;
+    private final com.swp5.library_management.repository.BorrowTicketDetailRepository borrowTicketDetailRepository;
+    private final com.swp5.library_management.repository.FineInvoiceRepository fineInvoiceRepository;
     private static final ConcurrentLinkedQueue<String> scanQueue = new ConcurrentLinkedQueue<>();
 
     @org.springframework.beans.factory.annotation.Value("${app.vietqr.bank-id}")
@@ -52,7 +54,9 @@ public class BookReturnController {
             redirectAttrs.addFlashAttribute("errorMsg", "Quyền truy cập bị từ chối. Vui lòng đăng nhập bằng tài khoản Thủ thư.");
             return "redirect:/login";
         }
-        List<BorrowTicketDetail> list = bookReturnService.searchCurrentlyBorrowing(bookTitle, borrowerId);
+        
+        String librarianId = (String) session.getAttribute("loggedInUserId");
+        List<BorrowTicketDetail> list = bookReturnService.searchCurrentlyBorrowing(bookTitle, borrowerId, librarianId);
 
         int pageSize = 10;
         int totalPages = (int) Math.ceil((double) list.size() / pageSize);
@@ -335,6 +339,40 @@ public class BookReturnController {
             }
             boolean isReturned = bookReturnService.isBookReturned(ticketDetailId);
             return ResponseEntity.ok(Map.of("success", true, "returned", isReturned));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/api/generate-payment-token")
+    @ResponseBody
+    public ResponseEntity<?> generatePaymentToken(
+            @RequestParam String action,
+            @RequestParam Integer id,
+            HttpSession session) {
+        if (isNotLibrarian(session)) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Quyền truy cập bị từ chối. Vui lòng đăng nhập bằng tài khoản Thủ thư."));
+        }
+
+        try {
+            String patronId = null;
+            if ("T".equalsIgnoreCase(action) || "M".equalsIgnoreCase(action) || "D".equalsIgnoreCase(action)) {
+                com.swp5.library_management.entity.BorrowTicketDetail detail = borrowTicketDetailRepository.findById(id).orElse(null);
+                if (detail != null && detail.getBorrowTicket() != null && detail.getBorrowTicket().getPatron() != null) {
+                    patronId = detail.getBorrowTicket().getPatron().getUserId();
+                }
+            } else if ("F".equalsIgnoreCase(action)) {
+                com.swp5.library_management.entity.FineInvoice fine = fineInvoiceRepository.findById(id).orElse(null);
+                if (fine != null && fine.getPatron() != null) {
+                    patronId = fine.getPatron().getUserId();
+                }
+            }
+
+            String librarianId = (String) session.getAttribute("loggedInUserId");
+            
+            String token = com.swp5.library_management.utils.PaymentTokenUtil.generateToken(action, id, patronId, librarianId);
+            return ResponseEntity.ok(Map.of("success", true, "token", token));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }

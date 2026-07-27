@@ -23,6 +23,7 @@ public class PaymentWebhookController {
 
     private final ViolationService violationService;
     private final BookReturnService bookReturnService;
+    private final com.swp5.library_management.repository.UserRepository userRepository;
 
     @Value("${app.webhook.api-key}")
     private String expectedApiKey;
@@ -89,6 +90,114 @@ public class PaymentWebhookController {
         }
         if (transactionCode == null || transactionCode.isBlank()) {
             transactionCode = "AUTO-QR-" + System.currentTimeMillis();
+        }
+
+        // Thử tìm kiếm và trích xuất Token bảo mật VietQR (dạng PAY... đứng trước hoặc nằm trong nội dung chuyển khoản)
+        String payToken = null;
+        Pattern payPattern = Pattern.compile("PAY[A-Z0-9]+", Pattern.CASE_INSENSITIVE);
+        Matcher payMatcher = payPattern.matcher(content);
+        if (payMatcher.find()) {
+            payToken = payMatcher.group(0);
+        }
+
+        com.swp5.library_management.utils.PaymentTokenUtil.DecodedToken decoded = null;
+        if (payToken != null) {
+            java.util.List<com.swp5.library_management.entity.User> librarians = userRepository.findAnyLibrarian();
+            decoded = com.swp5.library_management.utils.PaymentTokenUtil.decodeToken(payToken, librarians);
+        }
+
+        if (decoded != null) {
+            String librarianId = decoded.getLibrarianId();
+            if (librarianId == null || librarianId.trim().isEmpty()) {
+                librarianId = "SYSTEM_AUTO";
+            }
+            Integer id = decoded.getId();
+            String action = decoded.getAction().toUpperCase();
+
+            log.info("Decrypted Payment Token successfully. Action: {}, ID: {}, Librarian: {}", action, id, librarianId);
+
+            if ("T".equals(action)) {
+                try {
+                    bookReturnService.processOverdueReturn(id, "QRCode", transactionCode, librarianId, null);
+                } catch (IllegalArgumentException e) {
+                    log.error("Ticket detail not found for token return: {}", id);
+                    return badRequest(e.getMessage());
+                } catch (Exception e) {
+                    log.error("Internal error processing automatic return with token: " + id, e);
+                    Map<String, Object> errorResponse = new HashMap<>();
+                    errorResponse.put("success", false);
+                    errorResponse.put("message", "Lỗi xử lý tự động trả sách: " + e.getMessage());
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+                }
+
+                Map<String, Object> successResponse = new HashMap<>();
+                successResponse.put("success", true);
+                successResponse.put("message", "Hệ thống tự động trả sách và thu tiền quá hạn cho lượt mượn #" + id + " thành công (Token).");
+                return ResponseEntity.ok(successResponse);
+
+            } else if ("M".equals(action)) {
+                try {
+                    bookReturnService.processLost(id, true, "QRCode", transactionCode, librarianId, null);
+                } catch (IllegalArgumentException e) {
+                    log.error("Ticket detail not found for token lost reporting: {}", id);
+                    return badRequest(e.getMessage());
+                } catch (Exception e) {
+                    log.error("Internal error processing automatic lost reporting with token: " + id, e);
+                    Map<String, Object> errorResponse = new HashMap<>();
+                    errorResponse.put("success", false);
+                    errorResponse.put("message", "Lỗi xử lý tự động báo mất: " + e.getMessage());
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+                }
+
+                Map<String, Object> successResponse = new HashMap<>();
+                successResponse.put("success", true);
+                successResponse.put("message", "Hệ thống tự động ghi nhận báo mất sách và thanh toán gộp thành công cho lượt mượn #" + id + " (Token).");
+                return ResponseEntity.ok(successResponse);
+
+            } else if ("D".equals(action)) {
+                try {
+                    bookReturnService.processDamaged(id, true, "QRCode", transactionCode, librarianId, null);
+                } catch (IllegalArgumentException e) {
+                    log.error("Ticket detail not found for token damaged reporting: {}", id);
+                    return badRequest(e.getMessage());
+                } catch (Exception e) {
+                    log.error("Internal error processing automatic damaged reporting with token: " + id, e);
+                    Map<String, Object> errorResponse = new HashMap<>();
+                    errorResponse.put("success", false);
+                    errorResponse.put("message", "Lỗi xử lý tự động báo hỏng: " + e.getMessage());
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+                }
+
+                Map<String, Object> successResponse = new HashMap<>();
+                successResponse.put("success", true);
+                successResponse.put("message", "Hệ thống tự động ghi nhận báo hỏng sách và thanh toán gộp thành công cho lượt mượn #" + id + " (Token).");
+                return ResponseEntity.ok(successResponse);
+
+            } else if ("F".equals(action)) {
+                try {
+                    violationService.collectFineQR(id, librarianId, transactionCode);
+                } catch (IllegalArgumentException e) {
+                    log.error("Fine invoice not found for token: {}", id);
+                    return badRequest(e.getMessage());
+                } catch (IllegalStateException e) {
+                    log.warn("Fine invoice already paid: {}", id);
+                    Map<String, Object> successResponse = new HashMap<>();
+                    successResponse.put("success", true);
+                    successResponse.put("message", "Hóa đơn đã được thanh toán từ trước.");
+                    return ResponseEntity.ok(successResponse);
+                } catch (Exception e) {
+                    log.error("Internal error processing automatic payment for fine " + id, e);
+                    Map<String, Object> errorResponse = new HashMap<>();
+                    errorResponse.put("success", false);
+                    errorResponse.put("message", "Lỗi xử lý hệ thống: " + e.getMessage());
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+                }
+
+                Map<String, Object> successResponse = new HashMap<>();
+                successResponse.put("success", true);
+                successResponse.put("message", "Hệ thống tự động ghi nhận thanh toán hóa đơn phạt #" + id + " thành công (Token).");
+                return ResponseEntity.ok(successResponse);
+            }
         }
 
         if (matcherNopphat.find()) {

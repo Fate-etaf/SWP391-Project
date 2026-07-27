@@ -167,8 +167,8 @@
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5 font-medium">Trạng thái</label>
                         <select id="statusFilter" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white shadow-sm font-medium text-slate-800">
                             <option value="all" th:selected="${paidStatus == 'all'}">Tất cả trạng thái</option>
-                            <option value="Unpaid" th:selected="${paidStatus == null || paidStatus == 'Unpaid'}">Chưa trả</option>
-                            <option value="Paid" th:selected="${paidStatus == 'Paid'}">Đã trả</option>
+                            <option value="Unpaid" th:selected="${paidStatus == 'Unpaid'}">Chưa trả</option>
+                            <option value="Paid" th:selected="${paidStatus == null || paidStatus == 'Paid'}">Đã trả</option>
                         </select>
                     </div>
 
@@ -189,13 +189,13 @@
                     </button>
 
                     <!-- Nút Xuất Excel -->
-                    <a id="exportExcelLink" href="/librarian/fines/export"
+                    <button type="button" onclick="openExportExcelModal()"
                        class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow-sm transition self-end h-[42px]">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                         </svg>
                         Xuất Excel
-                    </a>
+                    </button>
                 </div>
             </div>
 
@@ -304,32 +304,7 @@
 
                             <!-- Thao tác -->
                             <td class="px-3 py-3">
-                                <div th:if="${fine.paidStatus == 'Unpaid'}" class="flex gap-2">
-                                    <!-- Thu tiền mặt: mở modal xác nhận -->
-                                    <button type="button" onclick="openCashModal(this)" th:data-fine-id="${fine.fineId}"
-                                        th:data-patron-name="${fine.patron != null ? fine.patron.fullName : ''}"
-                                        th:data-patron-id="${fine.patron != null ? fine.patron.userId : ''}"
-                                        th:data-book-title="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null and fine.ticketDetail.bookCopy.book != null ? fine.ticketDetail.bookCopy.book.title : '—'}"
-                                        th:data-copy-id="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null ? fine.ticketDetail.bookCopy.copyId : '—'}"
-                                        th:data-violation-type="${fine.violationType ?: ''}"
-                                        th:data-amount="${fine.remainingAmount != null ? fine.remainingAmount : 0}"
-                                        th:data-created-at="${fine.createdAt != null ? #temporals.format(fine.createdAt, 'dd/MM/yyyy') : '—'}"
-                                        class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition whitespace-nowrap shadow-md">
-                                        Thu tiền mặt
-                                    </button>
-                                    <button type="button" onclick="openQRModal(this)" th:data-fine-id="${fine.fineId}"
-                                        th:data-amount="${fine.remainingAmount != null ? fine.remainingAmount : 0}"
-                                        th:data-patron-name="${fine.patron != null ? fine.patron.fullName : ''}"
-                                        th:data-patron-id="${fine.patron != null ? fine.patron.userId : ''}"
-                                        th:data-book-title="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null and fine.ticketDetail.bookCopy.book != null ? fine.ticketDetail.bookCopy.book.title : '—'}"
-                                        th:data-copy-id="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null ? fine.ticketDetail.bookCopy.copyId : '—'}"
-                                        th:data-violation-type="${fine.violationType ?: ''}"
-                                        th:data-created-at="${fine.createdAt != null ? #temporals.format(fine.createdAt, 'dd/MM/yyyy') : '—'}"
-                                        class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition whitespace-nowrap shadow-md">
-                                        Thanh toán QR
-                                    </button>
-                                </div>
-                                <span th:if="${fine.paidStatus != 'Unpaid'}" class="text-slate-500 text-xs">—</span>
+                                <span class="text-slate-500 text-xs">—</span>
                             </td>
                         </tr>
                     </tbody>
@@ -440,7 +415,23 @@
     <!-- VietQR Payment Modal -->
     <div id="qrModal"
         class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-        <div class="bg-slate-900 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-850">
+        <div class="relative bg-slate-900 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-850">
+            <!-- Success Overlay -->
+            <div id="successOverlay" class="hidden absolute inset-0 bg-slate-900/95 flex flex-col items-center justify-center p-8 text-center z-50 animate-fade-in">
+                <div class="w-20 h-20 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mb-6 animate-bounce shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                    <svg class="w-12 h-12 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-black text-emerald-400 tracking-wide uppercase mb-2">✨ THANH TOÁN THÀNH CÔNG!</h3>
+                <p class="text-slate-200 text-sm max-w-xs mb-4">Hệ thống đã nhận diện thanh toán tự động qua VietQR thành công.</p>
+                <div class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 mb-6 w-full max-w-xs text-xs space-y-2">
+                    <p class="text-slate-400 flex justify-between"><span>Mã giao dịch:</span> <span id="successTxCode" class="font-mono font-bold text-slate-200">-</span></p>
+                    <p class="text-slate-400 flex justify-between"><span>Thanh toán cho:</span> <span id="successDescription" class="font-semibold text-slate-200">-</span></p>
+                </div>
+                <p class="text-xs text-slate-500 mb-4 animate-pulse">Trang sẽ tự động cập nhật sau <span id="successCountdown" class="font-bold text-emerald-400">5</span> giây...</p>
+                <button type="button" onclick="window.location.reload()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-lg transition-all uppercase">Thanh toán thành công</button>
+            </div>
             <!-- Header -->
             <div class="px-5 py-3.5 bg-slate-950/90 flex justify-between items-center text-white border-b border-slate-800">
                 <div class="flex items-center gap-2">
@@ -568,7 +559,97 @@
         </div>
     </div>
 
+    <!-- Export Excel Modal -->
+    <div id="exportExcelModal"
+        class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200">
+            <!-- Header -->
+            <div class="px-5 py-4 bg-emerald-600 flex justify-between items-center text-white">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                    </svg>
+                    <h3 class="text-sm font-bold text-white">Xuất Báo Cáo Excel</h3>
+                </div>
+                <button type="button" onclick="closeExportExcelModal()" class="text-emerald-100 hover:text-white transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <form id="exportExcelForm" method="get" action="/librarian/fines/export">
+                <input type="hidden" id="exportSearch" name="search" value="" />
+                <input type="hidden" id="exportPaidStatus" name="paidStatus" value="" />
+
+                <div class="p-6 space-y-4">
+                    <p class="text-xs text-slate-500 text-center">Vui lòng chọn thông tin bộ lọc trước khi xác nhận xuất báo cáo Excel.</p>
+
+                    <!-- Ngày bắt đầu -->
+                    <div class="space-y-1">
+                        <label for="exportStartDate" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider">Ngày Bắt Đầu:</label>
+                        <input type="date" id="exportStartDate" name="startDate" onclick="try { this.showPicker(); } catch(e) {}"
+                            class="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 bg-white font-medium cursor-pointer placeholder-slate-400" />
+                    </div>
+
+                    <!-- Ngày kết thúc -->
+                    <div class="space-y-1">
+                        <label for="exportEndDate" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider">Ngày Kết Thúc:</label>
+                        <input type="date" id="exportEndDate" name="endDate" onclick="try { this.showPicker(); } catch(e) {}"
+                            class="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 bg-white font-medium cursor-pointer placeholder-slate-400" />
+                    </div>
+
+                    <!-- Loại vi phạm -->
+                    <div class="space-y-1">
+                        <label for="exportViolationType" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider">Loại Vi Phạm:</label>
+                        <select id="exportViolationType" name="violationType"
+                            class="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 bg-white font-medium">
+                            <option value="">Tất cả lỗi</option>
+                            <option value="Overdue">Quá hạn (Overdue)</option>
+                            <option value="Lost">Mất sách (Lost)</option>
+                            <option value="Damaged">Hỏng sách (Damaged)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+                    <button type="button" onclick="closeExportExcelModal()"
+                        class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
+                        Hủy
+                    </button>
+                    <button type="submit" onclick="closeExportExcelModal()"
+                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-sm transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Xác nhận xuất Excel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script th:inline="javascript">
+        // ── Export Modal ─────────────────────────────────────────────
+        function openExportExcelModal() {
+            // Pick up current quick filter values
+            document.getElementById('exportSearch').value = searchInput.value;
+            document.getElementById('exportPaidStatus').value = statusFilter.value;
+            document.getElementById('exportViolationType').value = violationTypeFilter.value;
+
+            // Show the modal
+            document.getElementById('exportExcelModal').classList.remove('hidden');
+            document.getElementById('exportExcelModal').classList.add('flex');
+        }
+
+        function closeExportExcelModal() {
+            document.getElementById('exportExcelModal').classList.remove('flex');
+            document.getElementById('exportExcelModal').classList.add('hidden');
+        }
+
         // ── Cash Modal ──────────────────────────────────────────────
         const violationLabels = { 'Overdue': 'Quá hạn', 'Lost': 'Mất sách', 'Damaged': 'Hỏng sách' };
 
@@ -670,16 +751,13 @@
             // Banking info
             const amountFormatted = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
             document.getElementById('dbAmount').innerText = amountFormatted;
-            const transferDesc = 'NOPPHAT' + fineId;
-            document.getElementById('dbInfo').innerText = transferDesc;
-
-            // Generate VietQR URL
-            const qrUrl = 'https://img.vietqr.io/image/' + vqrBankId + '-' + vqrAccountNo + '-compact2.png?amount=' + amount
-                + '&addInfo=' + encodeURIComponent(transferDesc) + '&accountName=' + encodeURIComponent(vqrAccountName);
+            
+            // Set temporary loading status
+            document.getElementById('dbInfo').innerText = "Đang tạo mã thanh toán...";
             document.getElementById('qrLoading').classList.remove('hidden');
             const img = document.getElementById('qrImage');
             img.classList.add('hidden');
-            img.src = qrUrl;
+            img.src = "";
 
             // Form action
             let actionBaseUrl = /*[[@{/librarian/fines/collect-qr/}]]*/ '/librarian/fines/collect-qr/';
@@ -701,37 +779,78 @@
             document.getElementById('qrModal').classList.remove('hidden');
             document.getElementById('qrModal').classList.add('flex');
 
-            // Start polling
-            if (pollIntervalId) clearInterval(pollIntervalId);
-            pollIntervalId = setInterval(function () {
-                let checkUrlBase = /*[[@{/librarian/fines/check-status/}]]*/ '/librarian/fines/check-status/';
-                let finalCheckUrl;
-                if (checkUrlBase.includes(';')) {
-                    const parts = checkUrlBase.split(';');
-                    finalCheckUrl = parts[0] + fineId + (parts[1] ? ';' + parts[1] : '');
-                } else {
-                    finalCheckUrl = checkUrlBase + fineId;
-                }
-                fetch(finalCheckUrl)
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success && data.paid) {
-                            clearInterval(pollIntervalId);
-                            pollIntervalId = null;
-                            // Hide manual confirm button, show success banner inside modal
-                            document.getElementById('qrFooterActions').classList.add('hidden');
-                            const banner = document.getElementById('qrSuccessBanner');
-                            banner.classList.remove('hidden');
-                            document.getElementById('qrSuccessDetail').innerText =
-                                '🎉 Mã GD: ' + (data.transactionCode || 'N/A') + ' – Trang sẽ tự động làm mới sau 3 giây...';
-                            sessionStorage.setItem('autoSuccessMsg',
-                                '🎉 Hệ thống đã tự động nhận diện giao dịch chuyển khoản thành công cho phiếu phạt #' + fineId
-                                + ' (Mã GD: ' + (data.transactionCode || 'N/A') + ')');
-                            setTimeout(() => window.location.reload(), 3000);
+            // Call API to generate secure token
+            fetch('/borrowing/api/generate-payment-token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=F&id=' + fineId
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.token) {
+                    const transferDesc = data.token;
+                    document.getElementById('dbInfo').innerText = transferDesc;
+
+                    // Generate VietQR URL
+                    const qrUrl = 'https://img.vietqr.io/image/' + vqrBankId + '-' + vqrAccountNo + '-compact2.png?amount=' + amount
+                        + '&addInfo=' + encodeURIComponent(transferDesc) + '&accountName=' + encodeURIComponent(vqrAccountName);
+                    
+                    document.getElementById('qrLoading').classList.remove('hidden');
+                    img.src = qrUrl;
+
+                    // Start polling
+                    if (pollIntervalId) clearInterval(pollIntervalId);
+                    pollIntervalId = setInterval(function () {
+                        let checkUrlBase = /*[[@{/librarian/fines/check-status/}]]*/ '/librarian/fines/check-status/';
+                        let finalCheckUrl;
+                        if (checkUrlBase.includes(';')) {
+                            const parts = checkUrlBase.split(';');
+                            finalCheckUrl = parts[0] + fineId + (parts[1] ? ';' + parts[1] : '');
+                        } else {
+                            finalCheckUrl = checkUrlBase + fineId;
                         }
-                    })
-                    .catch(err => console.error('Error polling fine status:', err));
-            }, 2000);
+                        fetch(finalCheckUrl)
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.success && data.paid) {
+                                    clearInterval(pollIntervalId);
+                                    pollIntervalId = null;
+                                    
+                                    // Hiển thị overlay thành công đẹp mắt
+                                    document.getElementById('successTxCode').textContent = data.transactionCode || 'N/A';
+                                    document.getElementById('successDescription').textContent = 'Hóa đơn phạt #' + fineId;
+                                    
+                                    const overlay = document.getElementById('successOverlay');
+                                    overlay.classList.remove('hidden');
+                                    
+                                    let secondsLeft = 5;
+                                    const countdownSpan = document.getElementById('successCountdown');
+                                    countdownSpan.textContent = secondsLeft;
+                                    
+                                    const countdownInterval = setInterval(() => {
+                                        secondsLeft--;
+                                        countdownSpan.textContent = secondsLeft;
+                                        if (secondsLeft <= 0) {
+                                            clearInterval(countdownInterval);
+                                            window.location.reload();
+                                        }
+                                    }, 1000);
+                                }
+                            })
+                            .catch(err => console.error('Error polling fine status:', err));
+                    }, 2000);
+                } else {
+                    document.getElementById('dbInfo').innerText = "Lỗi sinh Token: " + (data.message || "Unknown error");
+                    document.getElementById('qrLoading').classList.add('hidden');
+                }
+            })
+            .catch(err => {
+                document.getElementById('dbInfo').innerText = "Không thể kết nối đến máy chủ.";
+                document.getElementById('qrLoading').classList.add('hidden');
+                console.error(err);
+            });
         }
 
         function closeQRModal() {
@@ -849,15 +968,7 @@
                 countText.innerText = 'Tìm thấy: ' + visibleCount + ' phiếu phạt';
             }
 
-            // Sync dynamic Excel export link
-            const exportLink = document.getElementById('exportExcelLink');
-            if (exportLink) {
-                const params = new URLSearchParams();
-                if (searchVal) params.append('search', searchVal);
-                if (statusVal) params.append('paidStatus', statusFilter.value);
-                if (violationVal) params.append('violationType', violationTypeFilter.value);
-                exportLink.href = '/librarian/fines/export?' + params.toString();
-            }
+
 
             // Update Pagination UI
             updatePaginationUI(totalPages);
@@ -1053,7 +1164,7 @@
         // Reset filter action
         resetFiltersBtn.addEventListener('click', () => {
             searchInput.value = '';
-            statusFilter.value = 'Unpaid';
+            statusFilter.value = 'Paid';
             violationTypeFilter.value = '';
             suggestionsDropdown.classList.add('hidden');
             fetchFinesFromServer();
