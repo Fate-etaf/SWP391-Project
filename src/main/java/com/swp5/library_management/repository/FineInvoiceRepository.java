@@ -50,9 +50,10 @@ public interface FineInvoiceRepository extends JpaRepository<FineInvoice, Intege
            "LEFT JOIN FETCH f.ticketDetail td " +
            "LEFT JOIN FETCH td.bookCopy bc " +
            "LEFT JOIN FETCH bc.book " +
+           "LEFT JOIN td.returnCampus rc " +
            "WHERE (:patronId IS NULL OR f.patron.userId = :patronId) " +
            "AND (:paidStatus IS NULL OR f.paidStatus = :paidStatus) " +
-           "AND td.returnCampus.campusId = :campusId " +
+           "AND (:campusId IS NULL OR rc.campusId = :campusId) " +
            "ORDER BY f.createdAt DESC")
     List<FineInvoice> findAllFiltered(@Param("patronId") String patronId,
                                       @Param("paidStatus") String paidStatus,
