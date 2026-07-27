@@ -74,7 +74,7 @@ public class ServiceController {
             @RequestParam(required = false) String publisher,
             @RequestParam(required = false) String language,
             @RequestParam(required = false) String bookLink,
-            @RequestParam(required = false) String requestUrgency,
+            @RequestParam(required = false) String priority,
             @RequestParam String reason,
             @RequestParam String email,
             @RequestParam(required = false) String feedback,
@@ -98,7 +98,7 @@ public class ServiceController {
                     .publisher(publisher)
                     .language(language)
                     .bookLink(bookLink)
-                    .priority(requestUrgency)
+                    .priority(priority)
                     .reason(reason)
                     .email(email)
                     .feedback(feedback)

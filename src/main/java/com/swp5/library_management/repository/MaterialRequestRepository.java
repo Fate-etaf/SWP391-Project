@@ -20,6 +20,8 @@ public interface MaterialRequestRepository extends JpaRepository<MaterialRequest
 
     List<MaterialRequest> findByPatronUserIdOrderByCreatedAtDesc(String patronId);
 
+    boolean existsByPatronUserIdAndTitleIgnoreCaseAndStatusNot(String patronId, String title, String status);
+
     long countByStatus(String status);
 
     long countByStatusAndPatronCampusId(String status, Integer campusId);

@@ -42,6 +42,15 @@ public class MaterialRequestServiceImpl implements MaterialRequestService {
         User patron = userRepository.findById(patronId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy tài khoản: " + patronId));
 
+        // Duplicate check: block if this patron already has a non-rejected request for the same title
+        boolean isDuplicate = materialRequestRepository
+                .existsByPatronUserIdAndTitleIgnoreCaseAndStatusNot(patronId, request.getTitle(), "Rejected");
+        if (isDuplicate) {
+            throw new IllegalStateException(
+                    "Bạn đã có một đề nghị mua tài liệu \"" + request.getTitle() +
+                    "\" đang được xử lý hoặc đã được duyệt. Không thể gửi yêu cầu trùng lặp.");
+        }
+
         // 1. Save request to database
         request.setPatron(patron);
         request.setStatus("Pending");

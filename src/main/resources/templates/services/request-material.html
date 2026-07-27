@@ -245,7 +245,7 @@
                 <label for="patronId" class="form-label">Mã sinh viên / Mã nhân viên</label>
                 <input type="text" name="patronId" id="patronId" class="form-input" 
                        th:value="${req != null ? req.patron.userId : patronId}" 
-                       th:readonly="${req != null}"
+                       readonly
                        placeholder="Ví dụ: HE207002" autocomplete="off">
             </div>
 
@@ -294,10 +294,17 @@
                 <label for="priority" class="form-label">
                     Thời gian cần? <span th:if="${req == null}" class="required-star">*</span>
                 </label>
-                <select name="priority" id="priority" class="form-select" required th:disabled="${req != null}">
-                    <option value="Medium" th:selected="${req == null or req.priority == 'Medium'}">25-30 ngày đối với sách Tiếng Việt, 8-12 tuần đổi với sách Ngoại văn</option>
-                    <option value="Low" th:selected="${req != null and req.priority == 'Low'}">Không vội </option>
-                    <option value="High" th:selected="${req != null and req.priority == 'High'}">Gấp (yêu cầu nêu rõ lý do)</option>
+                <!-- View mode: show as plain text -->
+                <div th:if="${req != null}" class="form-input" style="background:#f8fafc; cursor:default;">
+                    <span th:if="${req.priority == 'Low'}">Không vội</span>
+                    <span th:if="${req.priority == 'High'}">Gấp (yêu cầu nêu rõ lý do)</span>
+                    <span th:if="${req.priority == 'Medium' or req.priority == null or req.priority == ''}">25-30 ngày đối với sách Tiếng Việt, 8-12 tuần đổi với sách Ngoại văn</span>
+                </div>
+                <!-- Form mode: editable select -->
+                <select th:if="${req == null}" name="priority" id="priority" class="form-select" required>
+                    <option value="Medium">25-30 ngày đối với sách Tiếng Việt, 8-12 tuần đổi với sách Ngoại văn</option>
+                    <option value="Low">Không vội</option>
+                    <option value="High">Gấp (yêu cầu nêu rõ lý do)</option>
                 </select>
             </div>
 
