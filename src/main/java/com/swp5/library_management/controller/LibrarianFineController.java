@@ -60,10 +60,10 @@ public class LibrarianFineController {
             return "redirect:/login";
         }
 
-        // Mặc định là "Unpaid" nếu không có trạng thái chỉ định để giảm tải DB
+        // Mặc định là "Paid" nếu không có trạng thái chỉ định
         String activeStatus = paidStatus;
         if (activeStatus == null || activeStatus.isBlank()) {
-            activeStatus = "Unpaid";
+            activeStatus = "Paid";
         }
 
         // Nếu trạng thái là "all", truyền null vào DB để lấy toàn bộ
@@ -72,7 +72,8 @@ public class LibrarianFineController {
             dbStatus = null;
         }
 
-        List<FineInvoice> fines = violationService.getAllFineInvoices(null, dbStatus);
+        String librarianId = (String) session.getAttribute("loggedInUserId");
+        List<FineInvoice> fines = violationService.getAllFineInvoices(null, dbStatus, librarianId);
         model.addAttribute("fines", fines);
         model.addAttribute("patronId", patronId);
         model.addAttribute("paidStatus", activeStatus);
@@ -144,6 +145,8 @@ public class LibrarianFineController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String paidStatus,
             @RequestParam(required = false) String violationType,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
             HttpSession session) throws IOException {
 
         if (isNotLibrarian(session)) {
@@ -152,14 +155,15 @@ public class LibrarianFineController {
 
         String activeStatus = paidStatus;
         if (activeStatus == null || activeStatus.isBlank()) {
-            activeStatus = "Unpaid";
+            activeStatus = "Paid";
         }
         String dbStatus = activeStatus;
         if ("all".equalsIgnoreCase(dbStatus)) {
             dbStatus = null;
         }
 
-        List<FineInvoice> fines = violationService.getAllFineInvoices(null, dbStatus);
+        String librarianId = (String) session.getAttribute("loggedInUserId");
+        List<FineInvoice> fines = violationService.getAllFineInvoices(null, dbStatus, librarianId);
 
         // Uu tien lay search parameter cua nguoi dung
         String activeSearch = search;
@@ -187,7 +191,7 @@ public class LibrarianFineController {
             }).toList();
         }
 
-        if (paidStatus != null && !paidStatus.isBlank()) {
+        if (paidStatus != null && !paidStatus.isBlank() && !"all".equalsIgnoreCase(paidStatus)) {
             final String ps = paidStatus.toLowerCase().trim();
             fines = fines.stream().filter(f -> f.getPaidStatus() != null && f.getPaidStatus().equalsIgnoreCase(ps)).toList();
         }
@@ -195,6 +199,24 @@ public class LibrarianFineController {
         if (violationType != null && !violationType.isBlank()) {
             final String vt = violationType.toLowerCase().trim();
             fines = fines.stream().filter(f -> f.getViolationType() != null && f.getViolationType().equalsIgnoreCase(vt)).toList();
+        }
+
+        if (startDate != null && !startDate.isBlank()) {
+            try {
+                java.time.LocalDateTime startLDT = java.time.LocalDate.parse(startDate).atStartOfDay();
+                fines = fines.stream().filter(f -> f.getCreatedAt() != null && !f.getCreatedAt().isBefore(startLDT)).toList();
+            } catch (Exception e) {
+                // Keep default if format is invalid
+            }
+        }
+
+        if (endDate != null && !endDate.isBlank()) {
+            try {
+                java.time.LocalDateTime endLDT = java.time.LocalDate.parse(endDate).atTime(java.time.LocalTime.MAX);
+                fines = fines.stream().filter(f -> f.getCreatedAt() != null && !f.getCreatedAt().isAfter(endLDT)).toList();
+            } catch (Exception e) {
+                // Keep default if format is invalid
+            }
         }
 
         byte[] excelBytes = buildExcel(fines);

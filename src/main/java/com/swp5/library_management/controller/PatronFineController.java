@@ -49,7 +49,7 @@ public class PatronFineController {
         }
 
         // Lấy tất cả hóa đơn phạt của sinh viên
-        List<FineInvoice> allFines = violationService.getAllFineInvoices(loggedInUserId, null);
+        List<FineInvoice> allFines = violationService.getAllFineInvoices(loggedInUserId, null, null);
         
         // Lọc theo trạng thái
         List<FineInvoice> displayFines = allFines;

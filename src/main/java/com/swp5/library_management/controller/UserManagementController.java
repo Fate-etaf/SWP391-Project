@@ -43,6 +43,7 @@ public class UserManagementController {
             @RequestParam(value = "campusId", required = false) Integer campusId,
             @RequestParam(value = "tab", defaultValue = "all") String tab,
             @RequestParam(value = "computedStatus", required = false) String computedStatus,
+            @RequestParam(value = "page", defaultValue = "1") int page,
             Model model) {
         
         List<User> allUsers = userRepository.findAll();
@@ -87,7 +88,26 @@ public class UserManagementController {
                 .collect(java.util.stream.Collectors.toList());
         }
 
-        model.addAttribute("students", filteredStudents);
+        // Pagination Logic
+        int pageSize = 20;
+        int totalItems = filteredStudents.size();
+        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+        if (totalPages == 0) totalPages = 1;
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+        
+        int startItem = (page - 1) * pageSize;
+        List<User> pagedStudents;
+        if (filteredStudents.size() < startItem) {
+            pagedStudents = java.util.Collections.emptyList();
+        } else {
+            int toIndex = Math.min(startItem + pageSize, filteredStudents.size());
+            pagedStudents = filteredStudents.subList(startItem, toIndex);
+        }
+
+        model.addAttribute("students", pagedStudents);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         model.addAttribute("currentSearch", search);
         model.addAttribute("currentCampusId", campusId);
         model.addAttribute("currentTab", tab);
@@ -266,6 +286,7 @@ public class UserManagementController {
      * Sẽ bị chặn (hiện lỗi) nếu người dùng đang có sách mượn (đang có BorrowTicket kích hoạt).
      */
     @PostMapping("/admin/users/delete")
+    @org.springframework.transaction.annotation.Transactional
     public String deleteStudent(
             @RequestParam("userId") String userId,
             RedirectAttributes redirectAttributes) {
@@ -334,6 +355,7 @@ public class UserManagementController {
 
         List<User> usersToSave = new ArrayList<>();
         List<String> emailsToNotify = new ArrayList<>(); // Lưu email tài khoản mới phục vụ gửi mail ngầm
+        java.util.Set<String> processedEmails = new java.util.HashSet<>(); // Chặn email trùng nội bộ trong file Excel
         int successCount = 0;
 
         try (InputStream is = file.getInputStream();
@@ -394,10 +416,12 @@ public class UserManagementController {
                     User account = new User();
                     
                     if (email != null && !email.trim().isEmpty()) {
-                        if (userRepository.existsByEmail(email.trim())) {
-                            continue; // Bỏ qua nếu email đã tồn tại để tránh lỗi Unique Constraint
+                        String checkEmail = email.trim().toLowerCase();
+                        if (userRepository.existsByEmail(checkEmail) || processedEmails.contains(checkEmail)) {
+                            continue; // Bỏ qua nếu email đã tồn tại trong DB hoặc bị trùng với dòng trước đó trong file Excel
                         }
-                        emailsToNotify.add(email.trim());
+                        processedEmails.add(checkEmail);
+                        emailsToNotify.add(checkEmail);
                     }
 
                     account.setUserId(userId);

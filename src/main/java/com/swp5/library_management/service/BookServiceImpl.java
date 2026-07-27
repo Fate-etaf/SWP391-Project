@@ -43,6 +43,7 @@ public class BookServiceImpl implements BookService {
     private final SubjectRepository   subjectRepository;
     private final CampusRepository    campusRepository;
     private final ShelfRepository     shelfRepository;
+    private final CategoryRepository  categoryRepository;
 
     public BookServiceImpl(BookRepository bookRepository,
                            BookCopyRepository bookCopyRepository,
@@ -50,7 +51,8 @@ public class BookServiceImpl implements BookService {
                            PublisherRepository publisherRepository,
                            SubjectRepository subjectRepository,
                            CampusRepository campusRepository,
-                           ShelfRepository shelfRepository) {
+                           ShelfRepository shelfRepository,
+                           CategoryRepository categoryRepository) {
         this.bookRepository      = bookRepository;
         this.bookCopyRepository  = bookCopyRepository;
         this.authorRepository    = authorRepository;
@@ -58,6 +60,7 @@ public class BookServiceImpl implements BookService {
         this.subjectRepository   = subjectRepository;
         this.campusRepository    = campusRepository;
         this.shelfRepository     = shelfRepository;
+        this.categoryRepository  = categoryRepository;
     }
 
     // ── Librarian: getAllBooks ─────────────────────────────────────────────────
@@ -129,6 +132,19 @@ public class BookServiceImpl implements BookService {
         book.setAuthors(authors);
         book.setPublisher(publisher);
         book.setSubject(form.getSubjectCode() != null ? subject : null);
+
+        // Auto-assign category based on shelf
+        Set<Category> categories = new HashSet<>();
+        if (StringUtils.hasText(form.getShelfCode())) {
+            Shelf shelf = shelfRepository.findById(form.getShelfCode().trim()).orElse(null);
+            if (shelf != null && StringUtils.hasText(shelf.getShelfCodeTopic())) {
+                String topic = shelf.getShelfCodeTopic().trim();
+                Category category = categoryRepository.findByCategoryNameIgnoreCase(topic)
+                        .orElseGet(() -> categoryRepository.save(Category.builder().categoryName(topic).build()));
+                categories.add(category);
+            }
+        }
+        book.setCategories(categories);
 
         Book saved = bookRepository.saveAndFlush(book);
 
@@ -545,8 +561,18 @@ public class BookServiceImpl implements BookService {
                             }
 
                             // Cập nhật vị trí kệ (ShelfCode)
-                            if (shelfCode != null && !shelfCode.isBlank())
+                            if (shelfCode != null && !shelfCode.isBlank()) {
                                 existingBook.setShelfCode(shelfCode.trim());
+                                
+                                // Tự động gán thể loại theo Kệ sách
+                                Shelf shelf = shelfRepository.findById(shelfCode.trim()).orElse(null);
+                                if (shelf != null && StringUtils.hasText(shelf.getShelfCodeTopic())) {
+                                    String topic = shelf.getShelfCodeTopic().trim();
+                                    Category category = categoryRepository.findByCategoryNameIgnoreCase(topic)
+                                            .orElseGet(() -> categoryRepository.save(Category.builder().categoryName(topic).build()));
+                                    existingBook.getCategories().add(category);
+                                }
+                            }
 
                             bookRepository.saveAndFlush(existingBook);
 
