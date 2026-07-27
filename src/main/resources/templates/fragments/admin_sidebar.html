@@ -7,18 +7,18 @@
 
 <!-- ═══════════════════════════════════════════════════════ ADMIN SIDEBAR FRAGMENT ══ -->
 <aside th:fragment="sidebar(activeItem)" class="w-full lg:w-64 flex-shrink-0">
-    <div class="bg-slate-900 border border-slate-700/50 rounded-2xl overflow-hidden shadow-2xl sticky top-8">
+    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xl sticky top-8">
         
         <!-- Header Sidebar Admin -->
-        <div class="p-6 border-b border-slate-700/50 flex flex-col items-center text-center">
+        <div class="p-6 border-b border-slate-200 flex flex-col items-center text-center">
             <div class="w-16 h-16 bg-rose-500/20 rounded-xl flex items-center justify-center text-rose-500 mb-4 shadow-inner border border-rose-500/30">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
             </div>
-            <h3 class="font-bold text-white text-lg tracking-tight">Admin Portal</h3>
-            <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-wider font-semibold">System Management</p>
+            <h3 class="font-bold text-slate-800 text-lg tracking-tight">Admin Portal</h3>
+            <p class="text-[10px] text-slate-600 mt-1 uppercase tracking-wider font-semibold">System Management</p>
             
             <div class="mt-4 w-full" th:if="${session.loggedInUser != null}">
-                <p class="text-xs text-slate-500 mb-2" th:text="${session.loggedInUser.fullName}"></p>
+                <p class="text-xs text-slate-650 mb-2" th:text="${session.loggedInUser.fullName}"></p>
             </div>
         </div>
         
@@ -27,7 +27,7 @@
             <p class="px-4 pt-3 pb-2 text-[10px] font-bold text-rose-500/80 uppercase tracking-wider">Tài khoản & Phân quyền</p>
             <a href="/admin/users" 
                class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors"
-               th:classappend="${activeItem == 'students'} ? 'bg-rose-500/10 text-rose-400 font-semibold' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'">
+               th:classappend="${activeItem == 'students'} ? 'bg-rose-500/10 text-rose-600 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 <span>Quản lý Người dùng</span>
             </a>
@@ -35,14 +35,14 @@
             <p class="px-4 pt-5 pb-2 text-[10px] font-bold text-rose-500/80 uppercase tracking-wider">Hệ thống</p>
             <a href="/admin/settings" 
                class="flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors"
-               th:classappend="${activeItem == 'settings'} ? 'bg-rose-500/10 text-rose-400 font-semibold' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'">
+               th:classappend="${activeItem == 'settings'} ? 'bg-rose-500/10 text-rose-600 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 <span>Cấu hình Hệ thống</span>
             </a>
         </div>
         
         <!-- Footer / Logout -->
-        <div class="p-4 border-t border-slate-700/50 bg-slate-800/30">
+        <div class="p-4 border-t border-slate-200 bg-slate-50">
             <a href="/logout" class="flex items-center justify-center space-x-2 w-full py-2.5 px-4 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 font-medium rounded-xl transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 <span>Đăng xuất</span>

@@ -110,7 +110,7 @@
                             <p class="text-xs text-slate-550 mt-1">Tối đa 10MB</p>
                         </div>
                         <div id="fileInfo" class="hidden">
-                            <svg class="w-10 h-10 text-emerald-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-10 h-10 text-emerald-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                             <p class="text-sm text-slate-800 font-semibold" id="fileName"></p>
@@ -276,7 +276,7 @@
                                               th:text="${#numbers.formatInteger(item.remainingAmount, 1, 'POINT') + ' đ'}">
                                             0 đ
                                         </span>
-                                        <span th:if="${item.remainingAmount == null}" class="text-slate-550">—</span>
+                                        <span th:if="${item.remainingAmount == null}" class="text-slate-500">—</span>
                                     </td>
                                     <td class="px-6 py-3.5">
                                         <form method="post" th:action="@{/graduation/send-email}" class="inline"
@@ -307,12 +307,12 @@
 
     <!-- Modal Xác nhận -->
     <div id="confirmModal" class="fixed inset-0 bg-slate-950/70 hidden items-center justify-center z-50 transition-opacity">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-6 backdrop-blur-xl">
-            <h3 id="confirmTitle" class="text-lg font-extrabold text-slate-100">Xác nhận</h3>
-            <p id="confirmMessage" class="text-sm text-slate-400 mt-2">Thông báo</p>
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl p-6 backdrop-blur-xl">
+            <h3 id="confirmTitle" class="text-lg font-extrabold text-slate-800">Xác nhận</h3>
+            <p id="confirmMessage" class="text-sm text-slate-500 mt-2">Thông báo</p>
             <div class="flex items-center justify-end gap-3 mt-6">
                 <button type="button"
-                    class="px-4 py-2 rounded-xl border border-slate-800 text-sm font-semibold text-slate-300 hover:bg-slate-800"
+                    class="px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-200"
                     onclick="closeConfirmModal()">
                     Hủy
                 </button>
@@ -326,13 +326,13 @@
 
     <!-- Modal Loading -->
     <div id="loadingModal" class="fixed inset-0 bg-slate-950/70 hidden items-center justify-center z-50">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8 flex flex-col items-center max-w-xs w-full text-center">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl p-8 flex flex-col items-center max-w-xs w-full text-center">
             <svg class="animate-spin h-10 w-10 text-fpt-orange mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <h4 class="text-sm font-bold text-slate-200">Đang gửi thông báo email...</h4>
-            <p class="text-xs text-slate-400 mt-1">Xin vui lòng chờ trong giây lát.</p>
+            <h4 class="text-sm font-bold text-slate-700">Đang gửi thông báo email...</h4>
+            <p class="text-xs text-slate-500 mt-1">Xin vui lòng chờ trong giây lát.</p>
         </div>
     </div>
 
@@ -412,7 +412,7 @@
             toast.className = `fade-in p-4 rounded-xl shadow-2xl border text-sm font-semibold flex items-center gap-2.5 transform transition-all translate-x-10 opacity-0 duration-300`;
             
             if (type === 'success') {
-                toast.classList.add('bg-emerald-950/60', 'border-emerald-800/60', 'text-emerald-300', 'backdrop-blur-xl');
+                toast.classList.add('bg-emerald-950/60', 'border-emerald-200', 'text-emerald-300', 'backdrop-blur-xl');
                 toast.innerHTML = `
                     <svg class="w-5 h-5 text-emerald-450 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -422,7 +422,7 @@
             } else {
                 toast.classList.add('bg-rose-955/60', 'border-rose-800/60', 'text-rose-300', 'backdrop-blur-xl');
                 toast.innerHTML = `
-                    <svg class="w-5 h-5 text-rose-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                     <span>${message}</span>

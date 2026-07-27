@@ -254,7 +254,7 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label for="shelfCode">Shelf Location</label>
+                <label for="shelfCode">Shelf Location <span style="color: #fb7185">*</label>
                 <select id="shelfCode"
                         th:field="*{shelfCode}"
                         class="form-control">
@@ -272,7 +272,7 @@
         </div>
 
         <div class="form-group">
-            <label for="publishYear">Publish Year</label>
+            <label for="publishYear">Publish Year <span style="color: #fb7185">*</span></label>
             <input type="number" id="publishYear" th:field="*{publishYear}" class="form-control" placeholder="2024"/>
         </div>
 
@@ -282,14 +282,17 @@
         </div>
 
         <div class="form-group">
-            <label for="description">Description</label>
+            <label for="description">Description <span style="color: #fb7185">*</span></label>
             <textarea id="description" th:field="*{description}" class="form-control" rows="4" placeholder="Brief summary of the book..."></textarea>
         </div>
 
         <div class="form-row">
             <div class="form-group">
-                <label for="Copies">Number of Copies</label>
-                <input type="number" id="Copies" th:field="*{copies}" class="form-control" placeholder="Enter the number of copies"/>
+                <label for="Copies">Number of Copies <span style="color: #fb7185">*</span></label>
+                <input type="number" id="Copies" th:field="*{copies}"
+                       th:classappend="${#fields.hasErrors('copies')} ? 'is-invalid'"
+                       class="form-control" placeholder="Enter the number of copies" min="1" required/>
+                <span class="field-error" th:if="${#fields.hasErrors('copies')}" th:errors="*{copies}"></span>
             </div>
             
             <div class="form-group">
@@ -299,9 +302,9 @@
                         class="form-control">
                     <option value="" disabled selected>Select a campus</option>
                     <option value="1">Hòa Lạc</option>
-                    <option value="2">Cần Thơ</option>
-                    <option value="3">Đà Nẵng</option>
-                    <option value="4">Tp.Hồ Chí Minh</option>
+                    <option value="2">Đà Nẵng</option>
+                    <option value="3">Tp.Hồ Chí Minh</option>
+                    <option value="4">Cần Thơ</option>
                     <option value="5">Quy Nhơn</option>
                 </select>
                 <span class="field-error" th:if="${#fields.hasErrors('campusId')}" th:errors="*{campusId}"></span>
@@ -309,7 +312,7 @@
         </div>
 
         <div class="btn-group">
-            <a href="/librarian/books" class="btn btn-secondary">Cancel</a>
+            <a href="/librarian/inventory/list" class="btn btn-secondary">Cancel</a>
             <button type="submit" class="btn btn-primary">Save Book</button>
         </div>
     </form>
