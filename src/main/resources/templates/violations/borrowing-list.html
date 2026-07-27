@@ -50,7 +50,11 @@
     </style>
 </head>
 
+<<<<<<< HEAD
 <body class="bg-white min-h-screen text-slate-800 flex flex-col justify-between relative overflow-x-hidden">
+=======
+<body class="bg-slate-50 min-h-screen text-slate-900 flex flex-col justify-between relative overflow-x-hidden">
+>>>>>>> origin/main
 
     <!-- Ambient Background Glows -->
     <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
@@ -58,10 +62,19 @@
         <div class="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
     </div>
 
+<<<<<<< HEAD
 
 
     <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
         <!-- SIDEBAR -->
+=======
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
+    </div>
+
+    <main class="flex-grow max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col xl:flex-row gap-8">
+>>>>>>> origin/main
         <div th:replace="~{fragments/librarian_sidebar :: sidebar('borrowing')}"></div>
 
         <div class="flex-grow min-w-0">
@@ -87,7 +100,11 @@
             <div>
                 <p class="text-xs font-semibold uppercase tracking-wider text-fpt-orange">Quản lý mượn sách</p>
                 <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Sách đang được mượn</h2>
+<<<<<<< HEAD
                 <p class="text-sm text-slate-600 mt-1">Danh sách các cuốn sách hiện đang được mượn và thông tin người mượn.</p>
+=======
+                <p class="text-sm text-slate-500 mt-1">Danh sách các cuốn sách hiện đang được mượn và thông tin người mượn.</p>
+>>>>>>> origin/main
             </div>
             <div class="flex gap-3 animate-fade-in">
                 <button type="button" onclick="openBorrowingQr()"
@@ -102,6 +119,7 @@
         </div>
 
         <!-- Bộ lọc -->
+<<<<<<< HEAD
         <section class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 md:p-6 mb-6">
             <form id="filterForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4" method="get" th:action="@{/borrowing}">
                 <div>
@@ -115,6 +133,21 @@
                     <input id="borrowerId" name="borrowerId" type="text" th:value="${borrowerId}"
                         oninput="onFilterInput()" placeholder="Nhập mã sinh viên..."
                         class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange/40" />
+=======
+        <section class="bg-white border border-slate-300 backdrop-blur-xl rounded-2xl shadow-2xl p-5 md:p-6 mb-6">
+            <form id="filterForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4" method="get" th:action="@{/borrowing}">
+                <div>
+                    <label for="bookTitle" class="block text-xs font-semibold text-slate-500 mb-1">Tên sách</label>
+                    <input id="bookTitle" name="bookTitle" type="text" th:value="${bookTitle}" oninput="onFilterInput()"
+                        placeholder="Nhập tên sách..."
+                        class="w-full bg-white border border-slate-400 text-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange/40" />
+                </div>
+                <div>
+                    <label for="borrowerId" class="block text-xs font-semibold text-slate-500 mb-1">Mã sinh viên</label>
+                    <input id="borrowerId" name="borrowerId" type="text" th:value="${borrowerId}"
+                        oninput="onFilterInput()" placeholder="Nhập mã sinh viên..."
+                        class="w-full bg-white border border-slate-400 text-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange/40" />
+>>>>>>> origin/main
                 </div>
                 <div class="sm:col-span-2 flex items-center justify-between pt-1">
                     <a href="/borrowing" class="text-sm font-semibold text-slate-500 hover:text-slate-800">Xóa bộ
@@ -128,10 +161,17 @@
         </section>
 
         <!-- Bảng danh sách -->
+<<<<<<< HEAD
         <section class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead class="bg-slate-50 text-slate-700 border-b border-slate-200">
+=======
+        <section class="bg-white border border-slate-300 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-white text-slate-700 border-b border-slate-300">
+>>>>>>> origin/main
                         <tr>
                             <th class="text-left px-6 py-4 font-semibold">Người mượn</th>
                             <th class="text-left px-6 py-4 font-semibold">Mã sinh viên</th>
@@ -184,21 +224,34 @@
             </div>
 
             <div id="paginationContainer"
+<<<<<<< HEAD
                 class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
                 <div class="text-sm text-slate-600">
+=======
+                class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-6 py-4 border-t border-slate-300 bg-white">
+                <div class="text-sm text-slate-500">
+>>>>>>> origin/main
                     <span
                         th:text="${totalPages == 0 ? 'Trang 0 / 0' : 'Trang ' + (currentPage + 1) + ' / ' + totalPages}">Trang
                         1 / 1</span>
                 </div>
                 <div class="flex flex-wrap gap-2">
+<<<<<<< HEAD
                     <a class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
                         th:if="${currentPage > 0}"
                         th:href="@{/borrowing(page=${currentPage - 1}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">Trước</a>
                     <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400"
+=======
+                    <a class="px-3 py-1.5 rounded-lg border border-slate-400 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                        th:if="${currentPage > 0}"
+                        th:href="@{/borrowing(page=${currentPage - 1}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">Trước</a>
+                    <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-650"
+>>>>>>> origin/main
                         th:if="${currentPage == 0}">Trước</span>
 
                     <a th:if="${totalPages > 0}" th:each="p : ${#numbers.sequence(0, totalPages - 1)}"
                         class="px-3 py-1.5 rounded-lg border text-sm font-semibold transition-colors"
+<<<<<<< HEAD
                         th:classappend="${p == currentPage} ? ' border-fpt-orange text-fpt-orange bg-fpt-orange/10' : ' border-slate-300 text-slate-600 hover:bg-slate-100'"
                         th:text="${p + 1}"
                         th:href="@{/borrowing(page=${p}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">1</a>
@@ -207,6 +260,16 @@
                         th:if="${currentPage + 1 < totalPages}"
                         th:href="@{/borrowing(page=${currentPage + 1}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">Sau</a>
                     <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400"
+=======
+                        th:classappend="${p == currentPage} ? ' border-fpt-orange text-fpt-orange bg-fpt-orange/10' : ' border-slate-400 text-slate-700 hover:bg-slate-50'"
+                        th:text="${p + 1}"
+                        th:href="@{/borrowing(page=${p}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">1</a>
+
+                    <a class="px-3 py-1.5 rounded-lg border border-slate-400 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                        th:if="${currentPage + 1 < totalPages}"
+                        th:href="@{/borrowing(page=${currentPage + 1}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">Sau</a>
+                    <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-650"
+>>>>>>> origin/main
                         th:if="${currentPage + 1 >= totalPages}">Sau</span>
                 </div>
             </div>
@@ -215,6 +278,7 @@
     </main>
 
     <!-- Modal Xác nhận -->
+<<<<<<< HEAD
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50">
         <div class="bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-2xl p-6 text-slate-800">
             <h3 id="confirmTitle" class="text-lg font-extrabold text-slate-900">Xác nhận</h3>
@@ -222,6 +286,15 @@
             <div class="flex items-center justify-end gap-3 mt-6">
                 <button type="button"
                     class="px-4 py-2 rounded-lg border border-slate-350 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+=======
+    <div id="confirmModal" class="fixed inset-0 bg-white hidden items-center justify-center z-50">
+        <div class="bg-white w-full max-w-md rounded-2xl border border-slate-300 shadow-xl p-6 text-slate-900">
+            <h3 id="confirmTitle" class="text-lg font-extrabold text-slate-900">Xác nhận</h3>
+            <p id="confirmMessage" class="text-sm text-slate-500 mt-2">Thông báo</p>
+            <div class="flex items-center justify-end gap-3 mt-6">
+                <button type="button"
+                    class="px-4 py-2 rounded-lg border border-slate-400 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
+>>>>>>> origin/main
                     onclick="closeConfirmModal()">
                     Hủy
                 </button>
@@ -324,15 +397,15 @@
     </script>
 
     <!-- ====== MODAL CAMERA QR (CHUYỂN THÀNH KẾT NỐI APP DI ĐỘNG) ====== -->
-    <div id="qrCameraModal" class="fixed inset-0 bg-slate-950/80 hidden items-center justify-center z-[200] p-4">
-        <div class="bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-slate-800 text-slate-100">
-            <div class="bg-fpt-navy px-6 py-5 flex items-center justify-between border-b border-slate-800">
+    <div id="qrCameraModal" class="fixed inset-0 bg-white hidden items-center justify-center z-[200] p-4">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-slate-300 text-slate-900">
+            <div class="bg-fpt-navy px-6 py-5 flex items-center justify-between border-b border-slate-300">
                 <div>
                     <p class="text-xs font-bold text-fpt-orange uppercase tracking-widest">Mobile Integration</p>
                     <h3 class="text-xl font-extrabold text-white">📱 Đang Chờ App Quét QR</h3>
                 </div>
                 <button onclick="closeBorrowingQr()"
-                    class="text-slate-400 hover:text-white text-3xl font-bold transition-colors leading-none">&times;</button>
+                    class="text-slate-500 hover:text-white text-3xl font-bold transition-colors leading-none">&times;</button>
             </div>
             <div class="p-8 flex flex-col items-center">
                 <div class="relative flex items-center justify-center w-24 h-24 mb-6">
@@ -350,14 +423,14 @@
                 </div>
 
                 <div class="text-center w-full">
-                    <p class="font-bold text-slate-200 text-lg">Đang chờ điện thoại gửi mã quét...</p>
-                    <p class="text-xs text-slate-400 mt-2 font-mono">Thời gian chờ: <span id="scanWaitCounter"
+                    <p class="font-bold text-slate-800 text-lg">Đang chờ điện thoại gửi mã quét...</p>
+                    <p class="text-xs text-slate-500 mt-2 font-mono">Thời gian chờ: <span id="scanWaitCounter"
                             class="text-fpt-orange font-bold">0s</span></p>
                 </div>
 
-                <div class="mt-6 border-t border-slate-800 pt-6 w-full text-left">
-                    <h4 class="text-xs font-bold text-slate-200 mb-2">Hướng dẫn kết nối:</h4>
-                    <ol class="text-xs text-slate-400 space-y-2 list-decimal list-inside">
+                <div class="mt-6 border-t border-slate-300 pt-6 w-full text-left">
+                    <h4 class="text-xs font-bold text-slate-800 mb-2">Hướng dẫn kết nối:</h4>
+                    <ol class="text-xs text-slate-500 space-y-2 list-decimal list-inside">
                         <li>Kết nối điện thoại vào mạng Wi-Fi hoặc Mobile Hotspot do máy tính này phát.</li>
                         <li>Sử dụng ứng dụng quét mã di động của bạn để quét mã QR trên sách.</li>
                         <li>Ứng dụng sẽ gửi mã Copy ID trực tiếp về cổng API và hệ thống sẽ tự động xử lý.</li>
@@ -369,10 +442,17 @@
 
     <!-- ====== MODAL 1: TRẢ ĐÚNG HẠN ====== -->
     <div id="normalReturnModal"
+<<<<<<< HEAD
         class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div
             class="bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-800">
             <div class="flex items-center gap-3 border-b border-slate-200 pb-4 mb-4">
+=======
+        class="fixed inset-0 bg-white hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div
+            class="bg-white w-full max-w-md rounded-2xl border border-slate-300 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-900">
+            <div class="flex items-center gap-3 border-b border-slate-300 pb-4 mb-4">
+>>>>>>> origin/main
                 <div
                     class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -386,20 +466,35 @@
                 </div>
             </div>
 
+<<<<<<< HEAD
             <div class="space-y-3 mb-4 bg-slate-50 border border-slate-150 p-4 rounded-xl text-sm text-slate-650">
                 <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-800">...</span></p>
                 <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-600 font-mono font-bold">...</span>
                 </p>
                 <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-800">...</span> (<span
                         class="txt-patron-id text-slate-650">...</span>)</p>
+=======
+            <div class="space-y-3 mb-4 bg-white border border-slate-200 p-4 rounded-xl text-sm text-slate-350">
+                <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-800">...</span></p>
+                <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-400 font-mono font-bold">...</span>
+                </p>
+                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-800">...</span> (<span
+                        class="txt-patron-id">...</span>)</p>
+>>>>>>> origin/main
                 <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-700">...</span></p>
                 <p><strong>Hạn trả:</strong> <span class="txt-due-date text-slate-700">...</span></p>
             </div>
 
             <div class="mb-4">
+<<<<<<< HEAD
                 <label class="block text-xs font-bold text-slate-600 mb-1">📋 Tình trạng sách khi nhận lại</label>
                 <select id="conditionStatusNormal"
                     class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange">
+=======
+                <label class="block text-xs font-bold text-slate-500 mb-1">📋 Tình trạng sách khi nhận lại</label>
+                <select id="conditionStatusNormal"
+                    class="w-full bg-white border border-slate-400 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange">
+>>>>>>> origin/main
                     <option value="New">✨ New — Mới</option>
                     <option value="Good">👍 Good — Tốt</option>
                     <option value="Fair">📖 Fair — Bình thường</option>
@@ -412,7 +507,11 @@
                  </button>
                 <div class="flex gap-3">
                     <button onclick="closeModal('normalReturnModal')"
+<<<<<<< HEAD
                         class="px-4 py-2 border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
+=======
+                        class="px-4 py-2 border border-slate-400 bg-white text-slate-700 hover:bg-slate-100 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
+>>>>>>> origin/main
                     <button id="btnConfirmNormal"
                         class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Xác
                         nhận trả</button>
@@ -423,6 +522,7 @@
 
     <!-- ====== MODAL 2: TRẢ QUÁ HẠN ====== -->
     <div id="overdueReturnModal"
+<<<<<<< HEAD
         class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div
             class="relative bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-800">
@@ -443,6 +543,13 @@
             </div>
             <div class="flex items-center gap-3 border-b border-slate-200 pb-4 mb-4">
                 <div class="w-10 h-10 bg-red-50 text-red-600 rounded-full flex items-center justify-center shrink-0">
+=======
+        class="fixed inset-0 bg-white hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div
+            class="bg-white w-full max-w-md rounded-2xl border border-slate-300 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-900">
+            <div class="flex items-center gap-3 border-b border-slate-300 pb-4 mb-4">
+                <div class="w-10 h-10 bg-red-500/10 text-red-400 rounded-full flex items-center justify-center shrink-0">
+>>>>>>> origin/main
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
@@ -451,6 +558,7 @@
                 </div>
                 <div>
                     <h3 class="text-lg font-bold text-slate-900">Trả sách quá hạn</h3>
+<<<<<<< HEAD
                     <p class="text-xs text-red-650 font-semibold txt-overdue-days">Quá hạn: 0 ngày</p>
                 </div>
             </div>
@@ -458,20 +566,40 @@
             <div class="space-y-3 mb-4 bg-slate-50 border border-slate-200 p-4 rounded-xl text-sm text-slate-650">
                 <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-800">...</span></p>
                 <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-600 font-mono font-bold">...</span>
+=======
+                    <p class="text-xs text-red-450 font-semibold txt-overdue-days">Quá hạn: 0 ngày</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 mb-4 bg-white border border-slate-200 p-4 rounded-xl text-sm text-slate-350">
+                <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-800">...</span></p>
+                <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-500 font-mono font-bold">...</span>
+>>>>>>> origin/main
                 </p>
                 <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-800">...</span></p>
                 <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-700">...</span></p>
                 <p><strong>Hạn trả:</strong> <span class="txt-due-date text-slate-700">...</span></p>
+<<<<<<< HEAD
                 <p><strong>Số ngày quá hạn:</strong> <span class="txt-overdue-days-val font-semibold text-red-600">0</span> ngày</p>
                 <p class="border-t border-slate-200 pt-2 text-base font-bold text-red-500">
+=======
+                <p><strong>Số ngày quá hạn:</strong> <span class="txt-overdue-days-val font-semibold text-red-450">0</span> ngày</p>
+                <p class="border-t border-slate-300 pt-2 text-base font-bold text-red-400">
+>>>>>>> origin/main
                     Tiền phạt quá hạn: <span class="txt-fine-amount">0</span>đ
                 </p>
             </div>
 
             <div class="mb-4">
+<<<<<<< HEAD
                 <label class="block text-xs font-bold text-slate-600 mb-1">📋 Tình trạng sách khi nhận lại</label>
                 <select id="conditionStatusOverdue"
                     class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange">
+=======
+                <label class="block text-xs font-bold text-slate-500 mb-1">📋 Tình trạng sách khi nhận lại</label>
+                <select id="conditionStatusOverdue"
+                    class="w-full bg-white border border-slate-400 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange">
+>>>>>>> origin/main
                     <option value="New">✨ New — Mới</option>
                     <option value="Good">👍 Good — Tốt</option>
                     <option value="Fair">📖 Fair — Bình thường</option>
@@ -480,9 +608,15 @@
             </div>
 
             <div class="mb-4">
+<<<<<<< HEAD
                 <label class="block text-xs font-bold text-slate-600 mb-1">Phương thức thanh toán phạt</label>
                 <select id="paymentMethodOverdue"
                     class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+=======
+                <label class="block text-xs font-bold text-slate-500 mb-1">Phương thức thanh toán phạt</label>
+                <select id="paymentMethodOverdue"
+                    class="w-full bg-white border border-slate-400 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+>>>>>>> origin/main
                     onchange="toggleTxCode()">
                     <option value="Cash">💵 Tiền mặt tại quầy</option>
                     <option value="QRCode">📲 QRCode Chuyển khoản</option>
@@ -490,18 +624,31 @@
             </div>
 
             <div id="txCodeContainer" class="hidden mb-6 animate-fade-in">
+<<<<<<< HEAD
                 <label class="block text-xs font-bold text-slate-600 mb-1">Mã giao dịch đối chiếu (Chuyển khoản)</label>
                 <input type="text" id="transactionCodeOverdue"
                     class="w-full bg-white border border-slate-300 rounded-lg p-2 text-sm uppercase font-mono text-slate-800 focus:outline-none focus:border-fpt-orange"
+=======
+                <label class="block text-xs font-bold text-slate-500 mb-1">Mã giao dịch đối chiếu (Chuyển khoản)</label>
+                <input type="text" id="transactionCodeOverdue"
+                    class="w-full bg-white border border-slate-400 rounded-lg p-2 text-sm uppercase font-mono text-slate-800 focus:outline-none focus:border-fpt-orange"
+>>>>>>> origin/main
                     placeholder="Nhập mãGD ngân hàng...">
             </div>
 
             <!-- QR Code container -->
             <div id="overdueQrContainer"
+<<<<<<< HEAD
                 class="hidden space-y-4 border border-slate-200 rounded-xl p-4 bg-slate-50 mt-4 animate-fade-in text-xs text-slate-650">
                 <div class="flex justify-center mb-2">
                     <img id="overdueQrImage" src="" alt="Mã VietQR"
                         class="h-44 w-44 rounded-lg shadow-sm border border-slate-205">
+=======
+                class="hidden space-y-4 border border-slate-300 rounded-xl p-4 bg-white mt-4 animate-fade-in text-xs text-slate-700">
+                <div class="flex justify-center mb-2">
+                    <img id="overdueQrImage" src="" alt="Mã VietQR"
+                        class="h-44 w-44 rounded-lg shadow-sm border border-slate-400">
+>>>>>>> origin/main
                 </div>
                 <div class="space-y-1">
                     <div class="flex justify-between"><span class="text-slate-500">Ngân hàng:</span> <span
@@ -518,18 +665,32 @@
                 </div>
             </div>
 
+<<<<<<< HEAD
             <div class="flex justify-end gap-3 mt-6">
                 <button onclick="closeModal('overdueReturnModal')"
                     class="px-4 py-2 border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
                 <button id="btnConfirmOverdue"
                     class="px-4 py-2 bg-fpt-orange hover:bg-fpt-orangeHover active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Thu
                     tiền &amp; Trả sách</button>
+=======
+            <div class="flex justify-between items-center mt-6">
+                <button type="button" onclick="submitOverdueReturnLater()"
+                    class="text-xs text-amber-500 hover:underline font-bold">💳 Trả sách thanh toán sau</button>
+                <div class="flex gap-3">
+                    <button onclick="closeModal('overdueReturnModal')"
+                        class="px-4 py-2 border border-slate-755 bg-white text-slate-700 hover:bg-slate-100 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
+                    <button id="btnConfirmOverdue"
+                        class="px-4 py-2 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Thu
+                        tiền &amp; Trả sách</button>
+                </div>
+>>>>>>> origin/main
             </div>
         </div>
     </div>
 
     <!-- ====== MODAL 3: BÁO MẤT / BÁO HỎNG ====== -->
     <div id="reportIncidentModal"
+<<<<<<< HEAD
         class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 overflow-y-auto">
         <div
             class="relative bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-800">
@@ -549,6 +710,12 @@
                 <button type="button" onclick="window.location.reload()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-lg shadow-md transition-all uppercase">Thanh toán thành công</button>
             </div>
             <div class="flex items-center gap-3 border-b border-slate-200 pb-4 mb-4">
+=======
+        class="fixed inset-0 bg-white hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div
+            class="bg-white w-full max-w-md rounded-2xl border border-slate-300 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-900">
+            <div class="flex items-center gap-3 border-b border-slate-300 pb-4 mb-4">
+>>>>>>> origin/main
                 <div
                     class="w-10 h-10 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -559,6 +726,7 @@
                 </div>
                 <div>
                     <h3 class="text-lg font-bold text-slate-900" id="reportModalTitle">Báo cáo mất / hỏng sách</h3>
+<<<<<<< HEAD
                     <p class="text-xs text-slate-550">Cập nhật trạng thái sách và lập biên bản xử lý</p>
                 </div>
             </div>
@@ -570,6 +738,19 @@
                 <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-800">...</span></p>
                 <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-700">—</span></p>
                 <p><strong>Hạn trả:</strong> <span class="txt-due-date text-amber-600 font-bold">—</span></p>
+=======
+                    <p class="text-xs text-slate-500">Cập nhật trạng thái sách và lập biên bản xử lý</p>
+                </div>
+            </div>
+
+            <div class="space-y-2 mb-4 bg-white border border-slate-200 p-4 rounded-xl text-sm text-slate-350">
+                <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-800">...</span></p>
+                <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-400 font-mono font-bold">...</span>
+                </p>
+                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-800">...</span></p>
+                <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-700">—</span></p>
+                <p><strong>Hạn trả:</strong> <span class="txt-due-date text-amber-500 font-bold">—</span></p>
+>>>>>>> origin/main
             </div>
 
             <!-- Combined Fine Warning Banner for Overdue Lost Books -->
@@ -579,19 +760,33 @@
                     <span class="text-sm">⚠️</span>
                     <div>
                         <p class="font-bold">Bản sao này đang quá hạn <span id="combinedOverdueDays"
+<<<<<<< HEAD
                                 class="font-extrabold text-red-600">0</span> ngày!</p>
                         <p class="mt-1">Ngoài tiền đền bù mất sách (<span id="combinedBookPrice" class="font-semibold text-slate-800">0</span>đ), người mượn
                             vẫn cần đóng thêm tiền phạt quá hạn là <span id="combinedOverdueFine" class="font-semibold text-slate-700">0</span>đ.</p>
                         <p class="font-bold mt-1 text-red-650 border-t border-red-150 pt-1">Tổng tiền phạt/đền bù: <span
                                 id="combinedTotalFine" class="text-red-600 font-extrabold">0</span>đ</p>
+=======
+                                class="font-extrabold text-red-400">0</span> ngày!</p>
+                        <p class="mt-1">Ngoài tiền đền bù mất sách (<span id="combinedBookPrice" class="font-semibold text-slate-800">0</span>đ), người mượn
+                            vẫn cần đóng thêm tiền phạt quá hạn là <span id="combinedOverdueFine" class="font-semibold text-slate-250">0</span>đ.</p>
+                        <p class="font-bold mt-1 text-red-300 border-t border-red-900/60 pt-1">Tổng tiền phạt/đền bù: <span
+                                id="combinedTotalFine" class="text-red-400 font-extrabold">0</span>đ</p>
+>>>>>>> origin/main
                     </div>
                 </div>
             </div>
 
             <div class="mb-4">
+<<<<<<< HEAD
                 <label class="block text-xs font-bold text-slate-600 mb-1">Loại sự cố</label>
                 <select id="incidentType"
                     class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+=======
+                <label class="block text-xs font-bold text-slate-500 mb-1">Loại sự cố</label>
+                <select id="incidentType"
+                    class="w-full bg-white border border-slate-400 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+>>>>>>> origin/main
                     onchange="onSwitchIncidentType()">
                     <option value="Lost">🚨 Mất sách (Đền bù giá sách)</option>
                     <option value="Damaged">📘 Hỏng sách (Phạt hư hại)</option>
@@ -599,6 +794,7 @@
             </div>
 
             <div class="mb-4">
+<<<<<<< HEAD
                 <label class="block text-xs font-bold text-slate-600 mb-1">Ghi chú (Lý do / Tình trạng chi tiết)</label>
                 <textarea id="incidentNotes" rows="2"
                     class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
@@ -607,6 +803,16 @@
 
             <div class="mb-4 flex items-center gap-2 hidden">
                 <input type="checkbox" id="incidentPayNow" class="rounded border-slate-305 bg-white text-fpt-orange focus:ring-fpt-orange"
+=======
+                <label class="block text-xs font-bold text-slate-500 mb-1">Ghi chú (Lý do / Tình trạng chi tiết)</label>
+                <textarea id="incidentNotes" rows="2"
+                    class="w-full bg-white border border-slate-400 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+                    placeholder="Nhập lý do đền bù hoặc ghi chú tình trạng..."></textarea>
+            </div>
+
+            <div class="mb-4 flex items-center gap-2">
+                <input type="checkbox" id="incidentPayNow" class="rounded border-slate-400 bg-white text-fpt-orange focus:ring-fpt-orange"
+>>>>>>> origin/main
                     onchange="toggleIncidentPay()" checked>
                 <label for="incidentPayNow" class="text-xs font-bold text-slate-600">Thanh toán tiền phạt đền bù ngay
                     lúc này</label>
@@ -614,9 +820,15 @@
 
             <div id="incidentPaymentFields">
                 <div class="mb-4">
+<<<<<<< HEAD
                     <label class="block text-xs font-bold text-slate-600 mb-1">Phương thức thanh toán</label>
                     <select id="paymentMethodIncident"
                         class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+=======
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Phương thức thanh toán</label>
+                    <select id="paymentMethodIncident"
+                        class="w-full bg-white border border-slate-400 text-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+>>>>>>> origin/main
                         onchange="toggleIncidentTxCode()">
                         <option value="Cash">💵 Tiền mặt tại quầy</option>
                         <option value="QRCode">📲 QRCode Chuyển khoản</option>
@@ -624,15 +836,23 @@
                 </div>
 
                 <div id="txCodeContainerIncident" class="hidden mb-6">
+<<<<<<< HEAD
                     <label class="block text-xs font-bold text-slate-600 mb-1">Mã giao dịch đối chiếu (Chuyển
                         khoản)</label>
                     <input type="text" id="transactionCodeIncident"
                         class="w-full bg-white border border-slate-300 rounded-lg p-2 text-sm uppercase font-mono text-slate-800 focus:outline-none focus:border-fpt-orange"
+=======
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Mã giao dịch đối chiếu (Chuyển
+                        khoản)</label>
+                    <input type="text" id="transactionCodeIncident"
+                        class="w-full bg-white border border-slate-400 rounded-lg p-2 text-sm uppercase font-mono text-slate-800 focus:outline-none focus:border-fpt-orange"
+>>>>>>> origin/main
                         placeholder="Nhập mãGD ngân hàng...">
                 </div>
 
                 <!-- QR Code container for Incident -->
                 <div id="incidentQrContainer"
+<<<<<<< HEAD
                     class="hidden space-y-4 border border-slate-200 rounded-xl p-4 bg-slate-50 mt-4 animate-fade-in text-xs text-slate-655">
                     <div class="flex justify-center mb-2">
                         <img id="incidentQrImage" src="" alt="Mã VietQR"
@@ -641,10 +861,24 @@
                     <div class="space-y-1">
                         <div class="flex justify-between"><span class="text-slate-500">Ngân hàng:</span> <span
                                 class="font-semibold text-slate-850" th:text="${vietqrBankName}">TPBank</span></div>
+=======
+                    class="hidden space-y-4 border border-slate-300 rounded-xl p-4 bg-white mt-4 animate-fade-in text-xs text-slate-700">
+                    <div class="flex justify-center mb-2">
+                        <img id="incidentQrImage" src="" alt="Mã VietQR"
+                            class="h-44 w-44 rounded-lg shadow-sm border border-slate-400">
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex justify-between"><span class="text-slate-500">Ngân hàng:</span> <span
+                                class="font-semibold text-slate-800" th:text="${vietqrBankName}">TPBank</span></div>
+>>>>>>> origin/main
                         <div class="flex justify-between"><span class="text-slate-500">Số tài khoản:</span> <span
                                 class="font-mono font-semibold text-slate-800"
                                 th:text="${vietqrAccountNo}">00000102719</span></div>
+<<<<<<< HEAD
                         <div class="flex justify-between"><span class="text-slate-550">Tên tài khoản:</span> <span
+=======
+                        <div class="flex justify-between"><span class="text-slate-500">Tên tài khoản:</span> <span
+>>>>>>> origin/main
                                 class="font-semibold text-slate-800" th:text="${vietqrAccountName}">NGUYEN QUANG VINH</span>
                         </div>
                         <div class="flex justify-between"><span class="text-slate-500">Nội dung:</span> <span
@@ -656,7 +890,11 @@
 
             <div class="flex justify-end gap-3 mt-6">
                 <button onclick="closeModal('reportIncidentModal')"
+<<<<<<< HEAD
                     class="px-4 py-2 border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
+=======
+                    class="px-4 py-2 border border-slate-755 bg-white text-slate-700 hover:bg-slate-100 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
+>>>>>>> origin/main
                 <button id="btnConfirmIncident"
                     class="px-4 py-2 bg-fpt-orange hover:bg-fpt-orangeHover active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Lập
                     Biên Bản</button>
@@ -1168,7 +1406,7 @@
             toast.className += colorClasses;
             toast.innerHTML = `
                 <span>${message}</span>
-                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-900 font-extrabold">&times;</button>
+                <button onclick="this.parentElement.remove()" class="text-slate-500 hover:text-slate-900 font-extrabold">&times;</button>
             `;
 
             container.appendChild(toast);

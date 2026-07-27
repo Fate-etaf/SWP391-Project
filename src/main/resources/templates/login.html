@@ -26,14 +26,14 @@
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-center items-center relative overflow-y-auto p-4">
+<body class="bg-slate-50 min-h-screen text-slate-900 flex flex-col justify-center items-center relative overflow-y-auto p-4">
     
     <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px] pointer-events-none"></div>
     <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-orange-500/10 rounded-full blur-[100px] pointer-events-none"></div>
     
     <!-- Nút Home -->
     <a href="/home" class="absolute top-6 left-6 flex items-center text-slate-400 hover:text-fpt-orange transition-colors z-50 group">
-        <div class="bg-slate-800/50 p-2 rounded-full mr-2 group-hover:bg-fpt-orange/20 transition-colors">
+        <div class="bg-white p-2 rounded-full mr-2 group-hover:bg-fpt-orange/20 transition-colors shadow-sm">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
@@ -50,10 +50,10 @@
         </div>
     </div>
 
-    <div class="w-full max-w-md bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-8 shadow-2xl relative z-10 transition-all hover:border-fpt-orange/30 text-center">
+    <div class="w-full max-w-md bg-white border border-slate-200 backdrop-blur-xl rounded-2xl p-8 shadow-2xl relative z-10 transition-all hover:border-fpt-orange/30 text-center">
         
-        <h2 class="text-xl font-bold text-slate-200 mb-2">CỔNG XÁC THỰC HỆ THỐNG</h2>
-        <p class="text-xs text-slate-400 mb-8">Hệ thống Thư viện số dành riêng cho Cán bộ, Giảng viên và Sinh viên FPT University</p>
+        <h2 class="text-xl font-bold text-slate-800 mb-2">CỔNG XÁC THỰC HỆ THỐNG</h2>
+        <p class="text-xs text-slate-500 mb-8">Hệ thống Thư viện số dành riêng cho Cán bộ, Giảng viên và Sinh viên FPT University</p>
 
         <div th:if="${session.loginError != null}" id="error-alert-box" class="mb-6 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-xs font-medium text-left flex items-start gap-2 relative z-20 animate-fade-in">
             <span>🔒</span>
@@ -81,7 +81,7 @@
                 <div class="relative flex items-center">
                     <span class="absolute left-4 text-slate-500 text-sm font-bold select-none">#</span>
                     <input type="text" name="userId" th:value="${userId}" placeholder="Ví dụ: HE180000" required autocomplete="off"
-                           class="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600">
+                           class="w-full bg-slate-50 border border-slate-200 text-slate-800 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-400">
                 </div>
             </div>
 
@@ -92,7 +92,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                     </svg>
                     <input type="email" name="email" th:value="${email}" placeholder="username@fpt.edu.vn" required autocomplete="off"
-                           class="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600">
+                           class="w-full bg-slate-50 border border-slate-200 text-slate-800 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-400">
                 </div>
             </div>
 
@@ -103,7 +103,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
                     <input type="password" name="password" placeholder="••••••••" required autocomplete="off"
-                           class="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-600">
+                           class="w-full bg-slate-50 border border-slate-200 text-slate-800 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all placeholder-slate-400">
                 </div>
                 <div class="text-right mt-2">
                     <a href="/forgot-password" class="text-xs text-fpt-orange hover:text-fpt-orangeHover font-medium transition-colors">Quên mật khẩu?</a>
@@ -116,7 +116,7 @@
                     <svg class="w-4 h-4 text-slate-500 absolute left-4 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                     </svg>
-                    <select name="campusId" required class="w-full bg-slate-950 border border-slate-800 text-slate-300 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all cursor-pointer appearance-none">
+                    <select name="campusId" required class="w-full bg-slate-50 border border-slate-200 text-slate-800 pl-11 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:border-fpt-orange focus:ring-2 focus:ring-fpt-orange/20 transition-all cursor-pointer appearance-none">
                         <option value="" disabled th:selected="${campusId == null}">-- Chọn cơ sở học tập --</option>
                         <option value="1" th:selected="${campusId == 1}">Hà Nội</option>
                         <option value="2" th:selected="${campusId == 2}">Đà Nẵng</option>
@@ -133,14 +133,14 @@
         </form>
 
         <div class="flex items-center gap-4 mb-4">
-            <div class="h-px bg-slate-800 flex-grow"></div>
-            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Hoặc đăng nhập nhanh</span>
-            <div class="h-px bg-slate-800 flex-grow"></div>
+            <div class="h-px bg-slate-200 flex-grow"></div>
+            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Hoặc đăng nhập nhanh</span>
+            <div class="h-px bg-slate-200 flex-grow"></div>
         </div>
 
         <div class="pb-2">
             <a href="/mock-google-login" 
-               class="w-full flex items-center justify-center gap-3.5 bg-slate-950 hover:bg-fpt-orange text-white border border-slate-800 hover:border-fpt-orange rounded-xl py-3.5 transition-all duration-300 font-semibold text-sm shadow-xl hover:shadow-fpt-orange/20 active:scale-[0.99] group">
+               class="w-full flex items-center justify-center gap-3.5 bg-slate-50 hover:bg-fpt-orange text-slate-700 hover:text-white border border-slate-200 hover:border-fpt-orange rounded-xl py-3.5 transition-all duration-300 font-semibold text-sm shadow-sm hover:shadow-fpt-orange/20 active:scale-[0.99] group">
                 
                 <div class="bg-white p-2 rounded-lg transition-transform duration-300 group-hover:scale-105 flex items-center justify-center">
                     <svg class="w-4 h-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

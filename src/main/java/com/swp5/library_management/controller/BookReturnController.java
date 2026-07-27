@@ -179,8 +179,9 @@ public class BookReturnController {
             return "redirect:/login";
         }
         try {
+            String librarianId = (String) session.getAttribute("loggedInUserId");
             // Trả sách qua form redirect: giữ nguyên tình trạng (null = không đổi)
-            bookReturnService.processNormalReturn(id, null);
+            bookReturnService.processNormalReturn(id, null, librarianId);
             redirectAttrs.addFlashAttribute("successMsg", "Trả sách thành công!");
         } catch (Exception e) {
             redirectAttrs.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
@@ -195,7 +196,8 @@ public class BookReturnController {
             return "redirect:/login";
         }
         try {
-            bookReturnService.processLost(id, false, null, null, null, null);
+            String librarianId = (String) session.getAttribute("loggedInUserId");
+            bookReturnService.processLost(id, false, null, null, librarianId, null);
             redirectAttrs.addFlashAttribute("successMsg", "Đã đánh dấu sách bị mất!");
         } catch (Exception e) {
             redirectAttrs.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
@@ -210,7 +212,8 @@ public class BookReturnController {
             return "redirect:/login";
         }
         try {
-            bookReturnService.processDamaged(id, false, null, null, null, null);
+            String librarianId = (String) session.getAttribute("loggedInUserId");
+            bookReturnService.processDamaged(id, false, null, null, librarianId, null);
             redirectAttrs.addFlashAttribute("successMsg", "Đã đánh dấu sách bị hỏng!");
         } catch (Exception e) {
             redirectAttrs.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
@@ -232,7 +235,8 @@ public class BookReturnController {
                     .body(Map.of("message", "Quyền truy cập bị từ chối. Vui lòng đăng nhập bằng tài khoản Thủ thư."));
         }
         try {
-            bookReturnService.processNormalReturn(ticketDetailId, conditionStatus);
+            String librarianId = (String) session.getAttribute("loggedInUserId");
+            bookReturnService.processNormalReturn(ticketDetailId, conditionStatus, librarianId);
             return ResponseEntity.ok(Map.of("status", "SUCCESS", "message", "Trả sách đúng hạn thành công!"));
         } catch (Exception e) {
             String errorMsg = e.getMessage();

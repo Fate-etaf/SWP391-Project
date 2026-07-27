@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -16,7 +16,7 @@
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-between relative overflow-x-hidden">
+<body class="bg-slate-50 min-h-screen text-slate-900 flex flex-col justify-between relative overflow-x-hidden">
 
     <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
@@ -31,14 +31,14 @@
         
         <div th:replace="~{fragments/admin_sidebar :: sidebar('users')}"></div>
 
-        <div class="flex-grow min-w-0 bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
+        <div class="flex-grow min-w-0 bg-white border border-slate-200 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
             
-            <div class="mb-6 pb-4 border-b border-slate-800">
-                <a href="/admin/users" class="text-sm text-slate-400 hover:text-fpt-orange transition-colors inline-flex items-center gap-2 mb-3">
+            <div class="mb-6 pb-4 border-b border-slate-200">
+                <a href="/admin/users" class="text-sm text-slate-500 hover:text-fpt-orange transition-colors inline-flex items-center gap-2 mb-3">
                     ← Quay lại danh sách người dùng
                 </a>
-                <h1 class="text-xl font-extrabold text-white tracking-tight">IMPORT NGƯỜI DÙNG TỪ EXCEL</h1>
-                <p class="text-xs text-slate-400 mt-1">Chọn file Excel dữ liệu, sau đó bấm chọn nút tính năng tương ứng ở bên dưới để hệ thống phân loại xử lý.</p>
+                <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">IMPORT NGƯỜI DÙNG TỪ EXCEL</h1>
+                <p class="text-xs text-slate-500 mt-1">Chọn file Excel dữ liệu, sau đó bấm chọn nút tính năng tương ứng ở bên dưới để hệ thống phân loại xử lý.</p>
             </div>
 
             <div th:if="${errorMessage}" class="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold">
@@ -49,7 +49,7 @@
                 
                 <input type="hidden" id="importTypeInput" name="importType" value="NEW" />
 
-                <div class="border-2 border-dashed border-slate-800 hover:border-fpt-orange/40 bg-slate-950/30 rounded-2xl p-8 text-center transition-all relative group">
+                <div class="border-2 border-dashed border-slate-200 hover:border-fpt-orange/40 bg-white/30 rounded-2xl p-8 text-center transition-all relative group">
                     <input type="file" name="file" id="fileExcel" required
                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
                            onchange="document.getElementById('fileNameText').innerText = this.files[0] ? this.files[0].name : 'Chưa có file nào được chọn'"/>
@@ -60,27 +60,27 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                             </svg>
                         </div>
-                        <p class="text-sm font-medium text-slate-300">
+                        <p class="text-sm font-medium text-slate-700">
                             Kéo thả file vào đây hoặc <span class="text-fpt-orange font-bold">Nhấp để chọn file</span>
                         </p>
                         <p id="fileNameText" class="text-xs text-slate-500 italic font-mono">Chưa có file nào được chọn</p>
                     </div>
                 </div>
 
-                <div class="p-4 bg-slate-950/50 border border-slate-800 rounded-xl">
+                <div class="p-4 bg-white border border-slate-200 rounded-xl">
                     <h4 class="text-xs font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1.5 mb-2">
                         ⚠️ YÊU CẦU VỀ CẤU TRÚC FILE EXCEL MẪU:
                     </h4>
-                    <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside pl-1">
-                        <li><strong class="text-slate-300 font-mono">Cột A:</strong> Mã Số Tài Khoản (Ví dụ Sinh viên: <code class="text-fpt-orange">HE180000</code>, Giảng viên: <code class="text-blue-400">vinhnq</code>)</li>
-                        <li><strong class="text-slate-300 font-mono">Cột B:</strong> Họ và Tên thành viên</li>
-                        <li><strong class="text-slate-300 font-mono">Cột C:</strong> Địa chỉ Email FPT (Ví dụ: tênsvhe180000@fpt.edu.vn hoặc cánbộ@fe.edu.vn)</li>
-                        <li><strong class="text-slate-300 font-mono">Cột D:</strong> Mã Cơ Sở Học Tập/Làm Việc (Số từ <code class="text-emerald-400">1 -> 5</code> tương ứng: Hà Nội, HCM, Đà Nẵng, Cần Thơ, Quy Nhơn)</li>
+                    <ul class="text-xs text-slate-500 space-y-1.5 list-disc list-inside pl-1">
+                        <li><strong class="text-slate-700 font-mono">Cột A:</strong> Mã Số Tài Khoản (Ví dụ Sinh viên: <code class="text-fpt-orange">HE180000</code>, Giảng viên: <code class="text-blue-400">vinhnq</code>)</li>
+                        <li><strong class="text-slate-700 font-mono">Cột B:</strong> Họ và Tên thành viên</li>
+                        <li><strong class="text-slate-700 font-mono">Cột C:</strong> Địa chỉ Email FPT (Ví dụ: tênsvhe180000@fpt.edu.vn hoặc cánbộ@fe.edu.vn)</li>
+                        <li><strong class="text-slate-700 font-mono">Cột D:</strong> Mã Cơ Sở Học Tập/Làm Việc (Số từ <code class="text-emerald-400">1 -> 5</code> tương ứng: Hà Nội, HCM, Đà Nẵng, Cần Thơ, Quy Nhơn)</li>
                     </ul>
                 </div>
 
-                <div class="flex flex-col sm:flex-row sm:justify-end gap-3 pt-4 border-t border-slate-800/60">
-                    <a href="/admin/users" class="inline-flex items-center justify-center px-5 py-2.5 bg-slate-950 text-slate-400 font-semibold border border-slate-800 rounded-xl text-sm hover:bg-slate-900 transition-colors">
+                <div class="flex flex-col sm:flex-row sm:justify-end gap-3 pt-4 border-t border-slate-200/60">
+                    <a href="/admin/users" class="inline-flex items-center justify-center px-5 py-2.5 bg-white text-slate-500 font-semibold border border-slate-200 rounded-xl text-sm hover:bg-white transition-colors">
                         Hủy bỏ
                     </a>
                     
@@ -110,3 +110,4 @@
 
 </body>
 </html>
+

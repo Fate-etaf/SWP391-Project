@@ -11,7 +11,7 @@ public interface BookReturnService {
 
     Map<String, Object> checkScan(String copyId);
 
-    void processNormalReturn(Integer ticketDetailId, String conditionStatus);
+    void processNormalReturn(Integer ticketDetailId, String conditionStatus, String librarianId);
 
     void processOverdueReturn(Integer ticketDetailId, String paymentMethod, String transactionCode, String librarianId, String conditionStatus);
 
