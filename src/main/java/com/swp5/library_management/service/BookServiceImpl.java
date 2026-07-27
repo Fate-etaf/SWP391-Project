@@ -497,6 +497,60 @@ public class BookServiceImpl implements BookService {
                         if (existingOpt.isPresent()) {
                             com.swp5.library_management.entity.Book existingBook = existingOpt.get();
 
+                            // ── Cập nhật thông tin sách từ dòng Excel ────────────────────────
+                            if (title != null && !title.isBlank())
+                                existingBook.setTitle(title.trim());
+
+                            // Cập nhật tác giả (nếu có trong Excel)
+                            if (authorName != null && !authorName.isBlank()) {
+                                Set<Author> updatedAuthors = new HashSet<>();
+                                for (String name : authorName.split(",")) {
+                                    String trimmed = name.trim();
+                                    if (!trimmed.isEmpty()) {
+                                        Author a = authorRepository
+                                                .findByAuthorNameIgnoreCase(trimmed)
+                                                .orElseGet(() -> authorRepository.save(
+                                                        Author.builder().authorName(trimmed).build()));
+                                        updatedAuthors.add(a);
+                                    }
+                                }
+                                existingBook.setAuthors(updatedAuthors);
+                            }
+
+                            // Cập nhật nhà xuất bản
+                            if (publisherName != null && !publisherName.isBlank()) {
+                                Publisher pub = publisherRepository
+                                        .findByPublisherNameIgnoreCase(publisherName.trim())
+                                        .orElseGet(() -> publisherRepository.save(
+                                                Publisher.builder().publisherName(publisherName.trim()).build()));
+                                existingBook.setPublisher(pub);
+                            }
+
+                            // Cập nhật các trường đơn giản (chỉ khi Excel có giá trị)
+                            if (publishYear != null)
+                                existingBook.setPublishYear(publishYear);
+                            if (edition != null && !edition.isBlank())
+                                existingBook.setEdition(edition.trim());
+                            if (language != null && !language.isBlank())
+                                existingBook.setLanguage(language.trim());
+                            if (description != null && !description.isBlank())
+                                existingBook.setDescription(description.trim());
+                            if (coverImageUrl != null && !coverImageUrl.isBlank())
+                                existingBook.setCoverImageUrl(coverImageUrl.trim());
+
+                            // Cập nhật môn học (Subject)
+                            if (subjectCode != null && !subjectCode.isBlank()) {
+                                Subject sub = subjectRepository.findById(subjectCode.trim()).orElse(null);
+                                existingBook.setSubject(sub);
+                            }
+
+                            // Cập nhật vị trí kệ (ShelfCode)
+                            if (shelfCode != null && !shelfCode.isBlank())
+                                existingBook.setShelfCode(shelfCode.trim());
+
+                            bookRepository.saveAndFlush(existingBook);
+
+                            // ── Thêm copies nếu có ───────────────────────────────────────────
                             if (copies != null && copies > 0) {
                                 Campus campus = campusId != null
                                         ? campusRepository.findById(campusId).orElse(null) : null;
@@ -524,14 +578,12 @@ public class BookServiceImpl implements BookService {
                                                 .build();
                                         bookCopyRepository.saveAndFlush(copy);
                                     }
-                                    successCount++;
                                 } else {
                                     errors.add("Dòng " + (rowIdx + 1) + " ('" + title + "'): ISBN '" + cleanIsbn
                                             + "' đã tồn tại — thêm " + copies + " bản sao, nhưng campus không hợp lệ.");
                                 }
-                            } else {
-                                // Copies = 0 và ISBN đã tồn tại — bỏ qua im lặng, không cần làm gì
                             }
+                            successCount++;
                             continue; // Xử lý dòng tiếp theo
                         }
                     }
