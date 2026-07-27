@@ -22,4 +22,5 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
      */
     List<Category> findAllByOrderByCategoryIdAsc(Pageable pageable);
     Optional<Category> findByCategoryName(String categoryName);
+    Optional<Category> findByCategoryNameIgnoreCase(String categoryName);
 }
