@@ -3,6 +3,7 @@ package com.swp5.library_management.service;
 import com.swp5.library_management.entity.MaterialRequest;
 import com.swp5.library_management.entity.Notification;
 import com.swp5.library_management.entity.User;
+import com.swp5.library_management.repository.BookRepository;
 import com.swp5.library_management.repository.MaterialRequestRepository;
 import com.swp5.library_management.repository.NotificationRepository;
 import com.swp5.library_management.repository.UserRepository;
@@ -25,15 +26,18 @@ public class MaterialRequestServiceImpl implements MaterialRequestService {
     private final MaterialRequestRepository materialRequestRepository;
     private final NotificationRepository notificationRepository;
     private final EmailService emailService;
+    private final BookRepository bookRepository;
 
     public MaterialRequestServiceImpl(UserRepository userRepository,
                                      MaterialRequestRepository materialRequestRepository,
                                      NotificationRepository notificationRepository,
-                                     EmailService emailService) {
+                                     EmailService emailService,
+                                     BookRepository bookRepository) {
         this.userRepository = userRepository;
         this.materialRequestRepository = materialRequestRepository;
         this.notificationRepository = notificationRepository;
         this.emailService = emailService;
+        this.bookRepository = bookRepository;
     }
 
     @Override
@@ -49,6 +53,16 @@ public class MaterialRequestServiceImpl implements MaterialRequestService {
             throw new IllegalStateException(
                     "Bạn đã có một đề nghị mua tài liệu \"" + request.getTitle() +
                     "\" đang được xử lý hoặc đã được duyệt. Không thể gửi yêu cầu trùng lặp.");
+        }
+
+        // ISBN check: block if a book with this ISBN already exists in the catalog
+        String isbn = request.getIsbn();
+        if (isbn != null && !isbn.isBlank()) {
+            bookRepository.findByIsbn(isbn.trim()).ifPresent(existingBook -> {
+                throw new IllegalStateException(
+                        "Tài liệu có ISBN \"" + isbn.trim() + "\" (" + existingBook.getTitle() +
+                        "\") đã có trong danh mục thư viện. Bạn có thể yêu cầu mượn từ kho sách.");
+            });
         }
 
         // 1. Save request to database

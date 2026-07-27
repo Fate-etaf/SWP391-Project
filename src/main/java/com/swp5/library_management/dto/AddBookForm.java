@@ -1,5 +1,8 @@
 package com.swp5.library_management.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 /**
  * Form-backing DTO used by the Add Book page.
  * Uses simple String/primitive fields so Thymeleaf can bind them directly
@@ -8,10 +11,18 @@ package com.swp5.library_management.dto;
 public class AddBookForm {
 
     // ── Core fields ────────────────────────────────────────────────────────────
+    @NotBlank(message = "Tiêu đề sách không được để trống")
     private String title;
+
+    @NotBlank(message = "Tên tác giả không được để trống")
     private String authorName;      // comma-separated; resolved to Author entity(ies)
+
+    @NotBlank(message = "ISBN không được để trống")
     private String isbn;
+
+    @NotBlank(message = "Ngôn ngữ không được để trống")
     private String language = "Vietnamese";
+
     private Integer publishYear;
     private String coverImageUrl;
     private String description;
@@ -22,7 +33,10 @@ public class AddBookForm {
     private String shelfCode;      // must match an existing Shelf.shelfCode in the selected campus;
     private String subjectCode;     // must match an existing Subject.subjectCode
     private Integer copies;         // number of BookCopy records to create on save
+
+    @NotNull(message = "Vui lòng chọn cơ sở (campus)")
     private Integer campusId;       // campus to create the copies in
+
     private String requestId;       // optional: the MaterialRequest that was auto-filled (used to mark it Available)
 
     // ── Getters & Setters ──────────────────────────────────────────────────────
@@ -69,4 +83,3 @@ public class AddBookForm {
     public String getRequestId() { return requestId; }
     public void setRequestId(String requestId) { this.requestId = requestId; }
 }
-

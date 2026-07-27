@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import jakarta.validation.Valid;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 
@@ -231,10 +233,30 @@ public class InventoryController {
      */
     @PostMapping("/inventory/add")
     public String saveBook(
-            @ModelAttribute("bookForm") AddBookForm form,
+            @Valid @ModelAttribute("bookForm") AddBookForm form,
+            BindingResult bindingResult,
             jakarta.servlet.http.HttpSession session,
             org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes,
             Model model) {
+
+        // ── Server-side validation ─────────────────────────────────────────────
+        if (bindingResult.hasErrors()) {
+            String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+            Integer librarianCampusId = null;
+            if (loggedInUserId != null) {
+                User librarian = userRepository.findById(loggedInUserId).orElse(null);
+                if (librarian != null) {
+                    librarianCampusId = librarian.getCampusId();
+                }
+            }
+            List<MaterialRequest> approvedRequests = (librarianCampusId != null)
+                    ? materialRequestRepository.findByStatusAndSearchTermAndCampusId("Approved", null, librarianCampusId, null, null)
+                    : materialRequestRepository.findByStatusAndSearchTerm("Approved", null, null, null);
+            model.addAttribute("shelves", shelfRepository.findAll());
+            model.addAttribute("approvedRequests", approvedRequests);
+            return "inventory/add";
+        }
+
         Integer campusId = form.getCampusId();
         if (campusId == null) {
             campusId = (Integer) session.getAttribute("loggedInCampusId");
