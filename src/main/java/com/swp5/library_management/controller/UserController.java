@@ -118,8 +118,17 @@ model.addAttribute("isCardActive", isCardActive);
         
         Optional<User> userOpt = userRepository.findById(loggedInUserId);
         if (userOpt.isPresent()) {
+            if (phone != null && phone.trim().length() > 20) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Số điện thoại quá dài (tối đa 20 ký tự)!");
+                return "redirect:/profile";
+            }
+            if (phone != null && !phone.trim().isEmpty() && !phone.trim().matches("^[0-9\\+\\-\\s]+$")) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Số điện thoại chứa ký tự không hợp lệ!");
+                return "redirect:/profile";
+            }
+            
             User user = userOpt.get();
-            user.setPhone(phone.trim());
+            user.setPhone(phone != null ? phone.trim() : "");
             userRepository.save(user);
             session.setAttribute("loggedInUser", user);
             redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật số điện thoại thành công!");

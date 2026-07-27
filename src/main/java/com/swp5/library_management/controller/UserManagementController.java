@@ -224,16 +224,19 @@ public class UserManagementController {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             
-            if (email != null && !email.trim().isEmpty()) {
-                if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
-                    redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Định dạng Email không hợp lệ!");
-                    return "redirect:/admin/users";
-                }
-                Optional<User> emailOwnerOpt = userRepository.findByEmail(email.trim());
-                if (emailOwnerOpt.isPresent() && !emailOwnerOpt.get().getUserId().equalsIgnoreCase(userId)) {
-                    redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Email này đã được sử dụng cho một tài khoản khác!");
-                    return "redirect:/admin/users";
-                }
+            if (email == null || email.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Email không được để trống!");
+                return "redirect:/admin/users";
+            }
+            
+            if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Định dạng Email không hợp lệ!");
+                return "redirect:/admin/users";
+            }
+            Optional<User> emailOwnerOpt = userRepository.findByEmail(email.trim());
+            if (emailOwnerOpt.isPresent() && !emailOwnerOpt.get().getUserId().equalsIgnoreCase(userId)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Email này đã được sử dụng cho một tài khoản khác!");
+                return "redirect:/admin/users";
             }
             
             user.setFullName(fullName.trim());
