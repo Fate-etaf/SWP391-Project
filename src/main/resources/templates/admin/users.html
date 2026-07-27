@@ -174,11 +174,11 @@
         <th class="p-4 whitespace-nowrap w-1">Số điện thoại</th>
         <th class="p-4 whitespace-nowrap w-1">Cơ Sở</th>
         <th class="p-4 text-center whitespace-nowrap w-1">Trạng Thái Thẻ</th>
-        <th class="p-4 text-center whitespace-nowrap w-1">Thao tác</th>
+        <th class="p-4 text-center whitespace-nowrap w-1 sticky right-0 bg-slate-100 z-10 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.05)] border-l border-slate-200">Thao tác</th>
     </tr>
 </thead>
                     <tbody class="divide-y divide-slate-200">
-    <tr th:each="student : ${students}" class="hover:bg-slate-50 transition-colors">
+    <tr th:each="student : ${students}" class="hover:bg-slate-50 transition-colors group">
         <td class="p-4">
             <button th:onclick="showStudentStats([[${student.userId}]], [[${student.fullName}]])" class="font-mono font-bold text-fpt-orange hover:text-fpt-orangeHover hover:underline transition-all text-left" th:text="${student?.userId}">HE170000</button>
         </td>
@@ -272,7 +272,7 @@
             </span>
         </td>
         
-        <td class="p-4 text-center">
+        <td class="p-4 text-center sticky right-0 bg-white/95 backdrop-blur z-10 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.05)] border-l border-slate-100 group-hover:bg-slate-50">
             <div class="flex items-center justify-center gap-3">
                 <button th:onclick="openEditModal([[${student.userId}]], [[${student.fullName}]], [[${student.email}]], [[${student.campusId}]], [[${student.role?.roleId}]])" 
                         class="text-slate-500 hover:text-blue-400 transition-colors" title="Chỉnh sửa">
