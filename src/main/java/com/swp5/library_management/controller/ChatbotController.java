@@ -59,9 +59,21 @@ private final BookRepository bookRepository;
                 responseBody.put("reply", "Thư viện hiện đang có rất nhiều thể loại đa dạng phục vụ học tập và nghiên cứu, tiêu biểu như: Công nghệ Thông tin, Kinh tế, Quản trị Kinh doanh, Thiết kế Đồ họa, Ngoại ngữ, Tiểu thuyết và sách Kỹ năng mềm. Bạn đang muốn tìm sách thuộc chuyên ngành nào?");
                 return ResponseEntity.ok(responseBody);
             }
+            if (userMsg.contains("luật mượn") || userMsg.contains("quy định mượn") || userMsg.contains("cách mượn sách") || userMsg.contains("quy định thư viện")) {
+                responseBody.put("reply", "Thư viện cho phép sinh viên mượn tối đa 3 cuốn sách trong 14 ngày. Nếu trả sách trễ hạn sẽ bị phạt 5,000đ/ngày. Bạn có thể gia hạn trực tuyến thêm 1 lần (14 ngày) trên website nếu cuốn sách đó chưa có ai đặt trước nhé.");
+                return ResponseEntity.ok(responseBody);
+            }
             if (userMsg.contains("tôi muốn hỏi về sách có trong thư viện") || userMsg.contains("hỏi về sách có trong thư viện") || userMsg.equals("sách trong thư viện")) {
                 responseBody.put("reply", "Thư viện hiện có hàng ngàn đầu sách phong phú đa dạng các lĩnh vực. Bạn có thể cho mình biết cụ thể bạn đang quan tâm đến cuốn sách nào, chủ đề hay môn học nào không?");
                 return ResponseEntity.ok(responseBody);
+            }
+            if (userMsg.contains("review") || userMsg.contains("sách hay") || userMsg.contains("gợi ý ngẫu nhiên") || userMsg.contains("một cuốn sách")) {
+                List<Book> randomList = bookRepository.findAll();
+                if (!randomList.isEmpty()) {
+                    Book randomBook = randomList.get(new java.util.Random().nextInt(randomList.size()));
+                    responseBody.put("reply", "Chắc chắn rồi! Mình gợi ý cho bạn cuốn sách: **" + randomBook.getTitle() + "**. \nCuốn sách này cực kỳ thú vị và rất được sinh viên ưa chuộng! Hiện tại thư viện đang còn " + randomBook.getAvailableCount() + " cuốn sẵn sàng để mượn ở kệ " + randomBook.getShelfCode() + ".");
+                    return ResponseEntity.ok(responseBody);
+                }
             }
 
             // 2. Book search logic
