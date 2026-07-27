@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import jakarta.validation.Valid;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 
@@ -209,10 +211,15 @@ public class InventoryController {
         // Resolve the librarian's campus so we only show approved requests from their campus
         String loggedInUserId = (String) session.getAttribute("loggedInUserId");
         Integer librarianCampusId = null;
+        String librarianCampusName = null;
         if (loggedInUserId != null) {
             User librarian = userRepository.findById(loggedInUserId).orElse(null);
             if (librarian != null) {
                 librarianCampusId = librarian.getCampusId();
+                if (librarianCampusId != null) {
+                    librarianCampusName = campusRepository.findById(librarianCampusId)
+                            .map(c -> c.getCampusName()).orElse(null);
+                }
             }
         }
 
@@ -220,9 +227,13 @@ public class InventoryController {
                 ? materialRequestRepository.findByStatusAndSearchTermAndCampusId("Approved", null, librarianCampusId, null, null)
                 : materialRequestRepository.findByStatusAndSearchTerm("Approved", null, null, null);
 
-        model.addAttribute("bookForm", new AddBookForm());
+        AddBookForm bookForm = new AddBookForm();
+        bookForm.setCampusId(librarianCampusId);
+        model.addAttribute("bookForm", bookForm);
         model.addAttribute("shelves", shelfRepository.findAll());
         model.addAttribute("approvedRequests", approvedRequests);
+        model.addAttribute("librarianCampusId", librarianCampusId);
+        model.addAttribute("librarianCampusName", librarianCampusName);
         return "inventory/add";
     }
 
@@ -231,13 +242,41 @@ public class InventoryController {
      */
     @PostMapping("/inventory/add")
     public String saveBook(
-            @ModelAttribute("bookForm") AddBookForm form,
+            @Valid @ModelAttribute("bookForm") AddBookForm form,
+            BindingResult bindingResult,
             jakarta.servlet.http.HttpSession session,
             org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes,
             Model model) {
-        Integer campusId = form.getCampusId();
-        if (campusId == null) {
-            campusId = (Integer) session.getAttribute("loggedInCampusId");
+
+        // ── Resolve librarian campus ───────────────────────────────────────────
+        String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+        Integer librarianCampusId = null;
+        String librarianCampusName = null;
+        if (loggedInUserId != null) {
+            User librarian = userRepository.findById(loggedInUserId).orElse(null);
+            if (librarian != null) {
+                librarianCampusId = librarian.getCampusId();
+                if (librarianCampusId != null) {
+                    librarianCampusName = campusRepository.findById(librarianCampusId)
+                            .map(c -> c.getCampusName()).orElse(null);
+                }
+            }
+        }
+
+        // Always override campusId from librarian's campus
+        form.setCampusId(librarianCampusId);
+        Integer campusId = librarianCampusId;
+
+        // ── Server-side validation ─────────────────────────────────────────────
+        if (bindingResult.hasErrors()) {
+            List<MaterialRequest> approvedRequests = (librarianCampusId != null)
+                    ? materialRequestRepository.findByStatusAndSearchTermAndCampusId("Approved", null, librarianCampusId, null, null)
+                    : materialRequestRepository.findByStatusAndSearchTerm("Approved", null, null, null);
+            model.addAttribute("shelves", shelfRepository.findAll());
+            model.addAttribute("approvedRequests", approvedRequests);
+            model.addAttribute("librarianCampusId", librarianCampusId);
+            model.addAttribute("librarianCampusName", librarianCampusName);
+            return "inventory/add";
         }
 
         try {
@@ -255,15 +294,6 @@ public class InventoryController {
             redirectAttributes.addFlashAttribute("successMessage", "Thêm sách mới thành công!");
             return "redirect:/librarian/inventory/list";
         } catch (IllegalArgumentException e) {
-            String loggedInUserId = (String) session.getAttribute("loggedInUserId");
-            Integer librarianCampusId = null;
-            if (loggedInUserId != null) {
-                User librarian = userRepository.findById(loggedInUserId).orElse(null);
-                if (librarian != null) {
-                    librarianCampusId = librarian.getCampusId();
-                }
-            }
-
             List<MaterialRequest> approvedRequests = (librarianCampusId != null)
                     ? materialRequestRepository.findByStatusAndSearchTermAndCampusId("Approved", null, librarianCampusId, null, null)
                     : materialRequestRepository.findByStatusAndSearchTerm("Approved", null, null, null);
@@ -271,6 +301,8 @@ public class InventoryController {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("shelves", shelfRepository.findAll());
             model.addAttribute("approvedRequests", approvedRequests);
+            model.addAttribute("librarianCampusId", librarianCampusId);
+            model.addAttribute("librarianCampusName", librarianCampusName);
             return "inventory/add";
         }
     }
