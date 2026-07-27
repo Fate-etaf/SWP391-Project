@@ -33,6 +33,11 @@ public class UserManagementController {
     private final com.swp5.library_management.repository.BorrowTicketRepository borrowTicketRepository;
     private final NotificationRepository notificationRepository;
 
+    private boolean isNotAdmin(jakarta.servlet.http.HttpSession session) {
+        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+        return isAdmin == null || !isAdmin;
+    }
+
     /**
      * Hiển thị giao diện Quản lý Người dùng dành cho Admin.
      * Cung cấp danh sách người dùng kèm bộ lọc theo trạng thái, cơ sở học tập (Campus), và thanh tìm kiếm.
@@ -44,7 +49,11 @@ public class UserManagementController {
             @RequestParam(value = "tab", defaultValue = "all") String tab,
             @RequestParam(value = "computedStatus", required = false) String computedStatus,
             @RequestParam(value = "page", defaultValue = "1") int page,
+            jakarta.servlet.http.HttpSession session,
             Model model) {
+        
+        if (isNotAdmin(session)) return "redirect:/login";
+
         
         List<User> allUsers = userRepository.findAll();
         java.util.stream.Stream<User> stream = allUsers.stream();
@@ -128,7 +137,11 @@ public class UserManagementController {
             @RequestParam("campusId") Integer campusId,
             @RequestParam(value = "roleId", defaultValue = "1") Integer roleId,
             @RequestParam(value = "status", defaultValue = "Active") String status,
+            jakarta.servlet.http.HttpSession session,
             RedirectAttributes redirectAttributes) {
+        
+        if (isNotAdmin(session)) return "redirect:/login";
+
         
         // Kiểm tra định dạng Mã định danh theo Role
         String upperUserId = userId.trim().toUpperCase();
@@ -233,7 +246,11 @@ public class UserManagementController {
             @RequestParam("email") String email,
             @RequestParam("campusId") Integer campusId,
             @RequestParam("roleId") Integer roleId,
+            jakarta.servlet.http.HttpSession session,
             RedirectAttributes redirectAttributes) {
+        
+        if (isNotAdmin(session)) return "redirect:/login";
+
         
         if (!fullName.matches("^[\\p{L}\\s]+$")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Họ và tên không hợp lệ!");
@@ -289,7 +306,11 @@ public class UserManagementController {
     @org.springframework.transaction.annotation.Transactional
     public String deleteStudent(
             @RequestParam("userId") String userId,
+            jakarta.servlet.http.HttpSession session,
             RedirectAttributes redirectAttributes) {
+        
+        if (isNotAdmin(session)) return "redirect:/login";
+
         
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
@@ -333,7 +354,8 @@ public class UserManagementController {
      * Hiển thị giao diện Import người dùng hàng loạt từ File Excel.
      */
     @GetMapping("/admin/users/import")
-    public String showImportPage() {
+    public String showImportPage(jakarta.servlet.http.HttpSession session) {
+        if (isNotAdmin(session)) return "redirect:/login";
         return "admin/users-import"; 
     }
 
@@ -346,7 +368,11 @@ public class UserManagementController {
     public String processExcelUpload(
             @RequestParam("file") MultipartFile file,
             @RequestParam("importType") String importType,
+            jakarta.servlet.http.HttpSession session,
             RedirectAttributes redirectAttributes) {
+
+        if (isNotAdmin(session)) return "redirect:/login";
+
 
         if (file.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn một file Excel trước khi bấm xử lý!");
@@ -505,7 +531,11 @@ public class UserManagementController {
     @GetMapping("/admin/users/toggle-lock/{id}")
     public String toggleUserLock(
             @org.springframework.web.bind.annotation.PathVariable("id") String userId, 
+            jakarta.servlet.http.HttpSession session,
             RedirectAttributes redirectAttributes) {
+        
+        if (isNotAdmin(session)) return "redirect:/login";
+
         
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
@@ -552,7 +582,11 @@ public class UserManagementController {
     public String changeStatusModal(
             @RequestParam("userId") String userId,
             @RequestParam("newStatus") String newStatus,
+            jakarta.servlet.http.HttpSession session,
             RedirectAttributes redirectAttributes) {
+            
+        if (isNotAdmin(session)) return "redirect:/login";
+
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
