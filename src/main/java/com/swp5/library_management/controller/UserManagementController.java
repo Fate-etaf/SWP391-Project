@@ -286,6 +286,7 @@ public class UserManagementController {
      * Sẽ bị chặn (hiện lỗi) nếu người dùng đang có sách mượn (đang có BorrowTicket kích hoạt).
      */
     @PostMapping("/admin/users/delete")
+    @org.springframework.transaction.annotation.Transactional
     public String deleteStudent(
             @RequestParam("userId") String userId,
             RedirectAttributes redirectAttributes) {
@@ -354,6 +355,7 @@ public class UserManagementController {
 
         List<User> usersToSave = new ArrayList<>();
         List<String> emailsToNotify = new ArrayList<>(); // Lưu email tài khoản mới phục vụ gửi mail ngầm
+        java.util.Set<String> processedEmails = new java.util.HashSet<>(); // Chặn email trùng nội bộ trong file Excel
         int successCount = 0;
 
         try (InputStream is = file.getInputStream();
@@ -414,10 +416,12 @@ public class UserManagementController {
                     User account = new User();
                     
                     if (email != null && !email.trim().isEmpty()) {
-                        if (userRepository.existsByEmail(email.trim())) {
-                            continue; // Bỏ qua nếu email đã tồn tại để tránh lỗi Unique Constraint
+                        String checkEmail = email.trim().toLowerCase();
+                        if (userRepository.existsByEmail(checkEmail) || processedEmails.contains(checkEmail)) {
+                            continue; // Bỏ qua nếu email đã tồn tại trong DB hoặc bị trùng với dòng trước đó trong file Excel
                         }
-                        emailsToNotify.add(email.trim());
+                        processedEmails.add(checkEmail);
+                        emailsToNotify.add(checkEmail);
                     }
 
                     account.setUserId(userId);
