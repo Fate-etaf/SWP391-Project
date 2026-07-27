@@ -458,7 +458,7 @@ public class BookServiceImpl implements BookService {
                 String edition        = getCellString(row, 5);
                 String language       = getCellString(row, 6);
                 String subjectCode    = getCellString(row, 7);
-                String shelfCode      = getCellString(row, 8);
+                String shelfCode      = getCellStringPreserveLeadingZeros(row, 8);
                 String copiesStr      = getCellString(row, 9);
                 String description    = getCellString(row, 10);
                 String coverImageUrl  = getCellString(row, 11);
@@ -487,10 +487,62 @@ public class BookServiceImpl implements BookService {
                 }
 
                 try {
+                    String cleanIsbn = (isbn != null && !isbn.isBlank()) ? isbn.trim() : null;
+
+                    // ── Kiểm tra ISBN trùng: nếu đã tồn tại thì chỉ thêm copies ──────────
+                    if (cleanIsbn != null) {
+                        java.util.Optional<com.swp5.library_management.entity.Book> existingOpt =
+                                bookRepository.findByIsbn(cleanIsbn);
+
+                        if (existingOpt.isPresent()) {
+                            com.swp5.library_management.entity.Book existingBook = existingOpt.get();
+
+                            if (copies != null && copies > 0) {
+                                Campus campus = campusId != null
+                                        ? campusRepository.findById(campusId).orElse(null) : null;
+
+                                // Lấy shelf từ shelfCode trong dòng Excel (ưu tiên) hoặc shelf của sách cũ
+                                String resolvedShelfCode = (shelfCode != null && !shelfCode.isBlank())
+                                        ? shelfCode.trim() : existingBook.getShelfCode();
+                                Shelf shelf = (resolvedShelfCode != null)
+                                        ? shelfRepository.findById(resolvedShelfCode).orElse(null) : null;
+
+                                // Tính offset để không trùng copyId với các bản sao đã có
+                                int existingCopyCount = bookCopyRepository.countByBook(existingBook);
+
+                                if (campus != null) {
+                                    for (int i = 1; i <= copies; i++) {
+                                        String copyId = "BOOK-" + existingBook.getBookId() + "-" + (existingCopyCount + i);
+                                        BookCopy copy = BookCopy.builder()
+                                                .copyId(copyId)
+                                                .book(existingBook)
+                                                .campus(campus)
+                                                .shelf(shelf)
+                                                .copyStatus("Available")
+                                                .conditionStatus("Good")
+                                                .acquiredAt(LocalDateTime.now())
+                                                .build();
+                                        bookCopyRepository.saveAndFlush(copy);
+                                    }
+                                    successCount++;
+                                } else {
+                                    errors.add("Dòng " + (rowIdx + 1) + " ('" + title + "'): ISBN '" + cleanIsbn
+                                            + "' đã tồn tại — thêm " + copies + " bản sao, nhưng campus không hợp lệ.");
+                                }
+                            } else {
+                                // Không có copies yêu cầu, bỏ qua dòng này
+                                errors.add("Dòng " + (rowIdx + 1) + " ('" + title + "'): ISBN '" + cleanIsbn
+                                        + "' đã tồn tại — bỏ qua vì số lượng bản sao (Copies) = 0.");
+                            }
+                            continue; // Xử lý dòng tiếp theo
+                        }
+                    }
+
+                    // ── ISBN mới hoặc không có ISBN: tạo sách mới bình thường ──────────
                     AddBookForm form = new AddBookForm();
                     form.setTitle(title.trim());
                     form.setAuthorName(authorName.trim());
-                    form.setIsbn(isbn != null && !isbn.isBlank() ? isbn.trim() : null);
+                    form.setIsbn(cleanIsbn);
                     form.setPublisherName(publisherName != null && !publisherName.isBlank() ? publisherName.trim() : null);
                     form.setPublishYear(publishYear);
                     form.setEdition(edition != null && !edition.isBlank() ? edition.trim() : null);
