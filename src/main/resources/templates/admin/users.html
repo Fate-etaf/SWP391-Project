@@ -31,7 +31,7 @@
         }
     </style>
 </head>
-<body class="bg-[#0b0f19] min-h-screen text-slate-100 flex flex-col justify-between relative overflow-x-hidden">
+<body class="bg-slate-50 min-h-screen text-slate-900 flex flex-col justify-between relative overflow-x-hidden">
 
     <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div class="absolute -top-40 -left-40 w-96 h-96 bg-fpt-orange/10 rounded-full blur-[100px]"></div>
@@ -46,12 +46,12 @@
         
         <div th:replace="~{fragments/admin_sidebar :: sidebar('students')}"></div>
 
-        <div class="flex-grow min-w-0 bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
+        <div class="flex-grow min-w-0 bg-white border border-slate-200 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
             
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-5 border-b border-slate-800">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-5 border-b border-slate-200">
                 <div>
-                    <h1 class="text-xl font-extrabold text-white tracking-tight">DANH SÁCH NGƯỜI DÙNG HỆ THỐNG</h1>
-                    <p class="text-xs text-slate-400 mt-1">Quản lý tài khoản, cơ sở học tập và trạng thái hoạt động của Người dùng hệ thống.</p>
+                    <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">DANH SÁCH NGƯỜI DÙNG HỆ THỐNG</h1>
+                    <p class="text-xs text-slate-500 mt-1">Quản lý tài khoản, cơ sở học tập và trạng thái hoạt động của Người dùng hệ thống.</p>
                 </div>
                 <div class="flex gap-2">
                     <button type="button" onclick="document.getElementById('manualAddModal').classList.remove('hidden')"
@@ -72,30 +72,34 @@
             </div>
 
             <!-- Tabs Navigation -->
-            <div class="flex gap-4 mb-6 border-b border-slate-800 pb-2 flex-wrap">
+            <div class="flex gap-4 mb-6 border-b border-slate-200 pb-2 flex-wrap">
                 <a th:href="@{/admin/users(tab='all', search=${currentSearch}, campusId=${currentCampusId})}" 
-                   th:class="${currentTab == 'all' || currentTab == null ? 'text-fpt-orange border-b-2 border-fpt-orange pb-2 font-bold' : 'text-slate-400 hover:text-white pb-2 transition-colors'}">
+                   th:class="${currentTab == 'all' || currentTab == null ? 'text-fpt-orange border-b-2 border-fpt-orange pb-2 font-bold' : 'text-slate-500 hover:text-slate-900 pb-2 transition-colors'}">
                     Tất cả
                 </a>
                 <a th:href="@{/admin/users(tab='students', search=${currentSearch}, campusId=${currentCampusId})}" 
-                   th:class="${currentTab == 'students' ? 'text-fpt-orange border-b-2 border-fpt-orange pb-2 font-bold' : 'text-slate-400 hover:text-white pb-2 transition-colors'}">
+                   th:class="${currentTab == 'students' ? 'text-fpt-orange border-b-2 border-fpt-orange pb-2 font-bold' : 'text-slate-500 hover:text-slate-900 pb-2 transition-colors'}">
                     Sinh viên
                 </a>
                 <a th:href="@{/admin/users(tab='lecturers', search=${currentSearch}, campusId=${currentCampusId})}" 
-                   th:class="${currentTab == 'lecturers' ? 'text-fpt-orange border-b-2 border-fpt-orange pb-2 font-bold' : 'text-slate-400 hover:text-white pb-2 transition-colors'}">
+                   th:class="${currentTab == 'lecturers' ? 'text-fpt-orange border-b-2 border-fpt-orange pb-2 font-bold' : 'text-slate-500 hover:text-slate-900 pb-2 transition-colors'}">
                     Giảng viên
                 </a>
                 <a th:href="@{/admin/users(tab='librarians', search=${currentSearch}, campusId=${currentCampusId})}" 
-                   th:class="${currentTab == 'librarians' ? 'text-fpt-orange border-b-2 border-fpt-orange pb-2 font-bold' : 'text-slate-400 hover:text-white pb-2 transition-colors'}">
+                   th:class="${currentTab == 'librarians' ? 'text-fpt-orange border-b-2 border-fpt-orange pb-2 font-bold' : 'text-slate-500 hover:text-slate-900 pb-2 transition-colors'}">
                     Thủ thư
                 </a>
                 <a th:href="@{/admin/users(tab='admins', search=${currentSearch}, campusId=${currentCampusId})}" 
-                   th:class="${currentTab == 'admins' ? 'text-fpt-orange border-b-2 border-fpt-orange pb-2 font-bold' : 'text-slate-400 hover:text-white pb-2 transition-colors'}">
+                   th:class="${currentTab == 'admins' ? 'text-fpt-orange border-b-2 border-fpt-orange pb-2 font-bold' : 'text-slate-500 hover:text-slate-900 pb-2 transition-colors'}">
                     Admin
                 </a>
+                <a th:href="@{/admin/users(tab='graduated_only', search=${currentSearch}, campusId=${currentCampusId})}" 
+                   th:class="${currentTab == 'graduated_only' ? 'text-fpt-orange border-b-2 border-fpt-orange pb-2 font-bold' : 'text-slate-500 hover:text-slate-900 pb-2 transition-colors'}">
+                    Người Tốt Nghiệp
+                </a>
                 <a th:href="@{/admin/users(tab='graduates', search=${currentSearch}, campusId=${currentCampusId})}" 
-                   th:class="${currentTab == 'graduates' ? 'text-fpt-orange border-b-2 border-fpt-orange pb-2 font-bold' : 'text-slate-400 hover:text-white pb-2 transition-colors'}">
-                    Sinh viên (Inactive/Tốt nghiệp)
+                   th:class="${currentTab == 'graduates' ? 'text-fpt-orange border-b-2 border-fpt-orange pb-2 font-bold' : 'text-slate-500 hover:text-slate-900 pb-2 transition-colors'}">
+                    Người Dùng (Bị khóa/Inactive)
                 </a>
             </div>
 
@@ -112,12 +116,12 @@
                 
                 <div class="sm:col-span-8 relative">
                     <input type="text" name="search" th:value="${currentSearch}" placeholder="Tìm theo tên hoặc mã số..." 
-                           class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-fpt-orange transition-all"/>
+                           class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-fpt-orange transition-all"/>
                 </div>
                 
-                <div class="sm:col-span-4">
+                <div class="sm:col-span-3">
                     <select name="campusId" onchange="this.form.submit()"
-                            class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-fpt-orange transition-all cursor-pointer">
+                            class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-fpt-orange transition-all cursor-pointer">
                         <option value="">-- Tất cả cơ sở --</option>
                         <option value="1" th:selected="${currentCampusId == 1}">FPT Hà Nội</option>
                         <option value="2" th:selected="${currentCampusId == 2}">FPT TP. Hồ Chí Minh</option>
@@ -126,13 +130,26 @@
                         <option value="5" th:selected="${currentCampusId == 5}">FPT Quy Nhơn</option>
                     </select>
                 </div>
+
+                <!-- //Hung -->
+                <!-- === 6. BỘ LỌC TRẠNG THÁI THẺ CỦA NGƯỜI DÙNG === -->
+                <!-- Chỉ hiển thị đúng 3 trạng thái lõi: Hoạt động, Không hoạt động, Tốt nghiệp -->
+                <div class="sm:col-span-3">
+                    <select name="computedStatus" onchange="this.form.submit()"
+                            class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-fpt-orange transition-all cursor-pointer">
+                        <option value="">-- Trạng thái thẻ --</option>
+                        <option value="Active" th:selected="${currentComputedStatus == 'Active'}">Hoạt động</option>
+                        <option value="Inactive" th:selected="${currentComputedStatus == 'Inactive'}">Không hoạt động</option>
+                        <option value="Graduated" th:selected="${currentComputedStatus == 'Graduated'}">Đã Tốt nghiệp</option>
+                    </select>
+                </div>
                 
             </form>
 
-            <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/20">
+            <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
                 <table class="w-full text-left border-collapse text-sm">
                     <thead>
-    <tr class="bg-slate-900/80 text-slate-400 font-semibold border-b border-slate-800">
+    <tr class="bg-slate-100 text-slate-500 font-semibold border-b border-slate-200">
         <th class="p-4">Mã Người Dùng</th>
         <th class="p-4">Họ và Tên</th>
         <th class="p-4">Chức Vụ</th> 
@@ -142,19 +159,19 @@
         <th class="p-4 text-center">Thao tác</th>
     </tr>
 </thead>
-                    <tbody class="divide-y divide-slate-800/60">
-    <tr th:each="student : ${students}" class="hover:bg-slate-900/30 transition-colors">
+                    <tbody class="divide-y divide-slate-200">
+    <tr th:each="student : ${students}" class="hover:bg-slate-50 transition-colors">
         <td class="p-4">
             <button th:onclick="showStudentStats([[${student.userId}]], [[${student.fullName}]])" class="font-mono font-bold text-fpt-orange hover:text-fpt-orangeHover hover:underline transition-all text-left" th:text="${student?.userId}">HE170000</button>
         </td>
         
-        <td class="p-4 text-white font-medium">
+        <td class="p-4 text-slate-900 font-medium">
             <button th:onclick="showStudentStats([[${student.userId}]], [[${student.fullName}]])" class="hover:text-fpt-orange hover:underline transition-all text-left" th:text="${student?.fullName}">Nguyễn Văn A</button>
         </td>
         
         <td class="p-4">
             <span th:if="${student?.role?.roleId == 1 || student?.role == null}" 
-                  class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                  class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-semibold bg-white text-slate-700 border border-slate-200">
                 <span class="w-1 h-1 rounded-full bg-slate-400"></span>Sinh viên
             </span>
             <span th:if="${student?.role?.roleId == 2}" 
@@ -171,9 +188,9 @@
             </span>
         </td>
         
-        <td class="p-4 text-slate-400" th:text="${student?.email}">anvhe170000@fpt.edu.vn</td>
+        <td class="p-4 text-slate-500" th:text="${student?.email}">anvhe170000@fpt.edu.vn</td>
         
-        <td class="p-4 text-slate-300 font-medium" th:text="${student?.campusId == 1 ? 'Hà Nội' : 
+        <td class="p-4 text-slate-700 font-medium" th:text="${student?.campusId == 1 ? 'Hà Nội' : 
                                                       (student?.campusId == 2 ? 'Đà Nẵng' : 
                                                       (student?.campusId == 3 ? 'TP. HCM' : 
                                                       (student?.campusId == 4 ? 'Cần Thơ' : 
@@ -198,7 +215,7 @@
             
             <!-- Graduated -->
             <span th:if="${#strings.equalsIgnoreCase(student.computedStatus, 'Graduated')}" 
-               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-400 border border-slate-500/20">
+               class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-500 border border-slate-500/20">
                 <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> 
                 <span>Tốt nghiệp</span>
             </span>
@@ -237,21 +254,23 @@
         
         <td class="p-4 text-center">
             <div class="flex items-center justify-center gap-3">
-                <button th:onclick="openEditModal([[${student.userId}]], [[${student.fullName}]], [[${student.email}]], [[${student.campusId}]], [[${student.role?.roleId}]], [[${student.status}]])" 
-                        class="text-slate-400 hover:text-blue-400 transition-colors" title="Chỉnh sửa">
+                <button th:onclick="openEditModal([[${student.userId}]], [[${student.fullName}]], [[${student.email}]], [[${student.campusId}]], [[${student.role?.roleId}]])" 
+                        class="text-slate-500 hover:text-blue-400 transition-colors" title="Chỉnh sửa">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
                 </button>
-                <a th:href="@{/admin/users/toggle-lock/{id}(id=${student.userId})}" 
-                   class="text-slate-400 hover:text-purple-400 transition-colors" 
-                   th:title="${student.borrowingLocked ? 'Mở khóa thẻ' : 'Khóa thẻ'}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button th:onclick="openChangeStatusModal([[${student.userId}]], [[${student.computedStatus}]])" 
+                        class="text-slate-500 hover:text-red-400 transition-colors" title="Thay đổi trạng thái thẻ">
+                    <svg class="w-5 h-5" th:if="${!student.borrowingLocked}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
-                </a>
+                    <svg class="w-5 h-5 text-red-500" th:if="${student.borrowingLocked}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+                    </svg>
+                </button>
                 <button th:onclick="openDeleteModal([[${student.userId}]], [[${student.fullName}]])"
-                        class="text-slate-400 hover:text-rose-400 transition-colors" title="Xóa">
+                        class="text-slate-500 hover:text-rose-400 transition-colors" title="Xóa">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
@@ -277,14 +296,14 @@
     </div>
 
     <!-- Modal Chỉnh Sửa Thông Tin -->
-    <div id="editUserModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
-            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-                <h3 class="text-xl font-bold text-slate-100 flex items-center gap-2">
+    <div id="editUserModal" class="fixed inset-0 z-50 hidden bg-white/80 backdrop-blur-sm flex items-center justify-center">
+        <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-white">
+                <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
                     <svg class="w-5 h-5 text-fpt-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                     Chỉnh sửa Thông tin
                 </h3>
-                <button onclick="closeEditModal()" class="text-slate-400 hover:text-white transition-colors">
+                <button onclick="closeEditModal()" class="text-slate-500 hover:text-slate-900 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
@@ -293,27 +312,27 @@
                 <input type="hidden" id="editUserId" name="userId" />
                 
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Mã định danh (ID)</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Mã định danh (ID)</label>
                     <input type="text" id="editUserIdDisplay" readonly
-                           class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-500 cursor-not-allowed">
+                           class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-500 cursor-not-allowed">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Họ và Tên</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Họ và Tên</label>
                     <input type="text" id="editFullName" name="fullName" required pattern="^[\p{L}\s]+$" title="Họ và tên chỉ được chứa chữ cái và khoảng trắng"
-                           class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-fpt-orange">
+                           class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-fpt-orange">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Email</label>
-                    <input type="email" id="editEmail" name="email" required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Vui lòng nhập đúng định dạng email (VD: abc@fpt.edu.vn)"
-                           class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-fpt-orange">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                    <input type="email" id="editEmail" name="email" readonly
+                           class="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-500 cursor-not-allowed">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Chức Vụ</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Chức Vụ</label>
                     <select id="editRoleId" name="roleId"
-                            class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-fpt-orange">
+                            class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-fpt-orange">
                         <option value="1">Sinh viên (Patron)</option>
                         <option value="2">Giảng viên (Lecturer)</option>
                         <option value="3">Thủ thư (Librarian)</option>
@@ -322,9 +341,9 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Cơ Sở</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Cơ Sở</label>
                     <select id="editCampusId" name="campusId" required
-                            class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-fpt-orange">
+                            class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-fpt-orange">
                         <option value="1">Hà Nội</option>
                         <option value="2">Đà Nẵng</option>
                         <option value="3">TP. Hồ Chí Minh</option>
@@ -333,28 +352,18 @@
                     </select>
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Tình trạng tài khoản</label>
-                    <select id="editStatus" name="status" required
-                            class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-fpt-orange">
-                        <option value="Active">Hoạt động (Active)</option>
-                        <option value="Graduated">Đã Tốt Nghiệp</option>
-                        <option value="Inactive">Không hoạt động (Inactive)</option>
-                    </select>
-                </div>
-
                 <div class="pt-4 flex justify-end gap-3">
-                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">Hủy</button>
-                    <button type="submit" class="px-4 py-2 rounded-xl text-sm font-medium text-white bg-fpt-orange hover:bg-fpt-orangeHover transition-colors shadow-lg shadow-fpt-orange/20">Lưu Thay Đổi</button>
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-700 hover:text-slate-900 hover:bg-white transition-colors">Hủy</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-900 bg-fpt-orange hover:bg-fpt-orangeHover transition-colors shadow-lg shadow-fpt-orange/20">Lưu Thay Đổi</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Modal Xóa -->
-    <div id="deleteUserModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center">
-        <div class="bg-slate-900 border border-rose-500/20 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
-            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-rose-500/5">
+    <div id="deleteUserModal" class="fixed inset-0 z-50 hidden bg-white/80 backdrop-blur-sm flex items-center justify-center">
+        <div class="bg-white border border-rose-500/20 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-rose-500/5">
                 <h3 class="text-xl font-bold text-rose-500 flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                     Xác nhận Xóa
@@ -363,12 +372,12 @@
             
             <form action="/admin/users/delete" method="POST" class="p-6 space-y-4">
                 <input type="hidden" id="deleteUserId" name="userId" />
-                <p class="text-slate-300">Bạn có chắc chắn muốn xóa tài khoản <strong id="deleteUserName" class="text-white"></strong>?</p>
-                <p class="text-sm text-slate-400">Hành động này không thể hoàn tác. Nếu người này đang có lịch sử mượn trả, vui lòng sử dụng chức năng "Khóa Thẻ" thay vì Xóa.</p>
+                <p class="text-slate-700">Bạn có chắc chắn muốn xóa tài khoản <strong id="deleteUserName" class="text-slate-900"></strong>?</p>
+                <p class="text-sm text-slate-500">Hành động này không thể hoàn tác. Nếu người này đang có lịch sử mượn trả, vui lòng sử dụng chức năng "Khóa Thẻ" thay vì Xóa.</p>
 
                 <div class="pt-4 flex justify-end gap-3">
-                    <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">Hủy</button>
-                    <button type="submit" class="px-4 py-2 rounded-xl text-sm font-medium text-white bg-rose-500 hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/20">Xác nhận Xóa</button>
+                    <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-700 hover:text-slate-900 hover:bg-white transition-colors">Hủy</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-900 bg-rose-500 hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/20">Xác nhận Xóa</button>
                 </div>
             </form>
         </div>
@@ -376,25 +385,25 @@
 
     <!-- Modal Thêm Thủ Công -->
     <div id="manualAddModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative">
-            <div class="flex justify-between items-center p-5 border-b border-slate-800">
-                <h3 class="text-lg font-bold text-white">Thêm bạn đọc thủ công</h3>
-                <button onclick="document.getElementById('manualAddModal').classList.add('hidden')" class="text-slate-400 hover:text-white transition-colors">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative">
+            <div class="flex justify-between items-center p-5 border-b border-slate-200">
+                <h3 class="text-lg font-bold text-slate-900">Thêm bạn đọc thủ công</h3>
+                <button onclick="document.getElementById('manualAddModal').classList.add('hidden')" class="text-slate-500 hover:text-slate-900 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             <form action="/admin/users/add-manual" method="POST" class="p-5 space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Mã định danh (ID)</label>
-                    <input type="text" name="userId" required pattern="^[a-zA-Z0-9]+$" title="Mã định danh chỉ được chứa chữ cái và số, không chứa khoảng trắng hay ký tự đặc biệt" placeholder="VD: HE150000" class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:border-fpt-orange outline-none transition-all">
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Mã định danh (ID)</label>
+                    <input type="text" name="userId" required pattern="^[a-zA-Z0-9]+$" title="Mã định danh chỉ được chứa chữ cái và số, không chứa khoảng trắng hay ký tự đặc biệt" placeholder="VD: HE150000" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:border-fpt-orange outline-none transition-all">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Họ và Tên</label>
-                    <input type="text" name="fullName" required pattern="^[\p{L}\s]+$" title="Họ và tên chỉ được chứa chữ cái và khoảng trắng" placeholder="VD: Nguyễn Văn A" class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:border-fpt-orange outline-none transition-all">
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Họ và Tên</label>
+                    <input type="text" name="fullName" required pattern="^[\p{L}\s]+$" title="Họ và tên chỉ được chứa chữ cái và khoảng trắng" placeholder="VD: Nguyễn Văn A" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:border-fpt-orange outline-none transition-all">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Cơ sở học tập</label>
-                    <select name="campusId" required class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:border-fpt-orange outline-none transition-all cursor-pointer">
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Cơ sở học tập</label>
+                    <select name="campusId" required class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:border-fpt-orange outline-none transition-all cursor-pointer">
                         <option value="1">FPT Hà Nội</option>
                         <option value="2">FPT Đà Nẵng</option>
                         <option value="3">FPT TP. Hồ Chí Minh</option>
@@ -403,13 +412,13 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Email (Không bắt buộc)</label>
-                    <input type="email" name="email" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Vui lòng nhập đúng định dạng email (VD: abc@fpt.edu.vn)" placeholder="VD: anvahe150000@fpt.edu.vn" class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:border-fpt-orange outline-none transition-all">
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Email (Không bắt buộc)</label>
+                    <input type="email" name="email" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Vui lòng nhập đúng định dạng email (VD: abc@fpt.edu.vn)" placeholder="VD: anvahe150000@fpt.edu.vn" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:border-fpt-orange outline-none transition-all">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Chức vụ</label>
-                        <select name="roleId" class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:border-fpt-orange outline-none transition-all cursor-pointer">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Chức vụ</label>
+                        <select name="roleId" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:border-fpt-orange outline-none transition-all cursor-pointer">
                             <option value="1">Sinh viên (Patron)</option>
                             <option value="2">Giảng viên (Lecturer)</option>
                             <option value="3">Thủ thư (Librarian)</option>
@@ -417,8 +426,8 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Tình trạng</label>
-                        <select name="status" class="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:border-fpt-orange outline-none transition-all cursor-pointer">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Tình trạng</label>
+                        <select name="status" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:border-fpt-orange outline-none transition-all cursor-pointer">
                             <option value="Active">Hoạt động (Active)</option>
                             <option value="Graduated">Đã Tốt Nghiệp</option>
                             <option value="Inactive">Không hoạt động (Inactive)</option>
@@ -426,8 +435,57 @@
                     </div>
                 </div>
                 <div class="pt-2 flex justify-end gap-2">
-                    <button type="button" onclick="document.getElementById('manualAddModal').classList.add('hidden')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold transition-colors">Hủy</button>
+                    <button type="button" onclick="document.getElementById('manualAddModal').classList.add('hidden')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition-colors">Hủy</button>
                     <button type="submit" class="px-4 py-2 bg-fpt-orange hover:bg-fpt-orangeHover text-white rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-fpt-orange/20">Lưu thông tin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal Change Status -->
+    <div id="changeStatusModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-fpt-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                    Thay Đổi Trạng Thái Thẻ
+                </h3>
+                <button onclick="closeChangeStatusModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form action="/admin/users/change-status-modal" method="POST" class="p-6 space-y-4">
+                <input type="hidden" id="changeStatusUserId" name="userId" />
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Mã định danh</label>
+                    <input type="text" id="changeStatusUserIdDisplay" readonly class="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-500 font-mono">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Trạng thái mới</label>
+                    <select id="changeStatusSelect" name="newStatus" required
+                            class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-fpt-orange">
+                        <option value="Active">Hoạt động (Active)</option>
+                        <option value="Inactive">Không hoạt động (Inactive)</option>
+                        <option value="Graduated">Đã Tốt Nghiệp</option>
+                    </select>
+                </div>
+
+                <div class="pt-4 flex justify-end gap-3">
+                    <button type="button" onclick="closeChangeStatusModal()" 
+                            class="px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                        Hủy
+                    </button>
+                    <button type="submit" 
+                            class="px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-fpt-orange hover:bg-fpt-orangeHover transition-colors shadow-sm shadow-fpt-orange/20">
+                        Lưu Trạng Thái
+                    </button>
                 </div>
             </form>
         </div>
@@ -435,13 +493,13 @@
 
     <!-- Student Statistics Modal -->
     <div id="statsModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-[100] transition-opacity">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-3xl shadow-2xl relative">
-            <button type="button" onclick="document.getElementById('statsModal').classList.add('hidden'); document.getElementById('statsModal').classList.remove('flex');" class="absolute top-4 right-4 text-slate-500 hover:text-white bg-slate-800 p-2 rounded-xl transition-colors">
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-3xl shadow-2xl relative">
+            <button type="button" onclick="document.getElementById('statsModal').classList.add('hidden'); document.getElementById('statsModal').classList.remove('flex');" class="absolute top-4 right-4 text-slate-500 hover:text-slate-900 bg-white p-2 rounded-xl transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
 
-            <h2 class="text-xl font-bold text-white mb-2">Thống kê mượn trả: <span id="statsModalUserName" class="text-fpt-orange"></span></h2>
-            <p class="text-sm text-slate-400 mb-6">Mã người dùng: <span id="statsModalUserId" class="font-mono text-slate-300"></span></p>
+            <h2 class="text-xl font-bold text-slate-900 mb-2">Thống kê mượn trả: <span id="statsModalUserName" class="text-fpt-orange"></span></h2>
+            <p class="text-sm text-slate-500 mb-6">Mã người dùng: <span id="statsModalUserId" class="font-mono text-slate-700"></span></p>
 
             <!-- Loading Spinner -->
             <div id="statsLoading" class="flex justify-center py-8">
@@ -451,43 +509,43 @@
             <!-- Stats Content -->
             <div id="statsContent" class="hidden">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4 flex flex-col items-center text-center">
-                        <h4 class="text-slate-400 text-xs font-bold uppercase mb-1">Đang mượn</h4>
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col items-center text-center">
+                        <h4 class="text-slate-500 text-xs font-bold uppercase mb-1">Đang mượn</h4>
                         <div class="flex items-end justify-center space-x-1">
                             <span id="statsBorrowed" class="text-3xl font-extrabold text-blue-400">0</span>
                             <span class="text-slate-500 text-lg font-medium">/</span>
-                            <span id="statsLimit" class="text-slate-400 text-lg font-medium">5</span>
+                            <span id="statsLimit" class="text-slate-500 text-lg font-medium">5</span>
                         </div>
                     </div>
-                    <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4 flex flex-col items-center text-center">
-                        <h4 class="text-slate-400 text-xs font-bold uppercase mb-1">Quá hạn</h4>
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col items-center text-center">
+                        <h4 class="text-slate-500 text-xs font-bold uppercase mb-1">Quá hạn</h4>
                         <span id="statsOverdue" class="text-3xl font-extrabold">0</span>
                     </div>
-                    <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4 flex flex-col items-center text-center">
-                        <h4 class="text-slate-400 text-xs font-bold uppercase mb-1">Chưa nộp phạt</h4>
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col items-center text-center">
+                        <h4 class="text-slate-500 text-xs font-bold uppercase mb-1">Chưa nộp phạt</h4>
                         <span id="statsPenalties" class="text-3xl font-extrabold">0</span>
                     </div>
-                    <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4 flex flex-col items-center justify-center text-center">
-                        <h4 class="text-slate-400 text-xs font-bold uppercase mb-2">Hạn mức</h4>
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center text-center">
+                        <h4 class="text-slate-500 text-xs font-bold uppercase mb-2">Hạn mức</h4>
                         <p class="text-emerald-400 text-xs font-medium"><span id="statsRole" class="font-bold"></span>: Tối đa <span id="statsLimitText" class="font-bold"></span> cuốn</p>
                     </div>
                 </div>
 
                 <!-- Borrowing Rules Section -->
-                <div class="mt-4 border-t border-slate-800 pt-4 max-h-[30vh] overflow-y-auto pr-2 custom-scrollbar">
-                    <h3 class="text-sm font-bold text-slate-100 tracking-tight mb-3 flex items-center gap-2">
+                <div class="mt-4 border-t border-slate-200 pt-4 max-h-[30vh] overflow-y-auto pr-2 custom-scrollbar">
+                    <h3 class="text-sm font-bold text-slate-900 tracking-tight mb-3 flex items-center gap-2">
                         <svg class="w-4 h-4 text-fpt-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         Nội quy & Chính sách mượn trả
                     </h3>
-                    <div class="bg-slate-800/20 border border-slate-700/50 rounded-xl p-4 text-xs text-slate-300 space-y-3">
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 text-xs text-slate-700 space-y-3">
                         <p><strong>1.</strong> Sau khi đọc sách, bạn đọc cần trả lại đúng nơi quy định, không tự ý xếp lên kệ.</p>
                         <p><strong>2.</strong> Không được mang bất kỳ tài liệu nào ra khỏi thư viện khi chưa hoàn tất thủ tục mượn.</p>
                         <p><strong>3.</strong> Đối với giáo trình và tài liệu học tập: Mỗi sinh viên được mượn 1 bộ theo danh sách lớp của Phòng Đào tạo trong học kỳ hiện tại. Có thể gia hạn tối đa 1 tuần nếu có lý do chính đáng.</p>
                         <p><strong>4.</strong> Giáo trình mượn dưới dạng tài liệu tham khảo áp dụng thời hạn trả như sách tham khảo thông thường.</p>
                         <p><strong>5.</strong> Đối với tài liệu tham khảo: Bạn đọc được mượn tối đa <strong><span th:text="${@systemConfigService.getIntConfig('MAX_BOOKS_LECTURER', 10)}">10</span> cuốn</strong> (Giảng viên) hoặc <strong><span th:text="${@systemConfigService.getIntConfig('MAX_BOOKS_STUDENT', 3)}">5</span> cuốn</strong> (Sinh viên), thời hạn 1 tuần/tài liệu tiếng Việt, 2 tuần/tài liệu ngoại ngữ, và được phép gia hạn tối đa <span th:text="${@systemConfigService.getIntConfig('MAX_RENEWALS_ONLINE', 2)}">4</span> lần.</p>
                         <div class="pt-1">
-                            <p class="font-bold text-slate-200 mb-1">6. Trách nhiệm của người mượn:</p>
-                            <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                            <p class="font-bold text-slate-800 mb-1">6. Trách nhiệm của người mượn:</p>
+                            <ul class="list-disc pl-5 space-y-1 text-slate-500">
                                 <li><strong>6.1.</strong> Kiểm tra và xác nhận giao dịch với thủ thư tại quầy.</li>
                                 <li><strong>6.2.</strong> Kiểm tra tình trạng thực tế của tài liệu trước khi mang ra khỏi thư viện, giữ gìn và bảo quản tài liệu trong thời gian mượn. Trường hợp hư hỏng, người mượn cuối cùng sẽ chịu trách nhiệm bồi thường theo quy định.</li>
                             </ul>
@@ -505,6 +563,24 @@
     </style>
 
     <script>
+        function openChangeStatusModal(userId, currentComputedStatus) {
+            document.getElementById('changeStatusUserId').value = userId;
+            document.getElementById('changeStatusUserIdDisplay').value = userId;
+            
+            let statusVal = 'Active';
+            if (currentComputedStatus === 'Inactive') statusVal = 'Inactive';
+            else if (currentComputedStatus === 'Graduated') statusVal = 'Graduated';
+            else if (currentComputedStatus === 'Borrowing Locked') statusVal = 'BorrowingLocked';
+            
+            document.getElementById('changeStatusSelect').value = statusVal;
+            
+            document.getElementById('changeStatusModal').classList.remove('hidden');
+        }
+
+        function closeChangeStatusModal() {
+            document.getElementById('changeStatusModal').classList.add('hidden');
+        }
+
         function showStudentStats(userId, userName) {
             // Show modal and loading state
             const modal = document.getElementById('statsModal');
@@ -534,7 +610,7 @@
                     if (data.totalOverdue > 0) {
                         overdueEl.className = 'text-3xl font-extrabold text-orange-400';
                     } else {
-                        overdueEl.className = 'text-3xl font-extrabold text-slate-300';
+                        overdueEl.className = 'text-3xl font-extrabold text-slate-700';
                     }
                     
                     const penaltyEl = document.getElementById('statsPenalties');
@@ -542,7 +618,7 @@
                     if (data.totalPenalties > 0) {
                         penaltyEl.className = 'text-3xl font-extrabold text-rose-400';
                     } else {
-                        penaltyEl.className = 'text-3xl font-extrabold text-slate-300';
+                        penaltyEl.className = 'text-3xl font-extrabold text-slate-700';
                     }
                     
                     // Show content
@@ -556,7 +632,7 @@
                     modal.classList.remove('flex');
                 });
         }
-        function openEditModal(userId, fullName, email, campusId, roleId, status) {
+        function openEditModal(userId, fullName, email, campusId, roleId) {
             document.getElementById('editUserId').value = userId;
             document.getElementById('editUserIdDisplay').value = userId;
             document.getElementById('editFullName').value = fullName;
@@ -587,3 +663,4 @@
     </script>
 </body>
 </html>
+
