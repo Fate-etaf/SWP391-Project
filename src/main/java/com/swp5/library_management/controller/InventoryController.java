@@ -421,6 +421,55 @@ public class InventoryController {
         return "redirect:/librarian/inventory/" + id;
     }
 
+    /** Updates a copy's physical condition and derives its availability status. */
+    @PostMapping("/inventory/{id}/copies/{copyId}/condition")
+    public String updateCopyCondition(
+            @PathVariable Integer id,
+            @PathVariable String copyId,
+            @RequestParam String condition,
+            @RequestParam(required = false) Integer campusId,
+            HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+
+        String redirectUrl = "redirect:/librarian/inventory/" + id
+                + (campusId != null ? "?campusId=" + campusId : "");
+
+        try {
+            String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+            User librarian = loggedInUserId == null ? null
+                    : userRepository.findById(loggedInUserId).orElse(null);
+
+            if (librarian == null || !librarian.isLibrarian()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền cập nhật trạng thái bản sao.");
+                return redirectUrl;
+            }
+            com.swp5.library_management.entity.BookCopy copy = bookCopyRepository.findById(copyId)
+                    .orElseThrow(() -> new NoSuchElementException("Không tìm thấy bản sao sách"));
+            if (!id.equals(copy.getBook().getBookId())) {
+                throw new IllegalArgumentException("Bản sao không thuộc đầu sách này.");
+            }
+            if (librarian.getCampusId() == null
+                    || !librarian.getCampusId().equals(copy.getCampus().getCampusId())) {
+                throw new IllegalArgumentException("Bạn chỉ có thể cập nhật bản sao tại campus của mình.");
+            }
+            if (!"Good".equals(condition) && !"Damaged".equals(condition) && !"Lost".equals(condition)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Tình trạng vật lý của bản sao không hợp lệ.");
+                return redirectUrl;
+            }
+
+            copy.setConditionStatus(condition);
+            copy.setCopyStatus("Good".equals(condition) ? "Available"
+                    : "Damaged".equals(condition) ? "Maintenance" : "Lost");
+            bookCopyRepository.save(copy);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Đã cập nhật bản sao " + copyId + ". Tình trạng: " + condition
+                            + ", trạng thái: " + copy.getCopyStatus() + ".");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+        }
+        return redirectUrl;
+    }
+
     @GetMapping("/inventory/dashboard")
     public String dashboard(
             @RequestParam(required = false) Integer campusId,

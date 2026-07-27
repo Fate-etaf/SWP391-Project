@@ -270,6 +270,17 @@
         .badge-good         { background: var(--emerald-soft); color: var(--emerald); }
         .badge-damaged      { background: var(--gold-soft);    color: var(--gold); }
 
+        .status-form { display: flex; gap: 0.45rem; margin-top: 0.9rem; }
+        .status-select {
+            flex: 1; min-width: 0; padding: 0.38rem 0.5rem; border: 1px solid var(--border);
+            border-radius: 6px; background: var(--bg-surface); color: var(--text-primary); font-size: 0.72rem;
+        }
+        .status-button {
+            border: 0; border-radius: 6px; background: var(--accent); color: #fff; cursor: pointer;
+            padding: 0.38rem 0.65rem; font-size: 0.72rem; font-weight: 600;
+        }
+        .status-button:hover { background: #ea580c; }
+
         .shelf-tag {
             display: inline-flex; align-items: center; gap: 0.3rem;
             font-size: 0.68rem; font-weight: 500;
@@ -486,6 +497,18 @@
                         <span th:text="${copy.shelfCode + (copy.shelfNumber != null ? ' (Kệ số ' + copy.shelfNumber + ')' : '')}">SHELF</span>
                     </span>
                 </div>
+
+                <form class="status-form"
+                      th:action="@{/librarian/inventory/{id}/copies/{copyId}/condition(id=${book.bookId}, copyId=${copy.copyId})}"
+                      method="post">
+                    <input type="hidden" name="campusId" th:value="${selectedCampusId}"/>
+                    <select class="status-select" name="condition" aria-label="Update copy condition">
+                        <option value="Good" th:selected="${copy.conditionStatus == 'Good'}">Good</option>
+                        <option value="Damaged" th:selected="${copy.conditionStatus == 'Damaged'}">Damaged</option>
+                        <option value="Lost" th:selected="${copy.conditionStatus == 'Lost'}">Lost</option>
+                    </select>
+                    <button type="submit" class="status-button">Update condition</button>
+                </form>
             </div>
         </div>
     </div>
