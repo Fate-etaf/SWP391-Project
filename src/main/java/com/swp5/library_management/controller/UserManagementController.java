@@ -579,6 +579,7 @@ public class UserManagementController {
      * - Gửi Email chúc mừng nếu trạng thái đổi sang "Tốt nghiệp".
      */
     @PostMapping("/admin/users/change-status-modal")
+    @org.springframework.transaction.annotation.Transactional
     public String changeStatusModal(
             @RequestParam("userId") String userId,
             @RequestParam("newStatus") String newStatus,
