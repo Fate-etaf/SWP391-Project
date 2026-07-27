@@ -19,16 +19,10 @@ import com.swp5.library_management.repository.BookCopyRepository;
 import com.swp5.library_management.repository.BorrowTicketDetailRepository;
 import com.swp5.library_management.repository.FineInvoiceRepository;
 import com.swp5.library_management.repository.UserRepository;
-<<<<<<< HEAD
 import com.swp5.library_management.entity.Notification;
 import com.swp5.library_management.repository.NotificationRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-=======
 import com.swp5.library_management.entity.Campus;
 import com.swp5.library_management.repository.CampusRepository;
->>>>>>> origin/main
 
 import lombok.RequiredArgsConstructor;
 
@@ -46,10 +40,8 @@ public class ViolationServiceImpl implements ViolationService {
     private final UserRepository userRepository;
     private final ReservationService reservationService;
     private final SystemConfigService systemConfigService;
-<<<<<<< HEAD
     private final FineEmailService fineEmailService;
     private final NotificationRepository notificationRepository;
-=======
     private final CampusRepository campusRepository;
     
     private void setReturnCampusFromLibrarian(BorrowTicketDetail detail, String librarianId) {
@@ -63,7 +55,6 @@ public class ViolationServiceImpl implements ViolationService {
             });
         }
     }
->>>>>>> origin/main
 
     @Override
     @Transactional(readOnly = true)

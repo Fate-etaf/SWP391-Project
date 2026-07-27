@@ -122,9 +122,8 @@ public class BookReturnServiceImpl implements BookReturnService {
     }
 
     @Override
-<<<<<<< HEAD
-    public void processNormalReturn(Integer ticketDetailId, String conditionStatus) {
-        violationService.returnBook(ticketDetailId, conditionStatus);
+    public void processNormalReturn(Integer ticketDetailId, String conditionStatus, String librarianId) {
+        violationService.returnBook(ticketDetailId, conditionStatus, librarianId);
         
         try {
             BorrowTicketDetail detail = borrowTicketDetailRepository.findById(ticketDetailId).orElse(null);
@@ -145,10 +144,6 @@ public class BookReturnServiceImpl implements BookReturnService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-=======
-    public void processNormalReturn(Integer ticketDetailId, String conditionStatus, String librarianId) {
-        violationService.returnBook(ticketDetailId, conditionStatus, librarianId);
->>>>>>> origin/main
     }
 
     @Override
@@ -194,15 +189,10 @@ public class BookReturnServiceImpl implements BookReturnService {
     @Override
     public void processLost(Integer ticketDetailId, boolean payNow, String paymentMethod, String transactionCode,
             String librarianId, String notes) {
-<<<<<<< HEAD
-        List<FineInvoice> fines = violationService.createLostBookFine(ticketDetailId, notes);
+        List<FineInvoice> fines = violationService.createLostBookFine(ticketDetailId, notes, librarianId);
         BigDecimal totalFine = BigDecimal.ZERO;
         BigDecimal overdueFineAmount = BigDecimal.ZERO;
         BigDecimal lostFineAmount = BigDecimal.ZERO;
-        
-=======
-        List<FineInvoice> fines = violationService.createLostBookFine(ticketDetailId, notes, librarianId);
->>>>>>> origin/main
         for (FineInvoice fine : fines) {
             if (payNow) {
                 fine.setPaidStatus("Paid");
@@ -258,15 +248,10 @@ public class BookReturnServiceImpl implements BookReturnService {
     @Override
     public void processDamaged(Integer ticketDetailId, boolean payNow, String paymentMethod, String transactionCode,
             String librarianId, String notes) {
-<<<<<<< HEAD
-        List<FineInvoice> fines = violationService.createDamagedBookFine(ticketDetailId, notes);
+        List<FineInvoice> fines = violationService.createDamagedBookFine(ticketDetailId, notes, librarianId);
         BigDecimal totalFine = BigDecimal.ZERO;
         BigDecimal overdueFineAmount = BigDecimal.ZERO;
         BigDecimal damagedFineAmount = BigDecimal.ZERO;
-        
-=======
-        List<FineInvoice> fines = violationService.createDamagedBookFine(ticketDetailId, notes, librarianId);
->>>>>>> origin/main
         for (FineInvoice fine : fines) {
             if (payNow) {
                 fine.setPaidStatus("Paid");
