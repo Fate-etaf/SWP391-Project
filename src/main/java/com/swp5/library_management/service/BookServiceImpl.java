@@ -530,9 +530,7 @@ public class BookServiceImpl implements BookService {
                                             + "' đã tồn tại — thêm " + copies + " bản sao, nhưng campus không hợp lệ.");
                                 }
                             } else {
-                                // Không có copies yêu cầu, bỏ qua dòng này
-                                errors.add("Dòng " + (rowIdx + 1) + " ('" + title + "'): ISBN '" + cleanIsbn
-                                        + "' đã tồn tại — bỏ qua vì số lượng bản sao (Copies) = 0.");
+                                // Copies = 0 và ISBN đã tồn tại — bỏ qua im lặng, không cần làm gì
                             }
                             continue; // Xử lý dòng tiếp theo
                         }
