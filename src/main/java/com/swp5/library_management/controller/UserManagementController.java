@@ -542,6 +542,11 @@ public class UserManagementController {
                 user.setStatus("Inactive");
                 user.setBorrowingLocked(false);
             } else if ("Graduated".equalsIgnoreCase(newStatus)) {
+                boolean isStudent = user.getRoles() != null && user.getRoles().stream().anyMatch(r -> r.getRoleId() == 1);
+                if (!isStudent) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Trạng thái 'Tốt nghiệp' chỉ áp dụng cho Sinh viên!");
+                    return "redirect:/admin/users";
+                }
                 user.setStatus("Graduated");
                 user.setBorrowingLocked(false);
             } else if ("BorrowingLocked".equalsIgnoreCase(newStatus)) {
