@@ -411,4 +411,59 @@ private String buildMaterialRequestRejectionBody(String patronName, String bookT
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void sendReturnConfirmation(String toEmail, String patronName, String bookTitle, String copyId,
+                                       String returnDate, String fineAmount, String paymentMethod, String status) {
+        String subject = "[Thư viện FPT] Xác nhận trả sách thành công";
+        String body = buildReturnConfirmationBody(patronName, bookTitle, copyId, returnDate, fineAmount, paymentMethod, status);
+        sendHtmlEmail(toEmail, subject, body);
+    }
+
+    private String buildReturnConfirmationBody(String patronName, String bookTitle, String copyId,
+                                                String returnDate, String fineAmount, String paymentMethod, String status) {
+        return """
+                <html><body style="font-family: Arial, sans-serif; color: #333;">
+                  <div style="max-width:600px; margin:auto; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+                    <div style="background:#4caf50; padding:20px; text-align:center;">
+                      <h2 style="color:#fff; margin:0;">📚 Thư viện FPT University</h2>
+                    </div>
+                    <div style="padding:24px;">
+                      <p>Xin chào <strong>%s</strong>,</p>
+                      <p>Hệ thống đã xác nhận bạn hoàn trả sách thành công.</p>
+                      <table style="width:100%%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f5f5f5;">
+                          <td style="padding:10px; border:1px solid #ddd;"><strong>📖 Tên sách</strong></td>
+                          <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px; border:1px solid #ddd;"><strong>🔖 Mã bản sao</strong></td>
+                          <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr style="background:#f5f5f5;">
+                          <td style="padding:10px; border:1px solid #ddd;"><strong>📅 Ngày trả sách</strong></td>
+                          <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px; border:1px solid #ddd;"><strong>📌 Trạng thái trả</strong></td>
+                          <td style="padding:10px; border:1px solid #ddd;"><strong>%s</strong></td>
+                        </tr>
+                        <tr style="background:#f5f5f5;">
+                          <td style="padding:10px; border:1px solid #ddd;"><strong>💰 Khoản phạt vi phạm</strong></td>
+                          <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:10px; border:1px solid #ddd;"><strong>💳 Phương thức thanh toán</strong></td>
+                          <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                      </table>
+                      <div style="background:#e8f5e9; border-left:4px solid #4caf50; padding:12px; border-radius:4px;">
+                        <p style="margin:0;">✅ Thông tin giao dịch trả sách của bạn đã được đối lưu và cập nhật trên hệ thống quản lý thư viện.</p>
+                      </div>
+                      <p style="margin-top:20px;">Trân trọng,<br><strong>Hệ thống Thư viện FPT University</strong></p>
+                    </div>
+                  </div>
+                </body></html>
+                """.formatted(patronName, bookTitle, copyId, returnDate, status, fineAmount, paymentMethod);
+    }
 }

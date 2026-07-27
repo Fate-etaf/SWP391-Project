@@ -34,7 +34,7 @@ public interface ViolationService {
      * @param patronId   mã sinh viên (để null nếu không lọc)
      * @param paidStatus trạng thái ('Paid' / 'Unpaid', null nếu không lọc)
      */
-    List<FineInvoice> getAllFineInvoices(String patronId, String paidStatus);
+    List<FineInvoice> getAllFineInvoices(String patronId, String paidStatus, String librarianId);
 
     /**
      * Thủ thư xác nhận thu tiền mặt cho hóa đơn phạt.
