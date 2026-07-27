@@ -242,6 +242,7 @@ public class UserManagementController {
             
             Role userRole = new Role();
             userRole.setRoleId(roleId);
+            user.setRole(userRole); // Cập nhật luôn thuộc tính role (ManyToOne)
             user.getRoles().clear();
             user.getRoles().add(userRole);
             
@@ -254,6 +255,8 @@ public class UserManagementController {
         
         return "redirect:/admin/users";
     }
+
+    private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
     /**
      * Xử lý xóa vĩnh viễn một người dùng khỏi hệ thống.
@@ -271,10 +274,28 @@ public class UserManagementController {
                 redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa! Người dùng này đang có sách chưa trả. Vui lòng sử dụng tính năng Khóa Thẻ.");
             } else {
                 try {
+                    // Force Delete: Xóa tất cả các bản ghi liên quan (Lịch sử) trước khi xóa User
+                    jdbcTemplate.update("DELETE FROM dbo.UserRoles WHERE UserID = ?", userId);
+                    jdbcTemplate.update("DELETE FROM dbo.Notifications WHERE UserID = ?", userId);
+                    
+                    // Xóa chi tiết mượn và đơn mượn
+                    jdbcTemplate.update("DELETE FROM BorrowTicketDetails WHERE TicketID IN (SELECT TicketID FROM BorrowTickets WHERE PatronID = ?)", userId);
+                    jdbcTemplate.update("DELETE FROM BorrowTickets WHERE PatronID = ?", userId);
+                    
+                    // Xóa hóa đơn phạt
+                    jdbcTemplate.update("DELETE FROM FineInvoices WHERE PatronID = ?", userId);
+                    
+                    // Xóa các dữ liệu khác (nếu có)
+                    jdbcTemplate.update("DELETE FROM dbo.Reservations WHERE PatronID = ?", userId);
+                    jdbcTemplate.update("DELETE FROM dbo.Waitlists WHERE PatronID = ?", userId);
+                    jdbcTemplate.update("DELETE FROM dbo.RoomBookings WHERE PatronID = ?", userId);
+                    jdbcTemplate.update("DELETE FROM dbo.MaterialRequests WHERE PatronID = ?", userId);
+                    
+                    // Cuối cùng xóa User
                     userRepository.deleteById(userId);
-                    redirectAttributes.addFlashAttribute("successMessage", "Đã xóa hoàn toàn tài khoản: " + userId + " khỏi hệ thống!");
-                } catch (org.springframework.dao.DataIntegrityViolationException e) {
-                    redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa tài khoản này vì họ đã có lịch sử giao dịch (mượn sách, đóng phạt, thông báo...) trong hệ thống. Khuyến nghị: Hãy đổi trạng thái sang Inactive hoặc Graduated để lưu vết dữ liệu!");
+                    redirectAttributes.addFlashAttribute("successMessage", "Đã xóa hoàn toàn tài khoản và mọi lịch sử liên quan của: " + userId + " khỏi hệ thống!");
+                } catch (Exception e) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi xóa tài khoản: " + e.getMessage());
                 }
             }
         } else {

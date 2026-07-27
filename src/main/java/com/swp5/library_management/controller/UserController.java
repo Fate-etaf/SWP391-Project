@@ -59,9 +59,8 @@ public class UserController {
         model.addAttribute("user", user);
         session.setAttribute("loggedInUser", user);
         
-        // 🔴 ĐOẠN CODE SỬA LỖI TRIỆT ĐỂ: Kiểm tra trạng thái bằng Java chuẩn chỉ
+
         // Nếu status rỗng, hoặc CHỨA chữ "vô hiệu", hoặc CHỨA chữ "không" -> Đều coi là BỊ KHÓA
-       // 🔴 Kiểm tra trạng thái chuẩn hóa tuyệt đối: Chỉ kích hoạt nếu là Active hoặc Đang hoạt động
 boolean isCardActive = false;
 if (user.getStatus() != null) {
     String currentStatus = user.getStatus().trim().toLowerCase();
@@ -109,6 +108,27 @@ model.addAttribute("isCardActive", isCardActive);
     }
     return "redirect:/login";
 }
+
+    @PostMapping("/profile/update-phone")
+    public String updatePhone(@RequestParam("phone") String phone, HttpSession session, RedirectAttributes redirectAttributes) {
+        String loggedInUserId = (String) session.getAttribute("loggedInUserId");
+        if (loggedInUserId == null) {
+            return "redirect:/login";
+        }
+        
+        Optional<User> userOpt = userRepository.findById(loggedInUserId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setPhone(phone.trim());
+            userRepository.save(user);
+            session.setAttribute("loggedInUser", user);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật số điện thoại thành công!");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy thông tin người dùng!");
+        }
+        
+        return "redirect:/profile";
+    }
 
 @GetMapping("/librarian/students/{id}/profile")
 public String showStudentProfileToLibrarian(@org.springframework.web.bind.annotation.PathVariable("id") String targetUserId, HttpSession session, Model model) {
