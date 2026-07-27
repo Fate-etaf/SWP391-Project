@@ -346,7 +346,7 @@ public class UserManagementController {
                 org.apache.poi.ss.usermodel.Row row = sheet.getRow(i);
                 if (row == null) continue;
 
-                String userId = getSafeCellValue(row, 0);
+                String userId = getSafeCellValue(row, 0).toUpperCase();
                 String fullName = getSafeCellValue(row, 1);
                 String email = getSafeCellValue(row, 2);
                 String campusIdStr = getSafeCellValue(row, 3);
@@ -365,9 +365,26 @@ public class UserManagementController {
                 if ("GRADUATED".equalsIgnoreCase(importType)) {
                     if (userOpt.isPresent()) {
                         User student = userOpt.get();
-                        student.setStatus("Graduated"); 
-                        usersToSave.add(student);
-                        successCount++;
+                        
+                        // Chỉ cập nhật nếu trạng thái hiện tại chưa phải là Graduated
+                        if (!"Graduated".equalsIgnoreCase(student.getStatus())) {
+                            student.setStatus("Graduated");
+                            student.setBorrowingLocked(false);
+                            usersToSave.add(student);
+                            successCount++;
+                            
+                            // Tạo thông báo
+                            Notification notif = Notification.builder()
+                                .user(student)
+                                .notificationType("STATUS_UPDATE")
+                                .title("Cập nhật trạng thái Tốt Nghiệp")
+                                .content("Tài khoản của bạn đã được chuyển sang trạng thái Đã Tốt Nghiệp. Bạn sẽ không thể mượn thêm sách nhưng vẫn có thể tra cứu lịch sử.")
+                                .status("Pending")
+                                .createdAt(LocalDateTime.now())
+                                .read(false)
+                                .build();
+                            notificationRepository.save(notif);
+                        }
                     }
                 } else {
                     if (userOpt.isPresent()) {
