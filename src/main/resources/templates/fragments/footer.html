@@ -95,17 +95,26 @@
             </div>
         </div>
 
-        <div class="px-3 py-2 bg-slate-50 border-t border-slate-200 flex gap-2 overflow-x-auto scrollbar-none whitespace-nowrap">
-            <button onclick="document.getElementById('userInput').value='Bạn gợi ý vài sách ngành SE được không?'; sendChatMessage()" class="text-[11px] px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-full hover:bg-fpt-orange hover:text-white hover:border-fpt-orange transition-all shadow-sm">Sách chuyên ngành SE</button>
-            <button onclick="document.getElementById('userInput').value='Luật mượn sách thư viện là gì?'; sendChatMessage()" class="text-[11px] px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-full hover:bg-fpt-orange hover:text-white hover:border-fpt-orange transition-all shadow-sm">Luật mượn trả</button>
-            <button onclick="document.getElementById('userInput').value='Review cho tôi một cuốn sách hay?'; sendChatMessage()" class="text-[11px] px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-full hover:bg-fpt-orange hover:text-white hover:border-fpt-orange transition-all shadow-sm">Review sách ngẫu nhiên</button>
-        </div>
+        <div class="p-3 bg-white border-t border-slate-200 flex gap-2 items-center relative">
+            <div class="relative group">
+                <button type="button" class="text-slate-500 hover:text-fpt-orange transition-colors p-1" title="Câu hỏi nhanh">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </button>
+                
+                <div class="absolute bottom-full left-0 mb-3 w-52 bg-white border border-slate-200 rounded-xl shadow-xl hidden group-hover:block overflow-hidden z-50">
+                    <div class="bg-slate-50 px-3 py-2 text-xs font-bold text-slate-600 border-b border-slate-200">💡 Chọn câu hỏi nhanh</div>
+                    <button onclick="document.getElementById('userInput').value='Bạn gợi ý vài sách ngành SE được không?'; sendChatMessage()" class="w-full text-left px-3 py-2.5 text-xs text-slate-700 hover:bg-fpt-orange hover:text-white transition-colors border-b border-slate-100">📚 Sách chuyên ngành SE</button>
+                    <button onclick="document.getElementById('userInput').value='Luật mượn sách thư viện là gì?'; sendChatMessage()" class="w-full text-left px-3 py-2.5 text-xs text-slate-700 hover:bg-fpt-orange hover:text-white transition-colors border-b border-slate-100">⚖️ Luật mượn trả</button>
+                    <button onclick="document.getElementById('userInput').value='Review cho tôi một cuốn sách hay?'; sendChatMessage()" class="w-full text-left px-3 py-2.5 text-xs text-slate-700 hover:bg-fpt-orange hover:text-white transition-colors border-b border-slate-100">⭐ Review sách ngẫu nhiên</button>
+                    <button onclick="document.getElementById('userInput').value='Thư viện mở cửa lúc mấy giờ?'; sendChatMessage()" class="w-full text-left px-3 py-2.5 text-xs text-slate-700 hover:bg-fpt-orange hover:text-white transition-colors border-b border-slate-100">🕒 Giờ mở cửa</button>
+                    <button onclick="document.getElementById('userInput').value='Tài khoản của tôi bị phạt thì sao?'; sendChatMessage()" class="w-full text-left px-3 py-2.5 text-xs text-slate-700 hover:bg-fpt-orange hover:text-white transition-colors">💸 Quy định nộp phạt</button>
+                </div>
+            </div>
 
-        <div class="p-3 bg-white border-t border-slate-200 flex gap-2">
             <input type="text" id="userInput" placeholder="Nhập câu hỏi của cậu tại đây..." 
                    onkeypress="if(event.key === 'Enter') sendChatMessage()"
-                   class="flex-grow bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-fpt-orange transition-all"/>
-            <button onclick="sendChatMessage()" class="bg-fpt-orange hover:bg-fpt-orangeHover text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-colors">
+                   class="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-fpt-orange focus:bg-white transition-all"/>
+            <button onclick="sendChatMessage()" class="bg-fpt-orange hover:bg-fpt-orangeHover text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-colors shadow-sm">
                 Gửi
             </button>
         </div>
