@@ -230,9 +230,22 @@ public class ViolationServiceImpl implements ViolationService {
         if (copy == null) {
             return;
         }
-        copy.setCopyStatus(copyStatus);
         copy.setConditionStatus(conditionStatus);
-        bookCopyRepository.save(copy);
+
+        if ("Available".equals(copyStatus)) {
+            // Lưu trạng thái vật lý trước
+            bookCopyRepository.save(copy);
+            
+            // Kích hoạt hàm kiểm tra hàng chờ (Waitlist)
+            boolean assignedToWaitlist = reservationService.processWaitlistForReturnedBook(copy);
+            if (!assignedToWaitlist) {
+                copy.setCopyStatus("Available");
+                bookCopyRepository.save(copy);
+            }
+        } else {
+            copy.setCopyStatus(copyStatus);
+            bookCopyRepository.save(copy);
+        }
     }
 
     /**
