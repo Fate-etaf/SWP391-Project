@@ -68,10 +68,24 @@ private final BookRepository bookRepository;
                 return ResponseEntity.ok(responseBody);
             }
             if (userMsg.contains("review") || userMsg.contains("sách hay") || userMsg.contains("gợi ý ngẫu nhiên") || userMsg.contains("một cuốn sách")) {
-                List<Book> randomList = bookRepository.findAll();
-                if (!randomList.isEmpty()) {
-                    Book randomBook = randomList.get(new java.util.Random().nextInt(randomList.size()));
-                    responseBody.put("reply", "Chắc chắn rồi! Mình gợi ý cho bạn cuốn sách: **" + randomBook.getTitle() + "**. \nCuốn sách này cực kỳ thú vị và rất được sinh viên ưa chuộng! Hiện tại thư viện đang còn " + randomBook.getAvailableCount() + " cuốn sẵn sàng để mượn ở kệ " + randomBook.getShelfCode() + ".");
+                List<Book> allBooksList = bookRepository.findAll();
+                List<Book> availableBooks = allBooksList.stream().filter(b -> b.getAvailableCount() != null && b.getAvailableCount() > 0).collect(Collectors.toList());
+                if (availableBooks.isEmpty()) availableBooks = allBooksList; // Fallback
+                
+                if (!availableBooks.isEmpty()) {
+                    Book randomBook = availableBooks.get(new java.util.Random().nextInt(availableBooks.size()));
+                    String shelfInfo = (randomBook.getShelfCode() != null && !randomBook.getShelfCode().trim().isEmpty() && !"null".equalsIgnoreCase(randomBook.getShelfCode())) 
+                                       ? " tại kệ " + randomBook.getShelfCode() : "";
+                    
+                    String[] templates = {
+                        "Chắc chắn rồi! Mình gợi ý cho bạn cuốn sách: **%s**. \nCuốn sách này cực kỳ thú vị và rất được sinh viên ưa chuộng! Hiện tại thư viện đang còn %d cuốn sẵn sàng để mượn%s.",
+                        "Mình nghĩ bạn sẽ rất thích cuốn **%s**. \nĐây là một trong những cuốn sách đáng đọc nhất! Thư viện đang có sẵn %d cuốn%s.",
+                        "Một gợi ý tuyệt vời cho bạn: **%s**. \nĐừng bỏ lỡ cơ hội đọc cuốn này nhé! Đang còn %d cuốn có thể mượn%s."
+                    };
+                    String template = templates[new java.util.Random().nextInt(templates.length)];
+                    String reply = String.format(template, randomBook.getTitle(), randomBook.getAvailableCount(), shelfInfo);
+                    
+                    responseBody.put("reply", reply);
                     return ResponseEntity.ok(responseBody);
                 }
             }

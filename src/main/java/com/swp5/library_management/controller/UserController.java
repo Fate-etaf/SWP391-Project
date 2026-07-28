@@ -224,7 +224,6 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
             @RequestParam("userId") String userId,
             @RequestParam("email") String email,
             @RequestParam("campusId") Integer campusId,
-            @RequestParam("password") String password,
             HttpSession session,
             RedirectAttributes redirectAttributes,
             Model model) {
@@ -238,15 +237,6 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-
-            // KIỂM TRA MẬT KHẨU
-            if (user.getPasswordHash() == null || !user.getPasswordHash().equals(password)) {
-                model.addAttribute("loginError", "Sai mật khẩu! Vui lòng kiểm tra lại.");
-                model.addAttribute("userId", userId);
-                model.addAttribute("email", email);
-                model.addAttribute("campusId", campusId);
-                return "login";
-            }
 
             System.out.println("[LOGIN] User status: " + user.getStatus());
             System.out.println("[LOGIN] Roles loaded: " + user.getRoles().size() + " → " + user.getRoles());
@@ -295,7 +285,7 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
             return "redirect:/home";
         }
 
-        model.addAttribute("loginError", "Mã số, Email, Mật khẩu hoặc Cơ sở học tập không chính xác!");
+        model.addAttribute("loginError", "Mã số, Email hoặc Cơ sở học tập không trùng khớp với dữ liệu hệ thống!");
         model.addAttribute("userId", userId);
         model.addAttribute("email", email);
         model.addAttribute("campusId", campusId);
