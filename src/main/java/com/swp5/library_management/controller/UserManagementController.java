@@ -414,8 +414,11 @@ public class UserManagementController {
                     if (userOpt.isPresent()) {
                         User student = userOpt.get();
                         
-                        // Chỉ cập nhật nếu trạng thái hiện tại chưa phải là Graduated
-                        if (!"Graduated".equalsIgnoreCase(student.getStatus())) {
+                        // Chỉ cập nhật nếu trạng thái hiện tại chưa phải là Graduated và là SINH VIÊN (RoleId == 1)
+                        boolean isStudent = student.getRoles() != null && student.getRoles().stream().anyMatch(r -> r.getRoleId() == 1);
+                        if (student.getRole() != null && student.getRole().getRoleId() == 1) isStudent = true; // Fallback
+                        
+                        if (isStudent && !"Graduated".equalsIgnoreCase(student.getStatus())) {
                             student.setStatus("Graduated");
                             student.setBorrowingLocked(false);
                             usersToSave.add(student);
@@ -433,6 +436,36 @@ public class UserManagementController {
                                 .build();
                             notificationRepository.save(notif);
                         }
+                    } else {
+                        // Tạo mới Sinh viên tốt nghiệp nếu chưa tồn tại
+                        User account = new User();
+                        
+                        if (email != null && !email.trim().isEmpty()) {
+                            String checkEmail = email.trim().toLowerCase();
+                            if (userRepository.existsByEmail(checkEmail) || processedEmails.contains(checkEmail)) {
+                                continue;
+                            }
+                            processedEmails.add(checkEmail);
+                            emailsToNotify.add(checkEmail);
+                        }
+
+                        account.setUserId(userId);
+                        account.setFullName(fullName.isEmpty() ? "Sinh viên FPT" : fullName);
+                        account.setEmail(email);
+                        account.setCampusId(campusId);
+                        account.setStatus("Graduated"); // Trạng thái tốt nghiệp
+                        account.setBorrowingLocked(false);
+                        
+                        Role targetRole = new Role();
+                        targetRole.setRoleId(1); // Quyền Sinh viên
+                        account.setRole(targetRole);
+                        if (account.getRoles() == null) account.setRoles(new java.util.HashSet<>());
+                        account.getRoles().add(targetRole);
+
+                        account.setPasswordHash("12345678");  
+                        
+                        usersToSave.add(account);
+                        successCount++;
                     }
                 } else {
                     if (userOpt.isPresent()) {
