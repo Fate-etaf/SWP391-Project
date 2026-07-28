@@ -69,7 +69,7 @@ private final BookRepository bookRepository;
             }
             if (userMsg.contains("review") || userMsg.contains("sách hay") || userMsg.contains("gợi ý ngẫu nhiên") || userMsg.contains("một cuốn sách")) {
                 List<Book> allBooksList = bookRepository.findAll();
-                List<Book> availableBooks = allBooksList.stream().filter(b -> b.getAvailableCount() != null && b.getAvailableCount() > 0).collect(Collectors.toList());
+                List<Book> availableBooks = allBooksList.stream().filter(b -> b.getAvailableCount() > 0).collect(Collectors.toList());
                 if (availableBooks.isEmpty()) availableBooks = allBooksList; // Fallback
                 
                 if (!availableBooks.isEmpty()) {
