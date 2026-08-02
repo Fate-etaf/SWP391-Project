@@ -298,9 +298,11 @@
                        th:required="${req == null}"
                        placeholder="Nhập mã ISBN (10 hoặc 13 số)..."
                        autocomplete="off"
+                       pattern="(?:[0-9][ -]?){9}[0-9Xx]|(?:[0-9][ -]?){12}[0-9]"
                        oninvalid="this.setCustomValidity('Vui lòng nhập mã ISBN')"
                        oninput="this.setCustomValidity(''); handleIsbnInput(this.value)">
                 <span id="isbn-feedback" style="display:none; font-size:12.5px; font-weight:500; margin-top:4px;"></span>
+                <span id="metadata-feedback" style="display:none; font-size:12.5px; font-weight:500; margin-top:4px;"></span>
             </div>
 
             <!-- Publisher Field -->
@@ -402,6 +404,7 @@
     let isbnTimer = null;
     const isbnInput   = document.getElementById('isbn');
     const isbnFeedback = document.getElementById('isbn-feedback');
+    const metadataFeedback = document.getElementById('metadata-feedback');
     const submitBtn   = document.querySelector('.form-actions .btn-primary[type="submit"]:not([th\\:formaction])');
 
     function setIsbnFeedback(text, color, isError) {
@@ -424,6 +427,12 @@
         const trimmed = value.trim();
         if (!trimmed) {
             setIsbnFeedback('', '#64748b', false);
+            setMetadataFeedback('', '#64748b');
+            return;
+        }
+        if (!isCompleteIsbn(trimmed)) {
+            setIsbnFeedback('❌ ISBN không hợp lệ. Vui lòng nhập đúng 10 hoặc 13 ký tự.', '#dc2626', true);
+            setMetadataFeedback('', '#64748b');
             return;
         }
         setIsbnFeedback('Đang kiểm tra...', '#64748b', false);
@@ -435,6 +444,8 @@
                         setIsbnFeedback('❌ ' + data.message, '#dc2626', true);
                     } else if (data.status === 'exists_request') {
                         setIsbnFeedback('⚠️ ' + data.message, '#d97706', true);
+                    } else if (data.status === 'invalid') {
+                        setIsbnFeedback('❌ ' + data.message, '#dc2626', true);
                     } else if (data.status === 'ok') {
                         setIsbnFeedback('✅ ISBN hợp lệ, có thể sử dụng.', '#16a34a', false);
                     } else {
@@ -442,7 +453,48 @@
                     }
                 })
                 .catch(() => setIsbnFeedback('', '#64748b', false));
+            lookupBookMetadata(trimmed);
         }, 500);
+    }
+
+    function setMetadataFeedback(text, color) {
+        if (!metadataFeedback) return;
+        metadataFeedback.textContent = text;
+        metadataFeedback.style.color = color;
+        metadataFeedback.style.display = text ? 'block' : 'none';
+    }
+
+    function isCompleteIsbn(value) {
+        if (!/^[0-9Xx -]+$/.test(value)) return false;
+        const normalized = value.replace(/[ -]/g, '');
+        return /^\d{13}$/.test(normalized) || /^\d{9}[0-9Xx]$/.test(normalized);
+    }
+
+    function lookupBookMetadata(isbn) {
+        if (!isCompleteIsbn(isbn)) {
+            setMetadataFeedback('', '#64748b');
+            return;
+        }
+        setMetadataFeedback('Đang tìm thông tin sách...', '#64748b');
+        fetch('/services/book-metadata?isbn=' + encodeURIComponent(isbn))
+            .then(response => response.json())
+            .then(data => {
+                if (data.status !== 'found') {
+                    setMetadataFeedback('Không tìm thấy thông tin từ cơ sở dữ liệu sách. Bạn vẫn có thể nhập thủ công.', '#64748b');
+                    return;
+                }
+                setFieldValue('title', data.title);
+                setFieldValue('author', data.author);
+                setFieldValue('publisher', data.publisher);
+                setFieldValue('language', data.language);
+                setMetadataFeedback('Đã đề xuất thông tin từ Open Library. Bạn có thể chỉnh sửa trước khi gửi.', '#16a34a');
+            })
+            .catch(() => setMetadataFeedback('Không thể kết nối cơ sở dữ liệu sách. Bạn vẫn có thể nhập thủ công.', '#64748b'));
+    }
+
+    function setFieldValue(id, value) {
+        const field = document.getElementById(id);
+        if (field && value) field.value = value;
     }
 </script>
 
