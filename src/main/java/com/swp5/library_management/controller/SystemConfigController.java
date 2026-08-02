@@ -28,14 +28,13 @@ public class SystemConfigController {
     private final UserRepository userRepository;
 
     /**
-     * Kiểm tra phân quyền: Chỉ cho phép Admin hoặc Thủ thư (Librarian) truy cập.
+     * Kiểm tra phân quyền: Chỉ cho phép Admin truy cập.
      * @param session Phiên đăng nhập hiện tại
      * @return true nếu không có quyền, false nếu hợp lệ
      */
-    private boolean isNotAdminOrLibrarian(HttpSession session) {
-        Boolean isLibrarian = (Boolean) session.getAttribute("isLibrarian");
+    private boolean isNotAdmin(HttpSession session) {
         Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-        return (isLibrarian == null || !isLibrarian) && (isAdmin == null || !isAdmin);
+        return isAdmin == null || !isAdmin;
     }
 
     /**
@@ -44,7 +43,7 @@ public class SystemConfigController {
      */
     @GetMapping
     public String viewSettings(HttpSession session, Model model) {
-        if (isNotAdminOrLibrarian(session)) return "redirect:/login";
+        if (isNotAdmin(session)) return "redirect:/login";
 
         List<SystemConfig> configs = systemConfigRepository.findAll();
         model.addAttribute("configs", configs);
@@ -64,7 +63,7 @@ public class SystemConfigController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        if (isNotAdminOrLibrarian(session)) {
+        if (isNotAdmin(session)) {
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền thực hiện thao tác này.");
             return "redirect:/login";
         }

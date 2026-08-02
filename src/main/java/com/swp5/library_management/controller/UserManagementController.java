@@ -33,6 +33,11 @@ public class UserManagementController {
     private final com.swp5.library_management.repository.BorrowTicketRepository borrowTicketRepository;
     private final NotificationRepository notificationRepository;
 
+    private boolean isNotAdmin(jakarta.servlet.http.HttpSession session) {
+        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+        return isAdmin == null || !isAdmin;
+    }
+
     /**
      * Hiển thị giao diện Quản lý Người dùng dành cho Admin.
      * Cung cấp danh sách người dùng kèm bộ lọc theo trạng thái, cơ sở học tập (Campus), và thanh tìm kiếm.
@@ -44,7 +49,11 @@ public class UserManagementController {
             @RequestParam(value = "tab", defaultValue = "all") String tab,
             @RequestParam(value = "computedStatus", required = false) String computedStatus,
             @RequestParam(value = "page", defaultValue = "1") int page,
+            jakarta.servlet.http.HttpSession session,
             Model model) {
+        
+        if (isNotAdmin(session)) return "redirect:/login";
+
         
         List<User> allUsers = userRepository.findAll();
         java.util.stream.Stream<User> stream = allUsers.stream();
@@ -128,7 +137,11 @@ public class UserManagementController {
             @RequestParam("campusId") Integer campusId,
             @RequestParam(value = "roleId", defaultValue = "1") Integer roleId,
             @RequestParam(value = "status", defaultValue = "Active") String status,
+            jakarta.servlet.http.HttpSession session,
             RedirectAttributes redirectAttributes) {
+        
+        if (isNotAdmin(session)) return "redirect:/login";
+
         
         // Kiểm tra định dạng Mã định danh theo Role
         String upperUserId = userId.trim().toUpperCase();
@@ -233,7 +246,11 @@ public class UserManagementController {
             @RequestParam("email") String email,
             @RequestParam("campusId") Integer campusId,
             @RequestParam("roleId") Integer roleId,
+            jakarta.servlet.http.HttpSession session,
             RedirectAttributes redirectAttributes) {
+        
+        if (isNotAdmin(session)) return "redirect:/login";
+
         
         if (!fullName.matches("^[\\p{L}\\s]+$")) {
             redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Họ và tên không hợp lệ!");
@@ -289,7 +306,11 @@ public class UserManagementController {
     @org.springframework.transaction.annotation.Transactional
     public String deleteStudent(
             @RequestParam("userId") String userId,
+            jakarta.servlet.http.HttpSession session,
             RedirectAttributes redirectAttributes) {
+        
+        if (isNotAdmin(session)) return "redirect:/login";
+
         
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
@@ -333,7 +354,8 @@ public class UserManagementController {
      * Hiển thị giao diện Import người dùng hàng loạt từ File Excel.
      */
     @GetMapping("/admin/users/import")
-    public String showImportPage() {
+    public String showImportPage(jakarta.servlet.http.HttpSession session) {
+        if (isNotAdmin(session)) return "redirect:/login";
         return "admin/users-import"; 
     }
 
@@ -346,7 +368,11 @@ public class UserManagementController {
     public String processExcelUpload(
             @RequestParam("file") MultipartFile file,
             @RequestParam("importType") String importType,
+            jakarta.servlet.http.HttpSession session,
             RedirectAttributes redirectAttributes) {
+
+        if (isNotAdmin(session)) return "redirect:/login";
+
 
         if (file.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn một file Excel trước khi bấm xử lý!");
@@ -382,14 +408,14 @@ public class UserManagementController {
                     }
                 } catch (Exception e) {}
 
-                Optional<User> userOpt = userRepository.findById(userId);
+                Optional<User> userOpt = userRepository.findByUserIdIgnoreCase(userId);
 
                 if ("GRADUATED".equalsIgnoreCase(importType)) {
                     if (userOpt.isPresent()) {
                         User student = userOpt.get();
                         
-                        // Chỉ cập nhật nếu trạng thái hiện tại chưa phải là Graduated
-                        if (!"Graduated".equalsIgnoreCase(student.getStatus())) {
+                        // Chỉ cập nhật nếu là Sinh viên và trạng thái hiện tại chưa phải là Graduated
+                        if (student.isStudent() && !"Graduated".equalsIgnoreCase(student.getStatus())) {
                             student.setStatus("Graduated");
                             student.setBorrowingLocked(false);
                             usersToSave.add(student);
@@ -407,6 +433,36 @@ public class UserManagementController {
                                 .build();
                             notificationRepository.save(notif);
                         }
+                    } else {
+                        // Tạo mới Sinh viên tốt nghiệp nếu chưa tồn tại
+                        User account = new User();
+                        
+                        if (email != null && !email.trim().isEmpty()) {
+                            String checkEmail = email.trim().toLowerCase();
+                            if (userRepository.existsByEmail(checkEmail) || processedEmails.contains(checkEmail)) {
+                                continue;
+                            }
+                            processedEmails.add(checkEmail);
+                            emailsToNotify.add(checkEmail);
+                        }
+
+                        account.setUserId(userId);
+                        account.setFullName(fullName.isEmpty() ? "Sinh viên FPT" : fullName);
+                        account.setEmail(email);
+                        account.setCampusId(campusId);
+                        account.setStatus("Graduated"); // Trạng thái tốt nghiệp
+                        account.setBorrowingLocked(false);
+                        
+                        Role targetRole = new Role();
+                        targetRole.setRoleId(1); // Quyền Sinh viên
+                        account.setRole(targetRole);
+                        if (account.getRoles() == null) account.setRoles(new java.util.HashSet<>());
+                        account.getRoles().add(targetRole);
+
+                        account.setPasswordHash("12345678");  
+                        
+                        usersToSave.add(account);
+                        successCount++;
                     }
                 } else {
                     if (userOpt.isPresent()) {
@@ -505,7 +561,11 @@ public class UserManagementController {
     @GetMapping("/admin/users/toggle-lock/{id}")
     public String toggleUserLock(
             @org.springframework.web.bind.annotation.PathVariable("id") String userId, 
+            jakarta.servlet.http.HttpSession session,
             RedirectAttributes redirectAttributes) {
+        
+        if (isNotAdmin(session)) return "redirect:/login";
+
         
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
@@ -552,69 +612,77 @@ public class UserManagementController {
     public String changeStatusModal(
             @RequestParam("userId") String userId,
             @RequestParam("newStatus") String newStatus,
+            jakarta.servlet.http.HttpSession session,
             RedirectAttributes redirectAttributes) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            String oldStatus = user.getStatus();
             
-            // Handle statuses
-            if ("Active".equalsIgnoreCase(newStatus)) {
-                user.setStatus("Active");
-                user.setBorrowingLocked(false); // Unlocks any punishment
-            } else if ("Inactive".equalsIgnoreCase(newStatus)) {
-                user.setStatus("Inactive");
-                user.setBorrowingLocked(false);
-            } else if ("Graduated".equalsIgnoreCase(newStatus)) {
-                boolean isStudent = user.getRoles() != null && user.getRoles().stream().anyMatch(r -> r.getRoleId() == 1);
-                if (!isStudent) {
-                    redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Trạng thái 'Tốt nghiệp' chỉ áp dụng cho Sinh viên!");
-                    return "redirect:/admin/users";
-                }
-                user.setStatus("Graduated");
-                user.setBorrowingLocked(false);
-            } else if ("BorrowingLocked".equalsIgnoreCase(newStatus)) {
-                user.setStatus("Active");
-                user.setBorrowingLocked(true);
-            }
-            
-            userRepository.save(user);
+        if (isNotAdmin(session)) return "redirect:/login";
 
-            //Hung: Khởi tạo thông báo tự động (Notification) dựa trên trạng thái mới
-            // Gửi thông báo nếu trạng thái thực sự thay đổi
-            if (!user.getStatus().equalsIgnoreCase(oldStatus)) {
-                String title = "";
-                String content = "";
+        try {
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                String oldStatus = user.getStatus();
                 
-                if ("Active".equalsIgnoreCase(user.getStatus())) {
-                    title = "Kích Hoạt Tài Khoản";
-                    content = "Tài khoản của bạn đã được chuyển sang trạng thái Hoạt Động bình thường. Bạn có thể sử dụng tất cả các dịch vụ của thư viện.";
-                } else if ("Inactive".equalsIgnoreCase(user.getStatus())) {
-                    title = "Vô Hiệu Hóa Tài Khoản";
-                    content = "Tài khoản của bạn đã bị Vô hiệu hóa (Không hoạt động). Vui lòng liên hệ Thư viện để biết thêm chi tiết.";
-                } else if ("Graduated".equalsIgnoreCase(user.getStatus())) {
-                    //Hung: Soạn nội dung chúc mừng và cảnh báo không cho mượn sách nữa khi Tốt nghiệp
-                    title = "Cập nhật trạng thái Tốt Nghiệp";
-                    content = "Tài khoản của bạn đã được chuyển sang trạng thái Đã Tốt Nghiệp. Bạn sẽ không thể mượn thêm sách nhưng vẫn có thể tra cứu lịch sử.";
+                // Handle statuses
+                if ("Active".equalsIgnoreCase(newStatus)) {
+                    user.setStatus("Active");
+                    user.setBorrowingLocked(false); // Unlocks any punishment
+                } else if ("Inactive".equalsIgnoreCase(newStatus)) {
+                    user.setStatus("Inactive");
+                    user.setBorrowingLocked(false);
+                } else if ("Graduated".equalsIgnoreCase(newStatus)) {
+                    if (!user.isStudent()) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: Trạng thái 'Tốt nghiệp' chỉ áp dụng cho Sinh viên!");
+                        return "redirect:/admin/users";
+                    }
+                    user.setStatus("Graduated");
+                    user.setBorrowingLocked(false);
+                } else if ("BorrowingLocked".equalsIgnoreCase(newStatus)) {
+                    user.setStatus("Active");
+                    user.setBorrowingLocked(true);
                 }
                 
-                if (!title.isEmpty()) {
-                    Notification notif = Notification.builder()
-                            .user(user)
-                            .notificationType("STATUS_UPDATE")
-                            .title(title)
-                            .content(content)
-                            .status("Pending")
-                            .createdAt(LocalDateTime.now())
-                            .read(false)
-                            .build();
-                    notificationRepository.save(notif);
-                }
-            }
+                userRepository.saveAndFlush(user);
 
-            redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật trạng thái thẻ cho " + userId + " thành công!");
-        } else {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy người dùng!");
+                //Hung: Khởi tạo thông báo tự động (Notification) dựa trên trạng thái mới
+                // Gửi thông báo nếu trạng thái thực sự thay đổi
+                if (!java.util.Objects.equals(user.getStatus(), oldStatus)) {
+                    String title = "";
+                    String content = "";
+                    
+                    if ("Active".equalsIgnoreCase(user.getStatus())) {
+                        title = "Kích Hoạt Tài Khoản";
+                        content = "Tài khoản của bạn đã được chuyển sang trạng thái Hoạt Động bình thường. Bạn có thể sử dụng tất cả các dịch vụ của thư viện.";
+                    } else if ("Inactive".equalsIgnoreCase(user.getStatus())) {
+                        title = "Vô Hiệu Hóa Tài Khoản";
+                        content = "Tài khoản của bạn đã bị Vô hiệu hóa (Không hoạt động). Vui lòng liên hệ Thư viện để biết thêm chi tiết.";
+                    } else if ("Graduated".equalsIgnoreCase(user.getStatus())) {
+                        //Hung: Soạn nội dung chúc mừng và cảnh báo không cho mượn sách nữa khi Tốt nghiệp
+                        title = "Cập nhật trạng thái Tốt Nghiệp";
+                        content = "Tài khoản của bạn đã được chuyển sang trạng thái Đã Tốt Nghiệp. Bạn sẽ không thể mượn thêm sách nhưng vẫn có thể tra cứu lịch sử.";
+                    }
+                    
+                    if (!title.isEmpty()) {
+                        Notification notif = Notification.builder()
+                                .user(user)
+                                .notificationType("STATUS_UPDATE")
+                                .title(title)
+                                .content(content)
+                                .status("Pending")
+                                .createdAt(LocalDateTime.now())
+                                .read(false)
+                                .build();
+                        notificationRepository.saveAndFlush(notif);
+                    }
+                }
+
+                redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật trạng thái thẻ cho " + userId + " thành công!");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy người dùng!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi cập nhật trạng thái: " + e.getMessage());
         }
         return "redirect:/admin/users";
     }
