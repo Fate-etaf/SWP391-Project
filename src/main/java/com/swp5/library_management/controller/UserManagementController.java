@@ -72,11 +72,11 @@ public class UserManagementController {
         if ("all".equals(tab)) {
             // Không filter theo role, lấy toàn bộ
         } else if ("lecturers".equals(tab)) {
-            stream = stream.filter(u -> u.getRoles() != null && u.getRoles().stream().anyMatch(r -> r.getRoleId() == 2));
+            stream = stream.filter(User::isLecturer);
         } else if ("librarians".equals(tab)) {
-            stream = stream.filter(u -> u.getRoles() != null && u.getRoles().stream().anyMatch(r -> r.getRoleId() == 3));
+            stream = stream.filter(User::isLibrarian);
         } else if ("admins".equals(tab)) {
-            stream = stream.filter(u -> u.getRoles() != null && u.getRoles().stream().anyMatch(r -> r.getRoleId() == 4));
+            stream = stream.filter(User::isAdmin);
         } else if ("graduated_only".equals(tab)) {
             stream = stream.filter(u -> "Graduated".equalsIgnoreCase(u.getStatus()));
         } else if ("graduates".equals(tab)) {
