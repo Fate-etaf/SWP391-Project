@@ -177,6 +177,8 @@
                         th:data-author="${req.author}"
                         th:data-isbn="${req.isbn}"
                         th:data-publisher="${req.publisher}"
+                        th:data-publishyear="${req.publishYear}"
+                        th:data-description="${req.description}"
                         th:data-language="${req.language}"
                         th:data-requestid="${req.requestId}"
                         onclick="fillForm(this)"
@@ -254,16 +256,18 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label for="shelfCode">Shelf Location <span style="color: #fb7185">*</label>
+                <label for="shelfCode">Shelf Location <span style="color: #fb7185">*</span></label>
                 <select id="shelfCode"
                         th:field="*{shelfCode}"
-                        class="form-control">
+                        th:classappend="${#fields.hasErrors('shelfCode')} ? 'is-invalid'"
+                        class="form-control" required>
                     <option value="">-- Select Shelf --</option>
                     <option th:each="shelf : ${shelves}"
                             th:value="${shelf.shelfCode}"
                             th:text="${shelf.shelfCode + ' - ' + shelf.shelfCodeTopic}">
                     </option>
                 </select>
+                <span class="field-error" th:if="${#fields.hasErrors('shelfCode')}" th:errors="*{shelfCode}"></span>
             </div>
             <div class="form-group">
                 <label for="subjectCode">Subject Code</label>
@@ -273,7 +277,10 @@
 
         <div class="form-group">
             <label for="publishYear">Publish Year <span style="color: #fb7185">*</span></label>
-            <input type="number" id="publishYear" th:field="*{publishYear}" class="form-control" placeholder="2024"/>
+            <input type="number" id="publishYear" th:field="*{publishYear}"
+                   th:classappend="${#fields.hasErrors('publishYear')} ? 'is-invalid'"
+                   class="form-control" placeholder="2024" required/>
+            <span class="field-error" th:if="${#fields.hasErrors('publishYear')}" th:errors="*{publishYear}"></span>
         </div>
 
         <div class="form-group">
@@ -283,7 +290,10 @@
 
         <div class="form-group">
             <label for="description">Description <span style="color: #fb7185">*</span></label>
-            <textarea id="description" th:field="*{description}" class="form-control" rows="4" placeholder="Brief summary of the book..."></textarea>
+            <textarea id="description" th:field="*{description}"
+                      th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                      class="form-control" rows="4" placeholder="Brief summary of the book..." required></textarea>
+            <span class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></span>
         </div>
 
         <div class="form-row">
@@ -320,6 +330,8 @@
         const author = btn.getAttribute('data-author');
         const isbn = btn.getAttribute('data-isbn');
         const publisher = btn.getAttribute('data-publisher');
+        const publishYear = btn.getAttribute('data-publishyear');
+        const description = btn.getAttribute('data-description');
         const language = btn.getAttribute('data-language');
         const requestId = btn.getAttribute('data-requestid');
 
@@ -327,6 +339,8 @@
         if (author) document.getElementById('authorName').value = author;
         if (isbn) document.getElementById('isbn').value = isbn;
         if (publisher) document.getElementById('publisherName').value = publisher;
+        if (publishYear) document.getElementById('publishYear').value = publishYear;
+        if (description) document.getElementById('description').value = description;
         if (requestId) document.getElementById('requestId').value = requestId;
         
         if (language) {
@@ -339,25 +353,25 @@
             }
         }
 
-        // Clear previously selected card highlight
-        document.querySelectorAll('.request-item').forEach(el => {
-            el.style.borderColor = 'var(--border)';
-            el.style.background = 'var(--bg-surface)';
-        });
+        // // Clear previously selected card highlight
+        // document.querySelectorAll('.request-item').forEach(el => {
+        //     el.style.borderColor = 'var(--border)';
+        //     el.style.background = 'var(--bg-surface)';
+        // });
 
-        // Highlight the selected card
-        const card = btn.closest('.request-item');
-        if (card) {
-            card.style.borderColor = 'var(--accent)';
-            card.style.background = 'rgba(249,115,22,0.06)';
-        }
+        // // Highlight the selected card
+        // const card = btn.closest('.request-item');
+        // if (card) {
+        //     card.style.borderColor = 'var(--accent)';
+        //     card.style.background = 'rgba(249,115,22,0.06)';
+        // }
         
-        // Highlight form to indicate auto-fill
-        const formContainer = document.querySelector('.form-container');
-        formContainer.style.boxShadow = '0 0 0 2px var(--accent)';
-        setTimeout(() => {
-            formContainer.style.boxShadow = '0 4px 24px rgba(15,23,42,0.06)';
-        }, 800);
+        // // Highlight form to indicate auto-fill
+        // const formContainer = document.querySelector('.form-container');
+        // formContainer.style.boxShadow = '0 0 0 2px var(--accent)';
+        // setTimeout(() => {
+        //     formContainer.style.boxShadow = '0 4px 24px rgba(15,23,42,0.06)';
+        // }, 800);
     }
 </script>
 

@@ -24,7 +24,7 @@ public class AddBookForm {
     @NotBlank(message = "Ngôn ngữ không được để trống")
     private String language = "Vietnamese";
 
-    @NotBlank(message = "Năm xuất bản không được để trống")
+    @NotNull(message = "Năm xuất bản không được để trống")
     private Integer publishYear;
     private String coverImageUrl;
     @NotBlank(message = "Mô tả không được để trống")
@@ -33,6 +33,7 @@ public class AddBookForm {
     // ── New librarian fields ───────────────────────────────────────────────────
     private String publisherName;   // resolved to Publisher entity (find or create)
     private String edition;         // e.g. "3rd Edition"
+    @NotBlank(message = "Vị trí kệ sách không được để trống")
     private String shelfCode;      // must match an existing Shelf.shelfCode in the selected campus;
     private String subjectCode;     // must match an existing Subject.subjectCode
     @NotNull(message = "Số lượng bản sao không được để trống")
