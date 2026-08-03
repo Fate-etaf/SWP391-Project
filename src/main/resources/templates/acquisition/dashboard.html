@@ -41,7 +41,7 @@
                     <p class="text-sm text-slate-500">Manage and track material requests and orders.</p>
                 </div>
                 <div class="flex gap-3 mt-2 md:mt-0">
-                    <a th:href="@{/librarian/acquisition/export-excel(status=${currentStatus}, search=${currentSearch}, patronRole=${currentPatronRole}, fromDate=${currentFromDate}, toDate=${currentToDate})}"
+                    <a th:href="@{/librarian/acquisition/export-excel(status=${currentStatus}, patronRole=${currentPatronRole}, fromDate=${currentFromDate}, toDate=${currentToDate})}"
                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-lg gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -52,6 +52,21 @@
                         Refresh Data
                     </a>
                 </div>
+            </div>
+
+            <!-- Alert Notifications -->
+            <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-3 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span th:text="${successMsg}" class="font-medium">Success message</span>
+            </div>
+
+            <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm flex items-center gap-3 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span th:text="${errorMsg}" class="font-medium">Error message</span>
             </div>
 
             <!-- Statistics Grid -->
@@ -97,16 +112,16 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0">
-                        <a th:href="@{/librarian/acquisition/dashboard(search=${currentSearch}, patronRole=${currentPatronRole}, fromDate=${currentFromDate}, toDate=${currentToDate})}" 
+                        <a th:href="@{/librarian/acquisition/dashboard(patronRole=${currentPatronRole}, fromDate=${currentFromDate}, toDate=${currentToDate})}" 
                            th:classappend="${currentStatus == null or currentStatus == ''} ? 'bg-fpt-orange text-white border-fpt-orange' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'"
                            class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap">All</a>
-                        <a th:href="@{/librarian/acquisition/dashboard(status='Pending', search=${currentSearch}, patronRole=${currentPatronRole}, fromDate=${currentFromDate}, toDate=${currentToDate})}" 
+                        <a th:href="@{/librarian/acquisition/dashboard(status='Pending', patronRole=${currentPatronRole}, fromDate=${currentFromDate}, toDate=${currentToDate})}" 
                            th:classappend="${currentStatus == 'Pending'} ? 'bg-fpt-orange text-white border-fpt-orange' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'"
                            class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap">Pending</a>
-                        <a th:href="@{/librarian/acquisition/dashboard(status='Approved', search=${currentSearch}, patronRole=${currentPatronRole}, fromDate=${currentFromDate}, toDate=${currentToDate})}" 
+                        <a th:href="@{/librarian/acquisition/dashboard(status='Approved', patronRole=${currentPatronRole}, fromDate=${currentFromDate}, toDate=${currentToDate})}" 
                            th:classappend="${currentStatus == 'Approved'} ? 'bg-fpt-orange text-white border-fpt-orange' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'"
                            class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap">Approved</a>
-                        <a th:href="@{/librarian/acquisition/dashboard(status='Available', search=${currentSearch}, patronRole=${currentPatronRole}, fromDate=${currentFromDate}, toDate=${currentToDate})}" 
+                        <a th:href="@{/librarian/acquisition/dashboard(status='Available', patronRole=${currentPatronRole}, fromDate=${currentFromDate}, toDate=${currentToDate})}" 
                            th:classappend="${currentStatus == 'Available'} ? 'bg-fpt-orange text-white border-fpt-orange' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'"
                            class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-colors whitespace-nowrap">Available</a>
                     </div>
@@ -157,8 +172,8 @@
                                         <div class="text-xs text-slate-500" th:text="${req.author}">Robert C. Martin</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-slate-600" th:text="${req.patron.isStudent() ? 'Student' : 'Lecturer'}">Reader</div>
-
+                                        <div class="text-sm font-medium text-slate-600" th:text="${req.patron != null ? (req.patron.isStudent() ? 'Student' : 'Lecturer') : 'N/A'}">Reader</div>
+                                        <div class="text-xs text-slate-500" th:text="${req.patron != null ? req.patron.userId : ''}">ReaderID</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2.5 py-1 text-xs font-bold rounded-full"
