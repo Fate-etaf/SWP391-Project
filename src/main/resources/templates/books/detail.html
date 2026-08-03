@@ -183,10 +183,10 @@
                         <span class="text-slate-300 text-sm font-mono" th:text="${book.isbn}">ISBN</span>
                     </div>
                     <!-- Major -->
-                    <div th:if="${book.majorName != null}" class="flex items-start mb-3">
+                    <div class="flex items-start mb-3">
                         <span class="text-slate-400 text-sm w-24 shrink-0">Chuyên ngành</span>
                         <div class="flex-1">
-                            <span class="text-slate-300 text-sm" th:text="${book.majorName}">Major Name</span>
+                            <span class="text-slate-300 text-sm" th:text="${book.majorName != null ? book.majorName : 'Sách ngoài chuyên ngành'}">Sách ngoài chuyên ngành</span>
                         </div>
                     </div>
 
