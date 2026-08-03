@@ -197,7 +197,7 @@ public class BookReturnController {
         }
         try {
             String librarianId = (String) session.getAttribute("loggedInUserId");
-            bookReturnService.processLost(id, false, null, null, librarianId, null);
+            bookReturnService.processLost(id, "Cash", null, librarianId, null);
             redirectAttrs.addFlashAttribute("successMsg", "Đã đánh dấu sách bị mất!");
         } catch (Exception e) {
             redirectAttrs.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
@@ -213,7 +213,7 @@ public class BookReturnController {
         }
         try {
             String librarianId = (String) session.getAttribute("loggedInUserId");
-            bookReturnService.processDamaged(id, false, null, null, librarianId, null);
+            bookReturnService.processDamaged(id, "Cash", null, librarianId, null);
             redirectAttrs.addFlashAttribute("successMsg", "Đã đánh dấu sách bị hỏng!");
         } catch (Exception e) {
             redirectAttrs.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
@@ -278,7 +278,6 @@ public class BookReturnController {
     @ResponseBody
     public ResponseEntity<?> apiConfirmLost(
             @RequestParam Integer ticketDetailId,
-            @RequestParam(defaultValue = "false") boolean payNow,
             @RequestParam(required = false) String paymentMethod,
             @RequestParam(required = false) String transactionCode,
             @RequestParam(required = false) String notes,
@@ -289,7 +288,7 @@ public class BookReturnController {
         }
         try {
             String librarianId = (String) session.getAttribute("loggedInUserId");
-            bookReturnService.processLost(ticketDetailId, payNow, paymentMethod, transactionCode, librarianId, notes);
+            bookReturnService.processLost(ticketDetailId, paymentMethod, transactionCode, librarianId, notes);
             return ResponseEntity
                     .ok(Map.of("status", "SUCCESS", "message", "Báo mất sách và lập hóa đơn phạt thành công!"));
         } catch (Exception e) {
@@ -305,7 +304,6 @@ public class BookReturnController {
     @ResponseBody
     public ResponseEntity<?> apiConfirmDamaged(
             @RequestParam Integer ticketDetailId,
-            @RequestParam(defaultValue = "false") boolean payNow,
             @RequestParam(required = false) String paymentMethod,
             @RequestParam(required = false) String transactionCode,
             @RequestParam(required = false) String notes,
@@ -316,8 +314,7 @@ public class BookReturnController {
         }
         try {
             String librarianId = (String) session.getAttribute("loggedInUserId");
-            bookReturnService.processDamaged(ticketDetailId, payNow, paymentMethod, transactionCode, librarianId,
-                    notes);
+            bookReturnService.processDamaged(ticketDetailId, paymentMethod, transactionCode, librarianId, notes);
             return ResponseEntity
                     .ok(Map.of("status", "SUCCESS", "message", "Báo hỏng sách và lập hóa đơn phạt thành công!"));
         } catch (Exception e) {

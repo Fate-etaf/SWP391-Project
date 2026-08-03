@@ -153,28 +153,28 @@ public class BorrowingNotificationScheduler {
                     ? "[Thư viện FPT] ⚠️ Bạn đang có sách quá hạn trả!"
                     : "[Thư viện FPT] 🔔 Nhắc nhở: Sách sắp đến hạn trả";
 
-            String htmlBody = borrowReminderEmailService.buildReminderBody(patron.getFullName(), reminders);
+            StringBuilder plainContent = new StringBuilder();
+            if (hasOverdue) {
+                plainContent.append("Bạn đang có sách quá hạn trả. Vui lòng hoàn trả các sách vi phạm sau:\n");
+            } else {
+                plainContent.append("Vui lòng lưu ý hạn trả cho các sách sắp đến hạn sau:\n");
+            }
+            
+            for (BorrowReminderInfo info : reminders) {
+                plainContent.append("- ").append(info.getBookTitle())
+                            .append(" (").append(info.getCopyId()).append("): ")
+                            .append(info.getStatusLabel()).append("\n");
+            }
 
             if (errorMessage != null && !errorMessage.isBlank()) {
-                String errorBlock = """
-                        <div style="background:#ffebee; border-left:4px solid #f44336; padding:12px; border-radius:4px; margin: 16px auto; max-width:680px;">
-                          <p style="margin:0; color:#c62828;">❌ <strong>Lỗi gửi email:</strong> %s</p>
-                        </div>
-                        """.formatted(errorMessage);
-                int insertionPoint = htmlBody.indexOf("<div style=\"padding:24px;\">");
-                if (insertionPoint != -1) {
-                    int insertIndex = insertionPoint + "<div style=\"padding:24px;\">".length();
-                    htmlBody = htmlBody.substring(0, insertIndex) + errorBlock + htmlBody.substring(insertIndex);
-                } else {
-                    htmlBody = errorBlock + htmlBody;
-                }
+                plainContent.append("\n[Lỗi gửi email: ").append(errorMessage).append("]");
             }
 
             Notification notification = Notification.builder()
                     .user(patron)
                     .notificationType("BORROW_REMINDER")
                     .title(title)
-                    .content(htmlBody)
+                    .content(plainContent.toString().trim())
                     .status(status)
                     .sentAt(status.equals("Sent") ? LocalDateTime.now() : null)
                     .createdAt(LocalDateTime.now())

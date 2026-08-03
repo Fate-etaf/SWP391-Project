@@ -167,8 +167,8 @@
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5 font-medium">Trạng thái</label>
                         <select id="statusFilter" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white shadow-sm font-medium text-slate-800">
                             <option value="all" th:selected="${paidStatus == 'all'}">Tất cả trạng thái</option>
-                            <option value="Unpaid" th:selected="${paidStatus == 'Unpaid'}">Chưa trả</option>
-                            <option value="Paid" th:selected="${paidStatus == null || paidStatus == 'Paid'}">Đã trả</option>
+                            <option value="Unpaid" th:selected="${paidStatus == null || paidStatus == 'Unpaid'}">Chưa trả</option>
+                            <option value="Paid" th:selected="${paidStatus == 'Paid'}">Đã trả</option>
                         </select>
                     </div>
 
@@ -304,7 +304,53 @@
 
                             <!-- Thao tác -->
                             <td class="px-3 py-3">
-                                <span class="text-slate-500 text-xs">—</span>
+                                <!-- Chỉ hiện nút khi chưa thanh toán -->
+                                <div th:if="${fine.paidStatus == 'Unpaid'}" class="flex flex-col gap-1.5">
+                                    <!-- Nút Thu tiền mặt -->
+                                    <button type="button"
+                                        th:onclick="|openCashModal(this)|"
+                                        th:data-fine-id="${fine.fineId}"
+                                        th:data-patron-name="${fine.patron != null ? fine.patron.fullName : ''}"
+                                        th:data-patron-id="${fine.patron != null ? fine.patron.userId : ''}"
+                                        th:data-book-title="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null and fine.ticketDetail.bookCopy.book != null ? fine.ticketDetail.bookCopy.book.title : ''}"
+                                        th:data-copy-id="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null ? fine.ticketDetail.bookCopy.copyId : ''}"
+                                        th:data-violation-type="${fine.violationType}"
+                                        th:data-amount="${fine.remainingAmount}"
+                                        th:data-created-at="${fine.createdAt != null ? #temporals.format(fine.createdAt, 'dd/MM/yyyy') : ''}"
+                                        class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-lg transition shadow-sm whitespace-nowrap">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        Tiền mặt
+                                    </button>
+                                    <!-- Nút Thanh toán QR -->
+                                    <button type="button"
+                                        th:onclick="|openQRModal(this)|"
+                                        th:data-fine-id="${fine.fineId}"
+                                        th:data-patron-name="${fine.patron != null ? fine.patron.fullName : ''}"
+                                        th:data-patron-id="${fine.patron != null ? fine.patron.userId : ''}"
+                                        th:data-book-title="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null and fine.ticketDetail.bookCopy.book != null ? fine.ticketDetail.bookCopy.book.title : ''}"
+                                        th:data-copy-id="${fine.ticketDetail != null and fine.ticketDetail.bookCopy != null ? fine.ticketDetail.bookCopy.copyId : ''}"
+                                        th:data-violation-type="${fine.violationType}"
+                                        th:data-amount="${fine.remainingAmount}"
+                                        th:data-created-at="${fine.createdAt != null ? #temporals.format(fine.createdAt, 'dd/MM/yyyy') : ''}"
+                                        class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition shadow-sm whitespace-nowrap">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 3.9A9 9 0 1 1 5.1 5.1L16 16" />
+                                        </svg>
+                                        VietQR
+                                    </button>
+                                </div>
+                                <!-- Đã thu -->
+                                <span th:if="${fine.paidStatus != 'Unpaid'}"
+                                    class="inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Đã thu
+                                </span>
                             </td>
                         </tr>
                     </tbody>
@@ -326,10 +372,10 @@
      Modal Thu Tiền Mặt – Xác nhận thông tin trước khi thu
      ══════════════════════════════════════════════════════════ -->
     <div id="cashModal"
-        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-        <div class="bg-slate-900 rounded-2xl max-w-md w-full shadow-22xl overflow-hidden border border-slate-800">
+        class="fixed inset-0 bg-slate-800/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200">
             <!-- Header -->
-            <div class="px-5 py-4 bg-amber-600 flex justify-between items-center text-white">
+            <div class="px-5 py-4 bg-amber-500 flex justify-between items-center text-white">
                 <div class="flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -347,56 +393,56 @@
 
             <!-- Body -->
             <div class="p-6 space-y-4">
-                <p class="text-xs text-slate-400 text-center">Vui lòng kiểm tra thông tin trước khi xác nhận đã nhận đủ
+                <p class="text-xs text-slate-500 text-center">Vui lòng kiểm tra thông tin trước khi xác nhận đã nhận đủ
                     tiền mặt.</p>
 
                 <!-- Thông tin bạn đọc -->
-                <div class="bg-amber-950/20 border border-amber-800/30 rounded-xl p-4 space-y-2">
-                    <p class="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-2">👤 Thông tin bạn đọc
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
+                    <p class="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-2">👤 Thông tin bạn đọc
                     </p>
                     <div class="flex justify-between text-sm">
-                        <span class="text-slate-400">Họ tên:</span>
-                        <span id="cm-patron-name" class="font-semibold text-slate-205">—</span>
+                        <span class="text-slate-500">Họ tên:</span>
+                        <span id="cm-patron-name" class="font-semibold text-slate-800">—</span>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <span class="text-slate-400">Mã sinh viên:</span>
-                        <span id="cm-patron-id" class="font-mono font-semibold text-slate-200">—</span>
+                        <span class="text-slate-500">Mã sinh viên:</span>
+                        <span id="cm-patron-id" class="font-mono font-semibold text-slate-700">—</span>
                     </div>
                 </div>
 
                 <!-- Thông tin vi phạm -->
-                <div class="bg-slate-950/50 border border-slate-800 rounded-xl p-4 space-y-2">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">📚 Thông tin vi phạm
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">📚 Thông tin vi phạm
                     </p>
                     <div class="flex justify-between text-sm">
-                        <span class="text-slate-400">Tên sách:</span>
-                        <span id="cm-book-title" class="font-medium text-slate-200 text-right max-w-[60%]">—</span>
+                        <span class="text-slate-500">Tên sách:</span>
+                        <span id="cm-book-title" class="font-medium text-slate-800 text-right max-w-[60%]">—</span>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <span class="text-slate-400">Mã bản sao:</span>
-                        <span id="cm-copy-id" class="font-mono text-slate-350">—</span>
+                        <span class="text-slate-500">Mã bản sao:</span>
+                        <span id="cm-copy-id" class="font-mono text-slate-600">—</span>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <span class="text-slate-400">Loại vi phạm:</span>
-                        <span id="cm-violation" class="font-medium text-slate-200">—</span>
+                        <span class="text-slate-500">Loại vi phạm:</span>
+                        <span id="cm-violation" class="font-medium text-slate-800">—</span>
                     </div>
                     <div class="flex justify-between text-sm">
-                        <span class="text-slate-400">Ngày lập phiếu:</span>
-                        <span id="cm-created-at" class="text-slate-300">—</span>
+                        <span class="text-slate-500">Ngày lập phiếu:</span>
+                        <span id="cm-created-at" class="text-slate-600">—</span>
                     </div>
                 </div>
 
                 <!-- Số tiền cần thu -->
-                <div class="bg-rose-950/20 border border-rose-800/30 rounded-xl p-4 flex justify-between items-center">
-                    <span class="text-sm font-semibold text-rose-400">💰 Số tiền cần thu:</span>
-                    <span id="cm-amount" class="text-lg font-bold text-rose-500">0 đ</span>
+                <div class="bg-rose-50 border border-rose-200 rounded-xl p-4 flex justify-between items-center">
+                    <span class="text-sm font-semibold text-rose-600">💰 Số tiền cần thu:</span>
+                    <span id="cm-amount" class="text-lg font-bold text-rose-600">0 đ</span>
                 </div>
             </div>
 
             <!-- Footer -->
-            <div class="px-5 py-3 bg-slate-950/80 border-t border-slate-800 flex justify-end gap-2">
+            <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
                 <button type="button" onclick="closeCashModal()"
-                    class="px-4 py-2 border border-slate-700 rounded-lg text-slate-300 hover:bg-slate-800 font-semibold text-sm transition">
+                    class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
                     Hủy
                 </button>
                 <form id="cashConfirmForm" method="post" action="" class="inline">
@@ -414,34 +460,34 @@
 
     <!-- VietQR Payment Modal -->
     <div id="qrModal"
-        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-        <div class="relative bg-slate-900 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-850">
+        class="fixed inset-0 bg-slate-800/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="relative bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-200">
             <!-- Success Overlay -->
-            <div id="successOverlay" class="hidden absolute inset-0 bg-slate-900/95 flex flex-col items-center justify-center p-8 text-center z-50 animate-fade-in">
-                <div class="w-20 h-20 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mb-6 animate-bounce shadow-[0_0_20px_rgba(16,185,129,0.2)]">
-                    <svg class="w-12 h-12 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+            <div id="successOverlay" class="hidden absolute inset-0 bg-white/95 flex flex-col items-center justify-center p-8 text-center z-50">
+                <div class="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mb-6 animate-bounce">
+                    <svg class="w-12 h-12 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
-                <h3 class="text-2xl font-black text-emerald-400 tracking-wide uppercase mb-2">✨ THANH TOÁN THÀNH CÔNG!</h3>
-                <p class="text-slate-200 text-sm max-w-xs mb-4">Hệ thống đã nhận diện thanh toán tự động qua VietQR thành công.</p>
-                <div class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 mb-6 w-full max-w-xs text-xs space-y-2">
-                    <p class="text-slate-400 flex justify-between"><span>Mã giao dịch:</span> <span id="successTxCode" class="font-mono font-bold text-slate-200">-</span></p>
-                    <p class="text-slate-400 flex justify-between"><span>Thanh toán cho:</span> <span id="successDescription" class="font-semibold text-slate-200">-</span></p>
+                <h3 class="text-2xl font-black text-emerald-600 tracking-wide uppercase mb-2">✨ THANH TOÁN THÀNH CÔNG!</h3>
+                <p class="text-slate-600 text-sm max-w-xs mb-4">Hệ thống đã nhận diện thanh toán tự động qua VietQR thành công.</p>
+                <div class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 mb-6 w-full max-w-xs text-xs space-y-2">
+                    <p class="text-slate-500 flex justify-between"><span>Mã giao dịch:</span> <span id="successTxCode" class="font-mono font-bold text-slate-800">-</span></p>
+                    <p class="text-slate-500 flex justify-between"><span>Thanh toán cho:</span> <span id="successDescription" class="font-semibold text-slate-800">-</span></p>
                 </div>
-                <p class="text-xs text-slate-500 mb-4 animate-pulse">Trang sẽ tự động cập nhật sau <span id="successCountdown" class="font-bold text-emerald-400">5</span> giây...</p>
+                <p class="text-xs text-slate-400 mb-4 animate-pulse">Trang sẽ tự động cập nhật sau <span id="successCountdown" class="font-bold text-emerald-500">5</span> giây...</p>
                 <button type="button" onclick="window.location.reload()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-lg transition-all uppercase">Thanh toán thành công</button>
             </div>
             <!-- Header -->
-            <div class="px-5 py-3.5 bg-slate-950/90 flex justify-between items-center text-white border-b border-slate-800">
+            <div class="px-5 py-3.5 bg-emerald-600 flex justify-between items-center text-white border-b border-emerald-700">
                 <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 3.9A9 9 0 1 1 5.1 5.1L16 16" />
                     </svg>
                     <h3 class="text-sm font-bold text-white">Thanh toán qua VietQR</h3>
                 </div>
-                <button type="button" onclick="closeQRModal()" class="text-slate-400 hover:text-white transition">
+                <button type="button" onclick="closeQRModal()" class="text-emerald-100 hover:text-white transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                         </path>
@@ -450,7 +496,7 @@
             </div>
 
             <!-- Success Banner (hidden until auto-detected) -->
-            <div id="qrSuccessBanner" class="hidden bg-emerald-600 text-white text-center px-5 py-3 shadow-inner">
+            <div id="qrSuccessBanner" class="hidden bg-emerald-500 text-white text-center px-5 py-3 shadow-inner">
                 <p class="font-bold text-sm">🎉 Đã nhận thanh toán thành công!</p>
                 <p id="qrSuccessDetail" class="text-xs text-emerald-100 mt-0.5">Hệ thống sẽ tự động cập nhật...</p>
             </div>
@@ -459,33 +505,33 @@
             <form id="qrConfirmForm" method="post" action="">
                 <div class="p-5 space-y-4">
 
-                    <!-- Thông tin bạn đọc -->
-                    <div class="bg-slate-950/50 border border-slate-800 rounded-xl p-4 space-y-2">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">👤 Thông tin vi phạm</p>
+                    <!-- Thông tin vi phạm -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">👤 Thông tin vi phạm</p>
                         <div class="grid grid-cols-2 gap-2 text-xs">
                             <div>
-                                <span class="text-slate-500 block">Họ tên</span>
-                                <span id="qr-patron-name" class="font-semibold text-slate-200">—</span>
+                                <span class="text-slate-400 block">Họ tên</span>
+                                <span id="qr-patron-name" class="font-semibold text-slate-800">—</span>
                             </div>
                             <div>
-                                <span class="text-slate-500 block">Mã SV</span>
-                                <span id="qr-patron-id" class="font-mono font-semibold text-slate-205">—</span>
+                                <span class="text-slate-400 block">Mã SV</span>
+                                <span id="qr-patron-id" class="font-mono font-semibold text-slate-700">—</span>
                             </div>
                             <div>
-                                <span class="text-slate-500 block">Tên sách</span>
-                                <span id="qr-book-title" class="font-medium text-slate-200">—</span>
+                                <span class="text-slate-400 block">Tên sách</span>
+                                <span id="qr-book-title" class="font-medium text-slate-800">—</span>
                             </div>
                             <div>
-                                <span class="text-slate-500 block">Mã bản sao</span>
-                                <span id="qr-copy-id" class="font-mono text-slate-405">—</span>
+                                <span class="text-slate-400 block">Mã bản sao</span>
+                                <span id="qr-copy-id" class="font-mono text-slate-600">—</span>
                             </div>
                             <div>
-                                <span class="text-slate-500 block">Loại vi phạm</span>
-                                <span id="qr-violation" class="font-medium text-slate-250">—</span>
+                                <span class="text-slate-400 block">Loại vi phạm</span>
+                                <span id="qr-violation" class="font-medium text-slate-700">—</span>
                             </div>
                             <div>
-                                <span class="text-slate-500 block">Ngày lập phiếu</span>
-                                <span id="qr-created-at" class="text-slate-350">—</span>
+                                <span class="text-slate-400 block">Ngày lập phiếu</span>
+                                <span id="qr-created-at" class="text-slate-600">—</span>
                             </div>
                         </div>
                     </div>
@@ -493,12 +539,11 @@
                     <!-- Layout 2 cột: QR bên trái, chi tiết ngân hàng bên phải -->
                     <div class="flex gap-4 items-start">
                         <!-- QR Image Box -->
-                        <div
-                            class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex justify-center items-center w-44 h-44 shrink-0 relative">
+                        <div class="bg-white border border-slate-200 rounded-xl p-2 flex justify-center items-center w-44 h-44 shrink-0 relative shadow-sm">
                             <img id="qrImage" src="" alt="Mã VietQR" class="max-h-full max-w-full rounded shadow hidden"
                                 onload="this.classList.remove('hidden'); document.getElementById('qrLoading').classList.add('hidden')" />
-                            <div id="qrLoading" class="flex flex-col items-center justify-center text-slate-500">
-                                <svg class="animate-spin h-7 w-7 text-orange-500 mb-2" fill="none" viewBox="0 0 24 24">
+                            <div id="qrLoading" class="flex flex-col items-center justify-center text-slate-400">
+                                <svg class="animate-spin h-7 w-7 text-emerald-500 mb-2" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                                         stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor"
@@ -511,43 +556,38 @@
 
                         <!-- Banking details + Transaction input -->
                         <div class="flex-1 space-y-3">
-                            <div
-                                class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1.5 text-xs text-slate-300">
-                                <div class="flex justify-between"><span class="text-slate-500">Ngân hàng:</span> <span
-                                        class="font-semibold text-slate-200" th:text="${vietqrBankName}">TPBank</span>
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1.5 text-xs text-slate-700">
+                                <div class="flex justify-between"><span class="text-slate-400">Ngân hàng:</span> <span
+                                        class="font-semibold text-slate-800" th:text="${vietqrBankName}">TPBank</span>
                                 </div>
-                                <div class="flex justify-between"><span class="text-slate-500">Số TK:</span> <span
-                                        class="font-mono font-semibold text-slate-200"
+                                <div class="flex justify-between"><span class="text-slate-400">Số TK:</span> <span
+                                        class="font-mono font-semibold text-slate-800"
                                         th:text="${vietqrAccountNo}">00000102719</span></div>
-                                <div class="flex justify-between"><span class="text-slate-500">Chủ TK:</span> <span
-                                        class="font-semibold text-slate-202" th:text="${vietqrAccountName}">NGUYEN QUANG
-                                        VINH</span></div>
-                                <div class="flex justify-between"><span class="text-slate-500">Số tiền:</span> <span
-                                        id="dbAmount" class="font-bold text-rose-500">0 đ</span></div>
-                                <div class="flex justify-between"><span class="text-slate-500">Nội dung:</span> <span
+                                <div class="flex justify-between"><span class="text-slate-400">Chủ TK:</span> <span
+                                        class="font-semibold text-slate-700" th:text="${vietqrAccountName}">NGUYEN QUANG VINH</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Số tiền:</span> <span
+                                        id="dbAmount" class="font-bold text-rose-600">0 đ</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Nội dung:</span> <span
                                         id="dbInfo"
-                                        class="font-mono font-bold text-emerald-450 bg-emerald-950/30 border border-emerald-500/20 px-1 rounded">NOP
-                                        PHAT</span></div>
+                                        class="font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1 rounded">NOP PHAT</span></div>
                             </div>
                             <div class="space-y-1">
                                 <label for="transactionCode"
-                                    class="block text-[10px] font-semibold text-slate-450 uppercase tracking-wider">Mã
-                                    giao dịch (Nhập tay):</label>
+                                    class="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Mã giao dịch (Nhập tay):</label>
                                 <input type="text" id="transactionCode" name="transactionCode"
                                     placeholder="VD: MB127392817"
-                                    class="w-full text-xs px-3 py-2 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-100 bg-slate-950" />
+                                    class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400/30 focus:border-emerald-500 text-slate-800 bg-white" />
                             </div>
-                            <p class="text-[10px] text-slate-500 leading-relaxed font-medium">🔄 Hệ thống đang tự động kiểm tra
-                                thanh toán...</p>
+                            <p class="text-[10px] text-slate-400 leading-relaxed font-medium">🔄 Hệ thống đang tự động kiểm tra thanh toán...</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Footer -->
                 <div id="qrFooterActions"
-                    class="px-5 py-3 bg-slate-950/80 border-t border-slate-800 flex justify-end gap-2 text-xs">
+                    class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 text-xs">
                     <button type="button" onclick="closeQRModal()"
-                        class="px-3.5 py-1.5 border border-slate-700 rounded-lg text-slate-300 hover:bg-slate-800 font-semibold transition">
+                        class="px-3.5 py-1.5 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-100 font-semibold transition">
                         Hủy
                     </button>
                     <button type="submit"
@@ -1164,7 +1204,7 @@
         // Reset filter action
         resetFiltersBtn.addEventListener('click', () => {
             searchInput.value = '';
-            statusFilter.value = 'Paid';
+            statusFilter.value = 'Unpaid';
             violationTypeFilter.value = '';
             suggestionsDropdown.classList.add('hidden');
             fetchFinesFromServer();
