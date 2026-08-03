@@ -229,21 +229,30 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
             Model model) {
 
         System.out.println(">>> loginUser parameters: userId=" + userId + ", campusId=" + campusId);
-        Optional<User> userOpt = userRepository.findByUserIdAndCampusId(userId, campusId);
+        Optional<User> userOpt = userRepository.findByIdentifierIgnoreCase(userId);
 
-        // ====== DEBUG LOGIN ======
-        System.out.println("[LOGIN] userId=" + userId + " | campusId=" + campusId);
-        System.out.println("[LOGIN] User found: " + userOpt.isPresent());
+        if (userOpt.isEmpty()) {
+            model.addAttribute("loginError", "Tài khoản hoặc mật khẩu không chính xác!");
+            model.addAttribute("userId", userId);
+            model.addAttribute("campusId", campusId);
+            return "login";
+        }
 
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            
-            if (user.getPasswordHash() == null || !user.getPasswordHash().equals(password)) {
-                model.addAttribute("loginError", "Mật khẩu không chính xác!");
-                model.addAttribute("userId", userId);
-                model.addAttribute("campusId", campusId);
-                return "login";
-            }
+        User user = userOpt.get();
+        
+        if (user.getPasswordHash() == null || !user.getPasswordHash().equals(password)) {
+            model.addAttribute("loginError", "Tài khoản hoặc mật khẩu không chính xác!");
+            model.addAttribute("userId", userId);
+            model.addAttribute("campusId", campusId);
+            return "login";
+        }
+
+        if (user.getCampusId() == null || !user.getCampusId().equals(campusId)) {
+            model.addAttribute("loginError", "Cơ sở học tập không chính xác!");
+            model.addAttribute("userId", userId);
+            model.addAttribute("campusId", campusId);
+            return "login";
+        }
 
             System.out.println("[LOGIN] User status: " + user.getStatus());
             System.out.println("[LOGIN] Roles loaded: " + user.getRoles().size() + " → " + user.getRoles());
@@ -290,12 +299,6 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
 
             System.out.println("[LOGIN] → Redirecting to /home");
             return "redirect:/home";
-        }
-
-        model.addAttribute("loginError", "Mã số hoặc Cơ sở học tập không trùng khớp với dữ liệu hệ thống!");
-        model.addAttribute("userId", userId);
-        model.addAttribute("campusId", campusId);
-        return "login";
     }
 
     // === ĐĂNG XUẤT ===
