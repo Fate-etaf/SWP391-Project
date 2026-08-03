@@ -70,7 +70,7 @@
                     <button id="btnOutbound" class="px-4 py-2 rounded-md text-sm font-bold transition-all bg-fpt-orange text-white shadow-md">
                         Nhiệm vụ Xuất sách
                     </button>
-                    <button id="btnInbound" class="px-4 py-2 rounded-md text-sm font-bold transition-all text-slate-500 hover:text-slate-800 hover:bg-slate-700">
+                    <button id="btnInbound" class="px-4 py-2 rounded-md text-sm font-bold transition-all text-slate-500 hover:text-slate-800 hover:bg-slate-200">
                         Nhiệm vụ Nhập sách
                     </button>
                 </div>
@@ -80,7 +80,7 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         Tạo Lệnh Xin Sách
                     </a>
-                    <a href="/librarian/inventory/transfers/history" class="px-4 py-2 bg-slate-100 hover:bg-slate-700 text-slate-700 text-sm font-bold rounded-lg transition-colors border border-slate-300 flex items-center">
+                    <a href="/librarian/inventory/transfers/history" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-lg transition-colors border border-slate-300 flex items-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         Lịch sử
                     </a>
@@ -307,14 +307,14 @@
 
         btnOutbound.addEventListener('click', () => {
             btnOutbound.className = 'px-4 py-2 rounded-md text-sm font-bold transition-all bg-fpt-orange text-white shadow-md';
-            btnInbound.className = 'px-4 py-2 rounded-md text-sm font-bold transition-all text-slate-500 hover:text-slate-800 hover:bg-slate-700';
+            btnInbound.className = 'px-4 py-2 rounded-md text-sm font-bold transition-all text-slate-500 hover:text-slate-800 hover:bg-slate-200';
             viewOutbound.classList.remove('hidden');
             viewInbound.classList.add('hidden');
         });
 
         btnInbound.addEventListener('click', () => {
             btnInbound.className = 'px-4 py-2 rounded-md text-sm font-bold transition-all bg-fpt-orange text-white shadow-md';
-            btnOutbound.className = 'px-4 py-2 rounded-md text-sm font-bold transition-all text-slate-500 hover:text-slate-800 hover:bg-slate-700';
+            btnOutbound.className = 'px-4 py-2 rounded-md text-sm font-bold transition-all text-slate-500 hover:text-slate-800 hover:bg-slate-200';
             viewInbound.classList.remove('hidden');
             viewOutbound.classList.add('hidden');
         });
