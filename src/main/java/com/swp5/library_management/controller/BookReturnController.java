@@ -197,7 +197,7 @@ public class BookReturnController {
         }
         try {
             String librarianId = (String) session.getAttribute("loggedInUserId");
-            bookReturnService.processLost(id, "Cash", null, librarianId, null);
+            bookReturnService.processLost(id, "Cash", null, librarianId, null, null);
             redirectAttrs.addFlashAttribute("successMsg", "Đã đánh dấu sách bị mất!");
         } catch (Exception e) {
             redirectAttrs.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
@@ -213,7 +213,7 @@ public class BookReturnController {
         }
         try {
             String librarianId = (String) session.getAttribute("loggedInUserId");
-            bookReturnService.processDamaged(id, "Cash", null, librarianId, null);
+            bookReturnService.processDamaged(id, "Cash", null, librarianId, null, null);
             redirectAttrs.addFlashAttribute("successMsg", "Đã đánh dấu sách bị hỏng!");
         } catch (Exception e) {
             redirectAttrs.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
@@ -281,14 +281,18 @@ public class BookReturnController {
             @RequestParam(required = false) String paymentMethod,
             @RequestParam(required = false) String transactionCode,
             @RequestParam(required = false) String notes,
+            @RequestParam(required = false) java.math.BigDecimal manualFineAmount,
             HttpSession session) {
         if (isNotLibrarian(session)) {
             return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", "Quyền truy cập bị từ chối. Vui lòng đăng nhập bằng tài khoản Thủ thư."));
         }
+        if (manualFineAmount != null && manualFineAmount.compareTo(java.math.BigDecimal.ZERO) <= 0) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Mức đền bù/phạt phải lớn hơn 0!"));
+        }
         try {
             String librarianId = (String) session.getAttribute("loggedInUserId");
-            bookReturnService.processLost(ticketDetailId, paymentMethod, transactionCode, librarianId, notes);
+            bookReturnService.processLost(ticketDetailId, paymentMethod, transactionCode, librarianId, notes, manualFineAmount);
             return ResponseEntity
                     .ok(Map.of("status", "SUCCESS", "message", "Báo mất sách và lập hóa đơn phạt thành công!"));
         } catch (Exception e) {
@@ -307,14 +311,18 @@ public class BookReturnController {
             @RequestParam(required = false) String paymentMethod,
             @RequestParam(required = false) String transactionCode,
             @RequestParam(required = false) String notes,
+            @RequestParam(required = false) java.math.BigDecimal manualFineAmount,
             HttpSession session) {
         if (isNotLibrarian(session)) {
             return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", "Quyền truy cập bị từ chối. Vui lòng đăng nhập bằng tài khoản Thủ thư."));
         }
+        if (manualFineAmount != null && manualFineAmount.compareTo(java.math.BigDecimal.ZERO) <= 0) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Mức đền bù/phạt phải lớn hơn 0!"));
+        }
         try {
             String librarianId = (String) session.getAttribute("loggedInUserId");
-            bookReturnService.processDamaged(ticketDetailId, paymentMethod, transactionCode, librarianId, notes);
+            bookReturnService.processDamaged(ticketDetailId, paymentMethod, transactionCode, librarianId, notes, manualFineAmount);
             return ResponseEntity
                     .ok(Map.of("status", "SUCCESS", "message", "Báo hỏng sách và lập hóa đơn phạt thành công!"));
         } catch (Exception e) {

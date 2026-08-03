@@ -21,9 +21,9 @@ public interface ViolationService {
 
     FineInvoice createOverdueFine(Integer borrowTicketDetailId, String conditionStatus, String librarianId);
 
-    List<FineInvoice> createLostBookFine(Integer borrowTicketDetailId, String notes, String librarianId);
+    List<FineInvoice> createLostBookFine(Integer borrowTicketDetailId, String notes, String librarianId, BigDecimal manualFineAmount);
 
-    List<FineInvoice> createDamagedBookFine(Integer borrowTicketDetailId, String notes, String librarianId);
+    List<FineInvoice> createDamagedBookFine(Integer borrowTicketDetailId, String notes, String librarianId, BigDecimal manualFineAmount);
 
     /** Trả sách qua mã Barcode (CopyID) */
     BorrowTicketDetail returnByCopyId(String copyId, String librarianId);

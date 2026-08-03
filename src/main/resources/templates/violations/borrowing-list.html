@@ -60,162 +60,168 @@
 
 
 
-    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
+    <main
+        class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
         <!-- SIDEBAR -->
         <div th:replace="~{fragments/librarian_sidebar :: sidebar('borrowing')}"></div>
 
         <div class="flex-grow min-w-0">
-        <!-- VietQR Config Inputs -->
-        <input type="hidden" id="vqrBankId" th:value="${vietqrBankId}">
-        <input type="hidden" id="vqrBankName" th:value="${vietqrBankName}">
-        <input type="hidden" id="vqrAccountNo" th:value="${vietqrAccountNo}">
-        <input type="hidden" id="vqrAccountName" th:value="${vietqrAccountName}">
+            <!-- VietQR Config Inputs -->
+            <input type="hidden" id="vqrBankId" th:value="${vietqrBankId}">
+            <input type="hidden" id="vqrBankName" th:value="${vietqrBankName}">
+            <input type="hidden" id="vqrAccountNo" th:value="${vietqrAccountNo}">
+            <input type="hidden" id="vqrAccountName" th:value="${vietqrAccountName}">
 
-        <!-- Alert Messages -->
-        <div th:if="${successMsg}"
-            class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-250 text-emerald-800 flex items-center gap-2">
-            <span class="text-emerald-500">✅</span>
-            <span th:text="${successMsg}" class="font-medium text-sm">Thông báo thành công</span>
-        </div>
-        <div th:if="${errorMsg}"
-            class="mb-6 p-4 rounded-xl bg-red-50 border border-red-250 text-red-800 flex items-center gap-2">
-            <span class="text-red-500">⚠️</span>
-            <span th:text="${errorMsg}" class="font-medium text-sm">Thông báo lỗi</span>
-        </div>
-
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-wider text-fpt-orange">Quản lý mượn sách</p>
-                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Sách đang được mượn</h2>
-                <p class="text-sm text-slate-600 mt-1">Danh sách các cuốn sách hiện đang được mượn và thông tin người mượn.</p>
+            <!-- Alert Messages -->
+            <div th:if="${successMsg}"
+                class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-250 text-emerald-800 flex items-center gap-2">
+                <span class="text-emerald-500">✅</span>
+                <span th:text="${successMsg}" class="font-medium text-sm">Thông báo thành công</span>
             </div>
-            <div class="flex gap-3 animate-fade-in">
-                <button type="button" onclick="openBorrowingQr()"
-                    class="inline-flex items-center gap-2 bg-fpt-orange text-white hover:bg-fpt-orangeHover font-semibold text-sm px-4 py-2 rounded-xl shadow-sm transition-all hover:scale-105">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 17h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                    </svg>
-                    📷 Quét mã sách
-                </button>
+            <div th:if="${errorMsg}"
+                class="mb-6 p-4 rounded-xl bg-red-50 border border-red-250 text-red-800 flex items-center gap-2">
+                <span class="text-red-500">⚠️</span>
+                <span th:text="${errorMsg}" class="font-medium text-sm">Thông báo lỗi</span>
             </div>
-        </div>
 
-        <!-- Bộ lọc -->
-        <section class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 md:p-6 mb-6">
-            <form id="filterForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4" method="get" th:action="@{/borrowing}">
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
                 <div>
-                    <label for="bookTitle" class="block text-xs font-semibold text-slate-600 mb-1">Tên sách</label>
-                    <input id="bookTitle" name="bookTitle" type="text" th:value="${bookTitle}" oninput="onFilterInput()"
-                        placeholder="Nhập tên sách..."
-                        class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange/40" />
+                    <p class="text-xs font-semibold uppercase tracking-wider text-fpt-orange">Quản lý mượn sách</p>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Sách đang được mượn</h2>
+                    <p class="text-sm text-slate-600 mt-1">Danh sách các cuốn sách hiện đang được mượn và thông tin
+                        người mượn.</p>
                 </div>
-                <div>
-                    <label for="borrowerId" class="block text-xs font-semibold text-slate-600 mb-1">Mã sinh viên</label>
-                    <input id="borrowerId" name="borrowerId" type="text" th:value="${borrowerId}"
-                        oninput="onFilterInput()" placeholder="Nhập mã sinh viên..."
-                        class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange/40" />
-                </div>
-                <div class="sm:col-span-2 flex items-center justify-between pt-1">
-                    <a href="/borrowing" class="text-sm font-semibold text-slate-500 hover:text-slate-800">Xóa bộ
-                        lọc</a>
-                    <button type="submit"
-                        class="inline-flex items-center gap-2 bg-fpt-orange text-white hover:bg-fpt-orangeHover font-semibold text-sm px-5 py-2 rounded-xl shadow-sm transition-all hover:scale-105">
-                        🔍 Tìm kiếm
+                <div class="flex gap-3 animate-fade-in">
+                    <button type="button" onclick="openBorrowingQr()"
+                        class="inline-flex items-center gap-2 bg-fpt-orange text-white hover:bg-fpt-orangeHover font-semibold text-sm px-4 py-2 rounded-xl shadow-sm transition-all hover:scale-105">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 17h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                        </svg>
+                        📷 Quét mã sách
                     </button>
                 </div>
-            </form>
-        </section>
-
-        <!-- Bảng danh sách -->
-        <section class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
-                    <thead class="bg-slate-50 text-slate-700 border-b border-slate-200">
-                        <tr>
-                            <th class="text-left px-6 py-4 font-semibold">Người mượn</th>
-                            <th class="text-left px-6 py-4 font-semibold">Mã sinh viên</th>
-                            <th class="text-left px-6 py-4 font-semibold">Tên sách</th>
-                            <th class="text-left px-6 py-4 font-semibold">Mã bản sao</th>
-                            <th class="text-left px-6 py-4 font-semibold">Ngày mượn</th>
-                            <th class="text-left px-6 py-4 font-semibold">Hạn trả</th>
-                            <th class="text-left px-6 py-4 font-semibold">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="borrowingTableBody" class="divide-y divide-slate-200">
-                        <tr th:if="${borrowingItems.isEmpty()}">
-                            <td colspan="7" class="px-6 py-12 text-center text-slate-500 text-sm bg-slate-50">Không có sách nào đang
-                                được mượn.</td>
-                        </tr>
-                        <tr th:each="item : ${borrowingItems}" class="hover:bg-slate-50">
-                            <td class="px-6 py-4 text-slate-700 font-medium"
-                                th:text="${item.borrowTicket?.patron?.fullName ?: '—'}">—</td>
-                            <td class="px-6 py-4 text-slate-500 font-mono text-xs"
-                                th:text="${item.borrowTicket?.patron?.userId ?: '—'}">—</td>
-                            <td class="px-6 py-4 font-semibold text-slate-800"
-                                th:text="${item.bookCopy?.book?.title ?: '—'}">—</td>
-                            <td class="px-6 py-4 text-slate-500 font-mono text-xs"
-                                th:text="${item.bookCopy?.copyId ?: '—'}">—</td>
-                            <td class="px-6 py-4 text-slate-500"
-                                th:text="${item.borrowTicket?.createdAt != null ? #temporals.format(item.borrowTicket.createdAt, 'dd-MM-yyyy') : '—'}">
-                                —</td>
-                            <td class="px-6 py-4 text-slate-500"
-                                th:text="${item.dueDate != null ? #temporals.format(item.dueDate, 'dd-MM-yyyy') : '—'}">
-                                —</td>
-                            <td class="px-6 py-4">
-                                <div class="flex flex-wrap gap-2">
-                                    <button type="button"
-                                        class="bg-emerald-500 hover:bg-emerald-600 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
-                                        th:attr="data-copy-id=${item.bookCopy?.copyId}"
-                                        onclick="triggerCheckReturn(this.getAttribute('data-copy-id'))">
-                                        Trả sách
-                                    </button>
-                                    <button type="button"
-                                        class="bg-amber-500 hover:bg-amber-600 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
-                                        th:attr="data-copy-id=${item.bookCopy?.copyId}"
-                                        onclick="triggerDirectIncident(this.getAttribute('data-copy-id'), 'Lost')">
-                                        ⚠️ Báo sự cố
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
 
-            <div id="paginationContainer"
-                class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
-                <div class="text-sm text-slate-600">
-                    <span
-                        th:text="${totalPages == 0 ? 'Trang 0 / 0' : 'Trang ' + (currentPage + 1) + ' / ' + totalPages}">Trang
-                        1 / 1</span>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <a class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
-                        th:if="${currentPage > 0}"
-                        th:href="@{/borrowing(page=${currentPage - 1}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">Trước</a>
-                    <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400"
-                        th:if="${currentPage == 0}">Trước</span>
+            <!-- Bộ lọc -->
+            <section class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 md:p-6 mb-6">
+                <form id="filterForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4" method="get"
+                    th:action="@{/borrowing}">
+                    <div>
+                        <label for="bookTitle" class="block text-xs font-semibold text-slate-600 mb-1">Tên sách</label>
+                        <input id="bookTitle" name="bookTitle" type="text" th:value="${bookTitle}"
+                            oninput="onFilterInput()" placeholder="Nhập tên sách..."
+                            class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange/40" />
+                    </div>
+                    <div>
+                        <label for="borrowerId" class="block text-xs font-semibold text-slate-600 mb-1">Mã sinh
+                            viên</label>
+                        <input id="borrowerId" name="borrowerId" type="text" th:value="${borrowerId}"
+                            oninput="onFilterInput()" placeholder="Nhập mã sinh viên..."
+                            class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange/40" />
+                    </div>
+                    <div class="sm:col-span-2 flex items-center justify-between pt-1">
+                        <a href="/borrowing" class="text-sm font-semibold text-slate-500 hover:text-slate-800">Xóa bộ
+                            lọc</a>
+                        <button type="submit"
+                            class="inline-flex items-center gap-2 bg-fpt-orange text-white hover:bg-fpt-orangeHover font-semibold text-sm px-5 py-2 rounded-xl shadow-sm transition-all hover:scale-105">
+                            🔍 Tìm kiếm
+                        </button>
+                    </div>
+                </form>
+            </section>
 
-                    <a th:if="${totalPages > 0}" th:each="p : ${#numbers.sequence(0, totalPages - 1)}"
-                        class="px-3 py-1.5 rounded-lg border text-sm font-semibold transition-colors"
-                        th:classappend="${p == currentPage} ? ' border-fpt-orange text-fpt-orange bg-fpt-orange/10' : ' border-slate-300 text-slate-600 hover:bg-slate-100'"
-                        th:text="${p + 1}"
-                        th:href="@{/borrowing(page=${p}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">1</a>
-
-                    <a class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
-                        th:if="${currentPage + 1 < totalPages}"
-                        th:href="@{/borrowing(page=${currentPage + 1}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">Sau</a>
-                    <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400"
-                        th:if="${currentPage + 1 >= totalPages}">Sau</span>
+            <!-- Bảng danh sách -->
+            <section class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-slate-50 text-slate-700 border-b border-slate-200">
+                            <tr>
+                                <th class="text-left px-6 py-4 font-semibold">Người mượn</th>
+                                <th class="text-left px-6 py-4 font-semibold">Mã sinh viên</th>
+                                <th class="text-left px-6 py-4 font-semibold">Tên sách</th>
+                                <th class="text-left px-6 py-4 font-semibold">Mã bản sao</th>
+                                <th class="text-left px-6 py-4 font-semibold">Ngày mượn</th>
+                                <th class="text-left px-6 py-4 font-semibold">Hạn trả</th>
+                                <th class="text-left px-6 py-4 font-semibold">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="borrowingTableBody" class="divide-y divide-slate-200">
+                            <tr th:if="${borrowingItems.isEmpty()}">
+                                <td colspan="7" class="px-6 py-12 text-center text-slate-500 text-sm bg-slate-50">Không
+                                    có sách nào đang
+                                    được mượn.</td>
+                            </tr>
+                            <tr th:each="item : ${borrowingItems}" class="hover:bg-slate-50">
+                                <td class="px-6 py-4 text-slate-700 font-medium"
+                                    th:text="${item.borrowTicket?.patron?.fullName ?: '—'}">—</td>
+                                <td class="px-6 py-4 text-slate-500 font-mono text-xs"
+                                    th:text="${item.borrowTicket?.patron?.userId ?: '—'}">—</td>
+                                <td class="px-6 py-4 font-semibold text-slate-800"
+                                    th:text="${item.bookCopy?.book?.title ?: '—'}">—</td>
+                                <td class="px-6 py-4 text-slate-500 font-mono text-xs"
+                                    th:text="${item.bookCopy?.copyId ?: '—'}">—</td>
+                                <td class="px-6 py-4 text-slate-500"
+                                    th:text="${item.borrowTicket?.createdAt != null ? #temporals.format(item.borrowTicket.createdAt, 'dd-MM-yyyy') : '—'}">
+                                    —</td>
+                                <td class="px-6 py-4 text-slate-500"
+                                    th:text="${item.dueDate != null ? #temporals.format(item.dueDate, 'dd-MM-yyyy') : '—'}">
+                                    —</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-wrap gap-2">
+                                        <button type="button"
+                                            class="bg-emerald-500 hover:bg-emerald-600 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
+                                            th:attr="data-copy-id=${item.bookCopy?.copyId}"
+                                            onclick="triggerCheckReturn(this.getAttribute('data-copy-id'))">
+                                            Trả sách
+                                        </button>
+                                        <button type="button"
+                                            class="bg-amber-500 hover:bg-amber-600 text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-all"
+                                            th:attr="data-copy-id=${item.bookCopy?.copyId}"
+                                            onclick="triggerDirectIncident(this.getAttribute('data-copy-id'), 'Lost')">
+                                            ⚠️ Báo sự cố
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-        </section>
+
+                <div id="paginationContainer"
+                    class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
+                    <div class="text-sm text-slate-600">
+                        <span
+                            th:text="${totalPages == 0 ? 'Trang 0 / 0' : 'Trang ' + (currentPage + 1) + ' / ' + totalPages}">Trang
+                            1 / 1</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <a class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                            th:if="${currentPage > 0}"
+                            th:href="@{/borrowing(page=${currentPage - 1}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">Trước</a>
+                        <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400"
+                            th:if="${currentPage == 0}">Trước</span>
+
+                        <a th:if="${totalPages > 0}" th:each="p : ${#numbers.sequence(0, totalPages - 1)}"
+                            class="px-3 py-1.5 rounded-lg border text-sm font-semibold transition-colors"
+                            th:classappend="${p == currentPage} ? ' border-fpt-orange text-fpt-orange bg-fpt-orange/10' : ' border-slate-300 text-slate-600 hover:bg-slate-100'"
+                            th:text="${p + 1}"
+                            th:href="@{/borrowing(page=${p}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">1</a>
+
+                        <a class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                            th:if="${currentPage + 1 < totalPages}"
+                            th:href="@{/borrowing(page=${currentPage + 1}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">Sau</a>
+                        <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400"
+                            th:if="${currentPage + 1 >= totalPages}">Sau</span>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
     <!-- Modal Xác nhận -->
-    <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50">
+    <div id="confirmModal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50">
         <div class="bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-2xl p-6 text-slate-800">
             <h3 id="confirmTitle" class="text-lg font-extrabold text-slate-900">Xác nhận</h3>
             <p id="confirmMessage" class="text-sm text-slate-650 mt-2">Thông báo</p>
@@ -325,7 +331,8 @@
 
     <!-- ====== MODAL CAMERA QR (CHUYỂN THÀNH KẾT NỐI APP DI ĐỘNG) ====== -->
     <div id="qrCameraModal" class="fixed inset-0 bg-slate-950/80 hidden items-center justify-center z-[200] p-4">
-        <div class="bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-slate-800 text-slate-100">
+        <div
+            class="bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-slate-800 text-slate-100">
             <div class="bg-fpt-navy px-6 py-5 flex items-center justify-between border-b border-slate-800">
                 <div>
                     <p class="text-xs font-bold text-fpt-orange uppercase tracking-widest">Mobile Integration</p>
@@ -390,8 +397,8 @@
                 <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-800">...</span></p>
                 <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-600 font-mono font-bold">...</span>
                 </p>
-                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-800">...</span> (<span
-                        class="txt-patron-id text-slate-650">...</span>)</p>
+                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-800">...</span>
+                    (<span class="txt-patron-id text-slate-650">...</span>)</p>
                 <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-700">...</span></p>
                 <p><strong>Hạn trả:</strong> <span class="txt-due-date text-slate-700">...</span></p>
             </div>
@@ -408,8 +415,9 @@
             </div>
 
             <div class="flex justify-between items-center mt-6">
-                <button onclick="switchModalToReport('Lost')" class="text-xs text-red-500 hover:underline">⚠️ Báo hỏng sách
-                 </button>
+                <button onclick="switchModalToReport('Lost')" class="text-xs text-red-500 hover:underline">⚠️ Báo hỏng
+                    sách
+                </button>
                 <div class="flex gap-3">
                     <button onclick="closeModal('normalReturnModal')"
                         class="px-4 py-2 border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
@@ -427,19 +435,29 @@
         <div
             class="relative bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-800">
             <!-- Success Overlay -->
-            <div id="overdueSuccessOverlay" class="hidden absolute inset-0 bg-white/98 flex flex-col items-center justify-center p-6 text-center z-50 rounded-2xl animate-fade-in">
-                <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-5 animate-bounce shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                    <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+            <div id="overdueSuccessOverlay"
+                class="hidden absolute inset-0 bg-white/98 flex flex-col items-center justify-center p-6 text-center z-50 rounded-2xl animate-fade-in">
+                <div
+                    class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-5 animate-bounce shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                    <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
-                <h3 class="text-xl font-black text-emerald-600 tracking-wide uppercase mb-1">✨ THANH TOÁN THÀNH CÔNG!</h3>
-                <p class="text-slate-650 text-xs max-w-xs mb-3">Hệ thống đã nhận diện thanh toán tự động qua VietQR thành công.</p>
-                <div class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 mb-5 w-full max-w-xs text-xs space-y-1">
-                    <p class="text-slate-500 flex justify-between"><span>Thông tin:</span> <span class="font-semibold text-slate-800" id="overdueSuccessDesc">-</span></p>
+                <h3 class="text-xl font-black text-emerald-600 tracking-wide uppercase mb-1">✨ THANH TOÁN THÀNH CÔNG!
+                </h3>
+                <p class="text-slate-650 text-xs max-w-xs mb-3">Hệ thống đã nhận diện thanh toán tự động qua VietQR
+                    thành công.</p>
+                <div
+                    class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 mb-5 w-full max-w-xs text-xs space-y-1">
+                    <p class="text-slate-500 flex justify-between"><span>Thông tin:</span> <span
+                            class="font-semibold text-slate-800" id="overdueSuccessDesc">-</span></p>
                 </div>
-                <p class="text-xs text-slate-500 mb-4 animate-pulse">Trang sẽ tự động cập nhật sau <span id="overdueSuccessCountdown" class="font-bold text-emerald-600">5</span> giây...</p>
-                <button type="button" onclick="window.location.reload()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-lg shadow-md transition-all uppercase">Thanh toán thành công</button>
+                <p class="text-xs text-slate-500 mb-4 animate-pulse">Trang sẽ tự động cập nhật sau <span
+                        id="overdueSuccessCountdown" class="font-bold text-emerald-600">5</span> giây...</p>
+                <button type="button" onclick="window.location.reload()"
+                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-lg shadow-md transition-all uppercase">Thanh
+                    toán thành công</button>
             </div>
             <div class="flex items-center gap-3 border-b border-slate-200 pb-4 mb-4">
                 <div class="w-10 h-10 bg-red-50 text-red-600 rounded-full flex items-center justify-center shrink-0">
@@ -459,10 +477,12 @@
                 <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-800">...</span></p>
                 <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-600 font-mono font-bold">...</span>
                 </p>
-                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-800">...</span></p>
+                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-800">...</span>
+                </p>
                 <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-700">...</span></p>
                 <p><strong>Hạn trả:</strong> <span class="txt-due-date text-slate-700">...</span></p>
-                <p><strong>Số ngày quá hạn:</strong> <span class="txt-overdue-days-val font-semibold text-red-600">0</span> ngày</p>
+                <p><strong>Số ngày quá hạn:</strong> <span
+                        class="txt-overdue-days-val font-semibold text-red-600">0</span> ngày</p>
                 <p class="border-t border-slate-200 pt-2 text-base font-bold text-red-500">
                     Tiền phạt quá hạn: <span class="txt-fine-amount">0</span>đ
                 </p>
@@ -514,7 +534,8 @@
                     </div>
                     <div class="flex justify-between"><span class="text-slate-500">Nội dung:</span> <span
                             id="overdueQrInfo"
-                            class="font-mono font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">...</span></div>
+                            class="font-mono font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">...</span>
+                    </div>
                 </div>
             </div>
 
@@ -522,7 +543,8 @@
                 <button onclick="closeModal('overdueReturnModal')"
                     class="px-4 py-2 border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
                 <button id="btnConfirmOverdueLater"
-                    class="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Ghi nợ &amp; Trả sách</button>
+                    class="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Ghi
+                    nợ &amp; Trả sách</button>
                 <button id="btnConfirmOverdue"
                     class="px-4 py-2 bg-fpt-orange hover:bg-fpt-orangeHover active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Thu
                     tiền &amp; Trả sách</button>
@@ -536,19 +558,29 @@
         <div
             class="relative bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-2xl p-6 max-h-[90vh] overflow-y-auto text-slate-800">
             <!-- Success Overlay -->
-            <div id="incidentSuccessOverlay" class="hidden absolute inset-0 bg-white/98 flex flex-col items-center justify-center p-6 text-center z-50 rounded-2xl animate-fade-in animate-duration-300">
-                <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-5 animate-bounce shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                    <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+            <div id="incidentSuccessOverlay"
+                class="hidden absolute inset-0 bg-white/98 flex flex-col items-center justify-center p-6 text-center z-50 rounded-2xl animate-fade-in animate-duration-300">
+                <div
+                    class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-5 animate-bounce shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                    <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
-                <h3 class="text-xl font-black text-emerald-600 tracking-wide uppercase mb-1">✨ THANH TOÁN THÀNH CÔNG!</h3>
-                <p class="text-slate-655 text-xs max-w-xs mb-3">Hệ thống đã nhận diện thanh toán tự động qua VietQR thành công.</p>
-                <div class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 mb-5 w-full max-w-xs text-xs space-y-1">
-                    <p class="text-slate-500 flex justify-between"><span>Thông tin:</span> <span class="font-semibold text-slate-800" id="incidentSuccessDesc">-</span></p>
+                <h3 class="text-xl font-black text-emerald-600 tracking-wide uppercase mb-1">✨ THANH TOÁN THÀNH CÔNG!
+                </h3>
+                <p class="text-slate-655 text-xs max-w-xs mb-3">Hệ thống đã nhận diện thanh toán tự động qua VietQR
+                    thành công.</p>
+                <div
+                    class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 mb-5 w-full max-w-xs text-xs space-y-1">
+                    <p class="text-slate-500 flex justify-between"><span>Thông tin:</span> <span
+                            class="font-semibold text-slate-800" id="incidentSuccessDesc">-</span></p>
                 </div>
-                <p class="text-xs text-slate-500 mb-4 animate-pulse">Trang sẽ tự động cập nhật sau <span id="incidentSuccessCountdown" class="font-bold text-emerald-600">5</span> giây...</p>
-                <button type="button" onclick="window.location.reload()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-lg shadow-md transition-all uppercase">Thanh toán thành công</button>
+                <p class="text-xs text-slate-500 mb-4 animate-pulse">Trang sẽ tự động cập nhật sau <span
+                        id="incidentSuccessCountdown" class="font-bold text-emerald-600">5</span> giây...</p>
+                <button type="button" onclick="window.location.reload()"
+                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs rounded-lg shadow-md transition-all uppercase">Thanh
+                    toán thành công</button>
             </div>
             <div class="flex items-center gap-3 border-b border-slate-200 pb-4 mb-4">
                 <div
@@ -569,23 +601,32 @@
                 <p><strong>Tên sách:</strong> <span class="txt-book-title font-semibold text-slate-800">...</span></p>
                 <p><strong>Mã bản sao:</strong> <span class="txt-copy-id text-red-600 font-mono font-bold">...</span>
                 </p>
-                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-800">...</span></p>
+                <p><strong>Người mượn:</strong> <span class="txt-patron-name font-semibold text-slate-800">...</span>
+                </p>
                 <p><strong>Ngày mượn:</strong> <span class="txt-borrow-date text-slate-700">—</span></p>
                 <p><strong>Hạn trả:</strong> <span class="txt-due-date text-amber-600 font-bold">—</span></p>
             </div>
 
             <!-- Combined Fine Warning Banner for Overdue Lost Books -->
+            <!-- Combined Fine Warning Banner for Incident -->
             <div id="combinedFineWarning"
-                class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-800">
+                class="hidden mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800">
                 <div class="flex items-start gap-2">
-                    <span class="text-sm">⚠️</span>
-                    <div>
-                        <p class="font-bold">Bản sao này đang quá hạn <span id="combinedOverdueDays"
-                                class="font-extrabold text-red-600">0</span> ngày!</p>
-                        <p class="mt-1">Ngoài tiền đền bù mất sách (<span id="combinedBookPrice" class="font-semibold text-slate-800">0</span>đ), người mượn
-                            vẫn cần đóng thêm tiền phạt quá hạn là <span id="combinedOverdueFine" class="font-semibold text-slate-700">0</span>đ.</p>
-                        <p class="font-bold mt-1 text-red-650 border-t border-red-150 pt-1">Tổng tiền phạt/đền bù: <span
-                                id="combinedTotalFine" class="text-red-600 font-extrabold">0</span>đ</p>
+                    <span class="text-sm">💰</span>
+                    <div class="w-full">
+                        <div class="flex justify-between items-center mb-1">
+                            <span>Tiền đền bù / Phạt gốc:</span>
+                            <span id="combinedBookPrice" class="font-bold text-slate-800">0</span>
+                        </div>
+                        <div id="overdueDetailsIncident"
+                            class="flex justify-between items-center text-red-600 font-semibold mb-1 hidden">
+                            <span>Phạt quá hạn (<span id="combinedOverdueDays">0</span> ngày):</span>
+                            <span id="combinedOverdueFine">0</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-amber-200 pt-2 mt-1">
+                            <span class="font-bold uppercase">Tổng thanh toán:</span>
+                            <span id="combinedTotalFine" class="font-extrabold text-red-600 text-sm">0</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -598,6 +639,22 @@
                     <option value="Lost">🚨 Mất sách (Đền bù giá sách)</option>
                     <option value="Damaged">📘 Hỏng sách (Phạt hư hại)</option>
                 </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-slate-600 mb-1">Cập nhật mức đền bù/phạt (Nếu khác mặc định,
+                    VNĐ)</label>
+                <div class="relative w-full">
+                    <input type="number" id="manualFineAmountIncident" min="1000" step="1000"
+                        class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg p-2 pr-24 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange"
+                        placeholder="Nhập số tiền đền bù (để trống nếu dùng giá gốc)..."
+                        oninput="updateCombinedFineUI()">
+                    <button type="button" id="btnLockManualFine"
+                        class="absolute inset-y-0 right-0 px-3 flex items-center bg-emerald-500 hover:bg-emerald-600 border border-emerald-500 text-white font-bold text-xs rounded-r-lg transition-colors"
+                        onclick="toggleLockManualFine()">Xác nhận</button>
+                </div>
+                <p id="manualFineWarning" class="text-xs text-red-500 mt-1 hidden font-bold">⚠️ Sách chưa có giá hệ
+                    thống! Bắt buộc nhập tay mức phạt hợp lệ.</p>
             </div>
 
             <div class="mb-4">
@@ -642,11 +699,13 @@
                                 class="font-mono font-semibold text-slate-800"
                                 th:text="${vietqrAccountNo}">00000102719</span></div>
                         <div class="flex justify-between"><span class="text-slate-550">Tên tài khoản:</span> <span
-                                class="font-semibold text-slate-800" th:text="${vietqrAccountName}">NGUYEN QUANG VINH</span>
+                                class="font-semibold text-slate-800" th:text="${vietqrAccountName}">NGUYEN QUANG
+                                VINH</span>
                         </div>
                         <div class="flex justify-between"><span class="text-slate-500">Nội dung:</span> <span
                                 id="incidentQrInfo"
-                                class="font-mono font-bold text-emerald-700 bg-emerald-55 bg-emerald-50 px-1.5 py-0.5 rounded">...</span></div>
+                                class="font-mono font-bold text-emerald-700 bg-emerald-55 bg-emerald-50 px-1.5 py-0.5 rounded">...</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -877,14 +936,38 @@
             const method = document.getElementById('paymentMethodIncident').value;
             const code = document.getElementById('transactionCodeIncident').value.trim();
             const notes = document.getElementById('incidentNotes').value.trim();
+            const manualFineInput = document.getElementById('manualFineAmountIncident');
+            const manualFine = manualFineInput ? manualFineInput.value : '';
 
             if (payNow && method === 'QRCode' && !code) {
                 showToast('⚠️ Vui lòng nhập mã giao dịch ngân hàng đối chiếu!', 'error');
                 return;
             }
 
+            const isMissingPrice = activeScanData && parseFloat(activeScanData.bookPrice) < 0;
+            if (isMissingPrice && (!manualFine || manualFine.trim() === '')) {
+                showToast('⚠️ Sách chưa có giá nhập gốc. Vui lòng nhập mức đền bù/phạt hợp lệ.', 'error');
+                return;
+            }
+
+            if (manualFineInput && !manualFineInput.disabled && (manualFine.trim() !== '' || isMissingPrice)) {
+                showToast('⚠️ Vui lòng click "Xác nhận" để xác nhận mức đền bù trước khi Lập Biên Bản.', 'error');
+                return;
+            }
+
+            if (manualFine && manualFine.trim() !== '') {
+                const parsedFine = parseFloat(manualFine);
+                if (parsedFine <= 0) {
+                    showToast('⚠️ Mức đền bù/phạt phải lớn hơn 0!', 'error');
+                    return;
+                }
+            }
+
             const endpoint = type === 'Lost' ? '/borrowing/api/return-lost' : '/borrowing/api/return-damaged';
-            const params = `ticketDetailId=${ticketDetailId}&paymentMethod=${method}&transactionCode=${encodeURIComponent(code)}&notes=${encodeURIComponent(notes)}`;
+            let params = `ticketDetailId=${ticketDetailId}&paymentMethod=${method}&transactionCode=${encodeURIComponent(code)}&notes=${encodeURIComponent(notes)}`;
+            if (manualFine && manualFine.trim() !== '') {
+                params += `&manualFineAmount=${manualFine}`;
+            }
 
             try {
                 const res = await fetch(`${endpoint}?${params}`, { method: 'POST' });
@@ -914,6 +997,8 @@
             } else if (id === 'reportIncidentModal') {
                 document.getElementById('paymentMethodIncident').value = 'Cash';
                 document.getElementById('incidentNotes').value = ''; // Reset notes field
+                document.getElementById('manualFineAmountIncident').value = '';
+                if (typeof forceUnlockManualFine === 'function') forceUnlockManualFine();
                 toggleIncidentPay();
             }
         }
@@ -937,20 +1022,49 @@
             onSwitchIncidentType();
         }
 
+        function updateCombinedFineUI() {
+            if (!activeScanData) return;
+            const manualVal = document.getElementById('manualFineAmountIncident').value;
+            let currentBookPrice = parseFloat(activeScanData.bookPrice) || 0;
+            let isMissingPrice = (currentBookPrice < 0);
+
+            let finalPrice = isMissingPrice ? 0 : currentBookPrice;
+            if (manualVal && !isNaN(manualVal) && parseFloat(manualVal) >= 0) {
+                finalPrice = parseFloat(manualVal);
+            }
+
+            if (isMissingPrice && (!manualVal || manualVal.trim() === '')) {
+                document.getElementById('manualFineWarning').classList.remove('hidden');
+            } else {
+                document.getElementById('manualFineWarning').classList.add('hidden');
+            }
+
+            document.getElementById('combinedBookPrice').textContent = finalPrice.toLocaleString('vi-VN') + 'đ';
+            const overdueF = activeScanData.isOverdue ? parseFloat(activeScanData.fineAmount || 0) : 0;
+            const total = finalPrice + overdueF;
+            document.getElementById('combinedTotalFine').textContent = total.toLocaleString('vi-VN') + 'đ';
+
+            if (!document.getElementById('incidentQrContainer').classList.contains('hidden')) {
+                clearTimeout(window.qrDebounce);
+                window.qrDebounce = setTimeout(toggleIncidentTxCode, 300);
+            }
+        }
+
         function onSwitchIncidentType() {
             const type = document.getElementById('incidentType').value;
             document.getElementById('reportModalTitle').textContent = type === 'Lost' ? '🚨 Báo cáo mất sách' : '📘 Báo cáo hỏng sách';
 
-            const warningEl = document.getElementById('combinedFineWarning');
+            document.getElementById('combinedFineWarning').classList.remove('hidden');
+
             if (activeScanData && activeScanData.isOverdue) {
+                document.getElementById('overdueDetailsIncident').classList.remove('hidden');
                 document.getElementById('combinedOverdueDays').textContent = activeScanData.overdueDays;
-                document.getElementById('combinedBookPrice').textContent = parseFloat(activeScanData.bookPrice).toLocaleString('vi-VN');
-                document.getElementById('combinedOverdueFine').textContent = parseFloat(activeScanData.fineAmount).toLocaleString('vi-VN');
-                document.getElementById('combinedTotalFine').textContent = parseFloat(activeScanData.combinedAmount).toLocaleString('vi-VN');
-                warningEl.classList.remove('hidden');
+                document.getElementById('combinedOverdueFine').textContent = parseFloat(activeScanData.fineAmount).toLocaleString('vi-VN') + 'đ';
             } else {
-                warningEl.classList.add('hidden');
+                document.getElementById('overdueDetailsIncident').classList.add('hidden');
             }
+
+            updateCombinedFineUI();
             toggleIncidentTxCode();
         }
 
@@ -958,15 +1072,34 @@
             const method = document.getElementById('paymentMethodIncident').value;
             const container = document.getElementById('txCodeContainerIncident');
             const qrContainer = document.getElementById('incidentQrContainer');
-            const payNow = document.getElementById('incidentPayNow').checked;
+            const payNow = true;
+
+            const manualFineInput = document.getElementById('manualFineAmountIncident');
+            const hasManualValue = manualFineInput && manualFineInput.value.trim() !== '';
+            const isMissingPrice = activeScanData && parseFloat(activeScanData.bookPrice) < 0;
 
             if (payNow && method === 'QRCode') {
+                if (manualFineInput && !manualFineInput.disabled && (hasManualValue || isMissingPrice)) {
+                    document.getElementById('paymentMethodIncident').value = 'Cash';
+                    showToast('⚠️ Vui lòng click "Xác nhận" để xác nhận mức đền bù trước khi tạo mã QR.', 'error');
+                    return;
+                }
                 container.classList.remove('hidden');
                 qrContainer.classList.remove('hidden');
+                forceLockManualFine();
                 if (activeScanData) {
                     const isOverdue = activeScanData.isOverdue;
-                    const amount = isOverdue ? activeScanData.combinedAmount : activeScanData.bookPrice;
-                    
+
+                    const manualVal = document.getElementById('manualFineAmountIncident').value;
+                    let currentBookPrice = parseFloat(activeScanData.bookPrice) || 0;
+                    let isMissingPrice = (currentBookPrice < 0);
+                    let finalPrice = isMissingPrice ? 0 : currentBookPrice;
+                    if (manualVal && !isNaN(manualVal) && parseFloat(manualVal) >= 0) {
+                        finalPrice = parseFloat(manualVal);
+                    }
+
+                    let amount = isOverdue ? (finalPrice + parseFloat(activeScanData.fineAmount)) : finalPrice;
+
                     const incidentType = document.getElementById('incidentType').value;
                     const action = incidentType === 'Lost' ? 'M' : 'D';
 
@@ -981,35 +1114,90 @@
                         },
                         body: 'action=' + action + '&id=' + activeScanData.ticketDetailId
                     })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success && data.token) {
-                            const transferDesc = data.token;
-                            document.getElementById('incidentQrInfo').textContent = transferDesc;
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success && data.token) {
+                                const transferDesc = data.token;
+                                document.getElementById('incidentQrInfo').textContent = transferDesc;
 
-                            const vqrBankId = document.getElementById('vqrBankId').value;
-                            const vqrAccountNo = document.getElementById('vqrAccountNo').value;
-                            const vqrAccountName = document.getElementById('vqrAccountName').value;
+                                const vqrBankId = document.getElementById('vqrBankId').value;
+                                const vqrAccountNo = document.getElementById('vqrAccountNo').value;
+                                const vqrAccountName = document.getElementById('vqrAccountName').value;
 
-                            const qrUrl = 'https://img.vietqr.io/image/' + vqrBankId + '-' + vqrAccountNo + '-compact2.png?amount=' + amount + '&addInfo=' + encodeURIComponent(transferDesc) + '&accountName=' + encodeURIComponent(vqrAccountName);
-                            document.getElementById('incidentQrImage').src = qrUrl;
+                                const qrUrl = 'https://img.vietqr.io/image/' + vqrBankId + '-' + vqrAccountNo + '-compact2.png?amount=' + amount + '&addInfo=' + encodeURIComponent(transferDesc) + '&accountName=' + encodeURIComponent(vqrAccountName);
+                                document.getElementById('incidentQrImage').src = qrUrl;
 
-                            startOverdueReturnStatusPolling(activeScanData.ticketDetailId);
-                        } else {
-                            document.getElementById('incidentQrInfo').textContent = "Lỗi sinh Token: " + (data.message || "Unknown error");
-                        }
-                    })
-                    .catch(err => {
-                        document.getElementById('incidentQrInfo').textContent = "Không thể kết nối đến máy chủ.";
-                        console.error(err);
-                    });
+                                startOverdueReturnStatusPolling(activeScanData.ticketDetailId);
+                            } else {
+                                document.getElementById('incidentQrInfo').textContent = "Lỗi sinh Token: " + (data.message || "Unknown error");
+                            }
+                        })
+                        .catch(err => {
+                            document.getElementById('incidentQrInfo').textContent = "Không thể kết nối đến máy chủ.";
+                            console.error(err);
+                        });
                 }
             } else {
                 container.classList.add('hidden');
                 qrContainer.classList.add('hidden');
+                forceUnlockManualFine();
                 if (method !== 'QRCode') {
                     stopOverdueReturnStatusPolling();
                 }
+            }
+        }
+
+        function toggleLockManualFine() {
+            const input = document.getElementById('manualFineAmountIncident');
+            const method = document.getElementById('paymentMethodIncident').value;
+            if (!input) return;
+
+            if (input.disabled) {
+                if (method === 'QRCode') {
+                    showToast('⚠️ Bạn đang ở chế độ QRCode tự động sinh. Để mở khóa sửa giá, vui lòng chọn lại chuyển phương thức Tiền Mặt trước.', 'info');
+                    return;
+                }
+                forceUnlockManualFine();
+            } else {
+                const val = parseFloat(input.value);
+                const currentBookPrice = parseFloat(activeScanData?.bookPrice || 0);
+                if (currentBookPrice < 0 && (!val || val <= 0)) {
+                    showToast('⚠️ Sách chưa có giá hệ thống! Bạn buộc phải gõ giá hợp lệ trước khi chốt biên bản.', 'error');
+                    return;
+                }
+                forceLockManualFine();
+            }
+        }
+
+        function forceLockManualFine() {
+            const input = document.getElementById('manualFineAmountIncident');
+            const btn = document.getElementById('btnLockManualFine');
+            if (input) {
+                input.disabled = true;
+                input.classList.add('bg-slate-100', 'cursor-not-allowed', 'opacity-70');
+            }
+            if (btn) {
+                btn.textContent = 'Sửa Lại';
+                btn.classList.replace('bg-emerald-500', 'bg-slate-200');
+                btn.classList.replace('text-white', 'text-slate-600');
+                btn.classList.replace('hover:bg-emerald-600', 'hover:bg-slate-300');
+                btn.classList.replace('border-emerald-500', 'border-slate-300');
+            }
+        }
+
+        function forceUnlockManualFine() {
+            const input = document.getElementById('manualFineAmountIncident');
+            const btn = document.getElementById('btnLockManualFine');
+            if (input) {
+                input.disabled = false;
+                input.classList.remove('bg-slate-100', 'cursor-not-allowed', 'opacity-70');
+            }
+            if (btn) {
+                btn.textContent = 'Xác nhận';
+                btn.classList.replace('bg-slate-200', 'bg-emerald-500');
+                btn.classList.replace('text-slate-600', 'text-white');
+                btn.classList.replace('hover:bg-slate-300', 'hover:bg-emerald-600');
+                btn.classList.replace('border-slate-300', 'border-emerald-500');
             }
         }
 
@@ -1025,14 +1213,14 @@
                     const data = await response.json();
                     if (data.success && data.returned) {
                         stopOverdueReturnStatusPolling();
-                        
+
                         const isOverdueModalOpen = document.getElementById('overdueReturnModal').classList.contains('flex');
                         const isIncidentModalOpen = document.getElementById('reportIncidentModal').classList.contains('flex');
-                        
+
                         if (isOverdueModalOpen) {
                             document.getElementById('overdueSuccessDesc').textContent = 'Trả sách quá hạn #' + ticketDetailId;
                             document.getElementById('overdueSuccessOverlay').classList.remove('hidden');
-                            
+
                             let secondsLeft = 5;
                             const countdownSpan = document.getElementById('overdueSuccessCountdown');
                             countdownSpan.textContent = secondsLeft;
@@ -1048,7 +1236,7 @@
                             const incidentType = document.getElementById('incidentType').value;
                             document.getElementById('incidentSuccessDesc').textContent = (incidentType === 'Lost' ? 'Báo hỏng sách #' : 'Báo hỏng sách #') + ticketDetailId;
                             document.getElementById('incidentSuccessOverlay').classList.remove('hidden');
-                            
+
                             let secondsLeft = 5;
                             const countdownSpan = document.getElementById('incidentSuccessCountdown');
                             countdownSpan.textContent = secondsLeft;
@@ -1104,29 +1292,29 @@
                         },
                         body: 'action=T&id=' + activeScanData.ticketDetailId
                     })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success && data.token) {
-                            const transferDesc = data.token;
-                            document.getElementById('overdueQrInfo').textContent = transferDesc;
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success && data.token) {
+                                const transferDesc = data.token;
+                                document.getElementById('overdueQrInfo').textContent = transferDesc;
 
-                            const vqrBankId = document.getElementById('vqrBankId').value;
-                            const vqrAccountNo = document.getElementById('vqrAccountNo').value;
-                            const vqrAccountName = document.getElementById('vqrAccountName').value;
+                                const vqrBankId = document.getElementById('vqrBankId').value;
+                                const vqrAccountNo = document.getElementById('vqrAccountNo').value;
+                                const vqrAccountName = document.getElementById('vqrAccountName').value;
 
-                            const qrUrl = 'https://img.vietqr.io/image/' + vqrBankId + '-' + vqrAccountNo + '-compact2.png?amount=' + amount + '&addInfo=' + encodeURIComponent(transferDesc) + '&accountName=' + encodeURIComponent(vqrAccountName);
-                            document.getElementById('overdueQrImage').src = qrUrl;
+                                const qrUrl = 'https://img.vietqr.io/image/' + vqrBankId + '-' + vqrAccountNo + '-compact2.png?amount=' + amount + '&addInfo=' + encodeURIComponent(transferDesc) + '&accountName=' + encodeURIComponent(vqrAccountName);
+                                document.getElementById('overdueQrImage').src = qrUrl;
 
-                            // Bắt đầu khảo sát trạng thái trả sách sau khi quét
-                            startOverdueReturnStatusPolling(activeScanData.ticketDetailId);
-                        } else {
-                            document.getElementById('overdueQrInfo').textContent = "Lỗi sinh Token: " + (data.message || "Unknown error");
-                        }
-                    })
-                    .catch(err => {
-                        document.getElementById('overdueQrInfo').textContent = "Không thể kết nối đến máy chủ.";
-                        console.error(err);
-                    });
+                                // Bắt đầu khảo sát trạng thái trả sách sau khi quét
+                                startOverdueReturnStatusPolling(activeScanData.ticketDetailId);
+                            } else {
+                                document.getElementById('overdueQrInfo').textContent = "Lỗi sinh Token: " + (data.message || "Unknown error");
+                            }
+                        })
+                        .catch(err => {
+                            document.getElementById('overdueQrInfo').textContent = "Không thể kết nối đến máy chủ.";
+                            console.error(err);
+                        });
                 }
             } else {
                 container.classList.add('hidden');
@@ -1136,46 +1324,79 @@
         }
 
         function toggleIncidentPay() {
-            const payNow = document.getElementById('incidentPayNow').checked;
+            const payNow = true;
             const fields = document.getElementById('incidentPaymentFields');
-            if (payNow) {
+            if (payNow && fields) {
                 fields.classList.remove('hidden');
-            } else {
+            } else if (fields) {
                 fields.classList.add('hidden');
             }
         }
 
         // =====================================================================
-        // SYSTEM TOAST CREATOR
+        // =====================================================================
+        // NOTIFICATION MODAL SYSTEM
         // =====================================================================
         function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `flex items-center gap-3 px-5 py-3 rounded-xl shadow-lg border text-sm font-bold transition-all transform translate-y-2 pointer-events-auto duration-300 animate-bounce `;
+            const existing = document.getElementById('systemAlertModal');
+            if (existing) existing.remove();
 
-            let colorClasses = '';
+            const modal = document.createElement('div');
+            modal.id = 'systemAlertModal';
+            modal.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm';
+
+            let icon = '';
+            let title = '';
+            let btnClass = '';
+
             if (type === 'success') {
-                colorClasses = 'bg-emerald-50 border-emerald-200 text-emerald-800';
+                icon = '<svg class="w-12 h-12 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>';
+                title = 'Thành công';
+                btnClass = 'bg-emerald-500 hover:bg-emerald-600 focus:ring-emerald-200';
             } else if (type === 'error') {
-                colorClasses = 'bg-red-50 border-red-200 text-red-800';
+                icon = '<svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
+                title = 'Có lỗi xảy ra';
+                btnClass = 'bg-red-500 hover:bg-red-600 focus:ring-red-200';
             } else {
-                colorClasses = 'bg-blue-50 border-blue-200 text-blue-800';
+                icon = '<svg class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                title = 'Thông báo';
+                btnClass = 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-200';
             }
 
-            toast.className += colorClasses;
-            toast.innerHTML = `
-                <span>${message}</span>
-                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-900 font-extrabold">&times;</button>
+            modal.innerHTML = `
+                <div class="bg-white rounded-[24px] shadow-2xl max-w-sm w-full p-8 text-center" style="animation: scaleUpCustom 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;">
+                    <div class="flex justify-center mb-5">
+                        <div class="rounded-full bg-slate-50 p-4 shadow-sm border border-slate-100 flex items-center justify-center">
+                            ${icon}
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-slate-800 mb-2">${title}</h3>
+                    <p class="text-slate-500 text-sm font-medium mb-8 leading-relaxed max-h-48 overflow-y-auto">${message}</p>
+                    <button type="button" onclick="document.getElementById('systemAlertModal').remove()" 
+                            class="w-full text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-200 focus:ring-4 focus:outline-none ${btnClass}">
+                        Xác nhận
+                    </button>
+                </div>
+                <style>
+                    @keyframes scaleUpCustom {
+                        from { opacity: 0; transform: scale(0.92) translateY(20px); }
+                        to { opacity: 1; transform: scale(1) translateY(0); }
+                    }
+                </style>
             `;
 
-            container.appendChild(toast);
+            document.body.appendChild(modal);
 
-            setTimeout(() => {
-                toast.remove();
-            }, 4000);
+            if (type === 'success') {
+                setTimeout(() => {
+                    const el = document.getElementById('systemAlertModal');
+                    if (el) el.remove();
+                }, 3000);
+            }
         }
     </script>
 
 
 </body>
+
 </html>
