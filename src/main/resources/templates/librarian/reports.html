@@ -213,7 +213,7 @@
                                     <span th:if="${record.status == 'Returned'}" class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-600 border border-emerald-500/20">Đã trả</span>
                                     <span th:if="${record.status == 'Borrowing'}" class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-blue-500/20 text-blue-600 border border-blue-500/20">Đang mượn</span>
                                     <span th:if="${record.status == 'Overdue'}" class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-rose-500/20 text-rose-600 border border-rose-500/20">Quá hạn</span>
-                                    <span th:if="${record.status == 'Lost'}" class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-slate-700 text-slate-700 border border-slate-400">Mất sách</span>
+                                    <span th:if="${record.status == 'Lost'}" class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-slate-200 text-slate-700 border border-slate-400">Mất sách</span>
                                     <span th:if="${record.status == 'Damaged'}" class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-amber-500/20 text-amber-500 border border-amber-500/20">Làm hỏng</span>
                                 </td>
                             </tr>
@@ -222,7 +222,7 @@
                 </div>
                 
                 <!-- BỘ ĐIỀU KHIỂN PHÂN TRANG (PAGINATION) -->
-                <div th:if="${data.tableData != null and data.tableData.totalPages > 1}" class="px-5 py-4 border-t border-slate-200 flex items-center justify-between bg-white/40">
+                <div th:if="${data.tableData != null and data.tableData.totalPages > 0}" class="px-5 py-4 border-t border-slate-200 flex items-center justify-between bg-white/40">
                     <span class="text-xs text-slate-500">
                         Hiển thị trang <span class="font-bold text-slate-800" th:text="${data.tableData.number + 1}"></span> trên tổng số <span class="font-bold text-slate-800" th:text="${data.tableData.totalPages}"></span> trang
                     </span>
@@ -261,9 +261,25 @@
             const subjectSelect = document.getElementById('subjectSelect');
             subjectSelect.innerHTML = '<option value="">Tất cả</option>';
             
-            if (!majorId || !majorSubjectMap[majorId]) return;
+            let subjects = [];
+            if (!majorId) {
+                const allSubjectsMap = new Map();
+                Object.values(majorSubjectMap).forEach(subjList => {
+                    if (subjList) {
+                        subjList.forEach(subj => {
+                            allSubjectsMap.set(subj.subjectCode, subj);
+                        });
+                    }
+                });
+                subjects = Array.from(allSubjectsMap.values());
+            } else {
+                subjects = majorSubjectMap[majorId] || [];
+            }
 
-            majorSubjectMap[majorId].forEach(subj => {
+            // Sắp xếp môn học theo bảng chữ cái mã môn học
+            subjects.sort((a, b) => a.subjectCode.localeCompare(b.subjectCode));
+
+            subjects.forEach(subj => {
                 const isSelected = (safeSelectedSubject === subj.subjectCode) ? 'selected' : '';
                 subjectSelect.innerHTML += `<option value="${subj.subjectCode}" ${isSelected}>${subj.subjectCode} - ${subj.subjectName}</option>`;
             });
@@ -272,7 +288,7 @@
         // Khởi chạy lúc load trang
         document.addEventListener('DOMContentLoaded', () => {
             const initialMajorId = document.getElementById('majorSelect').value;
-            if (initialMajorId) loadSubjectsByMajor(initialMajorId);
+            loadSubjectsByMajor(initialMajorId);
         });
     </script>
 
