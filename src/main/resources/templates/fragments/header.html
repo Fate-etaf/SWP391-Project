@@ -6,6 +6,24 @@
     <title th:text="${title}">FPTU Library</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style th:replace="~{fragments/header :: header-style}"></style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false },
+            theme: {
+                extend: {
+                    colors: {
+                        fpt: {
+                            orange: '#F27125',
+                            navy: '#1E293B',
+                            dark: '#0F172A',
+                            orangeHover: '#D95F18'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 <body>
 
@@ -45,6 +63,31 @@
         .nav-profile-btn { color: #e87722 !important; font-size: 14px; font-weight: 600; padding: 14px 8px; text-decoration: none; }
         .nav-profile-btn:hover { color: #fff !important; text-decoration: underline; }
 
+        /* ── USER BOX ── */
+        .user-box-container {
+            display: flex; align-items: center; background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(51, 65, 85, 0.6); border-radius: 12px;
+            padding: 4px 12px; color: #e2e8f0; margin-left: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            backdrop-filter: blur(12px);
+        }
+        .user-box-profile {
+            display: flex; align-items: center; gap: 12px; cursor: pointer;
+            color: inherit; text-decoration: none; transition: opacity 0.2s;
+        }
+        .user-box-profile:hover { opacity: 0.8; }
+        .user-box-avatar {
+            width: 28px; height: 28px; border-radius: 8px; border: 1px solid #f97316; background: #020617; object-fit: cover;
+        }
+        .user-box-info { display: flex; flex-direction: column; text-align: left; line-height: 1; justify-content: center; }
+        .user-box-name { font-size: 12px; font-weight: 700; color: #f1f5f9; margin-bottom: 2px; }
+        .user-box-roll { font-size: 10px; color: #94a3b8; }
+        .user-box-logout {
+            font-size: 11px; color: #f87171; font-weight: 600; text-decoration: none;
+            border-left: 1px solid #334155; padding-left: 12px; margin-left: 12px; transition: color 0.2s;
+        }
+        .user-box-logout:hover { color: #fca5a5; }
+
         @media (max-width: 768px) {
             .top-bar .site-title { font-size: 16px; }
             .main-nav .inner { overflow-x: auto; }
@@ -68,15 +111,15 @@
                 </div>
                 <a th:if="${session.loggedInUser == null}" href="/login" class="btn-logout">Đăng nhập</a>
 
-                <div th:if="${session.loggedInUser != null}" class="flex items-center bg-slate-800/80 border border-slate-700/60 rounded-xl p-1 px-3 text-slate-200 ml-4 shadow-md backdrop-blur-md">
-                    <a href="/profile" class="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer text-inherit no-underline">
-                        <img th:src="@{'https://api.dicebear.com/7.x/bottts/svg?seed=' + ${session.loggedInUserId}}" alt="Avatar" class="w-7 h-7 rounded-lg border border-orange-500 bg-slate-950">
-                        <div class="flex flex-col text-left leading-none justify-center">
-                            <span class="text-[12px] font-bold text-slate-100" th:text="${session.loggedInUser.fullName}">Tên SV</span>
-                            <span class="text-[10px] text-slate-400 mt-1" th:text="${session.loggedInUserId}">Mã SV</span>
+                <div th:if="${session.loggedInUser != null}" class="user-box-container">
+                    <a href="/profile" class="user-box-profile" title="Trang cá nhân">
+                        <img th:src="@{'https://api.dicebear.com/7.x/bottts/svg?seed=' + ${session.loggedInUserId}}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=User&background=random';" alt="Avatar" class="user-box-avatar">
+                        <div class="user-box-info">
+                            <span class="user-box-name" th:text="${session.loggedInUser.fullName}">Tên SV</span>
+                            <span class="user-box-roll" th:text="${session.loggedInUserId}">Mã SV</span>
                         </div>
                     </a>
-                    <a href="/logout" class="text-[11px] text-red-400 hover:text-red-300 font-semibold border-l border-slate-700 pl-3 ml-3 transition-colors">Đăng xuất</a>
+                    <a href="/logout" class="user-box-logout">Đăng xuất</a>
                 </div>
             </div>
         </div>
@@ -126,9 +169,7 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Removed duplicate profile link -->
-            
+            <!-- Removed duplicate profile link -->          
         </div>
     </nav>
 
