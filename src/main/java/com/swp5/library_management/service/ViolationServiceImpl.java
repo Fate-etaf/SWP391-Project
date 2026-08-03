@@ -190,7 +190,7 @@ public class ViolationServiceImpl implements ViolationService {
         fine.setViolationType(violationType);
         fine.setReason(reason);
         fine.setCreatedAt(LocalDateTime.now());
-        fine.setPaidStatus("UNPAID");
+        fine.setPaidStatus("Unpaid");
         
         if (patron != null) {
             patron.setBorrowingLocked(true);

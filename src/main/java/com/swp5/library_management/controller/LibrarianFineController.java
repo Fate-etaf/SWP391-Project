@@ -60,10 +60,10 @@ public class LibrarianFineController {
             return "redirect:/login";
         }
 
-        // Mặc định là "Paid" nếu không có trạng thái chỉ định
+        // Mặc định là "Unpaid" nếu không có trạng thái chỉ định
         String activeStatus = paidStatus;
         if (activeStatus == null || activeStatus.isBlank()) {
-            activeStatus = "Paid";
+            activeStatus = "Unpaid";
         }
 
         // Nếu trạng thái là "all", truyền null vào DB để lấy toàn bộ

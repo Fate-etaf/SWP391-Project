@@ -15,10 +15,10 @@ public interface BookReturnService {
 
     void processOverdueReturn(Integer ticketDetailId, String paymentMethod, String transactionCode, String librarianId, String conditionStatus);
 
-    void processLost(Integer ticketDetailId, boolean payNow, String paymentMethod, String transactionCode,
+    void processLost(Integer ticketDetailId, String paymentMethod, String transactionCode,
             String librarianId, String notes);
 
-    void processDamaged(Integer ticketDetailId, boolean payNow, String paymentMethod, String transactionCode,
+    void processDamaged(Integer ticketDetailId, String paymentMethod, String transactionCode,
             String librarianId, String notes);
 
     boolean isBookReturned(Integer ticketDetailId);

@@ -43,17 +43,18 @@ public interface FineInvoiceRepository extends JpaRepository<FineInvoice, Intege
 
     /**
      * Lấy danh sách hóa đơn phạt, lọc theo patronId và paidStatus.
+     * Filter campus theo campusId của patron (không phải returnCampus)
+     * để phiếu Unpaid (chưa trả sách, returnCampus = null) vẫn hiển thị đúng campus.
      * Truyền null để bỏ qua bộ lọc tương ứng.
      */
     @Query("SELECT f FROM FineInvoice f " +
-           "LEFT JOIN FETCH f.patron " +
+           "LEFT JOIN FETCH f.patron p " +
            "LEFT JOIN FETCH f.ticketDetail td " +
            "LEFT JOIN FETCH td.bookCopy bc " +
            "LEFT JOIN FETCH bc.book " +
-           "LEFT JOIN td.returnCampus rc " +
-           "WHERE (:patronId IS NULL OR f.patron.userId = :patronId) " +
+           "WHERE (:patronId IS NULL OR p.userId = :patronId) " +
            "AND (:paidStatus IS NULL OR f.paidStatus = :paidStatus) " +
-           "AND (:campusId IS NULL OR rc.campusId = :campusId) " +
+           "AND (:campusId IS NULL OR p.campusId = :campusId) " +
            "ORDER BY f.createdAt DESC")
     List<FineInvoice> findAllFiltered(@Param("patronId") String patronId,
                                       @Param("paidStatus") String paidStatus,

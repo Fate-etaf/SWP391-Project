@@ -117,13 +117,13 @@ public interface BorrowTicketDetailRepository
        @Query("SELECT d.borrowTicket.patron.userId, COUNT(d) FROM BorrowTicketDetail d WHERE d.borrowTicket.patron.userId IN :userIds AND d.returnDate IS NULL GROUP BY d.borrowTicket.patron.userId")
        java.util.List<Object[]> countActiveBorrowedByUsers(@Param("userIds") java.util.List<String> userIds);
 
-       @EntityGraph(attributePaths = { "bookCopy", "bookCopy.book", "borrowTicket", "borrowTicket.patron", "borrowTicket.campus" })
+       @EntityGraph(attributePaths = { "bookCopy", "bookCopy.book", "bookCopy.campus", "borrowTicket", "borrowTicket.patron", "borrowTicket.campus" })
        @Query("SELECT b FROM BorrowTicketDetail b " +
               "WHERE b.returnDate IS NULL " +
               "AND (b.status IS NULL OR b.status NOT IN ('Returned', 'Lost', 'Damaged')) " +
               "AND (:title IS NULL OR LOWER(b.bookCopy.book.title) LIKE LOWER(CONCAT('%', :title, '%'))) " +
               "AND (:borrowerId IS NULL OR LOWER(b.borrowTicket.patron.userId) LIKE LOWER(CONCAT('%', :borrowerId, '%'))) " +
-              "AND (:campusId IS NULL OR b.borrowTicket.campus.campusId = :campusId)")
+              "AND (:campusId IS NULL OR b.bookCopy.campus.campusId = :campusId)")
        List<BorrowTicketDetail> searchCurrentlyBorrowing(@Param("title") String title, @Param("borrowerId") String borrowerId, @Param("campusId") Integer campusId);
 
        }
