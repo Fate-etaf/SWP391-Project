@@ -29,6 +29,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     long countByStatus(String status);
     
     Optional<User> findByUserIdAndEmailAndCampusId(String userId, String email, Integer campusId);
+    Optional<User> findByUserIdAndCampusId(String userId, Integer campusId);
 
     @Query(value = "SELECT r.RoleName FROM Roles r JOIN UserRoles ur ON r.RoleID = ur.RoleID WHERE ur.UserID = :userId", nativeQuery = true)
     List<String> findRolesByUserId(@Param("userId") String userId);
