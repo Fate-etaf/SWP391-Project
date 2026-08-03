@@ -272,7 +272,6 @@ public class LibrarianController {
     // ── 4. ACQUISITION DASHBOARD ──
     @GetMapping("/acquisition/dashboard")
     public String dashboard(@RequestParam(required = false) String status,
-                            @RequestParam(required = false) String search,
                             @RequestParam(required = false) String patronRole,
                             @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate fromDate,
                             @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate toDate,
@@ -309,21 +308,22 @@ public class LibrarianController {
 
         // Request list scoped to this librarian's campus
         List<MaterialRequest> requests = (librarianCampusId != null)
-                ? materialRequestRepository.findByStatusAndSearchTermAndCampusId(status, search, librarianCampusId, fromDateTime, toDateTime)
-                : materialRequestRepository.findByStatusAndSearchTerm(status, search, fromDateTime, toDateTime);
+                ? materialRequestRepository.findByStatusAndSearchTermAndCampusId(status, null, librarianCampusId, fromDateTime, toDateTime)
+                : materialRequestRepository.findByStatusAndSearchTerm(status, null, fromDateTime, toDateTime);
 
-        // Filter by Patron Role (Student / Lecturer)
+        // Filter by Patron Role (Student / Lecturer / Librarian)
         if (patronRole != null && !patronRole.isEmpty()) {
             if ("Student".equalsIgnoreCase(patronRole)) {
                 requests = requests.stream()
-                        .filter(r -> r.getPatron() != null &&
-                                (r.getPatron().getRoles().isEmpty()
-                                 || r.getPatron().getRoles().stream().anyMatch(role -> Integer.valueOf(1).equals(role.getRoleId()))))
+                        .filter(r -> r.getPatron() != null && r.getPatron().isStudent())
                         .toList();
             } else if ("Lecturer".equalsIgnoreCase(patronRole)) {
                 requests = requests.stream()
-                        .filter(r -> r.getPatron() != null &&
-                                r.getPatron().getRoles().stream().anyMatch(role -> Integer.valueOf(2).equals(role.getRoleId())))
+                        .filter(r -> r.getPatron() != null && r.getPatron().isLecturer())
+                        .toList();
+            } else if ("Librarian".equalsIgnoreCase(patronRole)) {
+                requests = requests.stream()
+                        .filter(r -> r.getPatron() != null && r.getPatron().isLibrarian())
                         .toList();
             }
         }
@@ -335,7 +335,6 @@ public class LibrarianController {
         model.addAttribute("availableCount",     availableCount);
         model.addAttribute("requests",           requests);
         model.addAttribute("currentStatus",      status);
-        model.addAttribute("currentSearch",      search);
         model.addAttribute("currentPatronRole",  patronRole);
         model.addAttribute("currentFromDate",    fromDate);
         model.addAttribute("currentToDate",      toDate);
@@ -346,7 +345,6 @@ public class LibrarianController {
 
     @GetMapping("/acquisition/export-excel")
     public void exportToExcel(@RequestParam(required = false) String status,
-                              @RequestParam(required = false) String search,
                               @RequestParam(required = false) String patronRole,
                               @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate fromDate,
                               @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate toDate,
@@ -367,21 +365,22 @@ public class LibrarianController {
         LocalDateTime toDateTime = (toDate != null) ? toDate.atTime(23, 59, 59) : null;
 
         List<MaterialRequest> requests = (librarianCampusId != null)
-                ? materialRequestRepository.findByStatusAndSearchTermAndCampusId(status, search, librarianCampusId, fromDateTime, toDateTime)
-                : materialRequestRepository.findByStatusAndSearchTerm(status, search, fromDateTime, toDateTime);
+                ? materialRequestRepository.findByStatusAndSearchTermAndCampusId(status, null, librarianCampusId, fromDateTime, toDateTime)
+                : materialRequestRepository.findByStatusAndSearchTerm(status, null, fromDateTime, toDateTime);
 
-        // Filter by Patron Role
+        // Filter by Patron Role (Student / Lecturer / Librarian)
         if (patronRole != null && !patronRole.isEmpty()) {
             if ("Student".equalsIgnoreCase(patronRole)) {
                 requests = requests.stream()
-                        .filter(r -> r.getPatron() != null &&
-                                (r.getPatron().getRoles().isEmpty()
-                                 || r.getPatron().getRoles().stream().anyMatch(role -> Integer.valueOf(1).equals(role.getRoleId()))))
+                        .filter(r -> r.getPatron() != null && r.getPatron().isStudent())
                         .toList();
             } else if ("Lecturer".equalsIgnoreCase(patronRole)) {
                 requests = requests.stream()
-                        .filter(r -> r.getPatron() != null &&
-                                r.getPatron().getRoles().stream().anyMatch(role -> Integer.valueOf(2).equals(role.getRoleId())))
+                        .filter(r -> r.getPatron() != null && r.getPatron().isLecturer())
+                        .toList();
+            } else if ("Librarian".equalsIgnoreCase(patronRole)) {
+                requests = requests.stream()
+                        .filter(r -> r.getPatron() != null && r.getPatron().isLibrarian())
                         .toList();
             }
         }

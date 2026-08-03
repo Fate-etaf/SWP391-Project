@@ -43,6 +43,12 @@ public class MaterialRequest {
     @Column(name = "BookLink", length = 500)
     private String bookLink;
 
+    @Column(name = "PublishYear")
+    private Integer publishYear;
+
+    @Column(name = "Description")
+    private String description;
+
     @Column(name = "Priority", length = 100)
     private String priority;
 

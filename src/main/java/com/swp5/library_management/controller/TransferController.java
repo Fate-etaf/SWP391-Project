@@ -115,7 +115,7 @@ public class TransferController {
         User user = (User) session.getAttribute("loggedInUser");
         if (user != null && user.isLibrarian()) {
             try {
-                transferService.confirmBatchShipment(user.getCampusId());
+                transferService.confirmBatchShipment(user.getCampusId(), user.getUserId());
                 redirectAttributes.addFlashAttribute("successMsg", "Đã xuất lô hàng cho đơn vị vận chuyển!");
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
@@ -233,7 +233,7 @@ public class TransferController {
         User user = (User) session.getAttribute("loggedInUser");
         if (user != null && user.isLibrarian()) {
             try {
-                transferService.markAsInTransit(transferId, user.getCampusId());
+                transferService.markAsInTransit(transferId, user.getCampusId(), user.getUserId());
                 redirectAttributes.addFlashAttribute("successMsg", "Lô sách đã được giao cho đơn vị vận chuyển!");
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("errorMsg", "Lỗi xử lý: " + e.getMessage());

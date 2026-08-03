@@ -20,6 +20,7 @@ public class RoomBookingCleanupJob {
 
     private final RoomBookingRepository roomBookingRepository;
     private final UserRepository userRepository;
+    private final com.swp5.library_management.service.EmailService emailService;
 
     @Scheduled(fixedRate = 60000) // Chạy mỗi phút
     @Transactional
@@ -30,6 +31,18 @@ public class RoomBookingCleanupJob {
         for (RoomBooking booking : noShows) {
             log.info("Booking {} marked as NoShow", booking.getBookingId());
             booking.setStatus("NoShow");
+            
+            try {
+                emailService.sendStudyRoomNoShow(
+                        booking.getPatron().getEmail(),
+                        booking.getPatron().getFullName(),
+                        booking.getStudyRoom().getRoomName(),
+                        booking.getBookingDate().toString(),
+                        booking.getStartTime() + " - " + booking.getEndTime()
+                );
+            } catch (Exception e) {
+                log.error("Failed to send NoShow email for booking {}", booking.getBookingId(), e);
+            }
         }
 
         if (!noShows.isEmpty()) {

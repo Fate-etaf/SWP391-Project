@@ -43,8 +43,8 @@ public class MaterialRequestExportService {
 
             // Headers
             String[] headers = {
-                "No.", "Request ID", "Patron ID", "Patron Name", "Title", "Author",
-                "ISBN", "Publisher", "Language", "Priority", "Reason",
+                "No.", "Request ID", "Patron ID", "Patron Name", "Patron Role", "Title", "Author",
+                "ISBN", "Publisher", "Publish Year", "Language", "Description", "Priority", "Reason",
                 "Status", "Feedback", "Reviewed By", "Reviewed At", "Created At"
             };
 
@@ -65,11 +65,14 @@ public class MaterialRequestExportService {
                 createCell(row, col++, "REQ" + String.format("%03d", req.getRequestId()), dataStyle);
                 createCell(row, col++, req.getPatron() != null ? req.getPatron().getUserId() : "", dataStyle);
                 createCell(row, col++, req.getPatron() != null ? req.getPatron().getFullName() : "", dataStyle);
+                createCell(row, col++, req.getPatron() != null ? req.getPatron().getRoleNameDisplay() : "", dataStyle);
                 createCell(row, col++, req.getTitle() != null ? req.getTitle() : "", dataStyle);
                 createCell(row, col++, req.getAuthor() != null ? req.getAuthor() : "", dataStyle);
                 createCell(row, col++, req.getIsbn() != null ? req.getIsbn() : "", dataStyle);
                 createCell(row, col++, req.getPublisher() != null ? req.getPublisher() : "", dataStyle);
+                createCell(row, col++, req.getPublishYear() != null ? req.getPublishYear() : "", dataStyle);
                 createCell(row, col++, req.getLanguage() != null ? req.getLanguage() : "", dataStyle);
+                createCell(row, col++, req.getDescription() != null ? req.getDescription() : "", dataStyle);
                 createCell(row, col++, req.getPriority() != null ? req.getPriority() : "", dataStyle);
                 createCell(row, col++, req.getReason() != null ? req.getReason() : "", dataStyle);
                 createCell(row, col++, req.getStatus() != null ? req.getStatus() : "", dataStyle);

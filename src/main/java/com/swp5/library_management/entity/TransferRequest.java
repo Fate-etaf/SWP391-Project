@@ -45,6 +45,10 @@ public class TransferRequest {
     @JoinColumn(name = "ConfirmedBy")
     private User confirmedBy;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ShippedBy")
+    private User shippedBy;
+
     @Column(name = "Status", length = 50)
     private String status;
 

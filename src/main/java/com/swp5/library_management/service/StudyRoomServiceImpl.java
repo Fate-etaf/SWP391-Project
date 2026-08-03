@@ -29,7 +29,7 @@ public class StudyRoomServiceImpl implements StudyRoomService {
     private final RoomBookingRepository roomBookingRepository;
     private final UserRepository userRepository;
     private final QrCodeService qrCodeService;
-    // private final EmailService emailService; // Temporarily omitted to avoid changing too many files unless needed
+    private final EmailService emailService;
 
     @Override
     public List<StudyRoomDTO> getAvailableRooms(Integer campusId, LocalDate date, String patronId) {
@@ -151,6 +151,15 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         booking.setQrCode(qrBytes);
         roomBookingRepository.save(booking);
         
+        // Send email confirmation
+        emailService.sendStudyRoomBookingConfirmation(
+                patron.getEmail(),
+                patron.getFullName(),
+                room.getRoomName(),
+                request.getBookingDate().toString(),
+                start + " - " + end
+        );
+        
         // Return response
         return RoomBookingResponseDTO.builder()
                 .bookingId(booking.getBookingId())
@@ -184,6 +193,15 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         
         booking.setStatus("Cancelled");
         roomBookingRepository.save(booking);
+
+        // Send email cancellation
+        emailService.sendStudyRoomCancellation(
+                booking.getPatron().getEmail(),
+                booking.getPatron().getFullName(),
+                booking.getStudyRoom().getRoomName(),
+                booking.getBookingDate().toString(),
+                booking.getStartTime() + " - " + booking.getEndTime()
+        );
     }
 
     @Override
@@ -237,6 +255,15 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         // Librarian can cancel if rules violated
         booking.setStatus("Cancelled");
         roomBookingRepository.save(booking);
+
+        // Send email cancellation
+        emailService.sendStudyRoomCancellation(
+                booking.getPatron().getEmail(),
+                booking.getPatron().getFullName(),
+                booking.getStudyRoom().getRoomName(),
+                booking.getBookingDate().toString(),
+                booking.getStartTime() + " - " + booking.getEndTime()
+        );
     }
 
     @Override

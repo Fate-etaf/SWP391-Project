@@ -113,12 +113,28 @@ public class User {
                 .anyMatch(r -> "Student".equalsIgnoreCase(r.getRoleName()) || r.getRoleId() == 1);
     }
 
+    public boolean isLecturer() {
+        if (this.role != null && (this.role.getRoleId() == 2 || "Lecturer".equalsIgnoreCase(this.role.getRoleName()))) {
+            return true;
+        }
+        return this.roles != null && this.roles.stream()
+                .anyMatch(r -> "Lecturer".equalsIgnoreCase(r.getRoleName()) || r.getRoleId() == 2);
+    }
+
     public boolean isAdmin() {
         if (this.role != null && (this.role.getRoleId() == 4 || "Admin".equalsIgnoreCase(this.role.getRoleName()))) {
             return true;
         }
         return this.roles != null && this.roles.stream()
                 .anyMatch(r -> "Admin".equalsIgnoreCase(r.getRoleName()) || r.getRoleId() == 4);
+    }
+
+    public String getRoleNameDisplay() {
+        if (isLibrarian()) return "Librarian";
+        if (isAdmin()) return "Admin";
+        if (isLecturer()) return "Lecturer";
+        if (isStudent()) return "Student";
+        return "Student";
     }
 
 
