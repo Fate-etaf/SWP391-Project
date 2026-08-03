@@ -25,15 +25,18 @@ public class TransferServiceImpl implements TransferService {
     private final BookCopyRepository bookCopyRepository;
     private final UserRepository userRepository;
     private final CampusRepository campusRepository;
+    private final EmailService emailService;
 
     public TransferServiceImpl(TransferRequestRepository transferRequestRepository,
             BookCopyRepository bookCopyRepository,
             UserRepository userRepository,
-            CampusRepository campusRepository) {
+            CampusRepository campusRepository,
+            EmailService emailService) {
         this.transferRequestRepository = transferRequestRepository;
         this.bookCopyRepository = bookCopyRepository;
         this.userRepository = userRepository;
         this.campusRepository = campusRepository;
+        this.emailService = emailService;
     }
 
     @Override
@@ -151,7 +154,7 @@ public class TransferServiceImpl implements TransferService {
 
     @Override
     @Transactional
-    public void markAsInTransit(Integer transferId, Integer librarianCampusId) {
+    public void markAsInTransit(Integer transferId, Integer librarianCampusId, String userId) {
         TransferRequest request = getTransferById(transferId);
 
         if (!"Pending".equals(request.getStatus())) {
@@ -164,9 +167,26 @@ public class TransferServiceImpl implements TransferService {
                     "Từ chối truy cập: Chỉ thủ thư tại cơ sở ĐÓNG GÓI mới có quyền xuất kho lô hàng này!");
         }
 
+        User shippedByUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin người giao hàng!"));
+
         request.setStatus("InTransit");
         request.setShippedAt(LocalDateTime.now()); // Ghi nhận thời gian giao cho shipper
+        request.setShippedBy(shippedByUser);
         transferRequestRepository.save(request);
+
+        try {
+            String bookTitle = request.getDetails() != null && !request.getDetails().isEmpty() ? request.getDetails().get(0).getCopy().getBook().getTitle() : "N/A";
+            emailService.sendBookTransferDecision(
+                request.getRequestedBy().getEmail(),
+                request.getRequestedBy().getFullName(),
+                bookTitle,
+                request.getFromCampus().getCampusName(),
+                "Accepted"
+            );
+        } catch (Exception e) {
+            // Ignore email errors
+        }
     }
 
     @Override
@@ -203,6 +223,29 @@ public class TransferServiceImpl implements TransferService {
         }
 
         transferRequestRepository.save(request);
+
+        // Gửi email cho requester và shipper
+        try {
+            String bookTitle = request.getDetails() != null && !request.getDetails().isEmpty() ? request.getDetails().get(0).getCopy().getBook().getTitle() : "N/A";
+            if (request.getRequestedBy() != null) {
+                emailService.sendBookTransferReceiptConfirmation(
+                    request.getRequestedBy().getEmail(),
+                    request.getRequestedBy().getFullName(),
+                    bookTitle,
+                    request.getToCampus().getCampusName()
+                );
+            }
+            if (request.getShippedBy() != null) {
+                emailService.sendBookTransferReceiptConfirmation(
+                    request.getShippedBy().getEmail(),
+                    request.getShippedBy().getFullName(),
+                    bookTitle,
+                    request.getToCampus().getCampusName()
+                );
+            }
+        } catch (Exception e) {
+            // Ignore email errors
+        }
     }
 
     // ==========================================
@@ -277,7 +320,9 @@ public class TransferServiceImpl implements TransferService {
 
     @Override
     @Transactional
-    public void confirmBatchShipment(Integer campusId) {
+    public void confirmBatchShipment(Integer campusId, String userId) {
+        User shippedByUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin người giao hàng!"));
         // Tìm tất cả các đơn Accepted
         List<TransferRequest> acceptedRequests = transferRequestRepository
                 .findByFromCampusCampusIdAndStatusInOrderByRequestedAtDesc(campusId,
@@ -286,7 +331,18 @@ public class TransferServiceImpl implements TransferService {
         for (TransferRequest request : acceptedRequests) {
             request.setStatus("InTransit");
             request.setShippedAt(now); // Đánh dấu chung 1 timestamp để Grouping (Logical Batching)
+            request.setShippedBy(shippedByUser);
             transferRequestRepository.save(request);
+            try {
+                String bookTitle = request.getDetails() != null && !request.getDetails().isEmpty() ? request.getDetails().get(0).getCopy().getBook().getTitle() : "N/A";
+                emailService.sendBookTransferDecision(
+                    request.getRequestedBy().getEmail(),
+                    request.getRequestedBy().getFullName(),
+                    bookTitle,
+                    request.getFromCampus().getCampusName(),
+                    "Accepted"
+                );
+            } catch (Exception e) {}
         }
 
         // Tìm các đơn Rejected để "Dọn rác" (Đưa vào lịch sử - Cancelled)
@@ -296,6 +352,16 @@ public class TransferServiceImpl implements TransferService {
         for (TransferRequest request : rejectedRequests) {
             request.setStatus("Cancelled");
             transferRequestRepository.save(request);
+            try {
+                String bookTitle = request.getDetails() != null && !request.getDetails().isEmpty() ? request.getDetails().get(0).getCopy().getBook().getTitle() : "N/A";
+                emailService.sendBookTransferDecision(
+                    request.getRequestedBy().getEmail(),
+                    request.getRequestedBy().getFullName(),
+                    bookTitle,
+                    request.getFromCampus().getCampusName(),
+                    "Rejected"
+                );
+            } catch (Exception e) {}
         }
     }
 
@@ -324,6 +390,26 @@ public class TransferServiceImpl implements TransferService {
                     }
                 }
                 transferRequestRepository.save(request);
+
+                try {
+                    String bookTitle = request.getDetails() != null && !request.getDetails().isEmpty() ? request.getDetails().get(0).getCopy().getBook().getTitle() : "N/A";
+                    if (request.getRequestedBy() != null) {
+                        emailService.sendBookTransferReceiptConfirmation(
+                            request.getRequestedBy().getEmail(),
+                            request.getRequestedBy().getFullName(),
+                            bookTitle,
+                            request.getToCampus().getCampusName()
+                        );
+                    }
+                    if (request.getShippedBy() != null) {
+                        emailService.sendBookTransferReceiptConfirmation(
+                            request.getShippedBy().getEmail(),
+                            request.getShippedBy().getFullName(),
+                            bookTitle,
+                            request.getToCampus().getCampusName()
+                        );
+                    }
+                } catch (Exception e) {}
             }
         }
     }

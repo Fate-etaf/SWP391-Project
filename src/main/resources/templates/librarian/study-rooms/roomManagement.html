@@ -9,9 +9,7 @@
             theme: { extend: { colors: { fpt: { orange: '#F27125', navy: '#1E293B', dark: '#0F172A', orangeHover: '#D95F18' } } } }
         }
     </script>
-    
-
-    
+    <style th:replace="~{fragments/footer :: footer-style}"></style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -59,6 +57,7 @@
                         <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500 border-b border-slate-200">
                             <tr>
                                 <th class="px-6 py-4">Tên Phòng</th>
+                                <th class="px-6 py-4">Người đặt</th>
                                 <th class="px-6 py-4">Giờ đặt</th>
                                 <th class="px-6 py-4">Số lượng</th>
                                 <th class="px-6 py-4 text-center">Trạng thái</th>
@@ -67,7 +66,7 @@
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             <tr th:if="${bookings.isEmpty()}" class="hover:bg-slate-50 transition-colors">
-                                <td colspan="5" class="px-6 py-8 text-center text-slate-500 italic">
+                                <td colspan="6" class="px-6 py-8 text-center text-slate-500 italic">
                                     Không có đơn đặt phòng nào trong ngày này.
                                 </td>
                             </tr>
@@ -75,6 +74,11 @@
                                 <td class="px-6 py-4 font-bold text-slate-700">
                                     <span th:text="${b.roomName}">Phòng 1</span>
                                     <div class="text-[10px] text-slate-400 font-normal mt-1">ID: <span th:text="${b.bookingId}"></span></div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-slate-900" th:text="${b.patronName}"></div>
+                                    <div class="text-[11px] text-slate-500 mt-0.5">MSSV: <span th:text="${b.patronId}"></span></div>
+                                    <div class="text-[11px] text-slate-500 mt-0.5" th:text="${b.patronEmail}"></div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-slate-900 font-semibold" th:text="${b.startTime + ' - ' + b.endTime}"></div>
@@ -99,6 +103,41 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${totalPages > 1}" class="flex items-center justify-between mt-4">
+                <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-slate-700">
+                            Hiển thị trang <span class="font-medium" th:text="${currentPage + 1}"></span> trên tổng số <span class="font-medium" th:text="${totalPages}"></span> trang
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                            <a th:href="@{/librarian/study-rooms/management(date=${targetDate}, page=${currentPage - 1})}" th:if="${currentPage > 0}" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0">
+                                <span class="sr-only">Previous</span>
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                            
+                            <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                                <a th:href="@{/librarian/study-rooms/management(date=${targetDate}, page=${i})}" 
+                                   th:text="${i + 1}"
+                                   th:class="${currentPage == i} ? 'relative z-10 inline-flex items-center bg-fpt-orange px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fpt-orange' : 'relative inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-900 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0'">
+                                </a>
+                            </th:block>
+
+                            <a th:href="@{/librarian/study-rooms/management(date=${targetDate}, page=${currentPage + 1})}" th:if="${currentPage < totalPages - 1}" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0">
+                                <span class="sr-only">Next</span>
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                        </nav>
+                    </div>
                 </div>
             </div>
 

@@ -394,7 +394,7 @@ private String buildMaterialRequestRejectionBody(String patronName, String bookT
             </body></html>
             """.formatted(patronName, bookTitle, author);
 }
-   @Override
+    @Override
     public void sendOtpEmail(String toEmail, String subject, String content) {
         try {
             // 1. Tạo cấu trúc tin nhắn Mail đơn giản của Spring
@@ -465,5 +465,209 @@ private String buildMaterialRequestRejectionBody(String patronName, String bookT
                   </div>
                 </body></html>
                 """.formatted(patronName, bookTitle, copyId, returnDate, status, fineAmount, paymentMethod);
+    }
+
+    // ==========================================
+    // STUDY ROOM NOTIFICATIONS
+    // ==========================================
+
+    @Override
+    public void sendStudyRoomBookingConfirmation(String toEmail, String patronName, String roomName, String date, String timeSlot) {
+        String subject = "[Thư viện FPT] Xác nhận đặt phòng học nhóm thành công";
+        String body = buildStudyRoomBookingConfirmBody(patronName, roomName, date, timeSlot);
+        sendHtmlEmail(toEmail, subject, body);
+    }
+
+    @Override
+    public void sendStudyRoomNoShow(String toEmail, String patronName, String roomName, String date, String timeSlot) {
+        String subject = "[Thư viện FPT] Hủy phòng học nhóm do không Check-in (No Show)";
+        String body = buildStudyRoomNoShowBody(patronName, roomName, date, timeSlot);
+        sendHtmlEmail(toEmail, subject, body);
+    }
+
+    @Override
+    public void sendStudyRoomCancellation(String toEmail, String patronName, String roomName, String date, String timeSlot) {
+        String subject = "[Thư viện FPT] Hủy đặt phòng học nhóm";
+        String body = buildStudyRoomCancellationBody(patronName, roomName, date, timeSlot);
+        sendHtmlEmail(toEmail, subject, body);
+    }
+
+    private String buildStudyRoomBookingConfirmBody(String patronName, String roomName, String date, String timeSlot) {
+        return """
+                <html><body style="font-family: Arial, sans-serif; color: #333;">
+                  <div style="max-width:600px; margin:auto; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+                    <div style="background:#003580; padding:20px; text-align:center;">
+                      <h2 style="color:#fff; margin:0;">📚 Thư viện FPT University</h2>
+                    </div>
+                    <div style="padding:24px;">
+                      <p>Xin chào <strong>%s</strong>,</p>
+                      <p>Đơn đặt phòng học nhóm của bạn đã được xác nhận thành công!</p>
+                      <table style="width:100%%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f5f5f5;">
+                           <td style="padding:10px; border:1px solid #ddd;"><strong>🏠 Phòng</strong></td>
+                           <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr>
+                           <td style="padding:10px; border:1px solid #ddd;"><strong>📅 Ngày</strong></td>
+                           <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr style="background:#f5f5f5;">
+                           <td style="padding:10px; border:1px solid #ddd;"><strong>⏰ Khung giờ</strong></td>
+                           <td style="padding:10px; border:1px solid #ddd; color:#e53935;"><strong>%s</strong></td>
+                        </tr>
+                      </table>
+                      <div style="background:#fff3e0; border-left:4px solid #ff9800; padding:12px; border-radius:4px;">
+                        <p style="margin:0;">⚠️ <strong>Lưu ý:</strong> Vui lòng có mặt và Check-in trước hoặc đúng giờ. Nếu trễ quá 15 phút, phòng sẽ bị tự động hủy (No Show).</p>
+                      </div>
+                      <p style="margin-top:20px;">Trân trọng,<br><strong>Hệ thống Thư viện FPT University</strong></p>
+                    </div>
+                  </div>
+                </body></html>
+                """.formatted(patronName, roomName, date, timeSlot);
+    }
+
+    private String buildStudyRoomNoShowBody(String patronName, String roomName, String date, String timeSlot) {
+        return """
+                <html><body style="font-family: Arial, sans-serif; color: #333;">
+                  <div style="max-width:600px; margin:auto; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+                    <div style="background:#f44336; padding:20px; text-align:center;">
+                      <h2 style="color:#fff; margin:0;">📚 Thư viện FPT University</h2>
+                    </div>
+                    <div style="padding:24px;">
+                      <p>Xin chào <strong>%s</strong>,</p>
+                      <p>Lịch đặt phòng học nhóm của bạn đã bị <strong style="color:#f44336;">Hủy tự động</strong> do bạn không thực hiện Check-in đúng hạn (trễ quá 15 phút).</p>
+                      <table style="width:100%%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f5f5f5;">
+                           <td style="padding:10px; border:1px solid #ddd;"><strong>🏠 Phòng</strong></td>
+                           <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr>
+                           <td style="padding:10px; border:1px solid #ddd;"><strong>📅 Ngày</strong></td>
+                           <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr style="background:#f5f5f5;">
+                           <td style="padding:10px; border:1px solid #ddd;"><strong>⏰ Khung giờ</strong></td>
+                           <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                      </table>
+                      <p>Phòng hiện đã được chuyển sang trạng thái trống để phục vụ cho các nhóm khác.</p>
+                      <p style="margin-top:20px;">Trân trọng,<br><strong>Hệ thống Thư viện FPT University</strong></p>
+                    </div>
+                  </div>
+                </body></html>
+                """.formatted(patronName, roomName, date, timeSlot);
+    }
+
+    private String buildStudyRoomCancellationBody(String patronName, String roomName, String date, String timeSlot) {
+        return """
+                <html><body style="font-family: Arial, sans-serif; color: #333;">
+                  <div style="max-width:600px; margin:auto; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+                    <div style="background:#003580; padding:20px; text-align:center;">
+                      <h2 style="color:#fff; margin:0;">📚 Thư viện FPT University</h2>
+                    </div>
+                    <div style="padding:24px;">
+                      <p>Xin chào <strong>%s</strong>,</p>
+                      <p>Lịch đặt phòng học nhóm của bạn đã được <strong>hủy thành công</strong>.</p>
+                      <table style="width:100%%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f5f5f5;">
+                           <td style="padding:10px; border:1px solid #ddd;"><strong>🏠 Phòng</strong></td>
+                           <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr>
+                           <td style="padding:10px; border:1px solid #ddd;"><strong>📅 Ngày</strong></td>
+                           <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr style="background:#f5f5f5;">
+                           <td style="padding:10px; border:1px solid #ddd;"><strong>⏰ Khung giờ</strong></td>
+                           <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                      </table>
+                      <p style="margin-top:20px;">Trân trọng,<br><strong>Hệ thống Thư viện FPT University</strong></p>
+                    </div>
+                  </div>
+                </body></html>
+                """.formatted(patronName, roomName, date, timeSlot);
+    }
+
+    // ==========================================
+    // BOOK TRANSFER NOTIFICATIONS
+    // ==========================================
+
+    @Override
+    public void sendBookTransferDecision(String toEmail, String librarianName, String bookTitle, String sourceCampus, String status) {
+        String subject = "Accepted".equals(status) ? 
+                         "[Thư viện FPT] Yêu cầu luân chuyển sách đã ĐƯỢC DUYỆT" : 
+                         "[Thư viện FPT] Yêu cầu luân chuyển sách bị TỪ CHỐI";
+        String body = buildBookTransferDecisionBody(librarianName, bookTitle, sourceCampus, status);
+        sendHtmlEmail(toEmail, subject, body);
+    }
+
+    @Override
+    public void sendBookTransferReceiptConfirmation(String toEmail, String librarianName, String bookTitle, String destinationCampus) {
+        String subject = "[Thư viện FPT] Sách luân chuyển đã đến cơ sở đích";
+        String body = buildBookTransferReceiptConfirmBody(librarianName, bookTitle, destinationCampus);
+        sendHtmlEmail(toEmail, subject, body);
+    }
+
+    private String buildBookTransferDecisionBody(String librarianName, String bookTitle, String sourceCampus, String status) {
+        boolean isAccepted = "Accepted".equals(status) || "InTransit".equals(status);
+        String headerBg = isAccepted ? "#4caf50" : "#f44336";
+        String statusText = isAccepted ? "<strong style='color:#4caf50;'>Đã Phê Duyệt & Đang Luân Chuyển</strong>" : "<strong style='color:#f44336;'>Đã Bị Từ Chối</strong>";
+        
+        return """
+                <html><body style="font-family: Arial, sans-serif; color: #333;">
+                  <div style="max-width:600px; margin:auto; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+                    <div style="background:%s; padding:20px; text-align:center;">
+                      <h2 style="color:#fff; margin:0;">📚 Thư viện FPT University</h2>
+                    </div>
+                    <div style="padding:24px;">
+                      <p>Xin chào <strong>%s</strong>,</p>
+                      <p>Lệnh xin luân chuyển sách của bạn gửi tới cơ sở <strong>%s</strong> vừa được xử lý.</p>
+                      <table style="width:100%%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f5f5f5;">
+                           <td style="padding:10px; border:1px solid #ddd;"><strong>📖 Tên sách / Mã bản sao</strong></td>
+                           <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr>
+                           <td style="padding:10px; border:1px solid #ddd;"><strong>📌 Trạng thái</strong></td>
+                           <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                      </table>
+                      <p style="margin-top:20px;">Trân trọng,<br><strong>Hệ thống Thư viện FPT University</strong></p>
+                    </div>
+                  </div>
+                </body></html>
+                """.formatted(headerBg, librarianName, sourceCampus, bookTitle, statusText);
+    }
+
+    private String buildBookTransferReceiptConfirmBody(String librarianName, String bookTitle, String destinationCampus) {
+        return """
+                <html><body style="font-family: Arial, sans-serif; color: #333;">
+                  <div style="max-width:600px; margin:auto; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+                    <div style="background:#003580; padding:20px; text-align:center;">
+                      <h2 style="color:#fff; margin:0;">📚 Thư viện FPT University</h2>
+                    </div>
+                    <div style="padding:24px;">
+                      <p>Xin chào <strong>%s</strong>,</p>
+                      <p>Một lệnh luân chuyển sách đã được xác nhận <strong>nhận hàng thành công</strong> tại cơ sở đích (<strong>%s</strong>).</p>
+                      <table style="width:100%%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f5f5f5;">
+                           <td style="padding:10px; border:1px solid #ddd;"><strong>📖 Tên sách / Mã bản sao</strong></td>
+                           <td style="padding:10px; border:1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr>
+                           <td style="padding:10px; border:1px solid #ddd;"><strong>📌 Trạng thái</strong></td>
+                           <td style="padding:10px; border:1px solid #ddd;"><strong style='color:#003580;'>Đã Nhập Kho (Received)</strong></td>
+                        </tr>
+                      </table>
+                      <div style="background:#e8f5e9; border-left:4px solid #4caf50; padding:12px; border-radius:4px;">
+                        <p style="margin:0;">✅ Chu trình luân chuyển đã hoàn tất. Sách hiện đã có sẵn trên kệ của cơ sở đích.</p>
+                      </div>
+                      <p style="margin-top:20px;">Trân trọng,<br><strong>Hệ thống Thư viện FPT University</strong></p>
+                    </div>
+                  </div>
+                </body></html>
+                """.formatted(librarianName, destinationCampus, bookTitle);
+>>>>>>> email-integration
     }
 }
