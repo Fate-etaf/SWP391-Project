@@ -521,6 +521,8 @@
             <div class="flex justify-end gap-3 mt-6">
                 <button onclick="closeModal('overdueReturnModal')"
                     class="px-4 py-2 border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-sm transition-all focus:outline-none">Hủy</button>
+                <button id="btnConfirmOverdueLater"
+                    class="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Ghi nợ &amp; Trả sách</button>
                 <button id="btnConfirmOverdue"
                     class="px-4 py-2 bg-fpt-orange hover:bg-fpt-orangeHover active:scale-95 text-white font-bold text-sm rounded-lg shadow-md transition-all">Thu
                     tiền &amp; Trả sách</button>
@@ -605,12 +607,7 @@
                     placeholder="Nhập lý do đền bù hoặc ghi chú tình trạng..."></textarea>
             </div>
 
-            <div class="mb-4 flex items-center gap-2 hidden">
-                <input type="checkbox" id="incidentPayNow" class="rounded border-slate-305 bg-white text-fpt-orange focus:ring-fpt-orange"
-                    onchange="toggleIncidentPay()" checked>
-                <label for="incidentPayNow" class="text-xs font-bold text-slate-600">Thanh toán tiền phạt đền bù ngay
-                    lúc này</label>
-            </div>
+
 
             <div id="incidentPaymentFields">
                 <div class="mb-4">
@@ -814,6 +811,7 @@
             // Cập nhật sự kiện click nút Confirm
             document.getElementById('btnConfirmNormal').onclick = () => submitNormalReturn(data.ticketDetailId);
             document.getElementById('btnConfirmOverdue').onclick = () => submitOverdueReturn(data.ticketDetailId);
+            document.getElementById('btnConfirmOverdueLater').onclick = () => submitOverdueReturn(data.ticketDetailId, true);
             document.getElementById('btnConfirmIncident').onclick = () => submitIncident(data.ticketDetailId);
         }
 
@@ -875,7 +873,7 @@
         // 3. Thực hiện báo mất hoặc báo hỏng
         async function submitIncident(ticketDetailId) {
             const type = document.getElementById('incidentType').value;
-            const payNow = document.getElementById('incidentPayNow').checked;
+            const payNow = true;
             const method = document.getElementById('paymentMethodIncident').value;
             const code = document.getElementById('transactionCodeIncident').value.trim();
             const notes = document.getElementById('incidentNotes').value.trim();
@@ -886,7 +884,7 @@
             }
 
             const endpoint = type === 'Lost' ? '/borrowing/api/return-lost' : '/borrowing/api/return-damaged';
-            const params = `ticketDetailId=${ticketDetailId}&payNow=${payNow}&paymentMethod=${method}&transactionCode=${encodeURIComponent(code)}&notes=${encodeURIComponent(notes)}`;
+            const params = `ticketDetailId=${ticketDetailId}&paymentMethod=${method}&transactionCode=${encodeURIComponent(code)}&notes=${encodeURIComponent(notes)}`;
 
             try {
                 const res = await fetch(`${endpoint}?${params}`, { method: 'POST' });
@@ -915,7 +913,6 @@
                 toggleTxCode();
             } else if (id === 'reportIncidentModal') {
                 document.getElementById('paymentMethodIncident').value = 'Cash';
-                document.getElementById('incidentPayNow').checked = true;
                 document.getElementById('incidentNotes').value = ''; // Reset notes field
                 toggleIncidentPay();
             }

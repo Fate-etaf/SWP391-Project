@@ -137,7 +137,7 @@ public class PaymentWebhookController {
 
             } else if ("M".equals(action)) {
                 try {
-                    bookReturnService.processLost(id, true, "QRCode", transactionCode, librarianId, null);
+                    bookReturnService.processLost(id, "QRCode", transactionCode, librarianId, null);
                 } catch (IllegalArgumentException e) {
                     log.error("Ticket detail not found for token lost reporting: {}", id);
                     return badRequest(e.getMessage());
@@ -156,7 +156,7 @@ public class PaymentWebhookController {
 
             } else if ("D".equals(action)) {
                 try {
-                    bookReturnService.processDamaged(id, true, "QRCode", transactionCode, librarianId, null);
+                    bookReturnService.processDamaged(id, "QRCode", transactionCode, librarianId, null);
                 } catch (IllegalArgumentException e) {
                     log.error("Ticket detail not found for token damaged reporting: {}", id);
                     return badRequest(e.getMessage());
@@ -279,7 +279,7 @@ public class PaymentWebhookController {
             try {
                 log.info("Auto processing lost book combined fine payment for TicketDetail ID: {} with trade code: {}", ticketDetailId, transactionCode);
                 // Gọi processLost với payNow = true và phương thức QRCode
-                bookReturnService.processLost(ticketDetailId, true, "QRCode", transactionCode, "SYSTEM_AUTO", null);
+                bookReturnService.processLost(ticketDetailId, "QRCode", transactionCode, "SYSTEM_AUTO", null);
             } catch (IllegalArgumentException e) {
                 log.error("Ticket detail not found or process error: {}", ticketDetailId);
                 return badRequest(e.getMessage());
