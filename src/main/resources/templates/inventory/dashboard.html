@@ -34,7 +34,7 @@
 
     <main class="flex-grow max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col xl:flex-row gap-8">
         
-        <div th:replace="~{fragments/librarian_sidebar :: sidebar('dashboard')}"></div>
+        <div th:replace="~{fragments/librarian_sidebar :: sidebar('inventoryDashboard')}"></div>
 
         <div class="flex-grow min-w-0">
             
@@ -89,23 +89,23 @@
                         </div>
                         <div id="conditionDropdown" class="hidden absolute top-full left-0 w-full mt-1 bg-slate-100 border border-slate-400 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto custom-scrollbar p-2">
                             <div class="space-y-1">
-                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-700 rounded-lg cursor-pointer">
+                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-200 rounded-lg cursor-pointer transition-colors">
                                     <input type="checkbox" name="conditions" value="New" th:checked="${param.conditions != null and #arrays.contains(param.conditions, 'New')}" class="w-4 h-4 text-fpt-orange bg-white border-slate-400 rounded focus:ring-fpt-orange">
                                     <span class="text-sm text-slate-800">Mới (New)</span>
                                 </label>
-                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-700 rounded-lg cursor-pointer">
+                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-200 rounded-lg cursor-pointer transition-colors">
                                     <input type="checkbox" name="conditions" value="Good" th:checked="${param.conditions != null and #arrays.contains(param.conditions, 'Good')}" class="w-4 h-4 text-fpt-orange bg-white border-slate-400 rounded focus:ring-fpt-orange">
                                     <span class="text-sm text-slate-800">Tốt (Good)</span>
                                 </label>
-                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-700 rounded-lg cursor-pointer">
+                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-200 rounded-lg cursor-pointer transition-colors">
                                     <input type="checkbox" name="conditions" value="Fair" th:checked="${param.conditions != null and #arrays.contains(param.conditions, 'Fair')}" class="w-4 h-4 text-fpt-orange bg-white border-slate-400 rounded focus:ring-fpt-orange">
                                     <span class="text-sm text-slate-800">Khá (Fair)</span>
                                 </label>
-                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-700 rounded-lg cursor-pointer">
+                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-200 rounded-lg cursor-pointer transition-colors">
                                     <input type="checkbox" name="conditions" value="Damaged" th:checked="${param.conditions != null and #arrays.contains(param.conditions, 'Damaged')}" class="w-4 h-4 text-fpt-orange bg-white border-slate-400 rounded focus:ring-fpt-orange">
                                     <span class="text-sm text-slate-800">Hư hỏng (Damaged)</span>
                                 </label>
-                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-700 rounded-lg cursor-pointer">
+                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-200 rounded-lg cursor-pointer transition-colors">
                                     <input type="checkbox" name="conditions" value="Lost" th:checked="${param.conditions != null and #arrays.contains(param.conditions, 'Lost')}" class="w-4 h-4 text-fpt-orange bg-white border-slate-400 rounded focus:ring-fpt-orange">
                                     <span class="text-sm text-slate-800">Mất (Lost)</span>
                                 </label>
@@ -122,27 +122,27 @@
                         </div>
                         <div id="statusDropdown" class="hidden absolute top-full left-0 w-full mt-1 bg-slate-100 border border-slate-400 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto custom-scrollbar p-2">
                             <div class="space-y-1">
-                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-700 rounded-lg cursor-pointer">
+                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-200 rounded-lg cursor-pointer transition-colors">
                                     <input type="checkbox" name="statuses" value="Available" th:checked="${param.statuses != null and #arrays.contains(param.statuses, 'Available')}" class="w-4 h-4 text-fpt-orange bg-white border-slate-400 rounded focus:ring-fpt-orange">
                                     <span class="text-sm text-slate-800">Sẵn sàng (Available)</span>
                                 </label>
-                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-700 rounded-lg cursor-pointer">
+                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-200 rounded-lg cursor-pointer transition-colors">
                                     <input type="checkbox" name="statuses" value="Borrowed" th:checked="${param.statuses != null and #arrays.contains(param.statuses, 'Borrowed')}" class="w-4 h-4 text-fpt-orange bg-white border-slate-400 rounded focus:ring-fpt-orange">
                                     <span class="text-sm text-slate-800">Đang mượn (Borrowed)</span>
                                 </label>
-                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-700 rounded-lg cursor-pointer">
+                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-200 rounded-lg cursor-pointer transition-colors">
                                     <input type="checkbox" name="statuses" value="Reserved" th:checked="${param.statuses != null and #arrays.contains(param.statuses, 'Reserved')}" class="w-4 h-4 text-fpt-orange bg-white border-slate-400 rounded focus:ring-fpt-orange">
                                     <span class="text-sm text-slate-800">Đã đặt giữ (Reserved)</span>
                                 </label>
-                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-700 rounded-lg cursor-pointer">
+                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-200 rounded-lg cursor-pointer transition-colors">
                                     <input type="checkbox" name="statuses" value="InTransfer" th:checked="${param.statuses != null and #arrays.contains(param.statuses, 'InTransfer')}" class="w-4 h-4 text-fpt-orange bg-white border-slate-400 rounded focus:ring-fpt-orange">
                                     <span class="text-sm text-slate-800">Luân chuyển (InTransfer)</span>
                                 </label>
-                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-700 rounded-lg cursor-pointer">
+                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-200 rounded-lg cursor-pointer transition-colors">
                                     <input type="checkbox" name="statuses" value="Maintenance" th:checked="${param.statuses != null and #arrays.contains(param.statuses, 'Maintenance')}" class="w-4 h-4 text-fpt-orange bg-white border-slate-400 rounded focus:ring-fpt-orange">
                                     <span class="text-sm text-slate-800">Bảo trì (Maintenance)</span>
                                 </label>
-                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-700 rounded-lg cursor-pointer">
+                                <label class="flex items-center space-x-3 p-2 hover:bg-slate-200 rounded-lg cursor-pointer transition-colors">
                                     <input type="checkbox" name="statuses" value="Lost" th:checked="${param.statuses != null and #arrays.contains(param.statuses, 'Lost')}" class="w-4 h-4 text-fpt-orange bg-white border-slate-400 rounded focus:ring-fpt-orange">
                                     <span class="text-sm text-slate-800">Mất (Lost)</span>
                                 </label>
@@ -368,24 +368,35 @@
             container.innerHTML = '';
             document.getElementById('subjectLabel').textContent = 'Tất cả môn học';
 
+            let subjects = [];
             if (!majorId) {
-                container.innerHTML = `<p class="text-xs text-slate-500 p-2">Vui lòng chọn Chuyên ngành trước</p>`;
-                return;
+                const allSubjectsMap = new Map();
+                Object.values(majorSubjectMap).forEach(subjList => {
+                    if (subjList) {
+                        subjList.forEach(subj => {
+                            allSubjectsMap.set(subj.subjectCode, subj);
+                        });
+                    }
+                });
+                subjects = Array.from(allSubjectsMap.values());
+            } else {
+                subjects = majorSubjectMap[majorId] || [];
             }
-
-            const subjects = majorSubjectMap[majorId];
 
             if (!subjects || subjects.length === 0) {
                 container.innerHTML = `<p class="text-xs text-slate-500 p-2">Không có môn học nào</p>`;
                 return;
             }
 
+            // Sắp xếp môn học theo bảng chữ cái mã môn học cho dễ nhìn
+            subjects.sort((a, b) => a.subjectCode.localeCompare(b.subjectCode));
+
             subjects.forEach(subj => {
                 // Kiểm tra xem lúc gửi form trước đó user có tick chọn môn này không
                 const isChecked = safeSelectedSubjects.includes(subj.subjectCode) ? 'checked' : '';
                 
                 const html = `
-                    <label class="flex items-center space-x-3 p-2 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">
+                    <label class="flex items-center space-x-3 p-2 hover:bg-slate-200 rounded-lg cursor-pointer transition-colors">
                         <input type="checkbox" name="subjectCodes" value="${subj.subjectCode}" ${isChecked} class="w-4 h-4 text-fpt-orange bg-white border-slate-400 rounded focus:ring-fpt-orange focus:ring-2">
                         <span class="text-sm text-slate-800">${subj.subjectCode} - ${subj.subjectName}</span>
                     </label>
@@ -396,14 +407,9 @@
             updateLabels();
         }
 
-        // Khởi chạy load môn học ngay khi load trang nếu Major đã được chọn
+        // Khởi chạy load môn học ngay khi load trang
         const initialMajorId = document.getElementById('majorSelect').value;
-        if (initialMajorId) {
-            loadSubjectsByMajor(initialMajorId);
-        } else {
-            // Đảm bảo update label cho các checkbox condition/status khác
-            updateLabels(); 
-        }
+        loadSubjectsByMajor(initialMajorId);
 
         // ==============================================
         // LOGIC VẼ CHARTS 
