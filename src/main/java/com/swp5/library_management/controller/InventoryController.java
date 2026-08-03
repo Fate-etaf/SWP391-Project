@@ -146,9 +146,10 @@ public class InventoryController {
         return "inventory/list";
     }
 
-    /**
-     * GET /librarian/inventory/import-excel → Tải về file Excel mẫu để thủ thư điền thông tin sách.
-     */
+    /*
+     * ═══ IMPORT EXCEL: GET template (COMMENTED OUT) ═══════════════════════════════
+     * GET /librarian/inventory/import-excel → Tải về file Excel mẫu.
+     *
     @GetMapping("/inventory/import-excel/template")
     public void downloadExcelTemplate(jakarta.servlet.http.HttpServletResponse response) throws Exception {
         byte[] templateBytes = bookService.generateImportTemplate();
@@ -157,10 +158,13 @@ public class InventoryController {
         response.getOutputStream().write(templateBytes);
         response.getOutputStream().flush();
     }
-
-    /**
-     * POST /librarian/inventory/import-excel → Xử lý file Excel import sách hàng loạt.
+     * ═══ END ════════════════════════════════════════════════════════
      */
+
+    /*
+     * ═══ IMPORT EXCEL: POST handler (COMMENTED OUT) ═══════════════════════════════
+     * POST /librarian/inventory/import-excel → Xử lý file Excel import sách hàng loạt.
+     *
     @PostMapping("/inventory/import-excel")
     public String importBooksFromExcel(
             @RequestParam("file") MultipartFile file,
@@ -170,13 +174,11 @@ public class InventoryController {
             redirectAttributes.addFlashAttribute("importError", "Vui lòng chọn file Excel để import.");
             return "redirect:/librarian/inventory/list";
         }
-
         String filename = file.getOriginalFilename();
         if (filename == null || (!filename.endsWith(".xlsx") && !filename.endsWith(".xls"))) {
             redirectAttributes.addFlashAttribute("importError", "File không đúng định dạng. Vui lòng upload file Excel (.xlsx hoặc .xls).");
             return "redirect:/librarian/inventory/list";
         }
-
         Integer campusId = (Integer) session.getAttribute("loggedInCampusId");
         if (campusId == null) {
             String loggedInUserId = (String) session.getAttribute("loggedInUserId");
@@ -185,7 +187,6 @@ public class InventoryController {
                 if (librarian != null) campusId = librarian.getCampusId();
             }
         }
-
         try {
             BookService.ImportResult result = bookService.importBooksFromExcel(file.getInputStream(), campusId);
             if (result.successCount() > 0) {
@@ -205,6 +206,8 @@ public class InventoryController {
         }
         return "redirect:/librarian/inventory/list";
     }
+     * ═══ END ════════════════════════════════════════════════════════
+     */
 
     @GetMapping("/inventory/add")
     public String showAddBookForm(HttpSession session, Model model) {
