@@ -668,6 +668,5 @@ private String buildMaterialRequestRejectionBody(String patronName, String bookT
                   </div>
                 </body></html>
                 """.formatted(librarianName, destinationCampus, bookTitle);
->>>>>>> email-integration
     }
 }

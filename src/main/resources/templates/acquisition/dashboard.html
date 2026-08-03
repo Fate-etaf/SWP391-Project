@@ -100,6 +100,7 @@
                                 <option value="" th:selected="${currentPatronRole == null or currentPatronRole == ''}">All Roles</option>
                                 <option value="Student" th:selected="${currentPatronRole == 'Student'}">Student</option>
                                 <option value="Lecturer" th:selected="${currentPatronRole == 'Lecturer'}">Lecturer</option>
+                                <option value="Librarian" th:selected="${currentPatronRole == 'Librarian'}">Librarian</option>
                             </select>
                         </div>
                         <div class="flex items-center gap-2">
@@ -172,7 +173,7 @@
                                         <div class="text-xs text-slate-500" th:text="${req.author}">Robert C. Martin</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-slate-600" th:text="${req.patron != null ? (req.patron.isStudent() ? 'Student' : 'Lecturer') : 'N/A'}">Reader</div>
+                                        <div class="text-sm font-medium text-slate-600" th:text="${req.patron != null ? req.patron.getRoleNameDisplay() : 'N/A'}">Reader</div>
                                         <div class="text-xs text-slate-500" th:text="${req.patron != null ? req.patron.userId : ''}">ReaderID</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
