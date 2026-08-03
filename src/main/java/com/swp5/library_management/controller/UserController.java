@@ -239,6 +239,16 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
         }
 
         User user = userOpt.get();
+
+        // ÉP BUỘC PHÂN BIỆT CHỮ HOA CHỮ THƯỜNG (Do CSDL có thể đang ở chế độ Case-Insensitive)
+        boolean isUserIdMatch = user.getUserId() != null && user.getUserId().equals(userId);
+        boolean isEmailMatch = user.getEmail() != null && user.getEmail().equals(userId);
+        if (!isUserIdMatch && !isEmailMatch) {
+            model.addAttribute("loginError", "Tài khoản hoặc mật khẩu không chính xác!");
+            model.addAttribute("userId", userId);
+            model.addAttribute("campusId", campusId);
+            return "login";
+        }
         
         if (user.getPasswordHash() == null || !user.getPasswordHash().equals(password)) {
             model.addAttribute("loginError", "Tài khoản hoặc mật khẩu không chính xác!");
