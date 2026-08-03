@@ -90,6 +90,8 @@ public class ServiceController {
             @RequestParam(required = false) String publisher,
             @RequestParam(required = false) String language,
             @RequestParam(required = false) String bookLink,
+            @RequestParam(required = false) Integer publishYear,
+            @RequestParam(required = false) String description,
             @RequestParam(required = false) String priority,
             @RequestParam String reason,
             @RequestParam String email,
@@ -117,6 +119,10 @@ public class ServiceController {
                     "Mã ISBN không hợp lệ. ISBN phải gồm đúng 10 hoặc 13 ký tự (có thể chứa dấu gạch nối hoặc khoảng trắng).");
                 return "redirect:/services/request-material";
             }
+            if (language == null || language.isBlank()) {
+                redirectAttrs.addFlashAttribute("errorMsg", "Vui lòng chọn ngôn ngữ cho tài liệu.");
+                return "redirect:/services/request-material";
+            }
 
             // // ── Kiểm tra ISBN đã tồn tại trong catalog sách chưa ──
             // if (bookRepository.existsByIsbn(isbn.trim())) {
@@ -141,6 +147,8 @@ public class ServiceController {
                     .publisher(publisher)
                     .language(language)
                     .bookLink(bookLink)
+                    .publishYear(publishYear)
+                    .description(description)
                     .priority(priority)
                     .reason(reason)
                     .email(email)

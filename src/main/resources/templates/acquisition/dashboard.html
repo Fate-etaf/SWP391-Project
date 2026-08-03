@@ -154,6 +154,7 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Request ID</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Book Title</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Source</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Created At</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
                                     <th scope="col" class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Action</th>
                                 </tr>
@@ -175,6 +176,10 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-slate-600" th:text="${req.patron != null ? req.patron.getRoleNameDisplay() : 'N/A'}">Reader</div>
                                         <div class="text-xs text-slate-500" th:text="${req.patron != null ? req.patron.userId : ''}">ReaderID</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-slate-600" th:text="${req.createdAt != null ? #temporals.format(req.createdAt, 'dd/MM/yyyy') : 'N/A'}">01/01/2026</div>
+                                        <div class="text-xs text-slate-400" th:text="${req.createdAt != null ? #temporals.format(req.createdAt, 'HH:mm') : ''}">00:00</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2.5 py-1 text-xs font-bold rounded-full"
@@ -202,7 +207,7 @@
                                     </td>
                                 </tr>
                                 <tr th:if="${requests == null or requests.isEmpty()}">
-                                    <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                                    <td colspan="7" class="px-6 py-12 text-center text-slate-500">
                                         No requests found matching the current filters.
                                     </td>
                                 </tr>

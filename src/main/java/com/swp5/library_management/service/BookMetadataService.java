@@ -3,6 +3,8 @@ package com.swp5.library_management.service;
 import tools.jackson.databind.JsonNode;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
@@ -14,6 +16,7 @@ public class BookMetadataService {
 
     private static final String OPEN_LIBRARY_BOOKS_URL =
             "https://openlibrary.org/api/books?format=json&jscmd=data&bibkeys=ISBN:";
+    private static final Pattern YEAR_PATTERN = Pattern.compile("\\b(19|20)\\d{2}\\b");
 
     private final RestClient restClient;
 
@@ -23,7 +26,6 @@ public class BookMetadataService {
 
     /**
      * Returns a display-ready metadata record, or an empty map when the ISBN is not found.
-     * Only ISBN-10 and ISBN-13 values are sent to the external service.
      */
     public Map<String, String> findByIsbn(String isbn) {
         String normalizedIsbn = normalizeIsbn(isbn);
@@ -45,10 +47,34 @@ public class BookMetadataService {
             putIfPresent(metadata, "title", book.path("title").asText(null));
             putIfPresent(metadata, "author", names(book.path("authors"), "name"));
             putIfPresent(metadata, "publisher", names(book.path("publishers"), "name"));
-            putIfPresent(metadata, "language", language(book.path("languages")));
+
+            // Extract 4-digit publishYear from publish_date
+            String publishDate = book.path("publish_date").asText(null);
+            if (StringUtils.hasText(publishDate)) {
+                Matcher matcher = YEAR_PATTERN.matcher(publishDate);
+                if (matcher.find()) {
+                    metadata.put("publishYear", matcher.group(0));
+                }
+            }
+
+
+            // Extract description / notes / subtitle
+            String subtitle = book.path("subtitle").asText(null);
+            String notes = book.path("notes").asText(null);
+            StringBuilder desc = new StringBuilder();
+            if (StringUtils.hasText(subtitle)) {
+                desc.append(subtitle);
+            }
+            if (StringUtils.hasText(notes)) {
+                if (desc.length() > 0) desc.append("\n");
+                desc.append(notes);
+            }
+            if (desc.length() > 0) {
+                metadata.put("description", desc.toString());
+            }
+
             return metadata;
         } catch (RestClientException ex) {
-            // An unavailable third-party service must not prevent users entering metadata manually.
             return Map.of();
         }
     }
@@ -78,22 +104,6 @@ public class BookMetadataService {
             }
         }
         return result.isEmpty() ? null : result.toString();
-    }
-
-    private static String language(JsonNode languages) {
-        if (!languages.isArray() || languages.isEmpty()) {
-            return null;
-        }
-        String key = languages.get(0).path("key").asText("");
-        String code = key.substring(key.lastIndexOf('/') + 1).toLowerCase();
-        return switch (code) {
-            case "eng" -> "Tiếng Anh";
-            case "vie" -> "Tiếng Việt";
-            case "jpn" -> "Tiếng Nhật";
-            case "kor" -> "Tiếng Hàn";
-            case "chi", "zho" -> "Tiếng Trung";
-            default -> StringUtils.hasText(code) ? code.toUpperCase() : null;
-        };
     }
 
     private static void putIfPresent(Map<String, String> metadata, String key, String value) {

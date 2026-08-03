@@ -157,9 +157,9 @@ public class BookServiceImpl implements BookService {
                 defaultCampus = campusRepository.findById(campusId).orElse(null);
             }
             System.out.println("DEBUG SAVEBOOK: defaultCampus=" + (defaultCampus == null ? "null" : defaultCampus.getCampusName()));
-            Shelf shelf = shelfRepository
-            .findById(saved.getShelfCode())
-            .orElseThrow();
+            Shelf shelf = (StringUtils.hasText(saved.getShelfCode()))
+                    ? shelfRepository.findById(saved.getShelfCode().trim()).orElse(null)
+                    : null;
             if (defaultCampus != null) {
                 for (int i = 1; i <= form.getCopies(); i++) {
                     String copyId = "BOOK-" + saved.getBookId() + "-" + i;
