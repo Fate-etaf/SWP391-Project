@@ -31,8 +31,8 @@ public interface UserRepository extends JpaRepository<User, String> {
     Optional<User> findByUserIdAndEmailAndCampusId(String userId, String email, Integer campusId);
     Optional<User> findByUserIdAndCampusId(String userId, Integer campusId);
     
-    @Query("SELECT u FROM User u WHERE LOWER(u.userId) = LOWER(:identifier) OR LOWER(u.email) = LOWER(:identifier)")
-    Optional<User> findByIdentifierIgnoreCase(@Param("identifier") String identifier);
+    @Query("SELECT u FROM User u WHERE u.userId = :identifier OR u.email = :identifier")
+    Optional<User> findByIdentifier(@Param("identifier") String identifier);
 
     @Query(value = "SELECT r.RoleName FROM Roles r JOIN UserRoles ur ON r.RoleID = ur.RoleID WHERE ur.UserID = :userId", nativeQuery = true)
     List<String> findRolesByUserId(@Param("userId") String userId);

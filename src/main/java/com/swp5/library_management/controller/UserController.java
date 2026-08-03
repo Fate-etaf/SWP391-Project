@@ -229,7 +229,7 @@ public String showStudentProfileToLibrarian(@org.springframework.web.bind.annota
             Model model) {
 
         System.out.println(">>> loginUser parameters: userId=" + userId + ", campusId=" + campusId);
-        Optional<User> userOpt = userRepository.findByIdentifierIgnoreCase(userId);
+        Optional<User> userOpt = userRepository.findByIdentifier(userId);
 
         if (userOpt.isEmpty()) {
             model.addAttribute("loginError", "Tài khoản hoặc mật khẩu không chính xác!");
