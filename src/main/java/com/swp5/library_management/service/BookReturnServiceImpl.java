@@ -161,6 +161,9 @@ public class BookReturnServiceImpl implements BookReturnService {
             fine.setTransactionCode(null);
             fineInvoiceRepository.save(fine);
         } else {
+            fine.setPaidStatus("Paid");
+            fine.setRemainingAmount(BigDecimal.ZERO);
+            fine.setPaidAt(LocalDateTime.now());
             updateFinePayment(fine, paymentMethod, transactionCode, librarianId);
         }
 
