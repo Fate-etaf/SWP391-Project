@@ -124,21 +124,21 @@ public class ServiceController {
                 return "redirect:/services/request-material";
             }
 
-            // // ── Kiểm tra ISBN đã tồn tại trong catalog sách chưa ──
-            // if (bookRepository.existsByIsbn(isbn.trim())) {
-            //     redirectAttrs.addFlashAttribute("errorMsg",
-            //         "ISBN «" + isbn.trim() + "» đã tồn tại trong hệ thống thư viện. " +
-            //         "Tài liệu này đã có sẵn, bạn có thể tìm kiếm trực tiếp.");
-            //     return "redirect:/services/request-material";
-            // }
+            // ── Kiểm tra ISBN đã tồn tại trong catalog sách chưa ──
+            if (bookRepository.existsByIsbn(isbn.trim())) {
+                redirectAttrs.addFlashAttribute("errorMsg",
+                    "ISBN «" + isbn.trim() + "» đã tồn tại trong hệ thống thư viện. " +
+                    "Tài liệu này đã có sẵn, bạn có thể tìm kiếm trực tiếp.");
+                return "redirect:/services/request-material";
+            }
 
-            // // ── Kiểm tra ISBN đã được ai đó request trước đó chưa ──
-            // if (materialRequestRepository.existsByIsbnIgnoreCase(isbn.trim())) {
-            //     redirectAttrs.addFlashAttribute("errorMsg",
-            //         "ISBN «" + isbn.trim() + "» đã được đề nghị mua trước đó. " +
-            //         "Vui lòng kiểm tra trạng thái yêu cầu hoặc liên hệ thư viện.");
-            //     return "redirect:/services/request-material";
-            // }
+            // ── Kiểm tra ISBN đã được ai đó request trước đó chưa ──
+            if (materialRequestRepository.existsByIsbnIgnoreCase(isbn.trim())) {
+                redirectAttrs.addFlashAttribute("errorMsg",
+                    "ISBN «" + isbn.trim() + "» đã được đề nghị mua trước đó. " +
+                    "Vui lòng kiểm tra trạng thái yêu cầu hoặc liên hệ thư viện.");
+                return "redirect:/services/request-material";
+            }
 
             MaterialRequest request = MaterialRequest.builder()
                     .title(title)
