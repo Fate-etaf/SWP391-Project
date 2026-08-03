@@ -7,6 +7,7 @@ import com.swp5.library_management.repository.CategoryRepository;
 import com.swp5.library_management.repository.MaterialRequestRepository;
 import com.swp5.library_management.repository.UserRepository;
 import com.swp5.library_management.service.MaterialRequestService;
+import com.swp5.library_management.service.BookMetadataService;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
@@ -30,17 +31,20 @@ public class ServiceController {
     private final CategoryRepository categoryRepository;
     private final BookRepository bookRepository;
     private final MaterialRequestRepository materialRequestRepository;
+    private final BookMetadataService bookMetadataService;
 
     public ServiceController(MaterialRequestService materialRequestService,
                              UserRepository userRepository,
                              CategoryRepository categoryRepository,
                              BookRepository bookRepository,
-                             MaterialRequestRepository materialRequestRepository) {
+                             MaterialRequestRepository materialRequestRepository,
+                             BookMetadataService bookMetadataService) {
         this.materialRequestService = materialRequestService;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.bookRepository = bookRepository;
         this.materialRequestRepository = materialRequestRepository;
+        this.bookMetadataService = bookMetadataService;
     }
 
     @GetMapping("/borrowing")
@@ -86,6 +90,8 @@ public class ServiceController {
             @RequestParam(required = false) String publisher,
             @RequestParam(required = false) String language,
             @RequestParam(required = false) String bookLink,
+            @RequestParam(required = false) Integer publishYear,
+            @RequestParam(required = false) String description,
             @RequestParam(required = false) String priority,
             @RequestParam String reason,
             @RequestParam String email,
@@ -108,22 +114,31 @@ public class ServiceController {
                 redirectAttrs.addFlashAttribute("errorMsg", "Mã ISBN là bắt buộc. Vui lòng nhập mã ISBN của tài liệu.");
                 return "redirect:/services/request-material";
             }
-
-            // ── Kiểm tra ISBN đã tồn tại trong catalog sách chưa ──
-            if (bookRepository.existsByIsbn(isbn.trim())) {
+            if (!isValidIsbnLength(isbn)) {
                 redirectAttrs.addFlashAttribute("errorMsg",
-                    "ISBN «" + isbn.trim() + "» đã tồn tại trong hệ thống thư viện. " +
-                    "Tài liệu này đã có sẵn, bạn có thể tìm kiếm trực tiếp.");
+                    "Mã ISBN không hợp lệ. ISBN phải gồm đúng 10 hoặc 13 ký tự (có thể chứa dấu gạch nối hoặc khoảng trắng).");
+                return "redirect:/services/request-material";
+            }
+            if (language == null || language.isBlank()) {
+                redirectAttrs.addFlashAttribute("errorMsg", "Vui lòng chọn ngôn ngữ cho tài liệu.");
                 return "redirect:/services/request-material";
             }
 
-            // ── Kiểm tra ISBN đã được ai đó request trước đó chưa ──
-            if (materialRequestRepository.existsByIsbnIgnoreCase(isbn.trim())) {
-                redirectAttrs.addFlashAttribute("errorMsg",
-                    "ISBN «" + isbn.trim() + "» đã được đề nghị mua trước đó. " +
-                    "Vui lòng kiểm tra trạng thái yêu cầu hoặc liên hệ thư viện.");
-                return "redirect:/services/request-material";
-            }
+            // // ── Kiểm tra ISBN đã tồn tại trong catalog sách chưa ──
+            // if (bookRepository.existsByIsbn(isbn.trim())) {
+            //     redirectAttrs.addFlashAttribute("errorMsg",
+            //         "ISBN «" + isbn.trim() + "» đã tồn tại trong hệ thống thư viện. " +
+            //         "Tài liệu này đã có sẵn, bạn có thể tìm kiếm trực tiếp.");
+            //     return "redirect:/services/request-material";
+            // }
+
+            // // ── Kiểm tra ISBN đã được ai đó request trước đó chưa ──
+            // if (materialRequestRepository.existsByIsbnIgnoreCase(isbn.trim())) {
+            //     redirectAttrs.addFlashAttribute("errorMsg",
+            //         "ISBN «" + isbn.trim() + "» đã được đề nghị mua trước đó. " +
+            //         "Vui lòng kiểm tra trạng thái yêu cầu hoặc liên hệ thư viện.");
+            //     return "redirect:/services/request-material";
+            // }
 
             MaterialRequest request = MaterialRequest.builder()
                     .title(title)
@@ -132,6 +147,8 @@ public class ServiceController {
                     .publisher(publisher)
                     .language(language)
                     .bookLink(bookLink)
+                    .publishYear(publishYear)
+                    .description(description)
                     .priority(priority)
                     .reason(reason)
                     .email(email)
@@ -162,6 +179,12 @@ public class ServiceController {
         if (trimmed.isBlank()) {
             return ResponseEntity.ok(Map.of("status", "empty"));
         }
+        if (!isValidIsbnLength(trimmed)) {
+            return ResponseEntity.ok(Map.of(
+                "status", "invalid",
+                "message", "ISBN phải gồm đúng 10 hoặc 13 ký tự."
+            ));
+        }
         if (bookRepository.existsByIsbn(trimmed)) {
             return ResponseEntity.ok(Map.of(
                 "status", "exists_book",
@@ -175,5 +198,30 @@ public class ServiceController {
             ));
         }
         return ResponseEntity.ok(Map.of("status", "ok"));
+    }
+
+    /**
+     * Suggests title, author, publisher and language for the material-request form.
+     * Metadata is sourced from Open Library and is intentionally advisory: users can edit it.
+     */
+    @GetMapping("/book-metadata")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> bookMetadata(@RequestParam String isbn) {
+        Map<String, String> metadata = bookMetadataService.findByIsbn(isbn);
+        if (metadata.isEmpty()) {
+            return ResponseEntity.ok(Map.of("status", "not_found"));
+        }
+        java.util.LinkedHashMap<String, String> response = new java.util.LinkedHashMap<>();
+        response.put("status", "found");
+        response.putAll(metadata);
+        return ResponseEntity.ok(response);
+    }
+
+    private static boolean isValidIsbnLength(String isbn) {
+        if (!isbn.matches("[0-9Xx -]+")) {
+            return false;
+        }
+        String normalized = isbn.replaceAll("[ -]", "");
+        return normalized.matches("\\d{13}") || normalized.matches("\\d{9}[0-9Xx]");
     }
 }

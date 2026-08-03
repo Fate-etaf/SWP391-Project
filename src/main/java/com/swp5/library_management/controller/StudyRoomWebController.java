@@ -15,6 +15,10 @@ import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Base64;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -35,14 +39,15 @@ public class StudyRoomWebController {
     }
 
     @GetMapping("/study-rooms/my-bookings")
-    public String myBookingsPage(Model model, HttpSession session) {
+    public String myBookingsPage(@RequestParam(defaultValue = "0") int page, Model model, HttpSession session) {
         String userId = (String) session.getAttribute("loggedInUserId");
         if (userId == null) {
             return "redirect:/login";
         }
-        List<RoomBooking> bookings = roomBookingRepository.findByPatron_UserIdOrderByBookingDateDescStartTimeDesc(userId);
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<RoomBooking> bookingsPage = roomBookingRepository.findByPatron_UserIdOrderByBookingDateDescStartTimeDesc(userId, pageable);
         
-        List<BookingViewData> viewData = bookings.stream().map(b -> new BookingViewData(
+        List<BookingViewData> viewData = bookingsPage.getContent().stream().map(b -> new BookingViewData(
                 b.getBookingId(),
                 b.getStudyRoom().getRoomName(),
                 b.getBookingDate(),
@@ -50,10 +55,15 @@ public class StudyRoomWebController {
                 b.getEndTime(),
                 b.getParticipantCount(),
                 b.getStatus(),
-                b.getQrCode() != null ? Base64.getEncoder().encodeToString(b.getQrCode()) : null
+                b.getQrCode() != null ? Base64.getEncoder().encodeToString(b.getQrCode()) : null,
+                b.getPatron().getUserId(),
+                b.getPatron().getFullName(),
+                b.getPatron().getEmail()
         )).collect(Collectors.toList());
 
         model.addAttribute("bookings", viewData);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", bookingsPage.getTotalPages());
         return "study-rooms/my-bookings";
     }
 
@@ -67,7 +77,9 @@ public class StudyRoomWebController {
     }
 
     @GetMapping("/librarian/study-rooms/management")
-    public String managementPage(@RequestParam(name = "date", required = false) java.time.LocalDate date, Model model, HttpSession session) {
+    public String managementPage(@RequestParam(name = "date", required = false) java.time.LocalDate date, 
+                                 @RequestParam(defaultValue = "0") int page, 
+                                 Model model, HttpSession session) {
         if (!Boolean.TRUE.equals(session.getAttribute("isLibrarian")) && !Boolean.TRUE.equals(session.getAttribute("isAdmin"))) {
             return "redirect:/login";
         }
@@ -77,17 +89,10 @@ public class StudyRoomWebController {
         Integer campusId = (Integer) session.getAttribute("loggedInCampusId");
         final Integer finalCampusId = (campusId == null) ? 1 : campusId; // Default
         
-        // Cần import com.swp5.library_management.repository.StudyRoomRepository và entity StudyRoom
-        // Nhưng tạm thời ta có thể dùng roomBookingRepository lọc theo status
-        // Để không phải khai báo thêm Repository, ta filter trực tiếp từ allBookings
-        List<RoomBooking> allBookings = roomBookingRepository.findAll(); 
-        List<RoomBooking> filteredBookings = allBookings.stream()
-                .filter(b -> b.getBookingDate().isEqual(targetDate))
-                .filter(b -> b.getStudyRoom().getCampus().getCampusId().equals(finalCampusId))
-                .sorted((b1, b2) -> b2.getStartTime().compareTo(b1.getStartTime()))
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<RoomBooking> bookingsPage = roomBookingRepository.findByBookingDateAndStudyRoom_Campus_CampusIdOrderByStartTimeDesc(targetDate, finalCampusId, pageable);
 
-        List<BookingViewData> viewData = filteredBookings.stream().map(b -> new BookingViewData(
+        List<BookingViewData> viewData = bookingsPage.getContent().stream().map(b -> new BookingViewData(
                 b.getBookingId(),
                 b.getStudyRoom().getRoomName(),
                 b.getBookingDate(),
@@ -95,10 +100,15 @@ public class StudyRoomWebController {
                 b.getEndTime(),
                 b.getParticipantCount(),
                 b.getStatus(),
-                null
+                null,
+                b.getPatron().getUserId(),
+                b.getPatron().getFullName(),
+                b.getPatron().getEmail()
         )).collect(Collectors.toList());
 
         model.addAttribute("bookings", viewData);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", bookingsPage.getTotalPages());
         return "librarian/study-rooms/roomManagement";
     }
 
@@ -111,8 +121,11 @@ public class StudyRoomWebController {
         public Integer participantCount;
         public String status;
         public String qrBase64;
+        public String patronId;
+        public String patronName;
+        public String patronEmail;
         
-        public BookingViewData(Integer bookingId, String roomName, java.time.LocalDate bookingDate, java.time.LocalTime startTime, java.time.LocalTime endTime, Integer participantCount, String status, String qrBase64) {
+        public BookingViewData(Integer bookingId, String roomName, java.time.LocalDate bookingDate, java.time.LocalTime startTime, java.time.LocalTime endTime, Integer participantCount, String status, String qrBase64, String patronId, String patronName, String patronEmail) {
             this.bookingId = bookingId;
             this.roomName = roomName;
             this.bookingDate = bookingDate;
@@ -121,6 +134,9 @@ public class StudyRoomWebController {
             this.participantCount = participantCount;
             this.status = status;
             this.qrBase64 = qrBase64;
+            this.patronId = patronId;
+            this.patronName = patronName;
+            this.patronEmail = patronEmail;
         }
     }
 }

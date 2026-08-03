@@ -4,6 +4,8 @@ import com.swp5.library_management.entity.RoomBooking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -28,8 +30,11 @@ public interface RoomBookingRepository extends JpaRepository<RoomBooking, Intege
     boolean existsOverlappingBooking(@Param("roomId") Integer roomId, @Param("date") LocalDate date, 
                                      @Param("startTime") LocalTime startTime, @Param("endTime") LocalTime endTime);
                                      
-    // Tìm đơn đặt phòng của user theo status
-    List<RoomBooking> findByPatron_UserIdOrderByBookingDateDescStartTimeDesc(String userId);
+    // Tìm đơn đặt phòng của user theo status (Có phân trang)
+    Page<RoomBooking> findByPatron_UserIdOrderByBookingDateDescStartTimeDesc(String userId, Pageable pageable);
+
+    // Tìm đơn đặt phòng theo ngày và cơ sở (Dành cho Thủ thư quản lý, có phân trang)
+    Page<RoomBooking> findByBookingDateAndStudyRoom_Campus_CampusIdOrderByStartTimeDesc(LocalDate date, Integer campusId, Pageable pageable);
 
     // Tìm các đơn đang Confirmed và đã quá giờ StartTime 15 phút (cho cleanup job)
     @Query("SELECT rb FROM RoomBooking rb WHERE rb.status = 'Confirmed' AND " +
