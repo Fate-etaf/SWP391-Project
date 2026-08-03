@@ -292,6 +292,7 @@ public class BookServiceImpl implements BookService {
                         ? book.getPublisher().getPublisherName() : "Chưa có thông tin")
                 .subjectCode(book.getSubject()  != null ? book.getSubject().getSubjectCode() : null)
                 .subjectName(book.getSubject()  != null ? book.getSubject().getSubjectName() : null)
+                .majorName(book.getMajor() != null ? book.getMajor().getMajorName() : null)
                 .categoryNames(categoryNames.isEmpty() ? "Chưa phân loại" : categoryNames)
                 .shelfCode(book.getShelfCode())
                 .shelfNumber(mainShelf != null ? mainShelf.getShelfNumber() : null)

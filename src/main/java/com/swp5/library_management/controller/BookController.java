@@ -61,7 +61,6 @@ public class BookController {
             @RequestParam(required = false) Integer majorId,
             @RequestParam(required = false) Integer campusId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "false") boolean ajax,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             jakarta.servlet.http.HttpSession session,
             Model model) {
@@ -118,9 +117,6 @@ public class BookController {
         model.addAttribute("selectedMajorId",    majorId);
         model.addAttribute("hasSearch",          hasSearch);
 
-        if (ajax) {
-            return "books/search :: searchResults";
-        }
         return "books/search";
     }
 

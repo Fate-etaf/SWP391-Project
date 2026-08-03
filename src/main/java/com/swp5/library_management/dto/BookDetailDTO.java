@@ -58,6 +58,9 @@ public class BookDetailDTO {
     /** Tên môn học đầy đủ. */
     private String subjectName;
 
+    /** Tên chuyên ngành (Major). Null nếu không gắn chuyên ngành. */
+    private String majorName;
+
     /** Các thể loại sách, ghép bởi dấu phẩy. */
     private String categoryNames;
 
