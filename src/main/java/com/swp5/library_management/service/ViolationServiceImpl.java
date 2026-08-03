@@ -21,7 +21,6 @@ import com.swp5.library_management.repository.FineInvoiceRepository;
 import com.swp5.library_management.repository.UserRepository;
 import com.swp5.library_management.entity.Notification;
 import com.swp5.library_management.repository.NotificationRepository;
-import com.swp5.library_management.entity.Campus;
 import com.swp5.library_management.repository.CampusRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -112,7 +111,7 @@ public class ViolationServiceImpl implements ViolationService {
     }
 
     @Override
-    public List<FineInvoice> createLostBookFine(Integer borrowTicketDetailId, String notes, String librarianId) {
+    public List<FineInvoice> createLostBookFine(Integer borrowTicketDetailId, String notes, String librarianId, BigDecimal manualFineAmount) {
         BorrowTicketDetail detail = getDetailOrThrow(borrowTicketDetailId);
         markCopyStatus(detail.getBookCopy(), "Maintenance", "Lost");
         updateTicketDetailStatus(detail, "Lost", librarianId);
@@ -127,12 +126,20 @@ public class ViolationServiceImpl implements ViolationService {
         if (notes != null && !notes.isBlank()) {
             reason += " — Ghi chú: " + notes.trim();
         }
-        fines.add(buildFixedFine(detail, "LOST", getLostFineAmount(detail), reason));
+        
+        BigDecimal fineAmount;
+        if (manualFineAmount != null && manualFineAmount.compareTo(BigDecimal.ZERO) >= 0) {
+            fineAmount = manualFineAmount;
+        } else {
+            fineAmount = getLostFineAmount(detail);
+        }
+        
+        fines.add(buildFixedFine(detail, "LOST", fineAmount, reason));
         return fines;
     }
 
     @Override
-    public List<FineInvoice> createDamagedBookFine(Integer borrowTicketDetailId, String notes, String librarianId) {
+    public List<FineInvoice> createDamagedBookFine(Integer borrowTicketDetailId, String notes, String librarianId, BigDecimal manualFineAmount) {
         BorrowTicketDetail detail = getDetailOrThrow(borrowTicketDetailId);
         markCopyStatus(detail.getBookCopy(), "Maintenance", "Damaged");
         updateTicketDetailStatus(detail, "Damaged", librarianId);
@@ -147,7 +154,15 @@ public class ViolationServiceImpl implements ViolationService {
         if (notes != null && !notes.isBlank()) {
             reason += " — Ghi chú: " + notes.trim();
         }
-        fines.add(buildFine(detail, getDamagedFineAmount(detail), "DAMAGED", reason));
+
+        BigDecimal fineAmount;
+        if (manualFineAmount != null && manualFineAmount.compareTo(BigDecimal.ZERO) >= 0) {
+            fineAmount = manualFineAmount;
+        } else {
+            fineAmount = getDamagedFineAmount(detail);
+        }
+
+        fines.add(buildFine(detail, fineAmount, "DAMAGED", reason));
         return fines;
     }
 
@@ -210,8 +225,12 @@ public class ViolationServiceImpl implements ViolationService {
 
     @Override
     public BigDecimal getBookPriceByTicketDetailId(Integer ticketDetailId) {
-        BorrowTicketDetail detail = getDetailOrThrow(ticketDetailId);
-        return getBookImportPrice(detail);
+        try {
+            BorrowTicketDetail detail = getDetailOrThrow(ticketDetailId);
+            return getBookImportPrice(detail);
+        } catch (IllegalStateException e) {
+            return BigDecimal.valueOf(-1);
+        }
     }
 
     private BigDecimal getBookImportPrice(BorrowTicketDetail detail) {

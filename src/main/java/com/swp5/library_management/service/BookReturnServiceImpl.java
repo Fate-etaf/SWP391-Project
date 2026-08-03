@@ -114,7 +114,11 @@ public class BookReturnServiceImpl implements BookReturnService {
         result.put("fineId", fineId);
         BigDecimal bookPrice = violationService.getBookPriceByTicketDetailId(detail.getTicketDetailId());
         result.put("bookPrice", bookPrice);
-        result.put("combinedAmount", fineAmount.add(bookPrice));
+        if (bookPrice.compareTo(BigDecimal.ZERO) >= 0) {
+            result.put("combinedAmount", fineAmount.add(bookPrice));
+        } else {
+            result.put("combinedAmount", BigDecimal.valueOf(-1));
+        }
         result.put("conditionStatus",
                 detail.getBookCopy() != null ? detail.getBookCopy().getConditionStatus() : "Fair");
 
@@ -197,8 +201,8 @@ public class BookReturnServiceImpl implements BookReturnService {
 
     @Override
     public void processLost(Integer ticketDetailId, String paymentMethod, String transactionCode,
-            String librarianId, String notes) {
-        List<FineInvoice> fines = violationService.createLostBookFine(ticketDetailId, notes, librarianId);
+            String librarianId, String notes, java.math.BigDecimal manualFineAmount) {
+        List<FineInvoice> fines = violationService.createLostBookFine(ticketDetailId, notes, librarianId, manualFineAmount);
         BigDecimal totalFine = BigDecimal.ZERO;
         BigDecimal overdueFineAmount = BigDecimal.ZERO;
         BigDecimal lostFineAmount = BigDecimal.ZERO;
@@ -256,8 +260,8 @@ public class BookReturnServiceImpl implements BookReturnService {
 
     @Override
     public void processDamaged(Integer ticketDetailId, String paymentMethod, String transactionCode,
-            String librarianId, String notes) {
-        List<FineInvoice> fines = violationService.createDamagedBookFine(ticketDetailId, notes, librarianId);
+            String librarianId, String notes, java.math.BigDecimal manualFineAmount) {
+        List<FineInvoice> fines = violationService.createDamagedBookFine(ticketDetailId, notes, librarianId, manualFineAmount);
         BigDecimal totalFine = BigDecimal.ZERO;
         BigDecimal overdueFineAmount = BigDecimal.ZERO;
         BigDecimal damagedFineAmount = BigDecimal.ZERO;

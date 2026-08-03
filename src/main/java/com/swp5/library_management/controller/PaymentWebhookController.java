@@ -24,6 +24,8 @@ public class PaymentWebhookController {
     private final ViolationService violationService;
     private final BookReturnService bookReturnService;
     private final com.swp5.library_management.repository.UserRepository userRepository;
+    private final com.swp5.library_management.repository.BorrowTicketDetailRepository borrowTicketDetailRepository;
+    private final com.swp5.library_management.service.SystemConfigService systemConfigService;
 
     @Value("${app.webhook.api-key}")
     private String expectedApiKey;
@@ -92,7 +94,8 @@ public class PaymentWebhookController {
             transactionCode = "AUTO-QR-" + System.currentTimeMillis();
         }
 
-        // Thử tìm kiếm và trích xuất Token bảo mật VietQR (dạng PAY... đứng trước hoặc nằm trong nội dung chuyển khoản)
+        // Thử tìm kiếm và trích xuất Token bảo mật VietQR (dạng PAY... đứng trước hoặc
+        // nằm trong nội dung chuyển khoản)
         String payToken = null;
         Pattern payPattern = Pattern.compile("PAY[A-Z0-9]+", Pattern.CASE_INSENSITIVE);
         Matcher payMatcher = payPattern.matcher(content);
@@ -114,7 +117,8 @@ public class PaymentWebhookController {
             Integer id = decoded.getId();
             String action = decoded.getAction().toUpperCase();
 
-            log.info("Decrypted Payment Token successfully. Action: {}, ID: {}, Librarian: {}", action, id, librarianId);
+            log.info("Decrypted Payment Token successfully. Action: {}, ID: {}, Librarian: {}", action, id,
+                    librarianId);
 
             if ("T".equals(action)) {
                 try {
@@ -132,12 +136,14 @@ public class PaymentWebhookController {
 
                 Map<String, Object> successResponse = new HashMap<>();
                 successResponse.put("success", true);
-                successResponse.put("message", "Hệ thống tự động trả sách và thu tiền quá hạn cho lượt mượn #" + id + " thành công (Token).");
+                successResponse.put("message",
+                        "Hệ thống tự động trả sách và thu tiền quá hạn cho lượt mượn #" + id + " thành công (Token).");
                 return ResponseEntity.ok(successResponse);
 
             } else if ("M".equals(action)) {
                 try {
-                    bookReturnService.processLost(id, "QRCode", transactionCode, librarianId, null);
+                    java.math.BigDecimal manualFine = calculateManualFineValue(id, request.getTransferAmount());
+                    bookReturnService.processLost(id, "QRCode", transactionCode, librarianId, null, manualFine);
                 } catch (IllegalArgumentException e) {
                     log.error("Ticket detail not found for token lost reporting: {}", id);
                     return badRequest(e.getMessage());
@@ -151,12 +157,15 @@ public class PaymentWebhookController {
 
                 Map<String, Object> successResponse = new HashMap<>();
                 successResponse.put("success", true);
-                successResponse.put("message", "Hệ thống tự động ghi nhận báo mất sách và thanh toán gộp thành công cho lượt mượn #" + id + " (Token).");
+                successResponse.put("message",
+                        "Hệ thống tự động ghi nhận báo mất sách và thanh toán gộp thành công cho lượt mượn #" + id
+                                + " (Token).");
                 return ResponseEntity.ok(successResponse);
 
             } else if ("D".equals(action)) {
                 try {
-                    bookReturnService.processDamaged(id, "QRCode", transactionCode, librarianId, null);
+                    java.math.BigDecimal manualFine = calculateManualFineValue(id, request.getTransferAmount());
+                    bookReturnService.processDamaged(id, "QRCode", transactionCode, librarianId, null, manualFine);
                 } catch (IllegalArgumentException e) {
                     log.error("Ticket detail not found for token damaged reporting: {}", id);
                     return badRequest(e.getMessage());
@@ -170,7 +179,9 @@ public class PaymentWebhookController {
 
                 Map<String, Object> successResponse = new HashMap<>();
                 successResponse.put("success", true);
-                successResponse.put("message", "Hệ thống tự động ghi nhận báo hỏng sách và thanh toán gộp thành công cho lượt mượn #" + id + " (Token).");
+                successResponse.put("message",
+                        "Hệ thống tự động ghi nhận báo hỏng sách và thanh toán gộp thành công cho lượt mượn #" + id
+                                + " (Token).");
                 return ResponseEntity.ok(successResponse);
 
             } else if ("F".equals(action)) {
@@ -195,7 +206,8 @@ public class PaymentWebhookController {
 
                 Map<String, Object> successResponse = new HashMap<>();
                 successResponse.put("success", true);
-                successResponse.put("message", "Hệ thống tự động ghi nhận thanh toán hóa đơn phạt #" + id + " thành công (Token).");
+                successResponse.put("message",
+                        "Hệ thống tự động ghi nhận thanh toán hóa đơn phạt #" + id + " thành công (Token).");
                 return ResponseEntity.ok(successResponse);
             }
         }
@@ -233,7 +245,8 @@ public class PaymentWebhookController {
 
             Map<String, Object> successResponse = new HashMap<>();
             successResponse.put("success", true);
-            successResponse.put("message", "Hệ thống tự động ghi nhận thanh toán hóa đơn phạt #" + fineId + " thành công.");
+            successResponse.put("message",
+                    "Hệ thống tự động ghi nhận thanh toán hóa đơn phạt #" + fineId + " thành công.");
             return ResponseEntity.ok(successResponse);
 
         } else if (matcherTrasach.find()) {
@@ -247,7 +260,9 @@ public class PaymentWebhookController {
             }
 
             try {
-                log.info("Auto processing overdue book return & fine payment for TicketDetail ID: {} with trade code: {}", ticketDetailId, transactionCode);
+                log.info(
+                        "Auto processing overdue book return & fine payment for TicketDetail ID: {} with trade code: {}",
+                        ticketDetailId, transactionCode);
                 // Gọi service trả sách quá hạn (tự động tạo hóa đơn phạt dạng PAID)
                 bookReturnService.processOverdueReturn(ticketDetailId, "QRCode", transactionCode, "SYSTEM_AUTO", null);
             } catch (IllegalArgumentException e) {
@@ -263,7 +278,8 @@ public class PaymentWebhookController {
 
             Map<String, Object> successResponse = new HashMap<>();
             successResponse.put("success", true);
-            successResponse.put("message", "Hệ thống tự động trả sách và thu tiền quá hạn cho lượt mượn #" + ticketDetailId + " thành công.");
+            successResponse.put("message",
+                    "Hệ thống tự động trả sách và thu tiền quá hạn cho lượt mượn #" + ticketDetailId + " thành công.");
             return ResponseEntity.ok(successResponse);
 
         } else if (matcherMatsat.find()) {
@@ -277,9 +293,12 @@ public class PaymentWebhookController {
             }
 
             try {
-                log.info("Auto processing lost book combined fine payment for TicketDetail ID: {} with trade code: {}", ticketDetailId, transactionCode);
+                log.info("Auto processing lost book combined fine payment for TicketDetail ID: {} with trade code: {}",
+                        ticketDetailId, transactionCode);
+                
+                java.math.BigDecimal manualFine = calculateManualFineValue(ticketDetailId, request.getTransferAmount());
                 // Gọi processLost với payNow = true và phương thức QRCode
-                bookReturnService.processLost(ticketDetailId, "QRCode", transactionCode, "SYSTEM_AUTO", null);
+                bookReturnService.processLost(ticketDetailId, "QRCode", transactionCode, "SYSTEM_AUTO", null, manualFine);
             } catch (IllegalArgumentException e) {
                 log.error("Ticket detail not found or process error: {}", ticketDetailId);
                 return badRequest(e.getMessage());
@@ -293,7 +312,9 @@ public class PaymentWebhookController {
 
             Map<String, Object> successResponse = new HashMap<>();
             successResponse.put("success", true);
-            successResponse.put("message", "Hệ thống tự động ghi nhận báo mất sách và thanh toán gộp thành công cho lượt mượn #" + ticketDetailId);
+            successResponse.put("message",
+                    "Hệ thống tự động ghi nhận báo mất sách và thanh toán gộp thành công cho lượt mượn #"
+                            + ticketDetailId);
             return ResponseEntity.ok(successResponse);
 
         } else {
@@ -303,6 +324,32 @@ public class PaymentWebhookController {
             response.put("message", "Nội dung giao dịch không liên quan đến thu phạt / trả sách.");
             return ResponseEntity.ok(response);
         }
+    }
+
+    private java.math.BigDecimal calculateManualFineValue(Integer ticketDetailId, Double transferAmount) {
+        if (transferAmount == null || transferAmount <= 0) return null;
+        com.swp5.library_management.entity.BorrowTicketDetail detail = borrowTicketDetailRepository.findById(ticketDetailId).orElse(null);
+        if (detail == null) return null;
+
+        long overdueDays = 0;
+        if (detail.getDueDate() != null) {
+            overdueDays = violationService.calculateOverdueDays(detail.getDueDate().toLocalDate());
+        }
+
+        int finePerDay = 5000;
+        if (systemConfigService != null) {
+            try {
+                finePerDay = systemConfigService.getIntConfig("FINE_PER_DAY", 5000);
+            } catch (Exception ignored) { }
+        }
+        
+        java.math.BigDecimal overdueAmount = java.math.BigDecimal.valueOf(overdueDays * finePerDay);
+        java.math.BigDecimal manualFine = java.math.BigDecimal.valueOf(transferAmount).subtract(overdueAmount);
+        
+        if (manualFine.compareTo(java.math.BigDecimal.ZERO) < 0) {
+            return null;
+        }
+        return manualFine;
     }
 
     private ResponseEntity<Map<String, Object>> badRequest(String message) {

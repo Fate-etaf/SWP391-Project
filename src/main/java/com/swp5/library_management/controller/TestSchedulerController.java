@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 public class TestSchedulerController {
 
     private final BorrowingNotificationScheduler borrowingNotificationScheduler;
+    private final com.swp5.library_management.service.BookReturnService bookReturnService;
 
     /**
      * Kích hoạt thủ công BorrowingNotificationScheduler để kiểm thử.
@@ -46,6 +47,15 @@ public class TestSchedulerController {
             log.error("[TEST TRIGGER] Lỗi khi chạy scheduler: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError()
                     .body("❌ Scheduler chạy thất bại: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/check-scan")
+    public ResponseEntity<?> testCheckScan(@org.springframework.web.bind.annotation.RequestParam String copyId) {
+        try {
+            return ResponseEntity.ok(bookReturnService.checkScan(copyId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

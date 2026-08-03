@@ -16,10 +16,10 @@ public interface BookReturnService {
     void processOverdueReturn(Integer ticketDetailId, String paymentMethod, String transactionCode, String librarianId, String conditionStatus);
 
     void processLost(Integer ticketDetailId, String paymentMethod, String transactionCode,
-            String librarianId, String notes);
+            String librarianId, String notes, java.math.BigDecimal manualFineAmount);
 
     void processDamaged(Integer ticketDetailId, String paymentMethod, String transactionCode,
-            String librarianId, String notes);
+            String librarianId, String notes, java.math.BigDecimal manualFineAmount);
 
     boolean isBookReturned(Integer ticketDetailId);
 
