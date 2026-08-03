@@ -396,6 +396,9 @@
                 <span class="meta-value" th:if="${book.isbn != null}" th:text="${book.isbn}"
                       style="font-family: monospace;">ISBN</span>
 
+                <span class="meta-label">Major</span>
+                <span class="meta-value" th:text="${book.majorName != null ? book.majorName : 'Sách ngoài chuyên ngành'}">Major Name</span>
+
                 <span class="meta-label" th:if="${book.subjectCode != null}">Subject</span>
                 <span class="meta-value" th:if="${book.subjectCode != null}">
                     <span class="badge-subject" th:text="${book.subjectCode}">CODE</span>
