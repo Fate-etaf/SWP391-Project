@@ -106,7 +106,7 @@
             <!-- Bộ lọc -->
             <section class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 md:p-6 mb-6">
                 <form id="filterForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4" method="get"
-                    th:action="@{/borrowing}">
+                    th:action="@{/librarian/borrowing}">
                     <div>
                         <label for="bookTitle" class="block text-xs font-semibold text-slate-600 mb-1">Tên sách</label>
                         <input id="bookTitle" name="bookTitle" type="text" th:value="${bookTitle}"
@@ -121,7 +121,7 @@
                             class="w-full bg-white border border-slate-300 text-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fpt-orange/40" />
                     </div>
                     <div class="sm:col-span-2 flex items-center justify-between pt-1">
-                        <a href="/borrowing" class="text-sm font-semibold text-slate-500 hover:text-slate-800">Xóa bộ
+                        <a href="/librarian/borrowing" class="text-sm font-semibold text-slate-500 hover:text-slate-800">Xóa bộ
                             lọc</a>
                         <button type="submit"
                             class="inline-flex items-center gap-2 bg-fpt-orange text-white hover:bg-fpt-orangeHover font-semibold text-sm px-5 py-2 rounded-xl shadow-sm transition-all hover:scale-105">
@@ -198,7 +198,7 @@
                     <div class="flex flex-wrap gap-2">
                         <a class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
                             th:if="${currentPage > 0}"
-                            th:href="@{/borrowing(page=${currentPage - 1}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">Trước</a>
+                            th:href="@{/librarian/borrowing(page=${currentPage - 1}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">Trước</a>
                         <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400"
                             th:if="${currentPage == 0}">Trước</span>
 
@@ -206,11 +206,11 @@
                             class="px-3 py-1.5 rounded-lg border text-sm font-semibold transition-colors"
                             th:classappend="${p == currentPage} ? ' border-fpt-orange text-fpt-orange bg-fpt-orange/10' : ' border-slate-300 text-slate-600 hover:bg-slate-100'"
                             th:text="${p + 1}"
-                            th:href="@{/borrowing(page=${p}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">1</a>
+                            th:href="@{/librarian/borrowing(page=${p}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">1</a>
 
                         <a class="px-3 py-1.5 rounded-lg border border-slate-300 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
                             th:if="${currentPage + 1 < totalPages}"
-                            th:href="@{/borrowing(page=${currentPage + 1}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">Sau</a>
+                            th:href="@{/librarian/borrowing(page=${currentPage + 1}, borrowerId=${borrowerId}, bookTitle=${bookTitle})}">Sau</a>
                         <span class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm text-slate-400"
                             th:if="${currentPage + 1 >= totalPages}">Sau</span>
                     </div>
@@ -744,7 +744,7 @@
                 document.getElementById('scanWaitCounter').textContent = pollSeconds + 's';
 
                 try {
-                    const res = await fetch('/borrowing/api/poll-scan');
+                    const res = await fetch('/librarian/borrowing/api/poll-scan');
                     const data = await res.json();
 
                     if (data.status === 'SCANNED' && data.copyId) {
@@ -788,7 +788,7 @@
             if (!copyId) return;
 
             try {
-                const response = await fetch('/borrowing/check-scan?copyId=' + encodeURIComponent(copyId));
+                const response = await fetch('/librarian/borrowing/check-scan?copyId=' + encodeURIComponent(copyId));
                 const data = await response.json();
 
                 if (!response.ok) {
@@ -814,7 +814,7 @@
             if (!copyId) return;
 
             try {
-                const response = await fetch('/borrowing/check-scan?copyId=' + encodeURIComponent(copyId));
+                const response = await fetch('/librarian/borrowing/check-scan?copyId=' + encodeURIComponent(copyId));
                 const data = await response.json();
 
                 if (!response.ok) {
@@ -882,7 +882,7 @@
         async function submitNormalReturn(ticketDetailId) {
             const conditionStatus = document.getElementById('conditionStatusNormal').value;
             try {
-                const res = await fetch(`/borrowing/api/return?ticketDetailId=${ticketDetailId}&conditionStatus=${encodeURIComponent(conditionStatus)}`, { method: 'POST' });
+                const res = await fetch(`/librarian/borrowing/api/return?ticketDetailId=${ticketDetailId}&conditionStatus=${encodeURIComponent(conditionStatus)}`, { method: 'POST' });
                 const result = await res.json();
                 if (res.ok) {
                     showToast('✅ Trả sách thành công!', 'success');
@@ -910,7 +910,7 @@
             }
 
             try {
-                const url = `/borrowing/api/return-overdue?ticketDetailId=${ticketDetailId}&paymentMethod=${method}&transactionCode=${encodeURIComponent(code)}&conditionStatus=${encodeURIComponent(conditionStatus)}`;
+                const url = `/librarian/borrowing/api/return-overdue?ticketDetailId=${ticketDetailId}&paymentMethod=${method}&transactionCode=${encodeURIComponent(code)}&conditionStatus=${encodeURIComponent(conditionStatus)}`;
                 const res = await fetch(url, { method: 'POST' });
                 const result = await res.json();
                 if (res.ok) {
@@ -963,7 +963,7 @@
                 }
             }
 
-            const endpoint = type === 'Lost' ? '/borrowing/api/return-lost' : '/borrowing/api/return-damaged';
+            const endpoint = type === 'Lost' ? '/librarian/borrowing/api/return-lost' : '/librarian/borrowing/api/return-damaged';
             let params = `ticketDetailId=${ticketDetailId}&paymentMethod=${method}&transactionCode=${encodeURIComponent(code)}&notes=${encodeURIComponent(notes)}`;
             if (manualFine && manualFine.trim() !== '') {
                 params += `&manualFineAmount=${manualFine}`;
@@ -1107,7 +1107,7 @@
                     document.getElementById('incidentQrInfo').textContent = "Đang tạo mã thanh toán...";
                     document.getElementById('incidentQrImage').src = "";
 
-                    fetch('/borrowing/api/generate-payment-token', {
+                    fetch('/librarian/borrowing/api/generate-payment-token', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
@@ -1209,7 +1209,7 @@
             }
             returnStatusPollIntervalId = setInterval(async () => {
                 try {
-                    const response = await fetch('/borrowing/api/check-return-status/' + ticketDetailId);
+                    const response = await fetch('/librarian/borrowing/api/check-return-status/' + ticketDetailId);
                     const data = await response.json();
                     if (data.success && data.returned) {
                         stopOverdueReturnStatusPolling();
@@ -1285,7 +1285,7 @@
                     document.getElementById('overdueQrInfo').textContent = "Đang tạo mã thanh toán...";
                     document.getElementById('overdueQrImage').src = "";
 
-                    fetch('/borrowing/api/generate-payment-token', {
+                    fetch('/librarian/borrowing/api/generate-payment-token', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',

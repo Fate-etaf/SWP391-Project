@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Controller
-@RequestMapping("/borrowing")
+@RequestMapping("/librarian/borrowing")
 @RequiredArgsConstructor
 public class BookReturnController {
 
@@ -86,7 +86,7 @@ public class BookReturnController {
             redirectAttrs.addFlashAttribute("errorMsg", "Quyền truy cập bị từ chối. Vui lòng đăng nhập bằng tài khoản Thủ thư.");
             return "redirect:/login";
         }
-        return "redirect:/borrowing";
+        return "redirect:/librarian/borrowing";
     }
 
     @GetMapping("/check-scan")
@@ -186,7 +186,7 @@ public class BookReturnController {
         } catch (Exception e) {
             redirectAttrs.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
         }
-        return "redirect:/borrowing";
+        return "redirect:/librarian/borrowing";
     }
 
     @PostMapping("/create-lost/{id}")
@@ -202,7 +202,7 @@ public class BookReturnController {
         } catch (Exception e) {
             redirectAttrs.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
         }
-        return "redirect:/borrowing";
+        return "redirect:/librarian/borrowing";
     }
 
     @PostMapping("/create-damaged/{id}")
@@ -218,7 +218,7 @@ public class BookReturnController {
         } catch (Exception e) {
             redirectAttrs.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
         }
-        return "redirect:/borrowing";
+        return "redirect:/librarian/borrowing";
     }
 
     // -----------------------------------------------------------
