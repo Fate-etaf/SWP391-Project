@@ -359,8 +359,6 @@
 </div>
 
 <script th:inline="javascript">
-    const userCampusId = /*[[${userCampusId}]]*/ null;
-
     function openConfirmModal() {
         const campusSelect = document.getElementById('campusSelect');
         if (campusSelect && !campusSelect.value) {
@@ -368,23 +366,21 @@
             return;
         }
 
-        if (userCampusId && campusSelect.value !== userCampusId.toString()) {
-            alert('Bạn đọc không có quyền mượn sách ở thư viện này. Vui lòng liên hệ với thủ thư để được trợ giúp!');
-            return;
-        }
-
+        // Bật popup xác nhận
         document.getElementById('confirmModal').classList.add('active');
     }
 
     function closeConfirmModal() {
+        // Tắt popup xác nhận
         document.getElementById('confirmModal').classList.remove('active');
     }
 
     function submitReservation() {
+        // Gửi form về backend
         document.getElementById('reserve-form').submit();
     }
 
-    // Đóng modal khi click ra ngoài
+    // Đóng popup khi click ra ngoài vùng nền đen
     document.getElementById('confirmModal').addEventListener('click', function(e) {
         if (e.target === this) closeConfirmModal();
     });
