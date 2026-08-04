@@ -137,15 +137,35 @@
                             </div>
                         </div>
 
+                        <!-- Khóa thủ công bởi thủ thư -->
                         <div th:if="${isCardActive && user.borrowingLocked}" class="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-xl text-sm flex items-start space-x-3">
                             <span class="text-lg">⚠️</span>
                             <div>
                                 <p class="font-bold">Thẻ đang bị khóa mượn sách!</p>
-                                <p class="text-xs text-rose-600 mt-0.5">Tài khoản của bạn hiện không thể tạo đơn mượn mới. Vui lòng liên hệ thủ thư hoặc kiểm tra sách mượn quá hạn.</p>
+                                <p class="text-xs text-rose-600 mt-0.5">Tài khoản của bạn hiện không thể tạo đơn mượn mới. Vui lòng liên hệ thủ thư để được hỗ trợ.</p>
+                            </div>
+                        </div>
+
+                        <!-- Khóa tự động do quá hạn -->
+                        <div th:if="${isCardActive && !user.borrowingLocked && totalOverdue > 0}" class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm flex items-start space-x-3">
+                            <span class="text-lg">⚠️</span>
+                            <div>
+                                <p class="font-bold">Tạm khóa mượn sách (Có sách quá hạn)</p>
+                                <p class="text-xs text-amber-700 mt-0.5">Bạn đang có sách mượn quá hạn chưa trả. Vui lòng hoàn trả sách để tiếp tục sử dụng dịch vụ.</p>
+                            </div>
+                        </div>
+
+                        <!-- Khóa tự động do nợ phạt -->
+                        <div th:if="${isCardActive && !user.borrowingLocked && totalOverdue == 0 && totalPenalties > 0}" class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-sm flex items-start space-x-3">
+                            <span class="text-lg">⚠️</span>
+                            <div>
+                                <p class="font-bold">Tạm khóa mượn sách (Có phiếu phạt chưa đóng)</p>
+                                <p class="text-xs text-amber-700 mt-0.5">Bạn đang có phiếu phạt chưa thanh toán. Vui lòng thanh toán để tiếp tục sử dụng dịch vụ.</p>
                             </div>
                         </div>
                         
-                        <div th:if="${isCardActive && !user.borrowingLocked}" class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl text-sm flex items-start space-x-3">
+                        <!-- Đủ điều kiện -->
+                        <div th:if="${isCardActive && !user.borrowingLocked && totalOverdue == 0 && totalPenalties == 0}" class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl text-sm flex items-start space-x-3">
                             <span class="text-lg">✅</span>
                             <div>
                                 <p class="font-bold">Đủ điều kiện mượn sách</p>
