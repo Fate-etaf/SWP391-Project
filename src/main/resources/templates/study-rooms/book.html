@@ -61,7 +61,7 @@
         </div>
 
         <!-- Room List -->
-        <div id="roomContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div id="roomContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
             <!-- Rooms will be loaded here via JS -->
             <div class="col-span-full text-center py-12 text-gray-500">
                 <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,6 +69,11 @@
                 </svg>
                 <p class="text-lg">Vui lòng chọn cơ sở và ngày để tìm phòng.</p>
             </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div id="paginationContainer" class="flex justify-center items-center gap-2 hidden">
+            <!-- Pagination buttons will be loaded here via JS -->
         </div>
     </main>
 
@@ -139,56 +144,114 @@
         dateInput.max = tomorrow.toISOString().split('T')[0];
         dateInput.value = dateInput.min;
 
+        let allRooms = [];
+        let currentPage = 1;
+        const itemsPerPage = 6;
+
         function loadRooms() {
             const campusId = document.getElementById('campusSelect').value;
             const dateStr = document.getElementById('bookingDate').value;
             fetch(`/api/study-rooms/campus/${campusId}/available?date=${dateStr}`)
                 .then(res => res.json())
                 .then(data => {
-                    const container = document.getElementById('roomContainer');
-                    container.innerHTML = '';
-                    if(data.length === 0) {
-                        container.innerHTML = '<div class="col-span-full text-center py-10 text-gray-500">Không có phòng trống nào tại cơ sở này.</div>';
-                        return;
-                    }
-                    data.forEach(room => {
-                        let bookedHtml = '';
-                        if (room.bookedSlots && room.bookedSlots.length > 0) {
-                            bookedHtml = '<div class="mb-6"><span class="text-sm font-semibold text-gray-700 block mb-2">Các khung giờ đã kín:</span><div class="flex flex-wrap gap-2">';
-                            room.bookedSlots.forEach(slot => {
-                                const timeStr = slot.startTime.substring(0,5) + ' - ' + slot.endTime.substring(0,5);
-                                if (slot.ownBooking || slot.isOwnBooking) {
-                                    bookedHtml += `<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded-md border border-blue-200">${timeStr} (Của bạn)</span>`;
-                                } else {
-                                    bookedHtml += `<span class="bg-gray-100 text-gray-500 text-xs font-medium px-2.5 py-1 rounded-md border border-gray-200">${timeStr} (Đã đặt)</span>`;
-                                }
-                            });
-                            bookedHtml += '</div></div>';
-                        } else {
-                            bookedHtml = '<div class="mb-6 text-sm text-green-600 font-medium italic">Chưa có người đặt trong ngày này.</div>';
-                        }
-
-                        container.innerHTML += `
-                            <div class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all border border-gray-100 flex flex-col h-full">
-                                <div class="flex justify-between items-start mb-4">
-                                    <h3 class="text-xl font-bold text-fpt-navy">${room.roomName}</h3>
-                                    <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-1 rounded-full border border-green-200">Trống</span>
-                                </div>
-                                <p class="text-gray-600 text-sm mb-4">${room.description || 'Không có mô tả'}</p>
-                                <div class="flex items-center text-sm text-gray-500 mb-4 bg-gray-50 p-2 rounded-lg">
-                                    <svg class="w-5 h-5 mr-2 text-fpt-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                                    <span>Sức chứa tối đa: <strong>${room.capacity}</strong> người</span>
-                                </div>
-                                <div class="flex-grow">
-                                    ${bookedHtml}
-                                </div>
-                                <button onclick="openModal(${room.roomId}, '${room.roomName}')" class="w-full mt-auto border-2 border-fpt-orange text-fpt-orange hover:bg-fpt-orange hover:text-white font-bold py-2.5 rounded-xl transition-colors">
-                                    Đặt Ngay
-                                </button>
-                            </div>
-                        `;
-                    });
+                    allRooms = data;
+                    currentPage = 1;
+                    renderRooms();
                 });
+        }
+
+        function renderRooms() {
+            const container = document.getElementById('roomContainer');
+            const paginationContainer = document.getElementById('paginationContainer');
+            container.innerHTML = '';
+            
+            if(allRooms.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center py-10 text-gray-500">Không có phòng trống nào tại cơ sở này.</div>';
+                paginationContainer.classList.add('hidden');
+                return;
+            }
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, allRooms.length);
+            const pageData = allRooms.slice(startIndex, endIndex);
+
+            pageData.forEach(room => {
+                let bookedHtml = '';
+                if (room.bookedSlots && room.bookedSlots.length > 0) {
+                    bookedHtml = '<div class="mb-6"><span class="text-sm font-semibold text-gray-700 block mb-2">Các khung giờ đã kín:</span><div class="flex flex-wrap gap-2">';
+                    room.bookedSlots.forEach(slot => {
+                        const timeStr = slot.startTime.substring(0,5) + ' - ' + slot.endTime.substring(0,5);
+                        if (slot.ownBooking || slot.isOwnBooking) {
+                            bookedHtml += `<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded-md border border-blue-200">${timeStr} (Của bạn)</span>`;
+                        } else {
+                            bookedHtml += `<span class="bg-gray-100 text-gray-500 text-xs font-medium px-2.5 py-1 rounded-md border border-gray-200">${timeStr} (Đã đặt)</span>`;
+                        }
+                    });
+                    bookedHtml += '</div></div>';
+                } else {
+                    bookedHtml = '<div class="mb-6 text-sm text-green-600 font-medium italic">Chưa có người đặt trong ngày này.</div>';
+                }
+
+                container.innerHTML += `
+                    <div class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all border border-gray-100 flex flex-col h-full">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-xl font-bold text-fpt-navy">${room.roomName}</h3>
+                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-1 rounded-full border border-green-200">Trống</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">${room.description || 'Không có mô tả'}</p>
+                        <div class="flex items-center text-sm text-gray-500 mb-4 bg-gray-50 p-2 rounded-lg">
+                            <svg class="w-5 h-5 mr-2 text-fpt-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            <span>Sức chứa tối đa: <strong>${room.capacity}</strong> người</span>
+                        </div>
+                        <div class="flex-grow">
+                            ${bookedHtml}
+                        </div>
+                        <button onclick="openModal(${room.roomId}, '${room.roomName}')" class="w-full mt-auto border-2 border-fpt-orange text-fpt-orange hover:bg-fpt-orange hover:text-white font-bold py-2.5 rounded-xl transition-colors">
+                            Đặt Ngay
+                        </button>
+                    </div>
+                `;
+            });
+            
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const container = document.getElementById('paginationContainer');
+            const totalPages = Math.ceil(allRooms.length / itemsPerPage);
+            
+            if (totalPages <= 1) {
+                container.classList.add('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            let html = '';
+            
+            // Prev button
+            html += `<button onclick="changePage(${currentPage - 1})" class="px-3 py-1 rounded-md border ${currentPage === 1 ? 'text-gray-400 border-gray-200 cursor-not-allowed' : 'text-fpt-navy border-gray-300 hover:bg-gray-100'}" ${currentPage === 1 ? 'disabled' : ''}>&laquo;</button>`;
+            
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    html += `<button class="px-3 py-1 rounded-md border bg-fpt-orange text-white border-fpt-orange font-bold">${i}</button>`;
+                } else {
+                    html += `<button onclick="changePage(${i})" class="px-3 py-1 rounded-md border text-fpt-navy border-gray-300 hover:bg-gray-100">${i}</button>`;
+                }
+            }
+            
+            // Next button
+            html += `<button onclick="changePage(${currentPage + 1})" class="px-3 py-1 rounded-md border ${currentPage === totalPages ? 'text-gray-400 border-gray-200 cursor-not-allowed' : 'text-fpt-navy border-gray-300 hover:bg-gray-100'}" ${currentPage === totalPages ? 'disabled' : ''}>&raquo;</button>`;
+            
+            container.innerHTML = html;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(allRooms.length / itemsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                renderRooms();
+                window.scrollTo({ top: document.getElementById('roomContainer').offsetTop - 100, behavior: 'smooth' });
+            }
         }
 
         function openModal(id, name) {

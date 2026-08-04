@@ -209,7 +209,7 @@
             </div>
 
             <!-- ACTIONABLE DATA TABLES -->
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8 relative z-10">
+            <div class="grid grid-cols-1 gap-6 mb-8 relative z-10">
                 <div class="bg-white border border-slate-200 backdrop-blur-xl rounded-2xl flex flex-col shadow-2xl overflow-hidden h-full">
                     <div class="p-5 border-b border-slate-200 bg-orange-950/20 flex items-center justify-between">
                         <div>
@@ -254,48 +254,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white border border-slate-200 backdrop-blur-xl rounded-2xl flex flex-col shadow-2xl overflow-hidden h-full">
-                    <div class="p-5 border-b border-slate-200 bg-rose-950/20 flex items-center justify-between">
-                        <div>
-                            <h5 class="text-base font-bold text-slate-900">Sách quá hạn cần thu hồi</h5>
-                            <p class="text-xs text-slate-500 mt-1">Danh sách sinh viên đang mượn quá ngày.</p>
-                        </div>
-                    </div>
-                    <div class="flex-grow overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-[10px] text-slate-500 uppercase bg-slate-100 border-b border-slate-200">
-                                <tr>
-                                    <th class="px-5 py-3 font-semibold tracking-wider">Mã / Sách</th>
-                                    <th class="px-4 py-3 font-semibold tracking-wider">Người mượn</th>
-                                    <th class="px-3 py-3 text-center font-semibold tracking-wider">Quá hạn</th>
-                                    <th class="px-5 py-3 text-right font-semibold tracking-wider">Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-800/50 text-slate-700">
-                                <tr th:if="${data.overdueBooks == null or data.overdueBooks.isEmpty()}">
-                                    <td colspan="4" class="px-5 py-10 text-center text-slate-500 text-sm">Tất cả tài sản lưu thông đều trong hạn.</td>
-                                </tr>
-                                <tr th:each="overdue : ${data.overdueBooks}" class="hover:bg-slate-50 transition-colors">
-                                    <td class="px-5 py-3">
-                                        <p class="font-mono text-xs font-bold text-slate-700" th:text="${overdue.copyId}"></p>
-                                        <p class="text-[11px] text-slate-500 line-clamp-1 mt-0.5" th:title="${overdue.bookTitle}" th:text="${overdue.bookTitle}"></p>
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <p class="text-xs font-bold text-slate-800" th:text="${overdue.patronName}"></p>
-                                        <p class="font-mono text-[10px] text-slate-500" th:text="${overdue.patronId}"></p>
-                                    </td>
-                                    <td class="px-3 py-3 text-center">
-                                        <span class="text-rose-600 font-bold text-[11px]" th:text="${overdue.daysOverdue + ' ngày'}"></span>
-                                    </td>
-                                    <td class="px-5 py-3 text-right">
-                                        <button class="text-[11px] bg-rose-500/20 border border-rose-500/30 text-rose-600 hover:bg-rose-500/30 px-3 py-1.5 rounded font-bold transition-colors whitespace-nowrap">Gửi Cảnh báo</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+
         </div>
     </main>
 
